@@ -74,10 +74,7 @@ pivot-ui/
 │   ├── environments/
 │   └── styles/                # Global SCSS, tokens, variables
 ├── e2e/                       # Specs Playwright
-├── docs/
-│   ├── adr/                   # Architecture Decision Records
-│   ├── gates/                 # Artifacts ACDD (us-{id}/gate-{n}.yaml)
-│   └── audits/                # Audits par domaine (UX, accessibilité, sécurité frontend)
+├── gates/                     # Artifacts ACDD (us-{id}/gate-{n}.yaml)
 ├── .github/
 │   ├── workflows/
 │   └── ISSUE_TEMPLATE/
@@ -292,7 +289,7 @@ Co-author sur chaque commit : `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthro
 
 ## Gates ACDD — Confidence Gates
 
-Chaque gate produit un artifact YAML dans `docs/gates/us-{id}/`. Score 0–100, jamais booléen.
+Chaque gate produit un artifact YAML dans `gates/us-{id}/`. Score 0–100, jamais booléen.
 
 | Gate | Moment | Seuils |
 |------|--------|--------|
@@ -307,7 +304,7 @@ Chaque gate produit un artifact YAML dans `docs/gates/us-{id}/`. Score 0–100, 
 
 **Checks Gate 3 :** SonarCloud ≥ 80 % (25) · zéro finding critique/high (25) · linters clean (20) · Gitleaks clean (20) · build Docker (10)
 
-**Format artifact** `docs/gates/us-{id}/gate-{n}.yaml` :
+**Format artifact** `gates/us-{id}/gate-{n}.yaml` :
 ```yaml
 gate: READINESS
 us_id: 42
@@ -328,7 +325,7 @@ notes: ""
 **ACDD (Acceptance Criteria Driven Development)** — gates de confiance continues.
 
 - Gates → score (0–100), jamais booléen pass/fail
-- Chaque gate → artifact YAML committé dans `docs/gates/` — pas réponse chat
+- Chaque gate → artifact YAML committé dans `gates/` — pas réponse chat
 - Breaking Points = seuls moments d'intervention humaine obligatoire
 
 ### Rôles
@@ -390,17 +387,7 @@ notes: ""
 
 ## Audits
 
-Dans `docs/audits/` — un fichier par catégorie, mis à jour en place. **Jamais de fichiers datés.**
-
-| Catégorie | Fichier |
-|-----------|---------|
-| Sécurité frontend | `audit-cyber.md` |
-| Architecture Angular | `audit-architecture.md` |
-| CI/CD / DevSecOps | `audit-cicd.md` |
-| QA / Tests | `audit-qa.md` |
-| UX / Accessibilité | `audit-ux.md` |
-| RGPD | `audit-rgpd.md` |
-| Modules / Plugins | `audit-modules.md` |
+Dans **pivot-docs** — un fichier par catégorie, mis à jour en place. **Jamais de fichiers datés.**
 
 ---
 
