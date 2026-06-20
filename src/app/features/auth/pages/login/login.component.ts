@@ -2,13 +2,14 @@ import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { AuthService } from '../../../../core/auth/service/auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'piv-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslocoPipe],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
@@ -56,18 +57,17 @@ export class LoginComponent {
   }
 
   onGoogleLogin(): void {
-    // Google Sign-In SDK must be loaded; handled by google-login.service (to be added)
-    this.error.set('Google Sign-In non configuré dans cet environnement.');
+    this.error.set('auth.login.error_google_not_configured');
   }
 
   private mapError(err: HttpErrorResponse): string {
-    if (err.status === 401) return 'Email ou mot de passe incorrect.';
+    if (err.status === 401) return 'auth.login.error_invalid_credentials';
     if (err.status === 403) {
       const msg = err.error?.message || '';
-      if (msg.includes('vérifié')) return 'Votre email n\'est pas encore vérifié. Vérifiez votre boîte email.';
-      return 'Compte désactivé. Contactez le support.';
+      if (msg.includes('verif') || msg.includes('vérifié')) return 'auth.login.error_not_verified';
+      return 'auth.login.error_disabled';
     }
-    if (err.status === 429) return 'Trop de tentatives. Réessayez dans quelques minutes.';
-    return 'Une erreur est survenue. Réessayez.';
+    if (err.status === 429) return 'auth.login.error_rate_limit';
+    return 'auth.login.error_generic';
   }
 }

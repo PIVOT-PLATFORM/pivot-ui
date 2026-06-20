@@ -1,21 +1,26 @@
 import { Component, EventEmitter, Output, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { TranslocoService, TranslocoPipe } from '@jsverse/transloco';
 import { AuthService } from '../../auth/service/auth.service';
 
 @Component({
   selector: 'piv-navbar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslocoPipe],
   template: `
     <header class="navbar">
       <button class="navbar__menu-btn" (click)="menuToggle.emit()" aria-label="Toggle menu">
         <span class="hamburger"></span>
       </button>
 
-      <div class="navbar__brand">PIVOT</div>
+      <div class="navbar__brand">{{ 'common.logo' | transloco }}</div>
 
       <div class="navbar__right">
+        <button class="lang-btn" (click)="switchLang()" [attr.title]="'nav.lang_other' | transloco">
+          {{ 'nav.lang_current' | transloco }}
+        </button>
+
         <div class="navbar__user" (click)="userMenuOpen.set(!userMenuOpen())">
           <div class="avatar">{{ initials() }}</div>
           <span class="navbar__username">{{ user()?.firstName }} {{ user()?.lastName }}</span>
@@ -27,7 +32,9 @@ import { AuthService } from '../../auth/service/auth.service';
                 <span>{{ user()?.email }}</span>
               </div>
               <hr/>
-              <button class="user-dropdown__item" (click)="logout()">Se déconnecter</button>
+              <button class="user-dropdown__item" (click)="logout()">
+                {{ 'nav.sign_out' | transloco }}
+              </button>
             </div>
           }
         </div>
@@ -73,7 +80,19 @@ import { AuthService } from '../../auth/service/auth.service';
       &::after { top: 6px; }
     }
     .navbar__brand { font-size: var(--text-lg); font-weight: 700; color: var(--color-navy-900); }
-    .navbar__right { margin-left: auto; }
+    .navbar__right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .lang-btn {
+      background: none;
+      border: 1px solid var(--color-gray-300);
+      border-radius: var(--radius-md);
+      padding: 4px 10px;
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--color-gray-600);
+      cursor: pointer;
+      letter-spacing: .05em;
+      &:hover { background: var(--color-gray-100); border-color: var(--color-gray-400); }
+    }
     .navbar__user {
       display: flex;
       align-items: center;
@@ -137,6 +156,7 @@ export class NavbarComponent {
 
   private auth = inject(AuthService);
   private router = inject(Router);
+  private transloco = inject(TranslocoService);
 
   userMenuOpen = signal(false);
   user = this.auth.currentUser;
@@ -145,6 +165,12 @@ export class NavbarComponent {
     const u = this.user();
     if (!u) return '?';
     return `${(u.firstName?.[0] || '')}${(u.lastName?.[0] || '')}`.toUpperCase();
+  }
+
+  switchLang(): void {
+    const next = this.transloco.getActiveLang() === 'fr' ? 'en' : 'fr';
+    this.transloco.setActiveLang(next);
+    localStorage.setItem('pivot_lang', next);
   }
 
   logout(): void {

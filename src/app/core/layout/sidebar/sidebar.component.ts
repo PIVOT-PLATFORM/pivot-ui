@@ -1,10 +1,11 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { AuthService } from '../../auth/service/auth.service';
 
 interface NavItem {
-  label: string;
+  labelKey: string;
   icon: string;
   route: string;
   roles?: string[];
@@ -13,11 +14,11 @@ interface NavItem {
 @Component({
   selector: 'piv-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterLink, RouterLinkActive, TranslocoPipe],
   template: `
     <aside class="sidebar" [class.sidebar--collapsed]="collapsed">
       <div class="sidebar__logo">
-        @if (!collapsed) { <span>PIVOT</span> }
+        @if (!collapsed) { <span>{{ 'common.logo' | transloco }}</span> }
         @else { <span>P</span> }
       </div>
 
@@ -25,15 +26,16 @@ interface NavItem {
         @for (item of visibleItems(); track item.route) {
           <a [routerLink]="item.route" routerLinkActive="is-active"
              class="sidebar__item" [class.sidebar__item--icon-only]="collapsed"
-             [title]="collapsed ? item.label : ''">
+             [title]="collapsed ? (item.labelKey | transloco) : ''">
             <span class="sidebar__icon" [innerHTML]="item.icon"></span>
-            @if (!collapsed) { <span class="sidebar__label">{{ item.label }}</span> }
+            @if (!collapsed) { <span class="sidebar__label">{{ item.labelKey | transloco }}</span> }
           </a>
         }
       </nav>
 
       <div class="sidebar__footer">
-        <button class="sidebar__collapse-btn" (click)="toggle.emit()" [attr.aria-label]="collapsed ? 'Développer' : 'Réduire'">
+        <button class="sidebar__collapse-btn" (click)="toggle.emit()"
+                [attr.aria-label]="(collapsed ? 'sidebar.expand' : 'sidebar.collapse') | transloco">
           @if (collapsed) { › } @else { ‹ }
         </button>
       </div>
@@ -108,12 +110,12 @@ export class SidebarComponent {
   @Input() collapsed = false;
   @Output() toggle = new EventEmitter<void>();
 
-  private allItems: NavItem[] = [
-    { label: 'Tableau de bord', icon: '▦', route: '/dashboard' },
-    { label: 'Administration', icon: '⚙', route: '/admin', roles: ['ROLE_ADMIN', 'ROLE_SUPER_ADMIN'] },
-  ];
+  private auth = inject(AuthService);
 
-  constructor(private auth: AuthService) {}
+  private allItems: NavItem[] = [
+    { labelKey: 'sidebar.dashboard', icon: '▦', route: '/dashboard' },
+    { labelKey: 'sidebar.admin', icon: '⚙', route: '/admin', roles: ['ROLE_ADMIN', 'ROLE_SUPER_ADMIN'] },
+  ];
 
   visibleItems(): NavItem[] {
     const role = this.auth.currentUser()?.role;

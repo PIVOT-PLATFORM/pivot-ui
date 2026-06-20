@@ -2,43 +2,43 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { AuthService } from '../../../../core/auth/service/auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'piv-device-confirm',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslocoPipe],
   template: `
     <div class="auth-page">
       <div class="card auth-card">
-        <span class="auth-logo">PIVOT</span>
-        <h1 class="auth-title">Vérification de l'appareil</h1>
-        <p class="auth-subtitle">
-          Un code à 6 chiffres a été envoyé à votre email. Entrez-le pour confirmer cette connexion.
-        </p>
+        <span class="auth-logo">{{ 'common.logo' | transloco }}</span>
+        <h1 class="auth-title">{{ 'auth.device_confirm.title' | transloco }}</h1>
+        <p class="auth-subtitle">{{ 'auth.device_confirm.subtitle' | transloco }}</p>
 
         @if (error()) {
-          <div class="alert alert-error" style="margin-bottom:16px">{{ error() }}</div>
+          <div class="alert alert-error" style="margin-bottom:16px">{{ error() | transloco }}</div>
         }
 
         <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
           <div class="form-group" style="margin-bottom:24px">
-            <label class="form-label" for="otp">Code de vérification</label>
+            <label class="form-label" for="otp">{{ 'auth.device_confirm.otp_label' | transloco }}</label>
             <input id="otp" type="text" formControlName="otp" class="form-control"
                    [class.is-invalid]="form.controls.otp.invalid && form.controls.otp.touched"
-                   placeholder="000000" autocomplete="one-time-code"
+                   [placeholder]="'auth.device_confirm.otp_placeholder' | transloco"
+                   autocomplete="one-time-code"
                    maxlength="6" style="font-size:1.5rem;letter-spacing:8px;text-align:center"/>
           </div>
 
           <button type="submit" class="btn btn-primary btn-full btn-lg" [disabled]="loading()">
             @if (loading()) { <span class="spinner"></span> }
-            Confirmer
+            {{ 'auth.device_confirm.submit' | transloco }}
           </button>
         </form>
 
         <p style="margin-top:16px;text-align:center;font-size:var(--text-sm);color:var(--color-gray-500)">
-          <a routerLink="/auth/login">← Annuler et retourner à la connexion</a>
+          <a routerLink="/auth/login">{{ 'auth.device_confirm.cancel' | transloco }}</a>
         </p>
       </div>
     </div>
@@ -79,11 +79,10 @@ export class DeviceConfirmComponent implements OnInit {
       next: () => this.router.navigate(['/dashboard']),
       error: (err: HttpErrorResponse) => {
         this.loading.set(false);
-        if (err.status === 429) {
-          this.error.set('Trop de tentatives. Retournez à la connexion.');
-        } else {
-          this.error.set('Code incorrect ou expiré. Vérifiez votre email.');
-        }
+        this.error.set(err.status === 429
+          ? 'auth.device_confirm.error_rate_limit'
+          : 'auth.device_confirm.error_invalid'
+        );
       },
     });
   }

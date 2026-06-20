@@ -1,57 +1,59 @@
 <div class="auth-page">
   <div class="card auth-card">
-    <span class="auth-logo">PIVOT</span>
+    <span class="auth-logo">{{ 'common.logo' | transloco }}</span>
 
     @if (success()) {
       <div style="text-align:center;padding:16px 0">
         <div style="font-size:48px;margin-bottom:16px">✉️</div>
-        <h2 class="auth-title">Vérifiez votre email</h2>
-        <p style="font-size:var(--text-sm);color:var(--color-gray-500);margin-top:8px;line-height:1.6">
-          Un lien de confirmation a été envoyé à {{ form.value.email }}.<br/>
-          Cliquez dessus pour activer votre compte.
+        <h2 class="auth-title">{{ 'auth.register.success_title' | transloco }}</h2>
+        <p style="font-size:var(--text-sm);color:var(--color-gray-500);margin-top:8px;line-height:1.6"
+           [innerHTML]="'auth.register.success_body' | transloco: { email: form.value.email }">
         </p>
         <p style="font-size:var(--text-xs);color:var(--color-gray-400);margin-top:16px">
-          Email non reçu ? Vérifiez vos spams ou
-          <a routerLink="/auth/login">retournez à la connexion</a>.
+          {{ 'auth.register.success_no_email' | transloco }}
+          <a routerLink="/auth/login">{{ 'auth.register.success_back_login' | transloco }}</a>.
         </p>
       </div>
     } @else {
-      <h1 class="auth-title">Créer un compte</h1>
-      <p class="auth-subtitle">Rejoignez PIVOT Platform</p>
+      <h1 class="auth-title">{{ 'auth.register.title' | transloco }}</h1>
+      <p class="auth-subtitle">{{ 'auth.register.subtitle' | transloco }}</p>
 
       @if (error()) {
-        <div class="alert alert-error" style="margin-bottom:16px">{{ error() }}</div>
+        <div class="alert alert-error" style="margin-bottom:16px">{{ error() | transloco }}</div>
       }
 
       <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
         <div class="form-fields">
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label" for="firstName">Prénom</label>
+              <label class="form-label" for="firstName">{{ 'auth.register.first_name' | transloco }}</label>
               <input id="firstName" type="text" formControlName="firstName" class="form-control"
                      [class.is-invalid]="form.controls.firstName.invalid && form.controls.firstName.touched"
-                     placeholder="Jean" autocomplete="given-name"/>
+                     [placeholder]="'auth.register.first_name_placeholder' | transloco"
+                     autocomplete="given-name"/>
             </div>
             <div class="form-group">
-              <label class="form-label" for="lastName">Nom</label>
+              <label class="form-label" for="lastName">{{ 'auth.register.last_name' | transloco }}</label>
               <input id="lastName" type="text" formControlName="lastName" class="form-control"
                      [class.is-invalid]="form.controls.lastName.invalid && form.controls.lastName.touched"
-                     placeholder="Dupont" autocomplete="family-name"/>
+                     [placeholder]="'auth.register.last_name_placeholder' | transloco"
+                     autocomplete="family-name"/>
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="email">Email professionnel</label>
+            <label class="form-label" for="email">{{ 'auth.register.email' | transloco }}</label>
             <input id="email" type="email" formControlName="email" class="form-control"
                    [class.is-invalid]="form.controls.email.invalid && form.controls.email.touched"
-                   placeholder="jean.dupont@entreprise.com" autocomplete="email"/>
+                   [placeholder]="'auth.register.email_placeholder' | transloco"
+                   autocomplete="email"/>
             @if (form.controls.email.errors?.['email'] && form.controls.email.touched) {
-              <span class="form-error">Adresse email invalide.</span>
+              <span class="form-error">{{ 'auth.register.email_invalid' | transloco }}</span>
             }
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="password">Mot de passe</label>
+            <label class="form-label" for="password">{{ 'auth.register.password.label' | transloco }}</label>
             <div class="password-wrapper">
               <input id="password" [type]="showPassword() ? 'text' : 'password'"
                      formControlName="password" class="form-control"
@@ -67,26 +69,27 @@
                      [style.width]="passwordStrength().width"
                      [style.background-color]="passwordStrength().color"></div>
               </div>
-              <span class="strength-label">{{ passwordStrength().label }}</span>
+              @if (passwordStrength().labelKey) {
+                <span class="strength-label">{{ passwordStrength().labelKey | transloco }}</span>
+              }
             }
             @if (form.controls.password.errors?.['weak'] && form.controls.password.touched) {
-              <span class="form-error">{{ form.controls.password.errors?.['weak'] }}</span>
+              <span class="form-error">{{ form.controls.password.errors?.['weak'] | transloco }}</span>
             }
           </div>
         </div>
 
         <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:24px" [disabled]="loading()">
           @if (loading()) { <span class="spinner"></span> }
-          Créer mon compte
+          {{ 'auth.register.submit' | transloco }}
         </button>
         <p class="terms-note">
-          En vous inscrivant, vous acceptez les <a href="#">Conditions d'utilisation</a>
-          et la <a href="#">Politique de confidentialité</a> de PIVOT.
+          {{ 'auth.register.terms_intro' | transloco }}<a href="#">{{ 'auth.register.terms_link' | transloco }}</a>{{ 'auth.register.terms_and' | transloco }}<a href="#">{{ 'auth.register.privacy_link' | transloco }}</a>{{ 'auth.register.terms_suffix' | transloco }}
         </p>
       </form>
 
       <p class="auth-footer">
-        Déjà un compte ? <a routerLink="/auth/login">Se connecter</a>
+        {{ 'auth.register.already_account' | transloco }} <a routerLink="/auth/login">{{ 'auth.register.login_link' | transloco }}</a>
       </p>
     }
   </div>
