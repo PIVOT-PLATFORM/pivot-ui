@@ -1,0 +1,93 @@
+<div class="auth-page">
+  <div class="card auth-card">
+    <span class="auth-logo">PIVOT</span>
+
+    @if (success()) {
+      <div style="text-align:center;padding:16px 0">
+        <div style="font-size:48px;margin-bottom:16px">✉️</div>
+        <h2 class="auth-title">Vérifiez votre email</h2>
+        <p style="font-size:var(--text-sm);color:var(--color-gray-500);margin-top:8px;line-height:1.6">
+          Un lien de confirmation a été envoyé à {{ form.value.email }}.<br/>
+          Cliquez dessus pour activer votre compte.
+        </p>
+        <p style="font-size:var(--text-xs);color:var(--color-gray-400);margin-top:16px">
+          Email non reçu ? Vérifiez vos spams ou
+          <a routerLink="/auth/login">retournez à la connexion</a>.
+        </p>
+      </div>
+    } @else {
+      <h1 class="auth-title">Créer un compte</h1>
+      <p class="auth-subtitle">Rejoignez PIVOT Platform</p>
+
+      @if (error()) {
+        <div class="alert alert-error" style="margin-bottom:16px">{{ error() }}</div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="form-fields">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="firstName">Prénom</label>
+              <input id="firstName" type="text" formControlName="firstName" class="form-control"
+                     [class.is-invalid]="form.controls.firstName.invalid && form.controls.firstName.touched"
+                     placeholder="Jean" autocomplete="given-name"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="lastName">Nom</label>
+              <input id="lastName" type="text" formControlName="lastName" class="form-control"
+                     [class.is-invalid]="form.controls.lastName.invalid && form.controls.lastName.touched"
+                     placeholder="Dupont" autocomplete="family-name"/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="email">Email professionnel</label>
+            <input id="email" type="email" formControlName="email" class="form-control"
+                   [class.is-invalid]="form.controls.email.invalid && form.controls.email.touched"
+                   placeholder="jean.dupont@entreprise.com" autocomplete="email"/>
+            @if (form.controls.email.errors?.['email'] && form.controls.email.touched) {
+              <span class="form-error">Adresse email invalide.</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">Mot de passe</label>
+            <div class="password-wrapper">
+              <input id="password" [type]="showPassword() ? 'text' : 'password'"
+                     formControlName="password" class="form-control"
+                     [class.is-invalid]="form.controls.password.invalid && form.controls.password.touched"
+                     placeholder="••••••••••••" autocomplete="new-password"/>
+              <button type="button" class="toggle-password" (click)="showPassword.set(!showPassword())">
+                @if (showPassword()) { <span>🙈</span> } @else { <span>👁</span> }
+              </button>
+            </div>
+            @if (form.value.password) {
+              <div class="strength-bar">
+                <div class="strength-bar__fill"
+                     [style.width]="passwordStrength().width"
+                     [style.background-color]="passwordStrength().color"></div>
+              </div>
+              <span class="strength-label">{{ passwordStrength().label }}</span>
+            }
+            @if (form.controls.password.errors?.['weak'] && form.controls.password.touched) {
+              <span class="form-error">{{ form.controls.password.errors?.['weak'] }}</span>
+            }
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:24px" [disabled]="loading()">
+          @if (loading()) { <span class="spinner"></span> }
+          Créer mon compte
+        </button>
+        <p class="terms-note">
+          En vous inscrivant, vous acceptez les <a href="#">Conditions d'utilisation</a>
+          et la <a href="#">Politique de confidentialité</a> de PIVOT.
+        </p>
+      </form>
+
+      <p class="auth-footer">
+        Déjà un compte ? <a routerLink="/auth/login">Se connecter</a>
+      </p>
+    }
+  </div>
+</div>
