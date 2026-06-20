@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -53,12 +53,13 @@ import { AuthService } from '../../../../core/auth/service/auth.service';
   styles: [`:host{display:contents}.auth-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--surface-bg)}.auth-card{max-width:440px;width:100%;padding:40px}.auth-logo{display:block;font-size:var(--text-2xl);font-weight:700;color:var(--color-navy-900);margin-bottom:28px}.auth-title{font-size:var(--text-xl);font-weight:700;color:var(--color-navy-900);margin-bottom:6px}.auth-subtitle{font-size:var(--text-sm);color:var(--color-gray-500);margin-bottom:24px}`]
 })
 export class ForgotPasswordComponent {
+  private fb = inject(FormBuilder);
+  private auth = inject(AuthService);
+
   form = this.fb.group({ email: ['', [Validators.required, Validators.email]] });
   loading = signal(false);
   sent = signal(false);
   error = signal<string | null>(null);
-
-  constructor(private fb: FormBuilder, private auth: AuthService) {}
 
   submit(): void {
     if (this.form.invalid || this.loading()) return;

@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -46,6 +46,11 @@ import { HttpErrorResponse } from '@angular/common/http';
   styles: [`:host{display:contents}.auth-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--surface-bg)}.auth-card{max-width:440px;width:100%;padding:40px}.auth-logo{display:block;font-size:var(--text-2xl);font-weight:700;color:var(--color-navy-900);margin-bottom:28px}.auth-title{font-size:var(--text-xl);font-weight:700;color:var(--color-navy-900);margin-bottom:6px}.auth-subtitle{font-size:var(--text-sm);color:var(--color-gray-500);margin-bottom:24px}`]
 })
 export class DeviceConfirmComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private auth = inject(AuthService);
+
   form = this.fb.group({
     otp: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]]
   });
@@ -53,13 +58,6 @@ export class DeviceConfirmComponent implements OnInit {
   fingerprint = signal<string | null>(null);
   loading = signal(false);
   error = signal<string | null>(null);
-
-  constructor(
-    private fb: FormBuilder,
-    private route: ActivatedRoute,
-    private router: Router,
-    private auth: AuthService
-  ) {}
 
   ngOnInit(): void {
     this.fingerprint.set(this.route.snapshot.queryParamMap.get('fingerprint'));

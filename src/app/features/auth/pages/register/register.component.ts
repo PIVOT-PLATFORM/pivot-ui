@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -22,6 +22,9 @@ function strongPassword(c: AbstractControl): ValidationErrors | null {
   styleUrl: './register.component.scss',
 })
 export class RegisterComponent {
+  private fb = inject(FormBuilder);
+  private auth = inject(AuthService);
+
   form = this.fb.group({
     firstName: ['', [Validators.required, Validators.minLength(2)]],
     lastName: ['', [Validators.required, Validators.minLength(2)]],
@@ -33,8 +36,6 @@ export class RegisterComponent {
   error = signal<string | null>(null);
   success = signal(false);
   showPassword = signal(false);
-
-  constructor(private fb: FormBuilder, private auth: AuthService) {}
 
   submit(): void {
     if (this.form.invalid || this.loading()) return;

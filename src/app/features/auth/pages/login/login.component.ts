@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -13,6 +13,10 @@ import { HttpErrorResponse } from '@angular/common/http';
   styleUrl: './login.component.scss',
 })
 export class LoginComponent {
+  private fb = inject(FormBuilder);
+  private auth = inject(AuthService);
+  private router = inject(Router);
+
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
@@ -23,8 +27,6 @@ export class LoginComponent {
   showPassword = signal(false);
   requiresDeviceVerification = signal(false);
   pendingFingerprint = signal<string | null>(null);
-
-  constructor(private fb: FormBuilder, private auth: AuthService, private router: Router) {}
 
   submit(): void {
     if (this.form.invalid || this.loading()) return;

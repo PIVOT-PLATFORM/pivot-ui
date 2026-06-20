@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Output, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../auth/service/auth.service';
@@ -135,10 +135,11 @@ import { AuthService } from '../../auth/service/auth.service';
 export class NavbarComponent {
   @Output() menuToggle = new EventEmitter<void>();
 
+  private auth = inject(AuthService);
+  private router = inject(Router);
+
   userMenuOpen = signal(false);
   user = this.auth.currentUser;
-
-  constructor(private auth: AuthService, private router: Router) {}
 
   initials(): string {
     const u = this.user();

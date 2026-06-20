@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -62,13 +62,15 @@ function strongPassword(c: AbstractControl): ValidationErrors | null {
   styles: [`:host{display:contents}.auth-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--surface-bg)}.auth-card{max-width:440px;width:100%;padding:40px}.auth-logo{display:block;font-size:var(--text-2xl);font-weight:700;color:var(--color-navy-900);margin-bottom:28px}.auth-title{font-size:var(--text-xl);font-weight:700;color:var(--color-navy-900);margin-bottom:6px}.auth-subtitle{font-size:var(--text-sm);color:var(--color-gray-500);margin-bottom:24px}`]
 })
 export class ResetPasswordComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private route = inject(ActivatedRoute);
+  private auth = inject(AuthService);
+
   form = this.fb.group({ newPassword: ['', [Validators.required, strongPassword]] });
   token = signal<string | null>(null);
   loading = signal(false);
   success = signal(false);
   error = signal<string | null>(null);
-
-  constructor(private fb: FormBuilder, private route: ActivatedRoute, private auth: AuthService) {}
 
   ngOnInit(): void {
     this.token.set(this.route.snapshot.queryParamMap.get('token'));
