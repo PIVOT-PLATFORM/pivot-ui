@@ -1,0 +1,12 @@
+# Tout changement requiert review de l'équipe frontend
+* @ApoSkunz @0bno
+
+# Workflows et config CI/CD
+.github/workflows/ @ApoSkunz @0bno
+.github/CODEOWNERS @ApoSkunz @0bno
+
+# Config sécurité / Auth OIDC
+src/app/core/auth/ @ApoSkunz @0bno
+
+# Contrat de modules
+src/app/features/ @ApoSkunz @0bno
