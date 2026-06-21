@@ -56,7 +56,6 @@
       "last_name_placeholder": "Doe",
       "email": "Professional email",
       "email_placeholder": "john.doe@company.com",
-      "password": "Password",
       "submit": "Create account",
       "already_account": "Already have an account?",
       "login_link": "Sign in",
@@ -84,6 +83,16 @@
         "strong": "Strong",
         "very_strong": "Very strong"
       }
+    },
+    "resend": {
+      "title": "Resend activation email",
+      "subtitle": "Enter your email to receive a new activation link.",
+      "email": "Email",
+      "email_placeholder": "you@company.com",
+      "submit": "Send activation link",
+      "back_login": "← Back to login",
+      "sent_title": "Email sent",
+      "sent_body": "If this email matches an unverified account, an activation link has been sent."
     },
     "verify_email": {
       "loading": "Verifying…",
@@ -125,18 +134,6 @@
       "cancel": "← Cancel and return to login",
       "error_rate_limit": "Too many attempts. Return to login.",
       "error_invalid": "Incorrect or expired code. Check your email."
-    }
-  },
-  "auth": {
-    "resend": {
-      "title": "Resend activation email",
-      "subtitle": "Enter your email to receive a new activation link.",
-      "email": "Email",
-      "email_placeholder": "you@company.com",
-      "submit": "Send activation link",
-      "back_login": "← Back to login",
-      "sent_title": "Email sent",
-      "sent_body": "If this email matches an unverified account, an activation link has been sent."
     }
   },
   "legal": {
