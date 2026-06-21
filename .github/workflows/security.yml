@@ -114,7 +114,7 @@ jobs:
   # -----------------------------------------
   # CI/CD CONFORMITE — Plumber
   # -----------------------------------------
-  plumber:
+  plumber-compliance:
     name: Plumber - CI/CD Compliance
     runs-on: ubuntu-latest
     timeout-minutes: 10
