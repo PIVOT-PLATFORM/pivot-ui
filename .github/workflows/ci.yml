@@ -146,7 +146,7 @@ jobs:
                      -Dsonar.pullrequest.base=${{ github.base_ref }}"
           fi
           npx sonar-scanner \
-            -Dsonar.projectKey=PIVOT-PLATFORM_PIVOT-UI \
+            -Dsonar.projectKey=PIVOT-PLATFORM_pivot-ui \
             -Dsonar.organization=pivot-platform \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.token="${SONAR_TOKEN}" \
