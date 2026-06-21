@@ -41,7 +41,7 @@
       "error_generic": "An error occurred. Please try again.",
       "error_generic_credentials": "Incorrect email or password.",
       "error_google_not_configured": "Google Sign-In is not configured in this environment.",
-      "google_disabled": "Google Sign-In is not available in this environment.",
+      "google_disabled": "Coming soon",
       "no_activation_email": "Didn't receive the activation email?",
       "resend_link": "Resend",
       "show_password": "Show password",

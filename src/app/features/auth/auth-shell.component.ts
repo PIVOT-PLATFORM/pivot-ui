@@ -8,9 +8,11 @@ import { TranslocoService, TranslocoPipe } from '@jsverse/transloco';
   imports: [RouterOutlet, RouterLink, TranslocoPipe],
   template: `
     <div class="auth-shell">
-      <div class="blob blob-1" aria-hidden="true"></div>
-      <div class="blob blob-2" aria-hidden="true"></div>
-      <div class="blob blob-3" aria-hidden="true"></div>
+      <div class="hex hex-1" aria-hidden="true"></div>
+      <div class="hex hex-2" aria-hidden="true"></div>
+      <div class="hex hex-3" aria-hidden="true"></div>
+      <div class="hex hex-4" aria-hidden="true"></div>
+      <div class="hex hex-5" aria-hidden="true"></div>
 
       <!-- Language switcher pill -->
       <div class="lang-pill" role="group" aria-label="Language">
@@ -41,14 +43,17 @@ import { TranslocoService, TranslocoPipe } from '@jsverse/transloco';
       flex-direction: column;
     }
 
-    .blob {
+    /* Hexagon blobs — clip-path pointy-top */
+    .hex {
       position: absolute;
-      border-radius: 50%;
       pointer-events: none;
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
     }
-    .blob-1 { width: 420px; height: 420px; background: rgba(255,255,255,.06); bottom: -80px; left: -80px; }
-    .blob-2 { width: 300px; height: 300px; background: rgba(255,255,255,.04); top: -60px; right: -60px; }
-    .blob-3 { width: 200px; height: 200px; background: rgba(124,58,237,.25); top: 30%; right: 5%; }
+    .hex-1 { width: 480px; height: 480px; background: rgba(255,255,255,.055); bottom: -120px; left: -100px; transform: rotate(10deg); }
+    .hex-2 { width: 280px; height: 280px; background: rgba(255,255,255,.04);  top: -70px; right: -60px;  transform: rotate(-15deg); }
+    .hex-3 { width: 180px; height: 180px; background: rgba(124,58,237,.28);   top: 30%; right: 6%;       transform: rotate(30deg); }
+    .hex-4 { width: 110px; height: 110px; background: rgba(255,255,255,.06);  top: 12%; left: 7%;        transform: rotate(-8deg); }
+    .hex-5 { width: 220px; height: 220px; background: rgba(99,102,241,.2);    bottom: 10%; right: 18%;   transform: rotate(20deg); }
 
     /* Lang pill */
     .lang-pill {

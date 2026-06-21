@@ -152,6 +152,40 @@ input:-webkit-autofill:focus {
   transition: background-color 9999s ease-in-out;
 }
 
+.google-btn-wrap {
+  position: relative;
+  display: block;
+
+  &--disabled:hover .google-tooltip { opacity: 1; pointer-events: none; }
+}
+
+.google-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(30, 27, 75, 0.92);
+  color: #fff;
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  transition: opacity .15s;
+  pointer-events: none;
+  z-index: 10;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: rgba(30, 27, 75, 0.92);
+  }
+}
+
 .google-btn {
   display: flex;
   align-items: center;
