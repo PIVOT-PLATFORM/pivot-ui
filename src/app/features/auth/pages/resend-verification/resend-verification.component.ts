@@ -14,7 +14,7 @@ import { HttpErrorResponse } from '@angular/common/http';
     <div class="auth-page">
       <div class="card auth-card">
         <div class="auth-brand">
-          <img src="assets/brand/pivot-icon.png" alt="PIVOT" class="auth-brand-icon" />
+          <img src="assets/brand/pivot-icon.png?v=2" alt="PIVOT" class="auth-brand-icon" />
         </div>
 
         @if (sent()) {
