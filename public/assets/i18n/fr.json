@@ -39,7 +39,8 @@
       "error_disabled": "Compte désactivé. Contactez le support.",
       "error_rate_limit": "Trop de tentatives. Réessayez dans quelques minutes.",
       "error_generic": "Une erreur est survenue. Réessayez.",
-      "error_google_not_configured": "Google Sign-In non configuré dans cet environnement."
+      "error_google_not_configured": "Google Sign-In non configuré dans cet environnement.",
+      "google_disabled": "Google Sign-In non disponible dans cet environnement."
     },
     "register": {
       "title": "Créer un compte",
@@ -119,5 +120,10 @@
       "error_rate_limit": "Trop de tentatives. Retournez à la connexion.",
       "error_invalid": "Code incorrect ou expiré. Vérifiez votre email."
     }
+  },
+  "legal": {
+    "mentions": "Mentions légales",
+    "privacy": "Confidentialité",
+    "terms": "CGU"
   }
 }

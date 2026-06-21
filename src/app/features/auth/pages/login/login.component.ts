@@ -1,4 +1,4 @@
-import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -6,6 +6,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { AuthService } from '../../../../core/auth/service/auth.service';
 import { DeviceService } from '../../../../core/auth/service/device.service';
 import { HttpErrorResponse } from '@angular/common/http';
+import { GOOGLE_CLIENT_ID } from '../../../../app.config';
 
 @Component({
   selector: 'piv-login',
@@ -20,6 +21,9 @@ export class LoginComponent {
   private readonly auth = inject(AuthService);
   private readonly deviceService = inject(DeviceService);
   private readonly router = inject(Router);
+  private readonly googleClientId = inject(GOOGLE_CLIENT_ID);
+
+  readonly googleEnabled = computed(() => !!this.googleClientId);
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],

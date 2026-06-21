@@ -1,37 +1,32 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslocoService, TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'piv-auth-shell',
   standalone: true,
-  imports: [RouterOutlet, RouterLink],
+  imports: [RouterOutlet, RouterLink, TranslocoPipe],
   template: `
     <div class="auth-shell">
-      <!-- Decorative background blobs -->
       <div class="blob blob-1" aria-hidden="true"></div>
       <div class="blob blob-2" aria-hidden="true"></div>
       <div class="blob blob-3" aria-hidden="true"></div>
 
-      <!-- Language switcher -->
-      <div class="lang-wrapper">
-        <span class="lang-globe">🌐</span>
-        <select class="lang-select" [value]="currentLang()" (change)="onLangChange($event)">
-          <option value="fr">Français</option>
-          <option value="en">English</option>
-        </select>
+      <!-- Language switcher pill -->
+      <div class="lang-pill" role="group" aria-label="Language">
+        <button class="lang-btn" [class.active]="currentLang() === 'fr'" (click)="setLang('fr')">FR</button>
+        <span class="lang-divider" aria-hidden="true"></span>
+        <button class="lang-btn" [class.active]="currentLang() === 'en'" (click)="setLang('en')">EN</button>
       </div>
 
-      <!-- Page content -->
       <router-outlet/>
 
-      <!-- Legal footer -->
       <footer class="auth-footer-legal">
-        <a routerLink="/legal/mentions-legales">Mentions légales</a>
-        <span class="sep">·</span>
-        <a routerLink="/legal/confidentialite">Confidentialité</a>
-        <span class="sep">·</span>
-        <a routerLink="/legal/cgu">CGU</a>
+        <a routerLink="/legal/mentions-legales">{{ 'legal.mentions' | transloco }}</a>
+        <span class="sep" aria-hidden="true">·</span>
+        <a routerLink="/legal/confidentialite">{{ 'legal.privacy' | transloco }}</a>
+        <span class="sep" aria-hidden="true">·</span>
+        <a routerLink="/legal/cgu">{{ 'legal.terms' | transloco }}</a>
       </footer>
     </div>
   `,
@@ -46,55 +41,54 @@ import { TranslocoService } from '@jsverse/transloco';
       flex-direction: column;
     }
 
-    /* Decorative large blobs */
     .blob {
       position: absolute;
       border-radius: 50%;
       pointer-events: none;
     }
-    .blob-1 {
-      width: 420px; height: 420px;
-      background: rgba(255,255,255,.06);
-      bottom: -80px; left: -80px;
-    }
-    .blob-2 {
-      width: 300px; height: 300px;
-      background: rgba(255,255,255,.04);
-      top: -60px; right: -60px;
-    }
-    .blob-3 {
-      width: 200px; height: 200px;
-      background: rgba(124,58,237,.25);
-      top: 30%; right: 5%;
-    }
+    .blob-1 { width: 420px; height: 420px; background: rgba(255,255,255,.06); bottom: -80px; left: -80px; }
+    .blob-2 { width: 300px; height: 300px; background: rgba(255,255,255,.04); top: -60px; right: -60px; }
+    .blob-3 { width: 200px; height: 200px; background: rgba(124,58,237,.25); top: 30%; right: 5%; }
 
-    /* Language switcher */
-    .lang-wrapper {
+    /* Lang pill */
+    .lang-pill {
       position: fixed;
       top: 16px;
       right: 20px;
       z-index: 100;
       display: flex;
       align-items: center;
-      gap: 6px;
-      background: rgba(255,255,255,.15);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,.25);
-      border-radius: var(--radius-md);
-      padding: 0 10px 0 8px;
+      background: rgba(255,255,255,.12);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 999px;
+      padding: 3px;
+      gap: 0;
     }
-    .lang-globe { font-size: 14px; line-height: 1; }
-    .lang-select {
+    .lang-btn {
       border: none;
-      outline: none;
       background: transparent;
-      font-size: var(--text-sm);
-      font-weight: 500;
-      color: #fff;
+      color: rgba(255,255,255,.6);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      padding: 5px 12px;
+      border-radius: 999px;
       cursor: pointer;
-      padding: 7px 0;
-      appearance: auto;
-      option { color: #1e1b4b; background: #fff; }
+      transition: background .15s, color .15s;
+      line-height: 1;
+      &:hover { color: #fff; }
+      &.active {
+        background: rgba(255,255,255,.9);
+        color: #312e81;
+        box-shadow: 0 1px 4px rgba(0,0,0,.2);
+      }
+    }
+    .lang-divider {
+      width: 1px;
+      height: 14px;
+      background: rgba(255,255,255,.2);
+      flex-shrink: 0;
     }
 
     /* Legal footer */
@@ -110,12 +104,13 @@ import { TranslocoService } from '@jsverse/transloco';
       gap: 8px;
       flex-wrap: wrap;
       a {
-        color: rgba(255,255,255,.65);
+        color: rgba(255,255,255,.55);
         font-size: 0.8125rem;
         text-decoration: none;
-        &:hover { color: #fff; text-decoration: underline; }
+        transition: color .15s;
+        &:hover { color: #fff; }
       }
-      .sep { color: rgba(255,255,255,.35); font-size: 0.8125rem; }
+      .sep { color: rgba(255,255,255,.25); font-size: 0.8125rem; }
     }
   `]
 })
@@ -124,8 +119,7 @@ export class AuthShellComponent {
 
   currentLang = signal(this.transloco.getActiveLang());
 
-  onLangChange(event: Event): void {
-    const lang = (event.target as HTMLSelectElement).value;
+  setLang(lang: string): void {
     this.transloco.setActiveLang(lang);
     localStorage.setItem('pivot_lang', lang);
     this.currentLang.set(lang);

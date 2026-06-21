@@ -39,7 +39,8 @@
       "error_disabled": "Account disabled. Contact support.",
       "error_rate_limit": "Too many attempts. Try again in a few minutes.",
       "error_generic": "An error occurred. Please try again.",
-      "error_google_not_configured": "Google Sign-In is not configured in this environment."
+      "error_google_not_configured": "Google Sign-In is not configured in this environment.",
+      "google_disabled": "Google Sign-In is not available in this environment."
     },
     "register": {
       "title": "Create account",
@@ -120,5 +121,10 @@
       "error_rate_limit": "Too many attempts. Return to login.",
       "error_invalid": "Incorrect or expired code. Check your email."
     }
+  },
+  "legal": {
+    "mentions": "Legal notice",
+    "privacy": "Privacy",
+    "terms": "Terms"
   }
 }
