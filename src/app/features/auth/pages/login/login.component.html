@@ -1,6 +1,9 @@
 <div class="auth-page">
   <div class="card auth-card">
-    <span class="auth-logo">{{ 'common.logo' | transloco }}</span>
+    <div class="auth-brand">
+      <img src="assets/brand/pivot-icon.png" alt="PIVOT" class="auth-brand-icon" />
+      <img src="assets/brand/pivot-brand.png" alt="PIVOT Suite Collaborative" class="auth-brand-wordmark" />
+    </div>
     <h1 class="auth-title">{{ 'auth.login.title' | transloco }}</h1>
     <p class="auth-subtitle">{{ 'auth.login.subtitle' | transloco }}</p>
 
@@ -45,6 +48,10 @@
         </div>
 
         <div class="form-actions">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="rememberMe" />
+            <span>{{ 'auth.login.remember_me' | transloco }}</span>
+          </label>
           <a routerLink="/auth/forgot-password">{{ 'auth.login.forgot_password' | transloco }}</a>
         </div>
 

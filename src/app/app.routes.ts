@@ -19,5 +19,22 @@ export const routes: Routes = [
       },
     ],
   },
+  {
+    path: 'legal',
+    children: [
+      {
+        path: 'mentions-legales',
+        loadComponent: () => import('./features/legal/legal-notice.component').then(m => m.LegalNoticeComponent),
+      },
+      {
+        path: 'confidentialite',
+        loadComponent: () => import('./features/legal/privacy.component').then(m => m.PrivacyComponent),
+      },
+      {
+        path: 'cgu',
+        loadComponent: () => import('./features/legal/terms.component').then(m => m.TermsComponent),
+      },
+    ],
+  },
   { path: '**', redirectTo: 'auth/login' },
 ];

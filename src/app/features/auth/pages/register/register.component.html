@@ -1,6 +1,9 @@
 <div class="auth-page">
   <div class="card auth-card">
-    <span class="auth-logo">{{ 'common.logo' | transloco }}</span>
+    <div class="auth-brand">
+      <img src="assets/brand/pivot-icon.png" alt="PIVOT" class="auth-brand-icon" />
+      <img src="assets/brand/pivot-brand.png" alt="PIVOT Suite Collaborative" class="auth-brand-wordmark" />
+    </div>
 
     @if (success()) {
       <div style="text-align:center;padding:16px 0">

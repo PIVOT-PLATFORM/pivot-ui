@@ -37,6 +37,16 @@
   --surface-sidebar: var(--color-navy-900);
   --surface-navbar:  #FFFFFF;
 
+  // Auth pages gradient — dark indigo → violet (brand identity)
+  --auth-gradient: linear-gradient(
+    135deg,
+    #1e1b4b 0%,
+    #312e81 20%,
+    #4338ca 45%,
+    #6d28d9 70%,
+    #7c3aed 100%
+  );
+
   // Typography
   --font-sans: 'Inter', 'Segoe UI', Arial, sans-serif;
   --text-xs:   0.75rem;

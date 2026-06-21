@@ -3,27 +3,38 @@
 :host { display: contents; }
 
 .auth-page {
-  min-height: 100vh;
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: var(--surface-bg);
+  position: relative;
+  z-index: 1;
 }
 
 .auth-card {
   width: 100%;
   max-width: 480px;
   padding: 40px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  border-radius: 20px;
   @media (max-width: 480px) { padding: 28px 20px; }
 }
 
-.auth-logo {
-  display: block;
-  font-size: var(--text-2xl);
-  font-weight: 700;
-  color: var(--color-navy-900);
+.auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 28px;
+}
+.auth-brand-icon {
+  height: 40px;
+  width: auto;
+  flex-shrink: 0;
+}
+.auth-brand-wordmark {
+  height: 28px;
+  width: auto;
 }
 
 .auth-title { font-size: var(--text-xl); font-weight: 700; color: var(--color-navy-900); margin-bottom: 6px; }

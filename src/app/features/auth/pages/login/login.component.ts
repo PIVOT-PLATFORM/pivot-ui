@@ -1,9 +1,10 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { AuthService } from '../../../../core/auth/service/auth.service';
+import { DeviceService } from '../../../../core/auth/service/device.service';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
@@ -12,15 +13,18 @@ import { HttpErrorResponse } from '@angular/common/http';
   imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslocoPipe],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {
-  private fb = inject(FormBuilder);
-  private auth = inject(AuthService);
-  private router = inject(Router);
+  private readonly fb = inject(FormBuilder);
+  private readonly auth = inject(AuthService);
+  private readonly deviceService = inject(DeviceService);
+  private readonly router = inject(Router);
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
+    rememberMe: [false],
   });
 
   loading = signal(false);
@@ -34,14 +38,15 @@ export class LoginComponent {
     this.loading.set(true);
     this.error.set(null);
 
-    const fingerprint = this.auth.getDeviceFingerprint();
-    const deviceName = this.auth.getDeviceName();
+    const fingerprint = this.deviceService.getDeviceFingerprint();
+    const deviceName = this.deviceService.getDeviceName();
 
     this.auth.login({
       email: this.form.value.email!,
       password: this.form.value.password!,
       deviceFingerprint: fingerprint,
       deviceName,
+      rememberMe: this.form.value.rememberMe ?? false,
     }).subscribe({
       next: () => this.router.navigate(['/dashboard']),
       error: (err: HttpErrorResponse) => {

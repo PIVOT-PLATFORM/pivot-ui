@@ -26,6 +26,7 @@
       "email": "Email",
       "email_placeholder": "you@company.com",
       "password": "Password",
+      "remember_me": "Remember me (30 days)",
       "forgot_password": "Forgot password?",
       "submit": "Sign in",
       "no_account": "No account yet?",
