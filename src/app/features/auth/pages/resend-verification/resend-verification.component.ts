@@ -15,8 +15,8 @@ import { HttpErrorResponse } from '@angular/common/http';
       <div class="card auth-card">
         <div class="auth-brand">
           <picture>
-            <source srcset="assets/brand/pivot-icon.webp?v=3" type="image/webp" />
-            <img src="assets/brand/pivot-icon.png?v=3" alt="PIVOT" class="auth-brand-icon" />
+            <source srcset="assets/brand/pivot-icon.webp?v=4" type="image/webp" />
+            <img src="assets/brand/pivot-icon.png?v=4" alt="PIVOT" class="auth-brand-icon" />
           </picture>
         </div>
 

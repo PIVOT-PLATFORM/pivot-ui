@@ -19,7 +19,13 @@ function detectInitialLang(): string {
 }
 
 function initSession(auth: AuthService) {
-  return () => auth.initSession().pipe(catchError(() => of(null)));
+  return () => {
+    // Sur les pages /auth/*, aucune session n'existe — évite un POST /refresh → 401 inutile en console.
+    if (window.location.pathname.startsWith('/auth')) {
+      return of(null);
+    }
+    return auth.initSession().pipe(catchError(() => of(null)));
+  };
 }
 
 export const appConfig: ApplicationConfig = {
