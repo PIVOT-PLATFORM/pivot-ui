@@ -14,6 +14,7 @@
     "!src/**/*.spec.ts",
     "!src/**/*.config.ts",
     "!src/main.ts",
+    "!src/test-setup.ts",
     "!src/**/environment*.ts"
   ],
   "thresholds": {
