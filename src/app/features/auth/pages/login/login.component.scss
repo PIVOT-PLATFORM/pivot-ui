@@ -13,21 +13,21 @@
 .auth-card {
   width: 100%;
   max-width: 440px;
-  padding: 40px;
+  padding: 28px 40px 40px;
   box-shadow: 0 20px 60px rgba(0,0,0,.35);
   border-radius: 20px;
 
-  @media (max-width: 480px) { padding: 28px 20px; }
+  @media (max-width: 480px) { padding: 20px 20px 28px; }
 }
 
 .auth-brand {
   display: flex;
   justify-content: center;
-  margin-bottom: 28px;
+  margin-bottom: 12px;
 }
 .auth-brand-icon {
-  height: 120px;
-  width: 120px;
+  height: 160px;
+  width: 160px;
   object-fit: contain;
 }
 
