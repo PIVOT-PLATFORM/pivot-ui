@@ -61,7 +61,7 @@ import { HttpErrorResponse } from '@angular/common/http';
   `,
   styles: [`
     :host { display: contents; }
-    .auth-page { min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 16px; position: relative; z-index: 1; }
+    .auth-page { flex: 1; display: flex; align-items: center; justify-content: center; padding: 16px; position: relative; z-index: 1; }
     .auth-card { width: 100%; max-width: 440px; padding: 20px 40px 28px; box-shadow: 0 20px 60px rgba(0,0,0,.35); border-radius: 20px; @media (max-width: 480px) { padding: 16px 20px 24px; } }
     .auth-brand { display: flex; justify-content: center; margin-bottom: 8px; }
     .auth-brand-icon { height: 100px; width: 100px; object-fit: contain; }

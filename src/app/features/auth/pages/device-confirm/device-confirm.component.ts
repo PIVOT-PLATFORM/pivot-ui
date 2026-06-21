@@ -13,16 +13,21 @@ import { HttpErrorResponse } from '@angular/common/http';
   template: `
     <div class="auth-page">
       <div class="card auth-card">
-        <span class="auth-logo">{{ 'common.logo' | transloco }}</span>
+        <div class="auth-brand">
+          <picture>
+            <source srcset="assets/brand/pivot-icon.webp?v=4" type="image/webp" />
+            <img src="assets/brand/pivot-icon.png?v=4" alt="PIVOT" class="auth-brand-icon" />
+          </picture>
+        </div>
         <h1 class="auth-title">{{ 'auth.device_confirm.title' | transloco }}</h1>
         <p class="auth-subtitle">{{ 'auth.device_confirm.subtitle' | transloco }}</p>
 
         @if (error()) {
-          <div class="alert alert-error" style="margin-bottom:16px">{{ error() | transloco }}</div>
+          <div class="alert alert-error" style="margin-bottom:12px">{{ error() | transloco }}</div>
         }
 
         <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-          <div class="form-group" style="margin-bottom:24px">
+          <div class="form-group" style="margin-bottom:16px">
             <label class="form-label" for="otp">{{ 'auth.device_confirm.otp_label' | transloco }}</label>
             <input id="otp" type="text" formControlName="otp" class="form-control"
                    [class.is-invalid]="form.controls.otp.invalid && form.controls.otp.touched"
@@ -37,13 +42,13 @@ import { HttpErrorResponse } from '@angular/common/http';
           </button>
         </form>
 
-        <p style="margin-top:16px;text-align:center;font-size:var(--text-sm);color:var(--color-gray-500)">
+        <p class="auth-footer">
           <a routerLink="/auth/login">{{ 'auth.device_confirm.cancel' | transloco }}</a>
         </p>
       </div>
     </div>
   `,
-  styles: [`:host{display:contents}.auth-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--surface-bg)}.auth-card{max-width:440px;width:100%;padding:40px}.auth-logo{display:block;font-size:var(--text-2xl);font-weight:700;color:var(--color-navy-900);margin-bottom:28px}.auth-title{font-size:var(--text-xl);font-weight:700;color:var(--color-navy-900);margin-bottom:6px}.auth-subtitle{font-size:var(--text-sm);color:var(--color-gray-500);margin-bottom:24px}`]
+  styles: [`:host{display:contents}.auth-page{flex:1;display:flex;align-items:center;justify-content:center;padding:16px;position:relative;z-index:1}.auth-card{max-width:440px;width:100%;padding:20px 36px 28px;box-shadow:0 20px 60px rgba(0,0,0,.35)}.auth-brand{display:flex;justify-content:center;margin-bottom:6px}.auth-brand-icon{height:100px;width:100px;object-fit:contain}.auth-title{font-size:var(--text-xl);font-weight:700;color:var(--color-navy-900);margin-bottom:6px;text-align:center}.auth-subtitle{font-size:var(--text-sm);color:var(--color-gray-500);margin-bottom:16px;text-align:center}.auth-footer{margin-top:14px;text-align:center;font-size:var(--text-sm);color:var(--color-gray-500)}`]
 })
 export class DeviceConfirmComponent implements OnInit {
   private fb = inject(FormBuilder);

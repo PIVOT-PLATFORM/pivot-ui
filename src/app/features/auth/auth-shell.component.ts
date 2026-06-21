@@ -33,7 +33,7 @@ import { TranslocoService, TranslocoPipe } from '@jsverse/transloco';
   styles: [`
     .auth-shell {
       position: relative;
-      min-height: 100vh;
+      min-height: 100dvh;
       background: var(--auth-gradient,
         linear-gradient(135deg, #1e1b4b 0%, #312e81 25%, #4338ca 50%, #6d28d9 75%, #7c3aed 100%));
       overflow: hidden;
