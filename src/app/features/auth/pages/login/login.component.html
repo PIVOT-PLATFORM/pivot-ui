@@ -6,9 +6,11 @@
     <h1 class="auth-title">{{ 'auth.login.title' | transloco }}</h1>
     <p class="auth-subtitle">{{ 'auth.login.subtitle' | transloco }}</p>
 
-    @if (error()) {
-      <div class="alert alert-error" style="margin-bottom:16px">{{ error() | transloco }}</div>
-    }
+    <div class="error-slot">
+      @if (error()) {
+        <div class="alert alert-error">{{ error() | transloco }}</div>
+      }
+    </div>
 
     @if (requiresDeviceVerification()) {
       <div class="alert alert-info" style="margin-bottom:16px">
