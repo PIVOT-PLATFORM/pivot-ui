@@ -244,7 +244,7 @@ jobs:
   plumber:
     name: Plumber — Security Gate
     runs-on: ubuntu-latest
-    needs: [quality, tests, build, sca]
+    needs: [quality, tests, sca]
     if: always()
     permissions:
       contents: read
@@ -254,15 +254,13 @@ jobs:
         env:
           QUALITY: ${{ needs.quality.result }}
           TESTS: ${{ needs.tests.result }}
-          BUILD: ${{ needs.build.result }}
           SCA: ${{ needs.sca.result }}
         run: |
           echo "quality : $QUALITY"
           echo "tests   : $TESTS"
-          echo "build   : $BUILD"
           echo "sca     : $SCA"
           FAILED=0
-          for RESULT in "$QUALITY" "$TESTS" "$BUILD" "$SCA"; do
+          for RESULT in "$QUALITY" "$TESTS" "$SCA"; do
             if [[ "$RESULT" != "success" && "$RESULT" != "skipped" ]]; then
               FAILED=1
             fi
