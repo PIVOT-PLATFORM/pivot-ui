@@ -24,6 +24,8 @@ out-tsc/
 .sass-cache/
 reports/
 .stryker-tmp/
+lighthouse-reports/
+.lighthouseci/
 
 # ===== IDE =====
 .idea/

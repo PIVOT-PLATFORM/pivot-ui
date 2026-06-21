@@ -1,7 +1,16 @@
 name: Lighthouse
 
-# DESACTIVE - pas d'URL deployee. Reactiver quand PIVOT_APP_URL disponible.
+# Audit accessibilite (WCAG) sur main, contre une stack pivot-core reelle
+# (image GHCR + postgres + redis) pour auditer aussi les pages authentifiees.
+
 on:
+  push:
+    branches: [main]
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - '.github/ISSUE_TEMPLATE/**'
   workflow_dispatch:
 
 permissions: read-all
@@ -10,15 +19,43 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
+env:
+  CORE_IMAGE: ghcr.io/pivot-platform/pivot-core:latest
+
 jobs:
   lighthouse:
-    name: Lighthouse CI - Perf & Accessibilite
+    name: Lighthouse — Accessibilité
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-    continue-on-error: true
+    timeout-minutes: 30
     permissions:
       contents: read
+      packages: read
       statuses: write
+
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: pivot_lh
+          POSTGRES_USER: pivot
+          POSTGRES_PASSWORD: pivot_lh
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U pivot -d pivot_lh"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Checkout
@@ -26,57 +63,95 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Setup Node.js 24
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - name: Login to GHCR
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
-          node-version: '24'
-          cache: 'npm'
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve host IP for pivot-core container
+        id: host-ip
+        run: echo "ip=$(ip route show default | awk '/default/{print $3}')" >> "$GITHUB_OUTPUT"
+
+      - name: Start pivot-core (seed profile)
+        run: |
+          docker run -d --name pivot-core \
+            -p 8080:8080 \
+            -e SPRING_DATASOURCE_URL=jdbc:postgresql://${{ steps.host-ip.outputs.ip }}:5432/pivot_lh \
+            -e SPRING_DATASOURCE_USERNAME=pivot \
+            -e SPRING_DATASOURCE_PASSWORD=pivot_lh \
+            -e SPRING_DATA_REDIS_HOST=${{ steps.host-ip.outputs.ip }} \
+            -e SPRING_DATA_REDIS_PORT=6379 \
+            -e SPRING_PROFILES_ACTIVE=test \
+            ${{ env.CORE_IMAGE }}
+
+      - name: Wait for pivot-core
+        run: curl --retry 25 --retry-delay 3 --retry-connrefused --silent --output /dev/null http://localhost:8080/api/actuator/health
+
+      - name: Setup Node + npm
+        uses: ./.github/actions/setup-node
 
       - name: Install dependencies
         run: npm ci
 
       - name: Build Angular (production)
-        env:
-          PIVOT_API_URL: ${{ secrets.PIVOT_API_URL || 'http://localhost:8080' }}
         run: npm run build -- --configuration production
 
       - name: Serve Angular build
-        run: |
-          npx http-server dist/pivot-ui/browser -p 4200 --silent &
-          sleep 3
+        run: npx --yes serve dist/pivot-ui/browser -p 4200 --single &
+
+      - name: Wait for frontend
+        run: curl --retry 15 --retry-delay 1 --retry-connrefused --silent --output /dev/null http://localhost:4200/
 
       - name: Install Chrome
         uses: browser-actions/setup-chrome@c785b87e244131f27c9f19c1a33e2ead956ab7ce # v1
         id: setup-chrome
 
-      - name: Run Lighthouse CI
+      - name: Run Lighthouse CI (public + authenticated)
         env:
           LHCI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CHROME_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
+          LH_BASE_URL: http://localhost:4200
+          LH_USER_EMAIL: user@pivot.test
+          LH_USER_PASSWORD: Pivot@Test123!
         run: |
-          npx lhci autorun
-          npx lhci upload --target=filesystem --outputDir=./lighthouse-reports || true
+          set +e
+          npx lhci autorun --config=.lighthouserc.noauth.json
+          RC_PUBLIC=$?
+          npx lhci upload --target=filesystem --outputDir=./lighthouse-reports/public || true
 
-      - name: Lighthouse - resume agrege
+          npx lhci autorun --config=.lighthouserc.json
+          RC_AUTH=$?
+          npx lhci upload --target=filesystem --outputDir=./lighthouse-reports/auth || true
+
+          echo "public a11y rc=$RC_PUBLIC | authenticated a11y rc=$RC_AUTH"
+          [ "$RC_PUBLIC" -eq 0 ] && [ "$RC_AUTH" -eq 0 ]
+
+      - name: Lighthouse — résumé agrégé
         if: always()
         run: |
-          echo "## Lighthouse CI - Resultats PIVOT-UI" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Page | Perf | A11y | Bonnes pratiques | SEO |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|------|------|------------------|-----|" >> $GITHUB_STEP_SUMMARY
+          echo "## Lighthouse — Accessibilité PIVOT-UI" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Page | A11y | Perf | SEO | Bonnes pratiques |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|------|------|------|-----|------------------|" >> "$GITHUB_STEP_SUMMARY"
           for f in $(find lighthouse-reports -name "lhr-*.json" 2>/dev/null); do
             [ -f "$f" ] || continue
             url=$(jq -r '.finalUrl' "$f")
-            perf=$(jq -r '(.categories.performance.score // 0) * 100 | round | tostring' "$f")
             a11y=$(jq -r '(.categories.accessibility.score // 0) * 100 | round | tostring' "$f")
-            bp=$(jq -r '(.categories["best-practices"].score // 0) * 100 | round | tostring' "$f")
+            perf=$(jq -r '(.categories.performance.score // 0) * 100 | round | tostring' "$f")
             seo=$(jq -r '(.categories.seo.score // 0) * 100 | round | tostring' "$f")
-            echo "| $url | ${perf}% | ${a11y}% | ${bp}% | ${seo}% |" >> $GITHUB_STEP_SUMMARY
+            bp=$(jq -r '(.categories["best-practices"].score // 0) * 100 | round | tostring' "$f")
+            echo "| $url | ${a11y}% | ${perf}% | ${seo}% | ${bp}% |" >> "$GITHUB_STEP_SUMMARY"
           done
 
+      - name: Dump pivot-core logs on failure
+        if: failure()
+        run: docker logs pivot-core || true
+
       - name: Upload Lighthouse report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: lighthouse-report
           path: lighthouse-reports/
