@@ -3,6 +3,7 @@
   "packageManager": "npm",
   "testRunner": "vitest",
   "vitest": {
+    "configFile": "vitest.stryker.config.ts",
     "related": false
   },
   "reporters": ["html", "clear-text", "progress"],
