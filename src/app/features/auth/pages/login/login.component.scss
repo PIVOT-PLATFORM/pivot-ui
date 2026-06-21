@@ -22,18 +22,13 @@
 
 .auth-brand {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  justify-content: center;
   margin-bottom: 28px;
 }
 .auth-brand-icon {
-  height: 40px;
-  width: auto;
-  flex-shrink: 0;
-}
-.auth-brand-wordmark {
-  height: 28px;
-  width: auto;
+  height: 72px;
+  width: 72px;
+  object-fit: contain;
 }
 
 .auth-title {
