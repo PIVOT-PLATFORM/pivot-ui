@@ -126,6 +126,18 @@
       "error_invalid": "Code incorrect ou expiré. Vérifiez votre email."
     }
   },
+  "auth": {
+    "resend": {
+      "title": "Renvoyer l'email d'activation",
+      "subtitle": "Entrez votre email pour recevoir un nouveau lien d'activation.",
+      "email": "Email",
+      "email_placeholder": "vous@entreprise.com",
+      "submit": "Renvoyer le lien",
+      "back_login": "← Retour à la connexion",
+      "sent_title": "Email envoyé",
+      "sent_body": "Si cet email correspond à un compte non vérifié, un lien d'activation vous a été envoyé."
+    }
+  },
   "legal": {
     "mentions": "Mentions légales",
     "privacy": "Confidentialité",

@@ -127,6 +127,18 @@
       "error_invalid": "Incorrect or expired code. Check your email."
     }
   },
+  "auth": {
+    "resend": {
+      "title": "Resend activation email",
+      "subtitle": "Enter your email to receive a new activation link.",
+      "email": "Email",
+      "email_placeholder": "you@company.com",
+      "submit": "Send activation link",
+      "back_login": "← Back to login",
+      "sent_title": "Email sent",
+      "sent_body": "If this email matches an unverified account, an activation link has been sent."
+    }
+  },
   "legal": {
     "mentions": "Legal notice",
     "privacy": "Privacy",

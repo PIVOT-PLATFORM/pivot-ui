@@ -30,6 +30,10 @@ export const AUTH_ROUTES: Routes = [
         path: 'device-confirm',
         loadComponent: () => import('./pages/device-confirm/device-confirm.component').then(m => m.DeviceConfirmComponent),
       },
+      {
+        path: 'resend-verification',
+        loadComponent: () => import('./pages/resend-verification/resend-verification.component').then(m => m.ResendVerificationComponent),
+      },
     ],
   },
 ];
