@@ -135,6 +135,16 @@ jobs:
 
       - name: SonarCloud Scan
         run: |
+          # PR decoration: feed pull-request params on PR events so SonarCloud
+          # posts the "SonarCloud Code Analysis" check (otherwise it records a
+          # branch analysis and the PR check stays pending). Mirrors the PR
+          # auto-detection that mvn sonar:sonar gives pivot-core.
+          PR_ARGS=""
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            PR_ARGS="-Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
+                     -Dsonar.pullrequest.branch=${{ github.head_ref }} \
+                     -Dsonar.pullrequest.base=${{ github.base_ref }}"
+          fi
           npx sonar-scanner \
             -Dsonar.projectKey=PIVOT-PLATFORM_PIVOT-UI \
             -Dsonar.organization=pivot-platform \
@@ -144,7 +154,8 @@ jobs:
             -Dsonar.tests=src \
             -Dsonar.test.inclusions=**/*.spec.ts \
             -Dsonar.exclusions=**/*.spec.ts,dist/**,node_modules/** \
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+            $PR_ARGS
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
