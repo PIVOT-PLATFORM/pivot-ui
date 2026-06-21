@@ -70,13 +70,10 @@ export class LoginComponent {
   }
 
   private mapError(err: HttpErrorResponse): string {
-    if (err.status === 401) return 'auth.login.error_invalid_credentials';
-    if (err.status === 403) {
-      const msg = err.error?.message || '';
-      if (msg.includes('verif') || msg.includes('vérifié')) return 'auth.login.error_not_verified';
-      return 'auth.login.error_disabled';
-    }
     if (err.status === 429) return 'auth.login.error_rate_limit';
+    // RGPD : 401 et 403 retournent le même message générique
+    // pour ne pas révéler si le compte existe, est bloqué ou non vérifié
+    if (err.status === 401 || err.status === 403) return 'auth.login.error_generic_credentials';
     return 'auth.login.error_generic';
   }
 }

@@ -39,8 +39,13 @@
       "error_disabled": "Account disabled. Contact support.",
       "error_rate_limit": "Too many attempts. Try again in a few minutes.",
       "error_generic": "An error occurred. Please try again.",
+      "error_generic_credentials": "Incorrect email or password.",
       "error_google_not_configured": "Google Sign-In is not configured in this environment.",
-      "google_disabled": "Google Sign-In is not available in this environment."
+      "google_disabled": "Google Sign-In is not available in this environment.",
+      "no_activation_email": "Didn't receive the activation email?",
+      "resend_link": "Resend",
+      "show_password": "Show password",
+      "hide_password": "Hide password"
     },
     "register": {
       "title": "Create account",
