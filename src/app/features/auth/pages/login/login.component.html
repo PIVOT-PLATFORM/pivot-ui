@@ -65,7 +65,7 @@
           <a class="link-subtle" routerLink="/auth/forgot-password">{{ 'auth.login.forgot_password' | transloco }}</a>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:20px" [disabled]="loading()">
+        <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:14px" [disabled]="loading()">
           @if (loading()) { <span class="spinner"></span> }
           {{ 'auth.login.submit' | transloco }}
         </button>
@@ -76,7 +76,7 @@
         </p>
       </form>
 
-      <div class="divider-text" style="margin:20px 0">{{ 'common.or' | transloco }}</div>
+      <div class="divider-text" style="margin:10px 0">{{ 'common.or' | transloco }}</div>
 
       <button type="button" class="google-btn"
               [disabled]="!googleEnabled()"

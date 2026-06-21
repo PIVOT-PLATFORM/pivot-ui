@@ -1,11 +1,11 @@
 :host { display: contents; }
 
 .auth-page {
-  flex: 1;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 16px;
   position: relative;
   z-index: 1;
 }
@@ -13,21 +13,21 @@
 .auth-card {
   width: 100%;
   max-width: 440px;
-  padding: 28px 40px 40px;
+  padding: 20px 40px 28px;
   box-shadow: 0 20px 60px rgba(0,0,0,.35);
   border-radius: 20px;
 
-  @media (max-width: 480px) { padding: 20px 20px 28px; }
+  @media (max-width: 480px) { padding: 16px 20px 24px; }
 }
 
 .auth-brand {
   display: flex;
   justify-content: center;
-  margin-bottom: 12px;
+  margin-bottom: 4px;
 }
 .auth-brand-icon {
-  height: 160px;
-  width: 160px;
+  height: 110px;
+  width: 110px;
   object-fit: contain;
 }
 
@@ -42,13 +42,13 @@
 .auth-subtitle {
   font-size: var(--text-sm);
   color: var(--color-gray-500);
-  margin-bottom: 28px;
+  margin-bottom: 12px;
   text-align: center;
 }
 
 .error-slot {
-  min-height: 48px;
-  margin-bottom: 8px;
+  min-height: 32px;
+  margin-bottom: 2px;
   display: flex;
   align-items: center;
   .alert-error {
@@ -66,8 +66,8 @@
 .form-fields {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .password-wrapper {
@@ -101,6 +101,7 @@
   align-items: center;
   margin-top: 4px;
   font-size: var(--text-sm);
+  background: transparent;
 }
 
 .checkbox-label {
@@ -125,11 +126,12 @@
   font-size: var(--text-sm);
   text-decoration: none;
   white-space: nowrap;
+  background: transparent;
   &:hover { text-decoration: underline; }
 }
 
 .resend-activation {
-  margin-top: 12px;
+  margin-top: 8px;
   text-align: center;
   font-size: var(--text-xs, 0.75rem);
   color: var(--color-gray-500);
@@ -138,6 +140,16 @@
     text-decoration: none;
     &:hover { text-decoration: underline; }
   }
+}
+
+// Chrome autofill override — prevent yellow/blue tint on form area
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #fff inset;
+  box-shadow: 0 0 0 1000px #fff inset;
+  -webkit-text-fill-color: var(--color-gray-900);
+  transition: background-color 9999s ease-in-out;
 }
 
 .google-btn {
@@ -161,7 +173,7 @@
 }
 
 .auth-footer {
-  margin-top: 24px;
+  margin-top: 14px;
   text-align: center;
   font-size: var(--text-sm);
   color: var(--color-gray-500);

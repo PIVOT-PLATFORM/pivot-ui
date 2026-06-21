@@ -61,13 +61,13 @@ import { HttpErrorResponse } from '@angular/common/http';
   `,
   styles: [`
     :host { display: contents; }
-    .auth-page { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; position: relative; z-index: 1; }
-    .auth-card { width: 100%; max-width: 440px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,.35); border-radius: 20px; @media (max-width: 480px) { padding: 28px 20px; } }
-    .auth-brand { display: flex; justify-content: center; margin-bottom: 28px; }
-    .auth-brand-icon { height: 120px; width: 120px; object-fit: contain; }
+    .auth-page { min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 16px; position: relative; z-index: 1; }
+    .auth-card { width: 100%; max-width: 440px; padding: 20px 40px 28px; box-shadow: 0 20px 60px rgba(0,0,0,.35); border-radius: 20px; @media (max-width: 480px) { padding: 16px 20px 24px; } }
+    .auth-brand { display: flex; justify-content: center; margin-bottom: 8px; }
+    .auth-brand-icon { height: 100px; width: 100px; object-fit: contain; }
     .auth-title { font-size: var(--text-xl); font-weight: 700; color: var(--color-navy-900); margin-bottom: 6px; text-align: center; }
-    .auth-subtitle { font-size: var(--text-sm); color: var(--color-gray-500); margin-bottom: 28px; text-align: center; }
-    .auth-footer { text-align: center; font-size: var(--text-sm); color: var(--color-gray-500); }
+    .auth-subtitle { font-size: var(--text-sm); color: var(--color-gray-500); margin-bottom: 14px; text-align: center; }
+    .auth-footer { text-align: center; font-size: var(--text-sm); color: var(--color-gray-500); margin-top: 14px; }
     .success-block { text-align: center; }
     .success-icon { font-size: 3rem; margin-bottom: 16px; }
   `]
