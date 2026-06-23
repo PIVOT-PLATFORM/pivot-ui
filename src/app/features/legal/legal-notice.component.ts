@@ -20,7 +20,7 @@ import { RouterLink } from '@angular/router';
           immatriculée au Registre du Commerce et des Sociétés de Paris sous le numéro
           RCS Paris B 000 000 000, dont le siège social est situé à Paris, France.
         </p>
-        <p>Directeur de la publication : Alexandre Solane</p>
+        <p>Directeur de la publication : le représentant légal de PIVOT SAS</p>
         <p>Contact : <a href="mailto:legal@pivot.app">legal&#64;pivot.app</a></p>
 
         <h2>2. Hébergement</h2>
