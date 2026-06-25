@@ -74,7 +74,8 @@
           "options": {
             "tsConfig": "tsconfig.spec.json",
             "runner": "vitest",
-            "coverageReporters": ["lcov", "text", "html"]
+            "coverageReporters": ["lcov", "text", "html"],
+            "coverageDirectory": "coverage"
           }
         }
       }
