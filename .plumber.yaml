@@ -28,6 +28,7 @@ github:
         - zaproxy/action-full-scan
         - docker/setup-buildx-action
         - docker/login-action
+        - slsa-framework/slsa-github-generator
 
     # --- Images : pas de tags mutables ---
     containerImageMustNotUseForbiddenTags:

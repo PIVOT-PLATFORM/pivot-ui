@@ -134,16 +134,21 @@ jobs:
           path: coverage/
 
       - name: SonarCloud Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Passés en variables d'env pour éviter l'injection de template dans le shell
+          # (github.head_ref est user-controlled via le nom de branche d'un fork).
+          GH_EVENT_NAME: ${{ github.event_name }}
+          GH_PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_HEAD_REF: ${{ github.head_ref }}
+          GH_BASE_REF: ${{ github.base_ref }}
         run: |
-          # PR decoration: feed pull-request params on PR events so SonarCloud
-          # posts the "SonarCloud Code Analysis" check (otherwise it records a
-          # branch analysis and the PR check stays pending). Mirrors the PR
-          # auto-detection that mvn sonar:sonar gives pivot-core.
           PR_ARGS=""
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            PR_ARGS="-Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
-                     -Dsonar.pullrequest.branch=${{ github.head_ref }} \
-                     -Dsonar.pullrequest.base=${{ github.base_ref }}"
+          if [ "${GH_EVENT_NAME}" = "pull_request" ]; then
+            PR_ARGS="-Dsonar.pullrequest.key=${GH_PR_NUMBER} \
+                     -Dsonar.pullrequest.branch=${GH_HEAD_REF} \
+                     -Dsonar.pullrequest.base=${GH_BASE_REF}"
           fi
           npx sonar-scanner \
             -Dsonar.projectKey=PIVOT-PLATFORM_pivot-ui \
@@ -156,9 +161,6 @@ jobs:
             -Dsonar.exclusions=**/*.spec.ts,dist/**,node_modules/** \
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
             $PR_ARGS
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # -----------------------------------------
   # 5. SCA - AUDIT DEPENDANCES (Trivy + npm)
