@@ -82,6 +82,7 @@ jobs:
             -e SPRING_DATA_REDIS_HOST=redis \
             -e SPRING_DATA_REDIS_PORT=6379 \
             -e SPRING_PROFILES_ACTIVE=test \
+            -e MANAGEMENT_HEALTH_MAIL_ENABLED=false \
             ${{ env.CORE_IMAGE }}
 
       - name: Wait for pivot-core
@@ -149,6 +150,10 @@ jobs:
       - name: Dump pivot-core logs on failure
         if: failure()
         run: docker logs pivot-core || true
+
+      - name: Stop pivot-core
+        if: always()
+        run: docker rm -f pivot-core || true
 
       - name: Upload Lighthouse report
         if: always()
