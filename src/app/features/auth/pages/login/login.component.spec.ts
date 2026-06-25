@@ -56,6 +56,7 @@ describe('LoginComponent', () => {
   it('does not submit when form is invalid', () => {
     component.submit();
     httpMock.expectNone(`${environment.apiUrl}/auth/login`);
+    expect(component.loading()).toBe(false);
   });
 
   it('sets loading during submit', () => {
@@ -106,7 +107,7 @@ describe('LoginComponent', () => {
     component.submit();
     component.submit();
     const reqs = httpMock.match(`${environment.apiUrl}/auth/login`);
-    expect(reqs.length).toBe(1);
+    expect(reqs).toHaveLength(1);
     reqs[0].flush(mockAuthResponse);
   });
 

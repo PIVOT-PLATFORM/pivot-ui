@@ -33,7 +33,7 @@ describe('authGuard', () => {
 
   it('redirects to /auth/login when not authenticated', () => {
     const result = TestBed.runInInjectionContext(() => authGuard({} as never, {} as never));
-    expect(result instanceof UrlTree).toBe(true);
+    expect(result).toBeInstanceOf(UrlTree);
     expect(router.serializeUrl(result as UrlTree)).toBe('/auth/login');
   });
 });
@@ -62,7 +62,7 @@ describe('guestGuard', () => {
   it('redirects to /dashboard when already authenticated', () => {
     authService.updateToken('tok', Date.now() + 3600_000);
     const result = TestBed.runInInjectionContext(() => guestGuard({} as never, {} as never));
-    expect(result instanceof UrlTree).toBe(true);
+    expect(result).toBeInstanceOf(UrlTree);
     expect(router.serializeUrl(result as UrlTree)).toBe('/dashboard');
   });
 });

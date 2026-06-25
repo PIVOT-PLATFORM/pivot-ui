@@ -48,6 +48,7 @@ describe('RegisterComponent', () => {
   it('does not submit when form is invalid', () => {
     component.submit();
     httpMock.expectNone(`${environment.apiUrl}/auth/register`);
+    expect(component.loading()).toBe(false);
   });
 
   const validForm = () => ({
@@ -98,7 +99,7 @@ describe('RegisterComponent', () => {
     component.submit();
     component.submit();
     const reqs = httpMock.match(`${environment.apiUrl}/auth/register`);
-    expect(reqs.length).toBe(1);
+    expect(reqs).toHaveLength(1);
     reqs[0].flush({});
   });
 

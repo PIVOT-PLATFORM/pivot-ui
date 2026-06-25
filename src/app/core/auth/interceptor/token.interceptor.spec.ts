@@ -158,6 +158,7 @@ describe('tokenInterceptor', () => {
       httpClient.post(authOnlyUrl, {}).subscribe({ error: () => {} });
 
       const req = httpMock.expectOne(authOnlyUrl);
+      expect(req.request.method).toBe('POST');
       req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
 
       // No refresh call expected

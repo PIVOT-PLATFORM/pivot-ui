@@ -5,21 +5,22 @@ import { provideHttpClientTesting, HttpTestingController } from '@angular/common
 import { provideRouter } from '@angular/router';
 import { Component } from '@angular/core';
 import { TranslocoTestingModule } from '@jsverse/transloco';
-import { ForgotPasswordComponent } from './forgot-password.component';
+import { ResendVerificationComponent } from './resend-verification.component';
 import { environment } from '../../../../../environments/environment';
 
 @Component({ template: '', standalone: true })
 class StubComponent {}
 
-describe('ForgotPasswordComponent', () => {
-  let fixture: ComponentFixture<ForgotPasswordComponent>;
-  let component: ForgotPasswordComponent;
+describe('ResendVerificationComponent', () => {
+  let fixture: ComponentFixture<ResendVerificationComponent>;
+  let component: ResendVerificationComponent;
   let httpMock: HttpTestingController;
+  const URL = `${environment.apiUrl}/auth/resend-verification`;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        ForgotPasswordComponent,
+        ResendVerificationComponent,
         TranslocoTestingModule.forRoot({ langs: { fr: {}, en: {} } }),
       ],
       providers: [
@@ -29,7 +30,7 @@ describe('ForgotPasswordComponent', () => {
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ForgotPasswordComponent);
+    fixture = TestBed.createComponent(ResendVerificationComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
@@ -43,38 +44,33 @@ describe('ForgotPasswordComponent', () => {
 
   it('does not submit when form invalid', () => {
     component.submit();
-    httpMock.expectNone(`${environment.apiUrl}/auth/forgot-password`);
+    httpMock.expectNone(r => r.url === URL);
     expect(component.loading()).toBe(false);
   });
 
-  it('sets loading during submit', () => {
+  it('sets loading then sent on success', () => {
     component.form.setValue({ email: 'user@example.com' });
     component.submit();
     expect(component.loading()).toBe(true);
-    httpMock.expectOne(`${environment.apiUrl}/auth/forgot-password`).flush({});
-  });
-
-  it('sets sent=true on success', () => {
-    component.form.setValue({ email: 'user@example.com' });
-    component.submit();
-    httpMock.expectOne(`${environment.apiUrl}/auth/forgot-password`).flush({});
+    httpMock.expectOne(r => r.url === URL).flush({ message: 'ok' });
     expect(component.sent()).toBe(true);
     expect(component.loading()).toBe(false);
   });
 
-  it('sets sent=true even on error (RGPD — ne révèle pas si email existant)', () => {
+  it('sets sent=true even on error (RGPD — pas d\'énumération)', () => {
     component.form.setValue({ email: 'user@example.com' });
     component.submit();
-    httpMock.expectOne(`${environment.apiUrl}/auth/forgot-password`).flush('', { status: 404, statusText: 'Not Found' });
+    httpMock.expectOne(r => r.url === URL).flush('', { status: 404, statusText: 'Not Found' });
     expect(component.sent()).toBe(true);
+    expect(component.loading()).toBe(false);
   });
 
   it('does not submit while loading', () => {
     component.form.setValue({ email: 'user@example.com' });
     component.submit();
     component.submit();
-    const reqs = httpMock.match(`${environment.apiUrl}/auth/forgot-password`);
+    const reqs = httpMock.match(r => r.url === URL);
     expect(reqs).toHaveLength(1);
-    reqs[0].flush({});
+    reqs[0].flush({ message: 'ok' });
   });
 });
