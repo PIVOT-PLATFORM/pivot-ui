@@ -113,8 +113,13 @@ describe('RegisterComponent', () => {
       expect(component.passwordStrength().width).toBe('100%');
     });
 
-    it('returns 20% for single short char', () => {
+    it('returns 0% for password with no criteria met', () => {
       component.form.patchValue({ password: 'a' });
+      expect(component.passwordStrength().width).toBe('0%');
+    });
+
+    it('returns 20% for password with exactly one criterion (uppercase only)', () => {
+      component.form.patchValue({ password: 'A' });
       expect(component.passwordStrength().width).toBe('20%');
     });
 

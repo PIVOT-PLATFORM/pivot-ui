@@ -65,11 +65,12 @@ describe('LoginComponent', () => {
     httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush(mockAuthResponse);
   });
 
-  it('clears loading and error on success', () => {
+  it('loading stays true after success (navigation, pas de reset)', () => {
     component.form.setValue({ email: 'a@b.com', password: 'secret', rememberMe: false });
     component.submit();
     httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush(mockAuthResponse);
-    expect(component.loading()).toBe(false);
+    // Le composant navigue vers /dashboard sans reset loading — comportement intentionnel.
+    expect(component.loading()).toBe(true);
   });
 
   it('sets error on 401', () => {

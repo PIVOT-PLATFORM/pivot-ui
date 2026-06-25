@@ -165,6 +165,7 @@ jobs:
     with:
       image: ${{ needs.release.outputs.image }}
       digest: ${{ needs.release.outputs.digest }}
+      private-repository: true
     secrets:
       # registry-username + registry-password : noms attendus par generator_container_slsa3.yml
       # (slsa-framework/slsa-github-generator v2.1.0, utilise docker/login-action en interne).
