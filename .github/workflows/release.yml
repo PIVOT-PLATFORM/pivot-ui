@@ -153,8 +153,6 @@ jobs:
   #    propre provenance (différence clé L2 → L3).
   #    Attache l'attestation en tant qu'artefact OCI dans GHCR via cosign.
   #
-  #    TODO: pin to SHA — récupérer le SHA exact sur :
-  #    github.com/slsa-framework/slsa-github-generator/releases
   # -----------------------------------------
   provenance-container:
     name: SLSA provenance — Docker (L3)
