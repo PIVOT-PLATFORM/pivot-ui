@@ -92,7 +92,10 @@ jobs:
             ${{ env.CORE_IMAGE }}
 
       - name: Wait for pivot-core
-        run: curl --retry 25 --retry-delay 3 --retry-connrefused --silent --output /dev/null http://localhost:8080/api/actuator/health
+        run: |
+          curl --retry 40 --retry-delay 3 --retry-connrefused --retry-all-errors \
+            --fail --silent --show-error --output /dev/null \
+            http://localhost:8080/api/actuator/health
 
       - name: Setup Node.js 24
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
