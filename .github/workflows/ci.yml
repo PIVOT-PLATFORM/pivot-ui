@@ -159,7 +159,7 @@ jobs:
             -Dsonar.tests=src \
             -Dsonar.test.inclusions=**/*.spec.ts \
             -Dsonar.exclusions=**/*.spec.ts,dist/**,node_modules/** \
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info,coverage/frontend/lcov.info \
             $PR_ARGS
 
   # -----------------------------------------
