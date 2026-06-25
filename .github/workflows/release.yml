@@ -166,6 +166,9 @@ jobs:
       image: ${{ needs.release.outputs.image }}
       digest: ${{ needs.release.outputs.digest }}
     secrets:
+      # registry-username + registry-password : noms attendus par generator_container_slsa3.yml
+      # (slsa-framework/slsa-github-generator v2.1.0, utilise docker/login-action en interne).
+      registry-username: ${{ github.actor }}
       registry-password: ${{ secrets.GITHUB_TOKEN }}
 
   # Le déploiement prod vit dans deploy.yml, déclenché `on: release: published` (event-based)
