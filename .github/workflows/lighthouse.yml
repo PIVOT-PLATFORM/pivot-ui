@@ -71,18 +71,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Resolve host IP for pivot-core container
-        id: host-ip
-        run: echo "ip=$(ip route show default | awk '/default/{print $3}')" >> "$GITHUB_OUTPUT"
-
       - name: Start pivot-core (seed profile)
         run: |
           docker run -d --name pivot-core \
+            --network ${{ job.services.postgres.network }} \
             -p 8080:8080 \
-            -e SPRING_DATASOURCE_URL=jdbc:postgresql://${{ steps.host-ip.outputs.ip }}:5432/pivot_lh \
+            -e SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/pivot_lh \
             -e SPRING_DATASOURCE_USERNAME=pivot \
             -e SPRING_DATASOURCE_PASSWORD=pivot_lh \
-            -e SPRING_DATA_REDIS_HOST=${{ steps.host-ip.outputs.ip }} \
+            -e SPRING_DATA_REDIS_HOST=redis \
             -e SPRING_DATA_REDIS_PORT=6379 \
             -e SPRING_PROFILES_ACTIVE=test \
             ${{ env.CORE_IMAGE }}
