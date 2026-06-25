@@ -103,6 +103,7 @@ Toute contribution mobilise les experts concernés — les mentionner explicitem
 | **Product Owner** | GitHub Issues backlog, Epics, US, critères d'acceptation, priorisation |
 | **Scrum Master** | Coordination, sprints, impediments, backlog consistency |
 | **Architecte Modules** | Lazy-loading Angular, guards d'activation, route protection par module |
+| **Expert PR Review** | Relecture croisée neutre : cohérence architecture, lisibilité, dette technique, respect des standards PIVOT — intervient quand les experts dev signalent "prêt pour review" |
 | **Experts Java / Backend** | → **pivot-core** |
 
 ### Faire appel aux experts
@@ -119,6 +120,7 @@ Toute contribution mobilise les experts concernés — les mentionner explicitem
 | RGPD, cookies, stockage navigateur | **Expert RGPD** |
 | Backlog, US, acceptance criteria | **Product Owner** |
 | Module activation, route guards | **Architecte Modules** |
+| Review finale PR (après "prêt pour review") | **Expert PR Review** |
 | Bug inexpliqué | **Architecte Angular** en premier, puis **Expert Red Team** si suspicion sécurité |
 | API REST, backend Java | → **pivot-core** |
 
