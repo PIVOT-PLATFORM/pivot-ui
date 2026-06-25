@@ -20,7 +20,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CORE_IMAGE: ghcr.io/pivot-platform/pivot-core:latest
+  # Image GHCR pivot-core : owner=pivot-platform, repo=pivot-core, image=pivot-core → nom répété.
+  CORE_IMAGE: ghcr.io/pivot-platform/pivot-core/pivot-core:latest
 
 jobs:
   lighthouse:
