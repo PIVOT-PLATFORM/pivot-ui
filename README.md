@@ -1,7 +1,16 @@
 # PIVOT-UI
 
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/PIVOT-PLATFORM/pivot-ui/badge)](https://securityscorecards.dev/viewer/?uri=github.com/PIVOT-PLATFORM/pivot-ui)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=PIVOT-PLATFORM_pivot-ui&metric=alert_status&style=for-the-badge)](https://sonarcloud.io/summary/new_code?id=PIVOT-PLATFORM_pivot-ui)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/PIVOT-PLATFORM/pivot-ui/badge?style=for-the-badge)](https://securityscorecards.dev/viewer/?uri=github.com/PIVOT-PLATFORM/pivot-ui)
+[![Lighthouse A11y](https://img.shields.io/badge/Lighthouse-A11y-F44B21?style=for-the-badge&logo=lighthouse&logoColor=white)](https://github.com/PIVOT-PLATFORM/pivot-ui/actions/workflows/lighthouse.yml)
+
+[![CI](https://github.com/PIVOT-PLATFORM/pivot-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/PIVOT-PLATFORM/pivot-ui/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/PIVOT-PLATFORM/pivot-ui?label=release&color=blue)](https://github.com/PIVOT-PLATFORM/pivot-ui/releases)
+[![Angular](https://img.shields.io/badge/Angular-22-DD0031?logo=angular&logoColor=white)](https://angular.dev)
+[![Node](https://img.shields.io/badge/Node-24-339933?logo=node.js&logoColor=white)](https://nodejs.org)
+[![Downloads](https://img.shields.io/github/downloads/PIVOT-PLATFORM/pivot-ui/total?label=downloads)](https://github.com/PIVOT-PLATFORM/pivot-ui/releases)
+[![Docker](https://img.shields.io/badge/docker-GHCR-2496ED?logo=docker&logoColor=white)](https://github.com/PIVOT-PLATFORM/pivot-ui/pkgs/container/pivot-ui%2Fpivot-ui)
+[![License](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 
 Frontend Angular de la suite collaborative [PIVOT](https://github.com/PIVOT-PLATFORM/pivot-core).
 
@@ -26,15 +35,11 @@ Interface réactive, accessible (WCAG 2.1 AA), organisée par modules activables
 
 **Analyse statique** — SonarCloud : Security Rating · Vulnérabilités · Quality Gate
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=PIVOT-PLATFORM_pivot-ui&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=PIVOT-PLATFORM_pivot-ui)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=PIVOT-PLATFORM_pivot-ui&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=PIVOT-PLATFORM_pivot-ui)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=PIVOT-PLATFORM_pivot-ui&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=PIVOT-PLATFORM_pivot-ui)
-
-## Qualité
-
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=PIVOT-PLATFORM_pivot-ui&metric=coverage)](https://sonarcloud.io/summary/new_code?id=PIVOT-PLATFORM_pivot-ui)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=PIVOT-PLATFORM_pivot-ui&metric=bugs)](https://sonarcloud.io/summary/new_code?id=PIVOT-PLATFORM_pivot-ui)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=PIVOT-PLATFORM_pivot-ui&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=PIVOT-PLATFORM_pivot-ui)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=PIVOT-PLATFORM_pivot-ui&metric=coverage)](https://sonarcloud.io/summary/new_code?id=PIVOT-PLATFORM_pivot-ui)
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=PIVOT-PLATFORM_pivot-ui&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=PIVOT-PLATFORM_pivot-ui)
 
 ---
