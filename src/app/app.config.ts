@@ -1,9 +1,9 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, APP_INITIALIZER, InjectionToken } from '@angular/core';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideAppInitializer, inject, InjectionToken } from '@angular/core';
 
 export const GOOGLE_CLIENT_ID = new InjectionToken<string>('GOOGLE_CLIENT_ID', {
-  factory: () => ((window as unknown) as Record<string, unknown>)['__PIVOT_GOOGLE_CLIENT_ID'] as string ?? '',
+  factory: () => ((globalThis as unknown) as Record<string, unknown>)['__PIVOT_GOOGLE_CLIENT_ID'] as string ?? '',
 });
-import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideTransloco } from '@jsverse/transloco';
 import { routes } from './app.routes';
@@ -19,20 +19,18 @@ function detectInitialLang(): string {
 }
 
 function initSession(auth: AuthService) {
-  return () => {
-    // Sur les pages /auth/*, aucune session n'existe — évite un POST /refresh → 401 inutile en console.
-    if (window.location.pathname.startsWith('/auth')) {
-      return of(null);
-    }
-    return auth.initSession().pipe(catchError(() => of(null)));
-  };
+  // Sur les pages /auth/*, aucune session n'existe — évite un POST /refresh → 401 inutile en console.
+  if (globalThis.location.pathname.startsWith('/auth')) {
+    return of(null);
+  }
+  return auth.initSession().pipe(catchError(() => of(null)));
 }
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(withFetch(), withInterceptors([tokenInterceptor])),
+    provideHttpClient(withInterceptors([tokenInterceptor])),
     provideTransloco({
       config: {
         availableLangs: ['en', 'fr'],
@@ -42,11 +40,6 @@ export const appConfig: ApplicationConfig = {
       },
       loader: TranslocoHttpLoader,
     }),
-    {
-      provide: APP_INITIALIZER,
-      useFactory: initSession,
-      deps: [AuthService],
-      multi: true,
-    },
+    provideAppInitializer(() => initSession(inject(AuthService))),
   ]
 };

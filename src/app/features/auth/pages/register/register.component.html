@@ -78,8 +78,8 @@
                 <span class="strength-label">{{ passwordStrength().labelKey | transloco }}</span>
               }
             }
-            @if (form.controls.password.errors?.['weak'] && form.controls.password.touched) {
-              <span class="form-error">{{ form.controls.password.errors?.['weak'] | transloco }}</span>
+            @if (form.controls.password.touched && form.controls.password.errors?.['weak']; as weakErr) {
+              <span class="form-error">{{ weakErr | transloco }}</span>
             }
           </div>
         </div>

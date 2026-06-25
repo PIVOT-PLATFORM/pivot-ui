@@ -10,7 +10,7 @@ function strongPassword(c: AbstractControl): ValidationErrors | null {
   const v: string = c.value || '';
   if (v.length < 12) return { weak: 'auth.register.password.min_length' };
   if (!/[A-Z]/.test(v)) return { weak: 'auth.register.password.need_uppercase' };
-  if (!/[0-9]/.test(v)) return { weak: 'auth.register.password.need_number' };
+  if (!/\d/.test(v)) return { weak: 'auth.register.password.need_number' };
   if (!/[^A-Za-z0-9]/.test(v)) return { weak: 'auth.register.password.need_special' };
   return null;
 }
@@ -23,8 +23,8 @@ function strongPassword(c: AbstractControl): ValidationErrors | null {
   styleUrl: './register.component.scss',
 })
 export class RegisterComponent {
-  private fb = inject(FormBuilder);
-  private auth = inject(AuthService);
+  private readonly fb = inject(FormBuilder);
+  private readonly auth = inject(AuthService);
 
   form = this.fb.group({
     firstName: ['', [Validators.required, Validators.minLength(2)]],
@@ -69,7 +69,7 @@ export class RegisterComponent {
     let score = 0;
     if (v.length >= 12) score++;
     if (/[A-Z]/.test(v)) score++;
-    if (/[0-9]/.test(v)) score++;
+    if (/\d/.test(v)) score++;
     if (/[^A-Za-z0-9]/.test(v)) score++;
     if (v.length >= 20) score++;
 

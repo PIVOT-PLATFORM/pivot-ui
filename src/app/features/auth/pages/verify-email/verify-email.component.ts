@@ -42,8 +42,8 @@ import { AuthService } from '../../../../core/auth/service/auth.service';
   styles: [`:host{display:contents}.auth-page{flex:1;display:flex;align-items:center;justify-content:center;padding:16px;position:relative;z-index:1}.auth-card{max-width:440px;width:100%;padding:20px 36px 28px;box-shadow:0 20px 60px rgba(0,0,0,.35)}.auth-brand{display:flex;justify-content:center;margin-bottom:8px}.auth-brand-icon{height:100px;width:100px;object-fit:contain}`]
 })
 export class VerifyEmailComponent implements OnInit {
-  private route = inject(ActivatedRoute);
-  private auth = inject(AuthService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly auth = inject(AuthService);
 
   state = signal<'loading' | 'success' | 'error'>('loading');
 

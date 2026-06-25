@@ -62,8 +62,8 @@ import { AuthService } from '../../../../core/auth/service/auth.service';
   styles: [`:host{display:contents}.auth-page{flex:1;display:flex;align-items:center;justify-content:center;padding:16px;position:relative;z-index:1}.auth-card{max-width:440px;width:100%;padding:20px 36px 28px;box-shadow:0 20px 60px rgba(0,0,0,.35)}.auth-brand{display:flex;justify-content:center;margin-bottom:6px}.auth-brand-icon{height:100px;width:100px;object-fit:contain}.auth-title{font-size:var(--text-xl);font-weight:700;color:var(--color-navy-900);margin-bottom:6px;text-align:center}.auth-subtitle{font-size:var(--text-sm);color:var(--color-gray-500);margin-bottom:16px;text-align:center}.auth-footer{margin-top:14px;text-align:center;font-size:var(--text-sm);color:var(--color-gray-500)}`]
 })
 export class ForgotPasswordComponent {
-  private fb = inject(FormBuilder);
-  private auth = inject(AuthService);
+  private readonly fb = inject(FormBuilder);
+  private readonly auth = inject(AuthService);
 
   form = this.fb.group({ email: ['', [Validators.required, Validators.email]] });
   loading = signal(false);

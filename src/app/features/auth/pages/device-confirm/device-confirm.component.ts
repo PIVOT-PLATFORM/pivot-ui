@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { AuthService } from '../../../../core/auth/service/auth.service';
+import { DeviceService } from '../../../../core/auth/service/device.service';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
@@ -51,10 +52,11 @@ import { HttpErrorResponse } from '@angular/common/http';
   styles: [`:host{display:contents}.auth-page{flex:1;display:flex;align-items:center;justify-content:center;padding:16px;position:relative;z-index:1}.auth-card{max-width:440px;width:100%;padding:20px 36px 28px;box-shadow:0 20px 60px rgba(0,0,0,.35)}.auth-brand{display:flex;justify-content:center;margin-bottom:6px}.auth-brand-icon{height:100px;width:100px;object-fit:contain}.auth-title{font-size:var(--text-xl);font-weight:700;color:var(--color-navy-900);margin-bottom:6px;text-align:center}.auth-subtitle{font-size:var(--text-sm);color:var(--color-gray-500);margin-bottom:16px;text-align:center}.auth-footer{margin-top:14px;text-align:center;font-size:var(--text-sm);color:var(--color-gray-500)}`]
 })
 export class DeviceConfirmComponent implements OnInit {
-  private fb = inject(FormBuilder);
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private auth = inject(AuthService);
+  private readonly fb = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
+  private readonly device = inject(DeviceService);
 
   form = this.fb.group({
     otp: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]]
@@ -67,7 +69,7 @@ export class DeviceConfirmComponent implements OnInit {
   ngOnInit(): void {
     this.fingerprint.set(this.route.snapshot.queryParamMap.get('fingerprint'));
     if (!this.fingerprint()) {
-      this.fingerprint.set(this.auth.getDeviceFingerprint());
+      this.fingerprint.set(this.device.getDeviceFingerprint());
     }
   }
 
@@ -79,7 +81,7 @@ export class DeviceConfirmComponent implements OnInit {
     this.auth.verifyDeviceOtp(
       this.fingerprint()!,
       this.form.value.otp!,
-      this.auth.getDeviceName()
+      this.device.getDeviceName()
     ).subscribe({
       next: () => this.router.navigate(['/dashboard']),
       error: (err: HttpErrorResponse) => {

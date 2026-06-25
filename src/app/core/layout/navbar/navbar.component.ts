@@ -154,9 +154,9 @@ import { AuthService } from '../../auth/service/auth.service';
 export class NavbarComponent {
   @Output() menuToggle = new EventEmitter<void>();
 
-  private auth = inject(AuthService);
-  private router = inject(Router);
-  private transloco = inject(TranslocoService);
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly transloco = inject(TranslocoService);
 
   userMenuOpen = signal(false);
   user = this.auth.currentUser;

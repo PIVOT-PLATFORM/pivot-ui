@@ -34,7 +34,7 @@ interface NavItem {
       </nav>
 
       <div class="sidebar__footer">
-        <button class="sidebar__collapse-btn" (click)="toggle.emit()"
+        <button class="sidebar__collapse-btn" (click)="toggleCollapse.emit()"
                 [attr.aria-label]="(collapsed ? 'sidebar.expand' : 'sidebar.collapse') | transloco">
           @if (collapsed) { › } @else { ‹ }
         </button>
@@ -108,11 +108,12 @@ interface NavItem {
 })
 export class SidebarComponent {
   @Input() collapsed = false;
-  @Output() toggle = new EventEmitter<void>();
+  // Renommé `toggleCollapse` (pas `toggle`) : `toggle` est un event DOM standard (S7651).
+  @Output() toggleCollapse = new EventEmitter<void>();
 
-  private auth = inject(AuthService);
+  private readonly auth = inject(AuthService);
 
-  private allItems: NavItem[] = [
+  private readonly allItems: NavItem[] = [
     { labelKey: 'sidebar.dashboard', icon: '▦', route: '/dashboard' },
     { labelKey: 'sidebar.admin', icon: '⚙', route: '/admin', roles: ['ROLE_ADMIN', 'ROLE_SUPER_ADMIN'] },
   ];

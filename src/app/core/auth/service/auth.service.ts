@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, catchError, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { DeviceService } from './device.service';
 
 export interface UserInfo {
   id: number;
@@ -56,7 +55,6 @@ export interface LoginRequest {
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
-  private readonly deviceService = inject(DeviceService);
   private readonly apiUrl = environment.apiUrl;
 
   // Access token in memory only — never persisted to localStorage
@@ -162,16 +160,6 @@ export class AuthService {
   updateToken(rawToken: string, expiresAt: number): void {
     this._accessToken.set(rawToken);
     this._tokenExpiresAt.set(expiresAt);
-  }
-
-  /** @deprecated Use DeviceService.getDeviceFingerprint() directly. */
-  getDeviceFingerprint(): string {
-    return this.deviceService.getDeviceFingerprint();
-  }
-
-  /** @deprecated Use DeviceService.getDeviceName() directly. */
-  getDeviceName(): string {
-    return this.deviceService.getDeviceName();
   }
 
   private storeAuth(res: AuthResponse): void {

@@ -120,7 +120,7 @@ import { TranslocoService, TranslocoPipe } from '@jsverse/transloco';
   `]
 })
 export class AuthShellComponent {
-  private transloco = inject(TranslocoService);
+  private readonly transloco = inject(TranslocoService);
 
   currentLang = signal(this.transloco.getActiveLang());
 

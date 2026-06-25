@@ -30,7 +30,7 @@ export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
         const newToken = event.headers.get('X-New-Token');
         const newExpiresAt = event.headers.get('X-Token-Expires-At');
         if (newToken && newExpiresAt) {
-          auth.updateToken(newToken, parseInt(newExpiresAt, 10));
+          auth.updateToken(newToken, Number.parseInt(newExpiresAt, 10));
         }
       }
     }),

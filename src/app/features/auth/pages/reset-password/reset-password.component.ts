@@ -9,7 +9,7 @@ function strongPassword(c: AbstractControl): ValidationErrors | null {
   const v: string = c.value || '';
   if (v.length < 12) return { weak: 'auth.register.password.min_length' };
   if (!/[A-Z]/.test(v)) return { weak: 'auth.register.password.need_uppercase' };
-  if (!/[0-9]/.test(v)) return { weak: 'auth.register.password.need_number' };
+  if (!/\d/.test(v)) return { weak: 'auth.register.password.need_number' };
   if (!/[^A-Za-z0-9]/.test(v)) return { weak: 'auth.register.password.need_special' };
   return null;
 }
@@ -58,8 +58,8 @@ function strongPassword(c: AbstractControl): ValidationErrors | null {
               <input id="newPassword" type="password" formControlName="newPassword" class="form-control"
                      [class.is-invalid]="form.controls.newPassword.invalid && form.controls.newPassword.touched"
                      placeholder="••••••••••••" autocomplete="new-password"/>
-              @if (form.controls.newPassword.errors?.['weak'] && form.controls.newPassword.touched) {
-                <span class="form-error">{{ form.controls.newPassword.errors?.['weak'] | transloco }}</span>
+              @if (form.controls.newPassword.touched && form.controls.newPassword.errors?.['weak']; as weakErr) {
+                <span class="form-error">{{ weakErr | transloco }}</span>
               }
             </div>
 
@@ -75,9 +75,9 @@ function strongPassword(c: AbstractControl): ValidationErrors | null {
   styles: [`:host{display:contents}.auth-page{flex:1;display:flex;align-items:center;justify-content:center;padding:16px;position:relative;z-index:1}.auth-card{max-width:440px;width:100%;padding:20px 36px 28px;box-shadow:0 20px 60px rgba(0,0,0,.35)}.auth-brand{display:flex;justify-content:center;margin-bottom:6px}.auth-brand-icon{height:100px;width:100px;object-fit:contain}.auth-title{font-size:var(--text-xl);font-weight:700;color:var(--color-navy-900);margin-bottom:6px;text-align:center}.auth-subtitle{font-size:var(--text-sm);color:var(--color-gray-500);margin-bottom:16px;text-align:center}`]
 })
 export class ResetPasswordComponent implements OnInit {
-  private fb = inject(FormBuilder);
-  private route = inject(ActivatedRoute);
-  private auth = inject(AuthService);
+  private readonly fb = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
+  private readonly auth = inject(AuthService);
 
   form = this.fb.group({ newPassword: ['', [Validators.required, strongPassword]] });
   token = signal<string | null>(null);

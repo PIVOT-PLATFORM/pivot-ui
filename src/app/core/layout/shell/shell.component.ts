@@ -10,7 +10,7 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
   imports: [CommonModule, RouterOutlet, NavbarComponent, SidebarComponent],
   template: `
     <div class="shell" [class.shell--collapsed]="sidebarCollapsed()">
-      <piv-sidebar [collapsed]="sidebarCollapsed()" (toggle)="sidebarCollapsed.set(!sidebarCollapsed())"/>
+      <piv-sidebar [collapsed]="sidebarCollapsed()" (toggleCollapse)="sidebarCollapsed.set(!sidebarCollapsed())"/>
       <div class="shell__main">
         <piv-navbar (menuToggle)="sidebarCollapsed.set(!sidebarCollapsed())"/>
         <main class="shell__content">
