@@ -161,6 +161,10 @@ jobs:
       id-token: write
       packages: write
       actions: read
+    # Réf en TAG (@v2.1.0) et NON en SHA : avec compile-generator: false le binaire est
+    # téléchargé depuis la Release au ref détecté par detect-env (via OIDC job_workflow_ref).
+    # builder-fetch.sh exige refs/tags/vX.Y.Z ; un SHA brut → exit 2 → binaire absent →
+    # exit 127 → upload-artifact sans chemin → SUCCESS=false → échec final 27.
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.1.0
     with:
       image: ${{ needs.release.outputs.image }}
