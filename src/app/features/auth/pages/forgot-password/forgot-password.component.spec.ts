@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { ComponentFixture } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
@@ -46,31 +46,34 @@ describe('ForgotPasswordComponent', () => {
     httpMock.expectNone(`${environment.apiUrl}/auth/forgot-password`);
   });
 
-  it('sets sent=true on success', fakeAsync(() => {
+  it('sets loading during submit', () => {
     component.form.setValue({ email: 'user@example.com' });
     component.submit();
     expect(component.loading()).toBe(true);
     httpMock.expectOne(`${environment.apiUrl}/auth/forgot-password`).flush({});
-    tick();
+  });
+
+  it('sets sent=true on success', () => {
+    component.form.setValue({ email: 'user@example.com' });
+    component.submit();
+    httpMock.expectOne(`${environment.apiUrl}/auth/forgot-password`).flush({});
     expect(component.sent()).toBe(true);
     expect(component.loading()).toBe(false);
-  }));
+  });
 
-  it('sets sent=true even on error (RGPD — ne révèle pas si email existant)', fakeAsync(() => {
+  it('sets sent=true even on error (RGPD — ne révèle pas si email existant)', () => {
     component.form.setValue({ email: 'user@example.com' });
     component.submit();
     httpMock.expectOne(`${environment.apiUrl}/auth/forgot-password`).flush('', { status: 404, statusText: 'Not Found' });
-    tick();
     expect(component.sent()).toBe(true);
-  }));
+  });
 
-  it('does not submit while loading', fakeAsync(() => {
+  it('does not submit while loading', () => {
     component.form.setValue({ email: 'user@example.com' });
     component.submit();
     component.submit();
     const reqs = httpMock.match(`${environment.apiUrl}/auth/forgot-password`);
     expect(reqs.length).toBe(1);
     reqs[0].flush({});
-    tick();
-  }));
+  });
 });

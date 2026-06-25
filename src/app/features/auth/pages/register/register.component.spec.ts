@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { ComponentFixture } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
@@ -57,46 +57,50 @@ describe('RegisterComponent', () => {
     password: 'SecurePass1!',
   });
 
-  it('submits and sets success on 200', fakeAsync(() => {
+  it('submits and sets success on 200', () => {
     component.form.setValue(validForm());
     component.submit();
     httpMock.expectOne(`${environment.apiUrl}/auth/register`).flush({});
-    tick();
     expect(component.success()).toBe(true);
     expect(component.loading()).toBe(false);
-  }));
+  });
 
-  it('sets success on 409 (RGPD — ne révèle pas si email existant)', fakeAsync(() => {
+  it('sets success on 409 (RGPD — ne révèle pas si email existant)', () => {
     component.form.setValue(validForm());
     component.submit();
     httpMock.expectOne(`${environment.apiUrl}/auth/register`).flush('', { status: 409, statusText: 'Conflict' });
-    tick();
     expect(component.success()).toBe(true);
-  }));
+  });
 
-  it('sets success on 400', fakeAsync(() => {
+  it('sets success on 400', () => {
     component.form.setValue(validForm());
     component.submit();
     httpMock.expectOne(`${environment.apiUrl}/auth/register`).flush('', { status: 400, statusText: 'Bad Request' });
-    tick();
     expect(component.success()).toBe(true);
-  }));
+  });
 
-  it('sets rate limit error on 429', fakeAsync(() => {
+  it('sets rate limit error on 429', () => {
     component.form.setValue(validForm());
     component.submit();
     httpMock.expectOne(`${environment.apiUrl}/auth/register`).flush('', { status: 429, statusText: 'Too Many Requests' });
-    tick();
     expect(component.error()).toBe('auth.login.error_rate_limit');
-  }));
+  });
 
-  it('sets generic error on 500', fakeAsync(() => {
+  it('sets generic error on 500', () => {
     component.form.setValue(validForm());
     component.submit();
     httpMock.expectOne(`${environment.apiUrl}/auth/register`).flush('', { status: 500, statusText: 'Server Error' });
-    tick();
     expect(component.error()).toBe('common.error_generic');
-  }));
+  });
+
+  it('does not submit while loading', () => {
+    component.form.setValue(validForm());
+    component.submit();
+    component.submit();
+    const reqs = httpMock.match(`${environment.apiUrl}/auth/register`);
+    expect(reqs.length).toBe(1);
+    reqs[0].flush({});
+  });
 
   describe('passwordStrength()', () => {
     it('returns 0% for empty password', () => {
@@ -104,17 +108,17 @@ describe('RegisterComponent', () => {
       expect(component.passwordStrength().width).toBe('0%');
     });
 
-    it('returns 100% for very strong password', () => {
+    it('returns 100% for very strong password (≥20 chars, all criteria)', () => {
       component.form.patchValue({ password: 'SuperSecure123!!Extra' });
       expect(component.passwordStrength().width).toBe('100%');
     });
 
-    it('returns 20% for short weak password', () => {
+    it('returns 20% for single short char', () => {
       component.form.patchValue({ password: 'a' });
       expect(component.passwordStrength().width).toBe('20%');
     });
 
-    it('increases with length, uppercase, digit, special char', () => {
+    it('increases score with length + uppercase + digit + special', () => {
       component.form.patchValue({ password: 'Abc123!secure' });
       const s = component.passwordStrength();
       expect(['60%', '80%', '100%']).toContain(s.width);

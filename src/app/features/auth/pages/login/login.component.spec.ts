@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { ComponentFixture } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
@@ -58,58 +58,56 @@ describe('LoginComponent', () => {
     httpMock.expectNone(`${environment.apiUrl}/auth/login`);
   });
 
-  it('sets loading during submit and clears on success', fakeAsync(() => {
+  it('sets loading during submit', () => {
     component.form.setValue({ email: 'a@b.com', password: 'secret', rememberMe: false });
     component.submit();
     expect(component.loading()).toBe(true);
-
     httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush(mockAuthResponse);
-    tick();
+  });
 
+  it('clears loading and error on success', () => {
+    component.form.setValue({ email: 'a@b.com', password: 'secret', rememberMe: false });
+    component.submit();
+    httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush(mockAuthResponse);
     expect(component.loading()).toBe(false);
-  }));
+  });
 
-  it('sets error on 401', fakeAsync(() => {
+  it('sets error on 401', () => {
     component.form.setValue({ email: 'a@b.com', password: 'wrong', rememberMe: false });
     component.submit();
     httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush('', { status: 401, statusText: 'Unauthorized' });
-    tick();
     expect(component.error()).toBe('auth.login.error_generic_credentials');
-  }));
+  });
 
-  it('sets error on 403', fakeAsync(() => {
+  it('sets error on 403', () => {
     component.form.setValue({ email: 'a@b.com', password: 'wrong', rememberMe: false });
     component.submit();
     httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush('', { status: 403, statusText: 'Forbidden' });
-    tick();
     expect(component.error()).toBe('auth.login.error_generic_credentials');
-  }));
+  });
 
-  it('sets error on 429', fakeAsync(() => {
+  it('sets error on 429', () => {
     component.form.setValue({ email: 'a@b.com', password: 'pw', rememberMe: false });
     component.submit();
     httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush('', { status: 429, statusText: 'Too Many Requests' });
-    tick();
     expect(component.error()).toBe('auth.login.error_rate_limit');
-  }));
+  });
 
-  it('sets generic error on 500', fakeAsync(() => {
+  it('sets generic error on 500', () => {
     component.form.setValue({ email: 'a@b.com', password: 'pw', rememberMe: false });
     component.submit();
     httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush('', { status: 500, statusText: 'Server Error' });
-    tick();
     expect(component.error()).toBe('auth.login.error_generic');
-  }));
+  });
 
-  it('does not submit while already loading', fakeAsync(() => {
+  it('does not submit while already loading', () => {
     component.form.setValue({ email: 'a@b.com', password: 'pw', rememberMe: false });
     component.submit();
     component.submit();
     const reqs = httpMock.match(`${environment.apiUrl}/auth/login`);
     expect(reqs.length).toBe(1);
     reqs[0].flush(mockAuthResponse);
-    tick();
-  }));
+  });
 
   it('googleEnabled is false when no Google client ID', () => {
     expect(component.googleEnabled()).toBe(false);

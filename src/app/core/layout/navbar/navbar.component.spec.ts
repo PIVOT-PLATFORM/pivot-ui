@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { ComponentFixture } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
@@ -59,20 +59,18 @@ describe('NavbarComponent', () => {
       expect(component.initials()).toBe('?');
     });
 
-    it('returns uppercase initials after login', fakeAsync(() => {
+    it('returns uppercase initials after login', () => {
       authService.login({ email: 'a@b.com', password: 'pw' }).subscribe();
       httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush(mockAuthResponse);
-      tick();
       expect(component.initials()).toBe('AM');
-    }));
+    });
 
-    it('handles missing lastName', fakeAsync(() => {
+    it('handles missing lastName', () => {
       const noLastName = { ...mockAuthResponse, user: { ...mockAuthResponse.user, lastName: null } };
       authService.login({ email: 'a@b.com', password: 'pw' }).subscribe();
       httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush(noLastName);
-      tick();
       expect(component.initials()).toBe('A');
-    }));
+    });
   });
 
   describe('switchLang()', () => {
@@ -84,16 +82,14 @@ describe('NavbarComponent', () => {
   });
 
   describe('logout()', () => {
-    it('calls auth.logout()', fakeAsync(() => {
+    it('calls auth.logout() and clears session', () => {
       authService.login({ email: 'a@b.com', password: 'pw' }).subscribe();
       httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush(mockAuthResponse);
-      tick();
 
       component.logout();
       httpMock.expectOne(`${environment.apiUrl}/auth/logout`).flush(null);
-      tick();
 
       expect(authService.isAuthenticated()).toBe(false);
-    }));
+    });
   });
 });
