@@ -24,7 +24,9 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CORE_IMAGE: ghcr.io/pivot-platform/pivot-core:latest
+  # pivot-core publie son image sous ghcr.io/<owner>/pivot-core/pivot-core (le nom de repo
+  # est répété : owner=pivot-platform, repo=pivot-core, image=pivot-core).
+  CORE_IMAGE: ghcr.io/pivot-platform/pivot-core/pivot-core:latest
 
 jobs:
   e2e:

@@ -6,9 +6,12 @@ on:
 
 permissions: read-all
 
+# UN SEUL job, gating "y a-t-il une release ?" au niveau des STEPS (ISO pivot-core) : un push
+# sans release-worthy commit => job vert, étapes de publication sautées au niveau step
+# (aucun job grisé). L'image n'est poussée QUE si une release est due et que Trivy passe.
 jobs:
   release:
-    name: Semantic Release
+    name: Release
     runs-on: ubuntu-latest
     timeout-minutes: 30
     if: github.actor != 'dependabot[bot]'
@@ -19,6 +22,7 @@ jobs:
       id-token: write
       attestations: write
       packages: write
+      security-events: write   # requis par "Upload Trivy SARIF"
 
     steps:
       - name: Checkout
@@ -37,57 +41,100 @@ jobs:
         run: npm ci
 
       - name: Install Semantic Release
-        run: npm install --save-dev semantic-release @semantic-release/changelog @semantic-release/git
+        run: npm install --save-dev semantic-release @semantic-release/changelog @semantic-release/git @semantic-release/exec
+
+      # Dry-run : @semantic-release/exec écrit `version=<x>` dans $GITHUB_OUTPUT s'il y a une
+      # release à faire ; sinon vide.
+      - name: Compute next version (dry-run)
+        id: version
+        env:
+          GITHUB_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
+        run: npx semantic-release --dry-run
+
+      - name: Pas de release due
+        if: steps.version.outputs.version == ''
+        run: echo "Aucun commit release-worthy depuis la dernière release — rien à publier."
 
       - name: Build Angular (production)
+        if: steps.version.outputs.version != ''
         run: npm run build -- --configuration production
 
+      - name: Compute build checksums
+        if: steps.version.outputs.version != ''
+        run: |
+          find dist -type f \( -name '*.js' -o -name '*.css' \) | sort \
+            | xargs sha256sum > build-checksums.txt
+          echo "Checksums :"; cat build-checksums.txt
+
+      # Atteste les ARTEFACTS listés (bundles JS/CSS), pas le fichier texte (subject-checksums).
+      - name: Generate SLSA provenance (L2)
+        if: steps.version.outputs.version != ''
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
+        with:
+          subject-checksums: build-checksums.txt
+
       - name: Set up Docker Buildx
+        if: steps.version.outputs.version != ''
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
       - name: Login to GitHub Container Registry
+        if: steps.version.outputs.version != ''
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build & push Docker image (amd64 + arm64)
+      # Build SANS push : image chargée localement (--load) pour être scannée AVANT publication.
+      # CVE HIGH/CRITICAL corrigeable -> job KO, image jamais poussée. amd64 uniquement (build
+      # arm64 émulé = lent/timeout ; base nginx:alpine déjà légère côté CVE).
+      - name: Build & load Docker image (amd64)
+        if: steps.version.outputs.version != ''
         run: |
-          docker buildx build --platform linux/amd64,linux/arm64 \
-            -t ghcr.io/${{ github.repository }}/pivot-ui:${{ github.sha }} \
-            -t ghcr.io/${{ github.repository }}/pivot-ui:latest \
-            --push .
+          # GHCR exige un nom de dépôt en minuscules ; github.repository contient PIVOT-PLATFORM.
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}/pivot-ui"
+          echo "IMAGE_REF=${IMAGE}:${GITHUB_SHA}" >> "$GITHUB_ENV"
+          echo "IMAGE_LATEST=${IMAGE}:latest" >> "$GITHUB_ENV"
+          docker buildx build --platform linux/amd64 --load \
+            -t "${IMAGE}:${GITHUB_SHA}" \
+            -t "${IMAGE}:latest" \
+            .
 
-      - name: Semantic Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
-        run: npx semantic-release
-
-      - name: Compute build checksums (SLSA provenance)
-        run: |
-          find dist -type f \( -name "*.js" -o -name "*.css" \) \
-            | sort | xargs sha256sum > build-checksums.txt
-          echo "Checksums generated:"
-          cat build-checksums.txt
-
-      - name: Scan Docker image - Trivy
+      - name: Scan Docker image - Trivy (gate avant push)
+        if: steps.version.outputs.version != ''
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          image-ref: ghcr.io/${{ github.repository }}/pivot-ui:${{ github.sha }}
+          image-ref: ${{ env.IMAGE_REF }}
           format: sarif
           output: trivy-ui.sarif
           severity: CRITICAL,HIGH
+          # Ne bloque que sur les CVE CORRIGEABLES (CVE OS de la base sans fix n'arrêtent pas).
+          ignore-unfixed: true
           exit-code: '1'
 
       - name: Upload Trivy SARIF
+        if: always() && hashFiles('trivy-ui.sarif') != ''
         uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4
-        if: always()
         with:
           sarif_file: trivy-ui.sarif
           category: trivy-container
 
-      - name: Generate SLSA provenance (L2)
-        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
-        with:
-          subject-path: 'build-checksums.txt'
+      # Atteint uniquement si Trivy a réussi.
+      - name: Push Docker image (scan OK)
+        if: steps.version.outputs.version != ''
+        run: |
+          docker push "${IMAGE_REF}"
+          docker push "${IMAGE_LATEST}"
+
+      # EN DERNIER : crée le tag + la GitHub Release. Si une étape précédente échoue, aucun tag
+      # n'est créé -> un rerun recalcule la version et rejoue tout (push d'image idempotent).
+      - name: Semantic Release (create tag + release)
+        if: steps.version.outputs.version != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
+        run: npx semantic-release
+
+      # Déploiement prod — placeholder, gardé sur la version.
+      - name: Deploy to production (TODO)
+        if: steps.version.outputs.version != ''
+        run: echo "TODO — brancher ici le déploiement (nginx image -> SSH / k8s / etc.)"
