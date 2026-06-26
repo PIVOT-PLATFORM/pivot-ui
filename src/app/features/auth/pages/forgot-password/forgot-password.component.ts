@@ -20,7 +20,7 @@ import { AuthService } from '../../../../core/auth/service/auth.service';
         </div>
 
         @if (sent()) {
-          <div style="text-align:center;padding:8px 0">
+          <div class="sent-block" style="text-align:center;padding:8px 0">
             <div style="font-size:48px;margin-bottom:12px">✉️</div>
             <h2 class="auth-title">{{ 'auth.forgot_password.sent_title' | transloco }}</h2>
             <p style="font-size:var(--text-sm);color:var(--color-gray-500);margin-top:8px;line-height:1.6">

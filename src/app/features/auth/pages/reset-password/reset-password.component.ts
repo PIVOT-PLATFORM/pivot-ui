@@ -34,7 +34,7 @@ function strongPassword(c: AbstractControl): ValidationErrors | null {
             <a routerLink="/auth/forgot-password">{{ 'auth.reset_password.request_new' | transloco }}</a>
           </div>
         } @else if (success()) {
-          <div style="text-align:center;padding:8px 0">
+          <div class="success-block" style="text-align:center;padding:8px 0">
             <div style="font-size:48px;margin-bottom:12px">🔒</div>
             <h2 class="auth-title">{{ 'auth.reset_password.success_title' | transloco }}</h2>
             <p style="font-size:var(--text-sm);color:var(--color-gray-500);margin:8px 0 20px">
