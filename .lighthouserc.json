@@ -22,6 +22,10 @@
           }
         }
       ]
+    },
+    "upload": {
+      "target": "filesystem",
+      "outputDir": "./lighthouse-reports/auth"
     }
   }
 }

@@ -38,6 +38,10 @@
           }
         }
       ]
+    },
+    "upload": {
+      "target": "filesystem",
+      "outputDir": "./lighthouse-reports/local"
     }
   }
 }

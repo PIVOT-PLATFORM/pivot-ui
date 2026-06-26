@@ -120,33 +120,34 @@ jobs:
           LH_USER_PASSWORD: Pivot@Test123!
         run: |
           set +e
+          # autorun = collect + assert + upload(filesystem) — écrit lighthouse-reports/{public,auth}/
+          # (HTML + *.report.json + manifest.json), exploités par le résumé et l'artifact.
           npx lhci autorun --config=.lighthouserc.noauth.json
           RC_PUBLIC=$?
-          npx lhci upload --target=filesystem --outputDir=./lighthouse-reports/public || true
-
           npx lhci autorun --config=.lighthouserc.json
           RC_AUTH=$?
-          npx lhci upload --target=filesystem --outputDir=./lighthouse-reports/auth || true
-
-          echo "public a11y rc=$RC_PUBLIC | authenticated a11y rc=$RC_AUTH"
+          echo "public rc=$RC_PUBLIC | authenticated rc=$RC_AUTH"
           [ "$RC_PUBLIC" -eq 0 ] && [ "$RC_AUTH" -eq 0 ]
 
       - name: Lighthouse — résumé agrégé
         if: always()
         run: |
-          echo "## Lighthouse — Accessibilité PIVOT-UI" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Page | A11y | Perf | SEO | Bonnes pratiques |" >> "$GITHUB_STEP_SUMMARY"
-          echo "|------|------|------|-----|------------------|" >> "$GITHUB_STEP_SUMMARY"
-          for f in $(find lighthouse-reports -name "lhr-*.json" 2>/dev/null); do
-            [ -f "$f" ] || continue
-            url=$(jq -r '.finalUrl' "$f")
-            a11y=$(jq -r '(.categories.accessibility.score // 0) * 100 | round | tostring' "$f")
-            perf=$(jq -r '(.categories.performance.score // 0) * 100 | round | tostring' "$f")
-            seo=$(jq -r '(.categories.seo.score // 0) * 100 | round | tostring' "$f")
-            bp=$(jq -r '(.categories["best-practices"].score // 0) * 100 | round | tostring' "$f")
-            echo "| $url | ${a11y}% | ${perf}% | ${seo}% | ${bp}% |" >> "$GITHUB_STEP_SUMMARY"
-          done
+          {
+            echo "## Lighthouse — Accessibilité PIVOT-UI"
+            echo ""
+            echo "| Page | A11y | Perf | SEO | Bonnes pratiques |"
+            echo "|------|------|------|-----|------------------|"
+            # manifest.json (un par dossier public/auth) = source fiable des scores agrégés
+            # par URL (run représentatif). Plus robuste que parser les LHR bruts.
+            for m in $(find lighthouse-reports -name "manifest.json" 2>/dev/null); do
+              jq -r '.[] | select(.isRepresentativeRun)
+                | "| \(.url) "
+                + "| \((.summary.accessibility * 100) | round)% "
+                + "| \((.summary.performance * 100) | round)% "
+                + "| \((.summary.seo * 100) | round)% "
+                + "| \((.summary["best-practices"] * 100) | round)% |"' "$m"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Dump pivot-core logs on failure
         if: failure()
