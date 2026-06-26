@@ -13,9 +13,11 @@ import { TranslocoHttpLoader } from './core/i18n/transloco.loader';
 import { catchError, of } from 'rxjs';
 
 function detectInitialLang(): string {
+  // Préférence explicite de l'utilisateur d'abord, sinon FR par défaut (produit français-first).
+  // On NE retombe PAS sur navigator.language : la langue par défaut doit être déterministe
+  // (un navigateur en-US ne doit pas basculer l'UI en anglais sans choix de l'utilisateur).
   const stored = localStorage.getItem('pivot_lang');
-  if (stored === 'en' || stored === 'fr') return stored;
-  return navigator.language.startsWith('fr') ? 'fr' : 'en';
+  return stored === 'en' || stored === 'fr' ? stored : 'fr';
 }
 
 function initSession(auth: AuthService) {
