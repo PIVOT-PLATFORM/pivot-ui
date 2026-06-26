@@ -107,10 +107,11 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Build Angular (production)
-        env:
-          PIVOT_API_URL: http://localhost:8080
-        run: npm run build -- --configuration production
+      - name: Build Angular (CI config — apiUrl http://localhost:8080)
+        # Config `ci` = optimisations prod SANS le fileReplacement vers /api.
+        # L'app sert sur :4200 (serve, pas de proxy) et appelle le backend :8080 directement.
+        # La config `production` (image Docker/nginx) utilise /api proxifié.
+        run: npm run build -- --configuration ci
 
       - name: Serve Angular build
         # Projet Angular = "frontend" (pas d'outputPath custom dans angular.json) → dist/frontend/browser.
