@@ -55,7 +55,10 @@ export class LoginComponent {
     }).subscribe({
       next: (resp: HttpResponse<AuthResponse>) => {
         // 202 = MFA device requise → affiche l'alerte de vérification au lieu de naviguer.
-        if (resp.status === 202 && resp.headers.get('X-Device-Verification-Required')) {
+        // On se fie au STATUT (contrat backend : 202 ⟺ device MFA) et non au header
+        // X-Device-Verification-Required : en cross-origin il n'est pas exposé au JS sans
+        // Access-Control-Expose-Headers, donc headers.get() renverrait null.
+        if (resp.status === 202) {
           this.loading.set(false);
           this.pendingFingerprint.set(fingerprint);
           this.requiresDeviceVerification.set(true);
