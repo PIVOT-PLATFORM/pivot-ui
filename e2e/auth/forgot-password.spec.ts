@@ -74,17 +74,17 @@ test.describe('US-AUTH-002 — Forgot & Reset password', () => {
     );
 
     await page.goto(`${RESET_URL}?token=expired-token`);
-    const pwdInput = page.locator('#newPassword, input[type="password"]').first();
 
-    if (await pwdInput.isVisible()) {
-      await pwdInput.fill('NewStr0ng!Pass');
-      await page.click('button[type="submit"]');
-      const errEl = page.locator('.alert-error, .invalid-link, [data-testid="reset-error"]');
-      await expect(errEl.first()).toBeVisible({ timeout: 5_000 });
-    } else {
-      // Component may show the error immediately without a form (token-less state)
-      const errEl = page.locator('.alert-error, .invalid-link, [data-testid="reset-error"]');
-      await expect(errEl.first()).toBeVisible({ timeout: 5_000 });
-    }
+    // Token présent → le formulaire s'affiche après l'hydratation Angular. On l'attend
+    // explicitement (isVisible() sans attente partait en race condition avant le rendu).
+    const pwdInput = page.locator('#newPassword, input[type="password"]').first();
+    await expect(pwdInput).toBeVisible({ timeout: 5_000 });
+
+    await pwdInput.fill('NewStr0ng!Pass');
+    await page.click('button[type="submit"]');
+
+    // Le backend rejette le token (400) → message d'erreur visible.
+    const errEl = page.locator('.alert-error, .invalid-link, [data-testid="reset-error"]');
+    await expect(errEl.first()).toBeVisible({ timeout: 5_000 });
   });
 });
