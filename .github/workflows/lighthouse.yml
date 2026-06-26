@@ -120,11 +120,15 @@ jobs:
           LH_USER_PASSWORD: Pivot@Test123!
         run: |
           set +e
-          # autorun = collect + assert + upload(filesystem) — écrit lighthouse-reports/{public,auth}/
+          # IMPORTANT : le binaire Lighthouse CI vient de @lhci/cli (pinné). `npx lhci`
+          # SANS scope installe un package npm tiers homonyme ("lhci", non Lighthouse) —
+          # il s'exécutait en no-op (exit 0) sans produire d'audit ni de rapport.
+          # autorun = collect + assert + upload(filesystem) → lighthouse-reports/{public,auth}/
           # (HTML + *.report.json + manifest.json), exploités par le résumé et l'artifact.
-          npx lhci autorun --config=.lighthouserc.noauth.json
+          LHCI="npx --yes @lhci/cli@0.15.1"
+          $LHCI autorun --config=.lighthouserc.noauth.json
           RC_PUBLIC=$?
-          npx lhci autorun --config=.lighthouserc.json
+          $LHCI autorun --config=.lighthouserc.json
           RC_AUTH=$?
           echo "public rc=$RC_PUBLIC | authenticated rc=$RC_AUTH"
           [ "$RC_PUBLIC" -eq 0 ] && [ "$RC_AUTH" -eq 0 ]
