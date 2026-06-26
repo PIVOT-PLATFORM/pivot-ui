@@ -5,7 +5,8 @@ import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { AuthService } from '../../../../core/auth/service/auth.service';
 import { DeviceService } from '../../../../core/auth/service/device.service';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
+import type { AuthResponse } from '../../../../core/auth/service/auth.service';
 import { GOOGLE_CLIENT_ID } from '../../../../app.config';
 
 @Component({
@@ -52,15 +53,19 @@ export class LoginComponent {
       deviceName,
       rememberMe: this.form.value.rememberMe ?? false,
     }).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
-      error: (err: HttpErrorResponse) => {
-        this.loading.set(false);
-        if (err.status === 202 && err.headers.get('X-Device-Verification-Required')) {
+      next: (resp: HttpResponse<AuthResponse>) => {
+        // 202 = MFA device requise → affiche l'alerte de vérification au lieu de naviguer.
+        if (resp.status === 202 && resp.headers.get('X-Device-Verification-Required')) {
+          this.loading.set(false);
           this.pendingFingerprint.set(fingerprint);
           this.requiresDeviceVerification.set(true);
         } else {
-          this.error.set(this.mapError(err));
+          this.router.navigate(['/dashboard']);
         }
+      },
+      error: (err: HttpErrorResponse) => {
+        this.loading.set(false);
+        this.error.set(this.mapError(err));
       },
     });
   }

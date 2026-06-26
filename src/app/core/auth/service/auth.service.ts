@@ -1,5 +1,5 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, catchError, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
@@ -83,10 +83,21 @@ export class AuthService {
     });
   }
 
-  login(req: LoginRequest): Observable<AuthResponse> {
+  /**
+   * Authentifie l'utilisateur. Observe la RÉPONSE complète (et non le body) car le
+   * backend renvoie 202 + header X-Device-Verification-Required lorsque la MFA device
+   * est requise — 202 étant un statut 2xx, il arrive dans le callback `next`, pas `error`.
+   * On ne stocke la session que sur un vrai 200 (body porteur du token).
+   */
+  login(req: LoginRequest): Observable<HttpResponse<AuthResponse>> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, req, {
-      withCredentials: true
-    }).pipe(tap(res => this.storeAuth(res)));
+      withCredentials: true,
+      observe: 'response',
+    }).pipe(tap(resp => {
+      if (resp.status === 200 && resp.body) {
+        this.storeAuth(resp.body);
+      }
+    }));
   }
 
   loginWithGoogle(idToken: string, deviceFingerprint?: string, deviceName?: string): Observable<AuthResponse> {
