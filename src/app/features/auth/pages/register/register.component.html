@@ -14,7 +14,7 @@
         <p style="font-size:var(--text-sm);color:var(--color-gray-500);margin-top:8px;line-height:1.6"
            [innerHTML]="'auth.register.success_body' | transloco: { email: form.value.email }">
         </p>
-        <p style="font-size:var(--text-xs);color:var(--color-gray-400);margin-top:16px">
+        <p style="font-size:var(--text-xs);color:var(--color-gray-500);margin-top:16px">
           {{ 'auth.register.success_no_email' | transloco }}
           <a routerLink="/auth/login">{{ 'auth.register.success_back_login' | transloco }}</a>.
         </p>

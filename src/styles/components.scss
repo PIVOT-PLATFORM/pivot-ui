@@ -144,3 +144,12 @@
     background: var(--color-gray-200);
   }
 }
+
+// ---- Liens inline dans un bloc de texte (WCAG 1.4.1 / audit link-in-text-block) ----
+// Un lien au sein d'un paragraphe/liste doit être distinguable autrement que par la
+// couleur (contraste lien/texte souvent < 3:1). Soulignement systématique des liens
+// en prose. Les liens « blocs » (boutons, nav, retour) ne sont pas concernés.
+p a,
+li a {
+  text-decoration: underline;
+}

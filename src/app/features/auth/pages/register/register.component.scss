@@ -50,9 +50,12 @@
 }
 
 .toggle-password {
-  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-  background: none; border: none; cursor: pointer; color: var(--color-gray-400);
-  &:hover { color: var(--color-gray-600); }
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; color: var(--color-gray-600);
+  // Cible tactile WCAG 2.5.8 (min 24×24).
+  min-width: 24px; min-height: 24px;
+  display: inline-flex; align-items: center; justify-content: center;
+  &:hover { color: var(--color-gray-700); }
 }
 
 .strength-bar {
@@ -79,7 +82,7 @@
 
 .terms-note {
   font-size: var(--text-xs);
-  color: var(--color-gray-400);
+  color: var(--color-gray-500);
   text-align: center;
   margin-top: 12px;
   line-height: 1.5;

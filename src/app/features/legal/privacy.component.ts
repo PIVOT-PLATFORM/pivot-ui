@@ -134,7 +134,7 @@ import { RouterLink } from '@angular/router';
       &:hover { text-decoration: underline; }
     }
     h1 { font-size: 1.75rem; font-weight: 700; color: #1e1b4b; margin-bottom: 4px; }
-    .updated { font-size: 0.8rem; color: #9ca3af; margin-bottom: 32px; }
+    .updated { font-size: 0.8rem; color: #6b7280; margin-bottom: 32px; }
     h2 { font-size: 1.1rem; font-weight: 600; color: #312e81; margin: 28px 0 10px; }
     p, li { font-size: 0.9375rem; color: #374151; line-height: 1.7; }
     ul { padding-left: 20px; }
