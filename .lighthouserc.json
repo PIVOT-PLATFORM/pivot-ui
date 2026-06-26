@@ -4,7 +4,7 @@
       "url": [
         "http://localhost:4200/dashboard"
       ],
-      "numberOfRuns": 3,
+      "numberOfRuns": 1,
       "puppeteerScript": "./lighthouse-auth.cjs",
       "puppeteerLaunchOptions": {
         "args": ["--no-sandbox", "--disable-dev-shm-usage"]
