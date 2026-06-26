@@ -62,10 +62,25 @@ export class AuthService {
   private readonly _user = signal<UserInfo | null>(null);
   private readonly _tokenExpiresAt = signal<number>(0);
 
-  readonly isAuthenticated = computed(() => this._accessToken() !== null);
+  /**
+   * Authentifié = token présent ET non expiré (expiresAt en epoch-ms).
+   *
+   * L'expiration n'est PAS réactive au temps qui s'écoule (Date.now() n'est pas un signal) :
+   * le calcul est réévalué à chaque navigation (guards) et à chaque mutation du token. Le
+   * logout-on-expiry proactif (timer) et l'auto-refresh viendront avec la gestion de session
+   * — ils s'appuieront sur tokenExpiresAt() / millisUntilExpiry().
+   */
+  readonly isAuthenticated = computed(() =>
+    this._accessToken() !== null && this._tokenExpiresAt() > Date.now()
+  );
   readonly currentUser = computed(() => this._user());
   readonly accessToken = computed(() => this._accessToken());
   readonly tokenExpiresAt = computed(() => this._tokenExpiresAt());
+
+  /** Millisecondes avant expiration du token (≤ 0 si expiré/absent). Base pour l'auto-refresh. */
+  millisUntilExpiry(): number {
+    return this._accessToken() === null ? 0 : Math.max(0, this._tokenExpiresAt() - Date.now());
+  }
 
   register(req: RegisterRequest): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${this.apiUrl}/auth/register`, req);

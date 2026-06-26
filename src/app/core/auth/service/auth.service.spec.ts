@@ -69,6 +69,32 @@ describe('AuthService', () => {
 
       expect(service.isAuthenticated()).toBe(true);
     });
+
+    it('should return false when the in-memory token is expired', () => {
+      service.updateToken('opaque-expired', Date.now() - 1_000);
+      expect(service.isAuthenticated()).toBe(false);
+    });
+
+    it('should return true while the token has not expired', () => {
+      service.updateToken('opaque-fresh', Date.now() + 3600_000);
+      expect(service.isAuthenticated()).toBe(true);
+    });
+  });
+
+  describe('millisUntilExpiry()', () => {
+    it('returns 0 when no token is held', () => {
+      expect(service.millisUntilExpiry()).toBe(0);
+    });
+
+    it('returns a positive delay for a fresh token', () => {
+      service.updateToken('t', Date.now() + 60_000);
+      expect(service.millisUntilExpiry()).toBeGreaterThan(50_000);
+    });
+
+    it('returns 0 for an expired token', () => {
+      service.updateToken('t', Date.now() - 1_000);
+      expect(service.millisUntilExpiry()).toBe(0);
+    });
   });
 
   describe('login()', () => {
