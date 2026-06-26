@@ -71,9 +71,10 @@ test.describe('US-AUTH-002 — Device MFA (OTP)', () => {
 
   test('device confirm — valid OTP redirects to dashboard', async ({ page, context }) => {
     await stubDeviceVerifyOk(page, context);
-    await page.route(`${API}/auth/refresh`, (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(AUTH_RESPONSE) })
-    );
+    // Pas d'override de /auth/refresh ici : pendant la MFA device, aucune session n'existe
+    // encore (le token n'est émis qu'après /device/verify). Laisser le 401 du beforeEach —
+    // sinon initSession authentifierait la page et guestGuard redirigerait vers /dashboard
+    // avant l'affichage du formulaire OTP.
 
     await page.goto(`${DEVICE_URL}?fingerprint=${FINGERPRINT}`);
     const otpInput = page.locator('#otp, input[formControlName="otp"]');
