@@ -113,7 +113,8 @@ jobs:
         run: npm run build -- --configuration production
 
       - name: Serve Angular build
-        run: npx --yes serve dist/pivot-ui/browser -p 4200 --single &
+        # Projet Angular = "frontend" (pas d'outputPath custom dans angular.json) → dist/frontend/browser.
+        run: npx --yes serve dist/frontend/browser -p 4200 --single &
 
       - name: Run Playwright
         env:

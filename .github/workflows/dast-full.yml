@@ -103,7 +103,7 @@ jobs:
 
       - name: Serve Angular build
         run: |
-          npx --yes serve dist/pivot-ui/browser -p 4200 --single &
+          npx --yes serve dist/frontend/browser -p 4200 --single &
           sleep 3
 
       - name: Authenticate - ROLE_USER
@@ -239,7 +239,7 @@ jobs:
 
       - name: Serve Angular build
         run: |
-          npx --yes serve dist/pivot-ui/browser -p 4200 --single &
+          npx --yes serve dist/frontend/browser -p 4200 --single &
           sleep 3
 
       - name: Authenticate - ROLE_ADMIN

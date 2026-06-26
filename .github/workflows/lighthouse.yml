@@ -101,7 +101,8 @@ jobs:
         run: npm run build -- --configuration production
 
       - name: Serve Angular build
-        run: npx --yes serve dist/pivot-ui/browser -p 4200 --single &
+        # Projet Angular = "frontend" → dist/frontend/browser (pas dist/pivot-ui).
+        run: npx --yes serve dist/frontend/browser -p 4200 --single &
 
       - name: Wait for frontend
         run: curl --retry 15 --retry-delay 1 --retry-connrefused --silent --output /dev/null http://localhost:4200/
