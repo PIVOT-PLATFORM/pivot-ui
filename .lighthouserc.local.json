@@ -2,14 +2,14 @@
   "ci": {
     "collect": {
       "url": [
-        "http://localhost:4200/auth/login",
-        "http://localhost:4200/auth/register",
-        "http://localhost:4200/auth/forgot-password",
-        "http://localhost:4200/auth/resend-verification",
-        "http://localhost:4200/legal/mentions-legales",
-        "http://localhost:4200/legal/confidentialite",
-        "http://localhost:4200/legal/cgu",
-        "http://localhost:4200/dashboard"
+        "http://localhost/auth/login",
+        "http://localhost/auth/register",
+        "http://localhost/auth/forgot-password",
+        "http://localhost/auth/resend-verification",
+        "http://localhost/legal/mentions-legales",
+        "http://localhost/legal/confidentialite",
+        "http://localhost/legal/cgu",
+        "http://localhost/dashboard"
       ],
       "numberOfRuns": 3,
       "puppeteerScript": "./lighthouse-auth.cjs",
