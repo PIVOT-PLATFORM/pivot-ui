@@ -42,6 +42,7 @@ import { AuthService } from '../../../../core/auth/service/auth.service';
             <div class="form-group" style="margin-bottom:16px">
               <label class="form-label" for="email">{{ 'auth.forgot_password.email' | transloco }}</label>
               <input id="email" type="email" formControlName="email" class="form-control"
+                     [class.is-invalid]="form.controls.email.invalid && form.controls.email.touched"
                      [placeholder]="'auth.forgot_password.email_placeholder' | transloco"
                      autocomplete="email"/>
             </div>

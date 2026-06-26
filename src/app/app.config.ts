@@ -19,10 +19,10 @@ function detectInitialLang(): string {
 }
 
 function initSession(auth: AuthService) {
-  // Sur les pages /auth/*, aucune session n'existe — évite un POST /refresh → 401 inutile en console.
-  if (globalThis.location.pathname.startsWith('/auth')) {
-    return of(null);
-  }
+  // Tente la restauration de session sur TOUTES les routes (y compris /auth/*) : un utilisateur
+  // déjà authentifié qui ouvre /auth/login doit être redirigé vers /dashboard par guestGuard,
+  // ce qui exige que le token soit restauré avant l'activation du routeur. Le 401 attendu pour
+  // un visiteur non authentifié est absorbé par catchError (pas d'impact fonctionnel).
   return auth.initSession().pipe(catchError(() => of(null)));
 }
 
