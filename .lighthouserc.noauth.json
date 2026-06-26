@@ -11,8 +11,8 @@
         "http://localhost:4200/legal/cgu"
       ],
       "numberOfRuns": 3,
-      "puppeteerLaunchOptions": {
-        "args": ["--no-sandbox", "--disable-dev-shm-usage"]
+      "settings": {
+        "chromeFlags": "--no-sandbox --disable-dev-shm-usage"
       }
     },
     "assert": {
