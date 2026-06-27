@@ -74,7 +74,6 @@ pivot-ui/
 │   ├── environments/
 │   └── styles/                # Global SCSS, tokens, variables
 ├── e2e/                       # Specs Playwright
-├── gates/                     # Artifacts ACDD (us-{id}/gate-{n}.yaml)
 ├── .github/
 │   ├── workflows/
 │   └── ISSUE_TEMPLATE/
@@ -100,10 +99,9 @@ Toute contribution mobilise les experts concernés — les mentionner explicitem
 | **Expert OIDC / IAM** | OIDC PKCE S256 Angular, gestion tokens, silent refresh, claims |
 | **Expert QA** | Stratégie Vitest/Playwright, coverage ≥ 80 %, A11y tests |
 | **Expert RGPD** | Conformité RGPD/CNIL, stockage navigateur, consentement, cookies |
-| **Product Owner** | GitHub Issues backlog, Epics, US, critères d'acceptation, priorisation |
+| **Product Owner** | Project GitHub org backlog, Epics, US, critères d'acceptation, priorisation |
 | **Scrum Master** | Coordination, sprints, impediments, backlog consistency |
 | **Architecte Modules** | Lazy-loading Angular, guards d'activation, route protection par module |
-| **Expert PR Review** | Relecture croisée neutre : cohérence architecture, lisibilité, dette technique, respect des standards PIVOT — intervient quand les experts dev signalent "prêt pour review" |
 | **Experts Java / Backend** | → **pivot-core** |
 
 ### Faire appel aux experts
@@ -120,7 +118,6 @@ Toute contribution mobilise les experts concernés — les mentionner explicitem
 | RGPD, cookies, stockage navigateur | **Expert RGPD** |
 | Backlog, US, acceptance criteria | **Product Owner** |
 | Module activation, route guards | **Architecte Modules** |
-| Review finale PR (après "prêt pour review") | **Expert PR Review** |
 | Bug inexpliqué | **Architecte Angular** en premier, puis **Expert Red Team** si suspicion sécurité |
 | API REST, backend Java | → **pivot-core** |
 
@@ -131,51 +128,52 @@ Toute contribution mobilise les experts concernés — les mentionner explicitem
 
 ---
 
-## Backlog — GitHub Issues + Projects
+## Backlog — GitHub Project (org)
 
-> Projet open-source → GitHub Issues publiques (contributions externes possibles, roadmap visible, CI peut labeler automatiquement).
+> **Source de vérité : `pivot-docs/backlog/README.md`.** Le backlog opérationnel vit dans le
+> **Project org `PIVOT-PLATFORM` (« PIVOT Platform »)**. Tant que le produit n'est pas public,
+> les items sont des **drafts** (pas d'Issues repo ; conversion à l'implémentation).
 
 ### Hiérarchie
+`EPIC → FEATURE (valeur) / ENABLER (technique) → US` · clé `E01 → F01.1 / EN01.1 → US01.1.1`.
 
-```
-Epic (issue parent, label "epic")
-└── User Stories (issues enfants, label "us", liées via "tracked by")
-```
+### Champs du Project
 
-### Template US (`.github/ISSUE_TEMPLATE/user-story.yml`)
+| Champ | Valeurs |
+|-------|---------|
+| Item Type | Epic / Feature / Enabler / US |
+| Parent | clé du parent (ex. `E01`, `F01.1`) |
+| Stage | Backlog / Ready / In progress / Review / Done |
+| Human Gate | needs-human-valid / human-validated |
+| Priority | Critical / High / Medium / Low |
+| Module | core / auth / admin / oidc / whiteboard / session / roadmap / survey / quiz (extensible) |
+| Phase | MVP / v1-enterprise / phase-3 |
+| Sprint | Sprint 1…N |
+| Size | XS / S / M / L / XL |
 
-```markdown
-En tant que [admin / utilisateur / participant anonyme]
-Je veux [action]
-Afin de [bénéfice]
+### Règles dures
+- **Human Gate** : aucune implémentation tant que `Human Gate = needs-human-valid` (posé par le **mainteneur seul** ; Claude le consomme, ne le pose jamais).
+- **Verrou MVP** : seuls les items `Phase: MVP` éligibles tant que « MVP terminé » non déclaré.
+- **Lecture Project** : Claude lit l'état du Project **au démarrage de session** (pas d'automation live).
+- **Draft → Issue** : à `human-validated` (+ MVP), Claude **convertit le draft en Issue** (repo selon module) et passe `Stage → In progress`. **1 draft = 1 Issue = 1 repo**.
+- **Transitions Stage autorisées pour Claude** :
+  - `Backlog → Ready` : DoR satisfaite, en attente de `human-validated`
+  - `Ready → In progress` : démarrage implémentation (après `human-validated`)
+  - `In progress → Review` : implémentation terminée, recette humaine attendue
+  - **`Review → Done` : mainteneur uniquement — jamais Claude**
+- US bloquée → retour `Backlog` + note.
 
-Critères d'acceptation :
-- [ ] Given [contexte], when [action], then [résultat observable]
-- [ ] Error case: given [input invalide], system affiche [message / redirection]
-- [ ] Security: [propriété de sécurité garantie]
-- [ ] A11y: [propriété d'accessibilité WCAG garantie]
+### Workflow autonome (boucle de session)
 
-Module cible : pivot-{module}
-Estimation : XS / S / M / L / XL
-Dépendances : #xxx (si applicable)
-```
+1. **Lecture** — au démarrage de session, Claude lit l'état du Project GitHub (Human Gate, Stage, Phase).
+2. **Si `Human Gate = human-validated` et `Phase: MVP`** :
+   - Convertit le draft en Issue dans le repo cible.
+   - Passe `Stage → In progress`.
+   - Implémente (Breaking Point 1 d'abord si non encore validé).
+3. **Fin d'implémentation** → passe `Stage → Review` (recette mainteneur).
+4. **`Review → Done`** : mainteneur uniquement — jamais Claude.
 
-### Champs GitHub Projects
-
-| Champ | Type | Valeurs |
-|-------|------|---------|
-| Status | Select | Backlog / Ready / In progress / Review / Done |
-| Priority | Select | Critical / High / Medium / Low |
-| Module | Select | core / whiteboard / session / roadmap / survey / quiz / auth / admin |
-| Phase | Select | MVP / v1-enterprise / phase-3 |
-| Size | Select | XS / S / M / L / XL |
-
-### Mise à jour des statuts (Claude)
-
-- Claude met le statut à **"Review"** quand une US est implémentée (Gate 2 vert)
-- Le mainteneur valide → statut **"Done"**
-- US bloquée → **"Backlog"** + note explicative
-- Ne jamais laisser un statut obsolète
+### Template US, Definition of Ready, vagues → `pivot-docs/backlog/README.md`.
 
 ---
 
@@ -220,7 +218,7 @@ Tout PR avec :
 | **2. Tests** | Vitest (TU composants + services) — **dans le même commit** |
 | **3. Qualité** | ESLint · TypeScript strict verts |
 | **4. UI / A11y / SCSS** | Composants Angular, styles, tokens, attributs ARIA |
-| **5. Backlog** | Mettre à jour le statut de l'US dans GitHub Issues · **obligatoire avant commit** |
+| **5. Project** | `Stage → Review` dans le Project GitHub (fin d'implémentation) · Issue trackée via PR · **obligatoire avant push** |
 | **6. E2E** | Spec Playwright (happy path + 1 erreur critique) |
 | **7. Commit** | `git add` fichier par fichier · commits atomiques · branche `feat/us-{id}-{slug}` |
 
@@ -267,6 +265,14 @@ Rapporter ✅ ou stderr complet. Toute erreur ou warning non justifié = **stop,
 - Rebase avant merge : `git rebase -i origin/main` → squash WIP
 - `git push --force-with-lease` uniquement sur branches de travail
 
+**Création de branche — procédure obligatoire :**
+```bash
+git checkout main
+git pull origin main
+git checkout -b feat/us-{id}-{slug}
+```
+Sauf si la branche existe déjà → `git checkout {branche}` directement.
+
 ---
 
 ## Workflow — Commits
@@ -291,7 +297,8 @@ Co-author sur chaque commit : `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthro
 
 ## Gates ACDD — Confidence Gates
 
-Chaque gate produit un artifact YAML dans `gates/us-{id}/`. Score 0–100, jamais booléen.
+Score 0–100, jamais booléen. Scores/décisions consignés en **commentaire de PR** (plus de
+dossier `gates/`). La validation humaine vit dans le champ **Human Gate** du Project.
 
 | Gate | Moment | Seuils |
 |------|--------|--------|
@@ -306,17 +313,7 @@ Chaque gate produit un artifact YAML dans `gates/us-{id}/`. Score 0–100, jamai
 
 **Checks Gate 3 :** SonarCloud ≥ 80 % (25) · zéro finding critique/high (25) · linters clean (20) · Gitleaks clean (20) · build Docker (10)
 
-**Format artifact** `gates/us-{id}/gate-{n}.yaml` :
-```yaml
-gate: READINESS
-us_id: 42
-score: 87
-decision: VALIDATE_WITH_PO
-executed_by: Claude
-timestamp: 2026-06-20T10:00Z
-breakdown: { ... }
-notes: ""
-```
+**Format du commentaire de PR (gate)** : `gate` (READINESS | COVERAGE | QUALITY | MERGE_CONFIDENCE), `score`, `decision`, `breakdown`, `notes`.
 
 ---
 
@@ -327,7 +324,7 @@ notes: ""
 **ACDD (Acceptance Criteria Driven Development)** — gates de confiance continues.
 
 - Gates → score (0–100), jamais booléen pass/fail
-- Chaque gate → artifact YAML committé dans `gates/` — pas réponse chat
+- Chaque gate → consigné en **commentaire de PR** (pas de fichier committé)
 - Breaking Points = seuls moments d'intervention humaine obligatoire
 
 ### Rôles
@@ -360,8 +357,8 @@ notes: ""
 ### Général
 
 - Pas de secrets dans le code — variables d'environnement
-- **`// NOSONAR` : zéro, jamais.** Tout faux positif Sonar se marque côté SonarCloud (UI "Won't fix" / "False positive", ou exclusion centralisée) — aucune exception.
-- **`// nosemgrep` : interdit par défaut**, autorisé **uniquement avec la validation explicite du mainteneur**. Sans validation, exclusion côté config Semgrep (`.semgrepignore` / `--exclude-rule`), jamais en commentaire inline.
+- `// NOSONAR — <justification courte>` (SonarCloud faux positif — justification obligatoire)
+- `// nosemgrep: <rule-id>` (Semgrep faux positif)
 
 ---
 
@@ -406,7 +403,7 @@ Dans **pivot-docs** — un fichier par catégorie, mis à jour en place. **Jamai
 | `any` TypeScript | Désactive la sécurité du typage |
 | Logique métier dans les composants | Viole la séparation des couches |
 | Module désactivé avec routes accessibles | Contournement restriction admin |
-| Implémenter sans US tracée dans GitHub Issues | Perte de traçabilité |
+| Implémenter sans draft/Issue tracé dans le Project GitHub org | Perte de traçabilité |
 
 ---
 
@@ -414,7 +411,7 @@ Dans **pivot-docs** — un fichier par catégorie, mis à jour en place. **Jamai
 
 Après **2 tentatives** (même stratégie ou variantes proches) :
 1. **Stopper** — ne pas continuer à boucler
-2. **Committer l'artifact de gate** avec `decision: ESCALATED` et contexte complet
+2. **Poster un commentaire de gate** sur la PR avec `decision: ESCALATED` et contexte complet
 3. **Signaler** au mainteneur : blocage, tentatives, raison de l'échec — label `needs-human-review`
 4. **Proposer** une alternative : approche différente, outil différent, contournement
 

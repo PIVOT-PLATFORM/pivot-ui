@@ -1,12 +1,12 @@
 # Tout changement requiert review de l'équipe frontend
-* @ApoSkunz @0bno
+* @ApoSkunz @0bno @Destinea @tellebma
 
 # Workflows et config CI/CD
-.github/workflows/ @ApoSkunz @0bno
-.github/CODEOWNERS @ApoSkunz @0bno
+.github/workflows/ @ApoSkunz @0bno @Destinea @tellebma
+.github/CODEOWNERS @ApoSkunz @0bno @Destinea @tellebma
 
 # Config sécurité / Auth OIDC
-src/app/core/auth/ @ApoSkunz @0bno
+src/app/core/auth/ @ApoSkunz @0bno @Destinea @tellebma
 
 # Contrat de modules
-src/app/features/ @ApoSkunz @0bno
+src/app/features/ @ApoSkunz @0bno @Destinea @tellebma
