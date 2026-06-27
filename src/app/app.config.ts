@@ -1,4 +1,4 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideAppInitializer, inject, InjectionToken } from '@angular/core';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideAppInitializer, inject, InjectionToken, isDevMode } from '@angular/core';
 
 export const GOOGLE_CLIENT_ID = new InjectionToken<string>('GOOGLE_CLIENT_ID', {
   factory: () => ((globalThis as unknown) as Record<string, unknown>)['__PIVOT_GOOGLE_CLIENT_ID'] as string ?? '',
@@ -38,7 +38,7 @@ export const appConfig: ApplicationConfig = {
         availableLangs: ['en', 'fr'],
         defaultLang: detectInitialLang(),
         reRenderOnLangChange: true,
-        prodMode: false,
+        prodMode: !isDevMode(),
       },
       loader: TranslocoHttpLoader,
     }),

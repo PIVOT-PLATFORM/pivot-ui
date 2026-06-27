@@ -16,7 +16,7 @@
     </div>
 
     @if (requiresDeviceVerification()) {
-      <div class="alert alert-info" style="margin-bottom:16px">
+      <div class="alert alert-info device-alert">
         {{ 'auth.login.device_sent' | transloco }}
         <a [routerLink]="['/auth/device-confirm']"
            [queryParams]="{ fingerprint: pendingFingerprint() }"
@@ -65,7 +65,7 @@
           <a class="link-subtle" routerLink="/auth/forgot-password">{{ 'auth.login.forgot_password' | transloco }}</a>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:14px" [disabled]="loading()">
+        <button type="submit" class="btn btn-primary btn-full btn-lg btn-submit" [disabled]="loading()">
           @if (loading()) { <span class="spinner"></span> }
           {{ 'auth.login.submit' | transloco }}
         </button>
@@ -76,7 +76,7 @@
         </p>
       </form>
 
-      <div class="divider-text" style="margin:10px 0">{{ 'common.or' | transloco }}</div>
+      <div class="divider-text">{{ 'common.or' | transloco }}</div>
 
       <span class="google-btn-wrap" [class.google-btn-wrap--disabled]="!googleEnabled()">
         @if (!googleEnabled()) {
