@@ -37,6 +37,7 @@ export class LoginComponent {
   showPassword = signal(false);
   requiresDeviceVerification = signal(false);
   pendingFingerprint = signal<string | null>(null);
+  pendingRememberMe = signal(false);
 
   submit(): void {
     if (this.form.invalid || this.loading()) return;
@@ -61,6 +62,7 @@ export class LoginComponent {
         if (resp.status === 202) {
           this.loading.set(false);
           this.pendingFingerprint.set(fingerprint);
+          this.pendingRememberMe.set(this.form.value.rememberMe ?? false);
           this.requiresDeviceVerification.set(true);
         } else {
           this.router.navigate(['/dashboard']);

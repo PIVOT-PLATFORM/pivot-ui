@@ -64,6 +64,7 @@ export class DeviceConfirmComponent implements OnInit {
   });
 
   fingerprint = signal<string | null>(null);
+  rememberMe = signal(false);
   loading = signal(false);
   error = signal<string | null>(null);
 
@@ -72,6 +73,7 @@ export class DeviceConfirmComponent implements OnInit {
     if (!this.fingerprint()) {
       this.fingerprint.set(this.device.getDeviceFingerprint());
     }
+    this.rememberMe.set(this.route.snapshot.queryParamMap.get('rememberMe') === 'true');
   }
 
   submit(): void {
@@ -82,7 +84,8 @@ export class DeviceConfirmComponent implements OnInit {
     this.auth.verifyDeviceOtp(
       this.fingerprint()!,
       this.form.value.otp!,
-      this.device.getDeviceName()
+      this.device.getDeviceName(),
+      this.rememberMe()
     ).subscribe({
       next: () => this.router.navigate(['/dashboard']),
       error: (err: HttpErrorResponse) => {

@@ -11,8 +11,8 @@
       <div class="success-block" style="text-align:center;padding:16px 0">
         <div style="font-size:48px;margin-bottom:16px">✉️</div>
         <h2 class="auth-title">{{ 'auth.register.success_title' | transloco }}</h2>
-        <p style="font-size:var(--text-sm);color:var(--color-gray-500);margin-top:8px;line-height:1.6"
-           [innerHTML]="'auth.register.success_body' | transloco: { email: form.value.email }">
+        <p style="font-size:var(--text-sm);color:var(--color-gray-500);margin-top:8px;line-height:1.6">
+          {{ 'auth.register.success_body' | transloco: { email: form.value.email } }}
         </p>
         <p style="font-size:var(--text-xs);color:var(--color-gray-500);margin-top:16px">
           {{ 'auth.register.success_no_email' | transloco }}
@@ -89,7 +89,7 @@
           {{ 'auth.register.submit' | transloco }}
         </button>
         <p class="terms-note">
-          {{ 'auth.register.terms_intro' | transloco }}<a href="#">{{ 'auth.register.terms_link' | transloco }}</a>{{ 'auth.register.terms_and' | transloco }}<a href="#">{{ 'auth.register.privacy_link' | transloco }}</a>{{ 'auth.register.terms_suffix' | transloco }}
+          {{ 'auth.register.terms_intro' | transloco }}<a routerLink="/legal/cgu">{{ 'auth.register.terms_link' | transloco }}</a>{{ 'auth.register.terms_and' | transloco }}<a routerLink="/legal/confidentialite">{{ 'auth.register.privacy_link' | transloco }}</a>{{ 'auth.register.terms_suffix' | transloco }}
         </p>
       </form>
 

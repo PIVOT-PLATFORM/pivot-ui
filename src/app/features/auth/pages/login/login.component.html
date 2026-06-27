@@ -19,7 +19,7 @@
       <div class="alert alert-info device-alert">
         {{ 'auth.login.device_sent' | transloco }}
         <a [routerLink]="['/auth/device-confirm']"
-           [queryParams]="{ fingerprint: pendingFingerprint() }"
+           [queryParams]="{ fingerprint: pendingFingerprint(), rememberMe: pendingRememberMe() }"
            style="font-weight:600;display:block;margin-top:8px;">
           {{ 'auth.login.device_enter' | transloco }}
         </a>

@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
@@ -78,6 +79,15 @@ describe('AuthService', () => {
     it('should return true while the token has not expired', () => {
       service.updateToken('opaque-fresh', Date.now() + 3600_000);
       expect(service.isAuthenticated()).toBe(true);
+    });
+
+    it('should return false after expiry time passes without signal change', () => {
+      vi.useFakeTimers();
+      service.updateToken('t', Date.now() + 1_000);
+      expect(service.isAuthenticated()).toBe(true);
+      vi.advanceTimersByTime(1_001);
+      expect(service.isAuthenticated()).toBe(false);
+      vi.useRealTimers();
     });
   });
 

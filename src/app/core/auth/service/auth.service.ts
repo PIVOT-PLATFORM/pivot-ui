@@ -70,9 +70,9 @@ export class AuthService {
    * logout-on-expiry proactif (timer) et l'auto-refresh viendront avec la gestion de session
    * — ils s'appuieront sur tokenExpiresAt() / millisUntilExpiry().
    */
-  readonly isAuthenticated = computed(() =>
-    this._accessToken() !== null && this._tokenExpiresAt() > Date.now()
-  );
+  isAuthenticated(): boolean {
+    return this._accessToken() !== null && this._tokenExpiresAt() > Date.now();
+  }
   readonly currentUser = computed(() => this._user());
   readonly accessToken = computed(() => this._accessToken());
   readonly tokenExpiresAt = computed(() => this._tokenExpiresAt());
