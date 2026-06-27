@@ -50,6 +50,7 @@ describe('ForgotPasswordComponent', () => {
   it('sets loading during submit', () => {
     component.form.setValue({ email: 'user@example.com' });
     component.submit();
+    fixture.detectChanges();
     expect(component.loading()).toBe(true);
     httpMock.expectOne(`${environment.apiUrl}/auth/forgot-password`).flush({});
   });
@@ -58,6 +59,7 @@ describe('ForgotPasswordComponent', () => {
     component.form.setValue({ email: 'user@example.com' });
     component.submit();
     httpMock.expectOne(`${environment.apiUrl}/auth/forgot-password`).flush({});
+    fixture.detectChanges();
     expect(component.sent()).toBe(true);
     expect(component.loading()).toBe(false);
   });
@@ -67,6 +69,12 @@ describe('ForgotPasswordComponent', () => {
     component.submit();
     httpMock.expectOne(`${environment.apiUrl}/auth/forgot-password`).flush('', { status: 404, statusText: 'Not Found' });
     expect(component.sent()).toBe(true);
+  });
+
+  it('affiche alerte erreur quand signal error positionné', () => {
+    component.error.set('common.error_generic');
+    fixture.detectChanges();
+    expect(component.error()).toBe('common.error_generic');
   });
 
   it('does not submit while loading', () => {

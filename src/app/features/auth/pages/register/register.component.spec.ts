@@ -85,7 +85,7 @@ describe('RegisterComponent', () => {
     component.form.setValue(validForm());
     component.submit();
     httpMock.expectOne(`${environment.apiUrl}/auth/register`).flush('', { status: 429, statusText: 'Too Many Requests' });
-    expect(component.error()).toBe('auth.login.error_rate_limit');
+    expect(component.error()).toBe('auth.register.error_rate_limit');
   });
 
   it('sets generic error on 500', () => {
@@ -93,6 +93,31 @@ describe('RegisterComponent', () => {
     component.submit();
     httpMock.expectOne(`${environment.apiUrl}/auth/register`).flush('', { status: 500, statusText: 'Server Error' });
     expect(component.error()).toBe('common.error_generic');
+  });
+
+  it('rate limit: formatRetryAfter affiche minutes+secondes (ex. 125 s)', () => {
+    component.form.setValue(validForm());
+    component.submit();
+    httpMock.expectOne(`${environment.apiUrl}/auth/register`)
+      .flush({ retryAfterSeconds: 125 }, { status: 429, statusText: 'Too Many Requests' });
+    expect(component.error()).toBe('auth.register.error_rate_limit');
+    expect(component.errorParams()).toEqual({ time: '2m 5s' });
+  });
+
+  it('rate limit: formatRetryAfter affiche uniquement les minutes (ex. 120 s)', () => {
+    component.form.setValue(validForm());
+    component.submit();
+    httpMock.expectOne(`${environment.apiUrl}/auth/register`)
+      .flush({ retryAfterSeconds: 120 }, { status: 429, statusText: 'Too Many Requests' });
+    expect(component.errorParams()).toEqual({ time: '2m' });
+  });
+
+  it('rate limit: formatRetryAfter affiche uniquement les secondes (ex. 45 s)', () => {
+    component.form.setValue(validForm());
+    component.submit();
+    httpMock.expectOne(`${environment.apiUrl}/auth/register`)
+      .flush({ retryAfterSeconds: 45 }, { status: 429, statusText: 'Too Many Requests' });
+    expect(component.errorParams()).toEqual({ time: '45s' });
   });
 
   it('does not submit while loading', () => {

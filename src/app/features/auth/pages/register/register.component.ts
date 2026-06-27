@@ -36,10 +36,12 @@ export class RegisterComponent {
 
   loading = signal(false);
   error = signal<string | null>(null);
+  errorParams = signal<Record<string, string>>({});
   success = signal(false);
   showPassword = signal(false);
 
   submit(): void {
+    this.form.markAllAsTouched();
     if (this.form.invalid || this.loading()) return;
     this.loading.set(true);
     this.error.set(null);
@@ -58,7 +60,9 @@ export class RegisterComponent {
         if (err.status === 409) {
           this.success.set(true);
         } else if (err.status === 429) {
-          this.error.set('auth.login.error_rate_limit');
+          const seconds: number = err.error?.retryAfterSeconds ?? 0;
+          this.error.set('auth.register.error_rate_limit');
+          this.errorParams.set({ time: this.formatRetryAfter(seconds) });
         } else {
           this.error.set('common.error_generic');
         }
@@ -84,5 +88,14 @@ export class RegisterComponent {
       { labelKey: 'auth.register.strength.very_strong', color: '#15803D', width: '100%' },
     ];
     return levels[score] || levels[0];
+  }
+
+  private formatRetryAfter(seconds: number): string {
+    if (seconds <= 0) return '';
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    if (m > 0 && s > 0) return `${m}m ${s}s`;
+    if (m > 0) return `${m}m`;
+    return `${s}s`;
   }
 }

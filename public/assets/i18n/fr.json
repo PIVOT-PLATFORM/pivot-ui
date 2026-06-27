@@ -2,7 +2,8 @@
   "common": {
     "logo": "PIVOT",
     "or": "ou",
-    "error_generic": "Une erreur est survenue. Réessayez."
+    "error_generic": "Une erreur est survenue. Réessayez.",
+    "field_required": "Ce champ est obligatoire."
   },
   "nav": {
     "sign_out": "Se déconnecter",
@@ -65,10 +66,12 @@
       "privacy_link": "Politique de confidentialité",
       "terms_suffix": " de PIVOT.",
       "success_title": "Vérifiez votre email",
-      "success_body": "Un lien de confirmation a été envoyé à {{ email }}.\nCliquez dessus pour activer votre compte.",
+      "success_body": "Vérifiez votre boîte email et cliquez sur le lien pour activer votre compte.",
       "success_no_email": "Email non reçu ? Vérifiez vos spams ou",
       "success_back_login": "retournez à la connexion",
       "email_invalid": "Adresse email invalide.",
+      "show_password": "Afficher le mot de passe",
+      "hide_password": "Masquer le mot de passe",
       "password": {
         "label": "Mot de passe",
         "min_length": "Minimum 12 caractères.",
@@ -82,7 +85,8 @@
         "medium": "Moyen",
         "strong": "Fort",
         "very_strong": "Très fort"
-      }
+      },
+      "error_rate_limit": "Trop de tentatives. Réessayez dans {{ time }}."
     },
     "resend": {
       "title": "Renvoyer l'email d'activation",
@@ -119,6 +123,9 @@
       "subtitle": "Choisissez un mot de passe sécurisé.",
       "new_password": "Nouveau mot de passe",
       "submit": "Réinitialiser",
+      "checking": "Vérification du lien...",
+      "expired_title": "Lien expiré ou déjà utilisé",
+      "expired_body": "Ce lien de réinitialisation est invalide, expiré ou a déjà été utilisé.",
       "invalid_link": "Lien invalide ou expiré. ",
       "request_new": "Demander un nouveau lien.",
       "success_title": "Mot de passe réinitialisé",
