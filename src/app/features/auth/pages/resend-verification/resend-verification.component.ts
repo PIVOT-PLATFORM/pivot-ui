@@ -36,7 +36,7 @@ import { HttpErrorResponse } from '@angular/common/http';
           <p class="auth-subtitle">{{ 'auth.resend.subtitle' | transloco }}</p>
 
           @if (error()) {
-            <div class="alert alert-error" style="margin-bottom:16px">{{ error() }}</div>
+            <div class="alert alert-error" style="margin-bottom:16px">{{ error() | transloco }}</div>
           }
 
           <form [formGroup]="form" (ngSubmit)="submit()" novalidate>

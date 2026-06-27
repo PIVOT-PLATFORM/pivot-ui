@@ -115,7 +115,7 @@ export class ResetPasswordComponent implements OnInit {
   }
 
   submit(): void {
-    if (this.form.invalid || this.loading()) return;
+    if (this.form.invalid || this.loading() || this.tokenState() !== 'valid') return;
     this.loading.set(true);
     this.error.set(null);
 
