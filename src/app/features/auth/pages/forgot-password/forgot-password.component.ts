@@ -22,7 +22,9 @@ import { AuthService } from '../../../../core/auth/service/auth.service';
 
         @if (sent()) {
           <div class="sent-block" style="text-align:center;padding:8px 0">
-            <div style="font-size:48px;margin-bottom:12px">✉️</div>
+            <div style="margin-bottom:12px;display:flex;justify-content:center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2 4 12 13 22 4"/></svg>
+            </div>
             <h2 class="auth-title">{{ 'auth.forgot_password.sent_title' | transloco }}</h2>
             <p style="font-size:var(--text-sm);color:var(--color-gray-500);margin-top:8px;line-height:1.6">
               {{ 'auth.forgot_password.sent_body' | transloco }}

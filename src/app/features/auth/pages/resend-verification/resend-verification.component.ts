@@ -22,7 +22,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 
         @if (sent()) {
           <div class="success-block">
-            <div class="success-icon" aria-hidden="true">✉️</div>
+            <div style="margin-bottom:16px;display:flex;justify-content:center" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2 4 12 13 22 4"/></svg>
+            </div>
             <h1 class="auth-title">{{ 'auth.resend.sent_title' | transloco }}</h1>
             <p class="auth-subtitle">{{ 'auth.resend.sent_body' | transloco }}</p>
             <a routerLink="/auth/login" class="btn btn-primary btn-full" style="margin-top:24px">

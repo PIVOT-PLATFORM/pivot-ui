@@ -2,7 +2,8 @@
   "common": {
     "logo": "PIVOT",
     "or": "or",
-    "error_generic": "An error occurred. Please try again."
+    "error_generic": "An error occurred. Please try again.",
+    "field_required": "This field is required."
   },
   "nav": {
     "sign_out": "Sign out",
@@ -65,10 +66,12 @@
       "privacy_link": "Privacy Policy",
       "terms_suffix": " of PIVOT.",
       "success_title": "Check your email",
-      "success_body": "A confirmation link was sent to {{ email }}.\nClick it to activate your account.",
+      "success_body": "Check your inbox and click the link to activate your account.",
       "success_no_email": "Didn't receive it? Check your spam or",
       "success_back_login": "return to login",
       "email_invalid": "Invalid email address.",
+      "show_password": "Show password",
+      "hide_password": "Hide password",
       "password": {
         "label": "Password",
         "min_length": "Minimum 12 characters.",
@@ -82,7 +85,8 @@
         "medium": "Medium",
         "strong": "Strong",
         "very_strong": "Very strong"
-      }
+      },
+      "error_rate_limit": "Too many attempts. Try again in {{ time }}."
     },
     "resend": {
       "title": "Resend activation email",
@@ -119,6 +123,9 @@
       "subtitle": "Choose a secure password.",
       "new_password": "New password",
       "submit": "Reset password",
+      "checking": "Checking link...",
+      "expired_title": "Link expired or already used",
+      "expired_body": "This reset link is invalid, expired, or has already been used.",
       "invalid_link": "Invalid or expired link. ",
       "request_new": "Request a new link.",
       "success_title": "Password reset",

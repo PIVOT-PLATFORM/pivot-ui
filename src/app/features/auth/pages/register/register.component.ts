@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, signal, inject } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '../../../../core/auth/service/auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -26,6 +26,7 @@ function strongPassword(c: AbstractControl): ValidationErrors | null {
 export class RegisterComponent {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
+  private readonly transloco = inject(TranslocoService);
 
   form = this.fb.group({
     firstName: ['', [Validators.required, Validators.minLength(2)]],
@@ -40,6 +41,7 @@ export class RegisterComponent {
   showPassword = signal(false);
 
   submit(): void {
+    this.form.markAllAsTouched();
     if (this.form.invalid || this.loading()) return;
     this.loading.set(true);
     this.error.set(null);
@@ -58,9 +60,11 @@ export class RegisterComponent {
         if (err.status === 409) {
           this.success.set(true);
         } else if (err.status === 429) {
-          this.error.set('auth.login.error_rate_limit');
+          const seconds: number = err.error?.retryAfterSeconds ?? 0;
+          const label = this.formatRetryAfter(seconds);
+          this.error.set(this.transloco.translate('auth.register.error_rate_limit', { time: label }));
         } else {
-          this.error.set('common.error_generic');
+          this.error.set(this.transloco.translate('common.error_generic'));
         }
       },
     });
@@ -84,5 +88,14 @@ export class RegisterComponent {
       { labelKey: 'auth.register.strength.very_strong', color: '#15803D', width: '100%' },
     ];
     return levels[score] || levels[0];
+  }
+
+  private formatRetryAfter(seconds: number): string {
+    if (seconds <= 0) return '';
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    if (m > 0 && s > 0) return `${m}m ${s}s`;
+    if (m > 0) return `${m}m`;
+    return `${s}s`;
   }
 }

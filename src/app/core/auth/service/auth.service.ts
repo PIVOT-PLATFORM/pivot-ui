@@ -98,6 +98,12 @@ export class AuthService {
     });
   }
 
+  checkResetToken(token: string): Observable<{ message: string }> {
+    return this.http.get<{ message: string }>(`${this.apiUrl}/auth/check-reset-token`, {
+      params: { token }
+    });
+  }
+
   /**
    * Authentifie l'utilisateur. Observe la RÉPONSE complète (et non le body) car le
    * backend renvoie 202 + header X-Device-Verification-Required lorsque la MFA device
