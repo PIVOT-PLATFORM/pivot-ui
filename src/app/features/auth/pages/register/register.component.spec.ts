@@ -20,7 +20,15 @@ describe('RegisterComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         RegisterComponent,
-        TranslocoTestingModule.forRoot({ langs: { fr: {}, en: {} } }),
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              common: { error_generic: 'common.error_generic' },
+              auth: { register: { error_rate_limit: 'auth.register.error_rate_limit' } },
+            },
+            fr: {},
+          },
+        }),
       ],
       providers: [
         provideHttpClient(),
@@ -85,7 +93,7 @@ describe('RegisterComponent', () => {
     component.form.setValue(validForm());
     component.submit();
     httpMock.expectOne(`${environment.apiUrl}/auth/register`).flush('', { status: 429, statusText: 'Too Many Requests' });
-    expect(component.error()).toBe('auth.login.error_rate_limit');
+    expect(component.error()).toBe('auth.register.error_rate_limit');
   });
 
   it('sets generic error on 500', () => {
