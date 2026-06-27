@@ -1,4 +1,4 @@
-import { Component, signal, inject, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -24,7 +24,8 @@ export class LoginComponent {
   private readonly router = inject(Router);
   private readonly googleClientId = inject(GOOGLE_CLIENT_ID);
 
-  readonly googleEnabled = computed(() => !!this.googleClientId);
+  // Google OAuth flow not yet implemented — button always disabled until loginWithGoogle() is wired
+  readonly googleEnabled = signal(false);
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],

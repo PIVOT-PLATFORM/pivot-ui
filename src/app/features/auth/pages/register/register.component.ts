@@ -53,8 +53,9 @@ export class RegisterComponent {
       next: () => { this.loading.set(false); this.success.set(true); },
       error: (err: HttpErrorResponse) => {
         this.loading.set(false);
-        // RGPD: same message whether email exists or not
-        if (err.status === 409 || err.status === 400) {
+        // RGPD: 409 (email already exists) returns neutral success — anti-enumeration
+        // 400 is a real validation error from @Valid — show generic error, account not created
+        if (err.status === 409) {
           this.success.set(true);
         } else if (err.status === 429) {
           this.error.set('auth.login.error_rate_limit');
