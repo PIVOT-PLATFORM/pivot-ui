@@ -99,7 +99,7 @@ Toute contribution mobilise les experts concernés — les mentionner explicitem
 | **Expert OIDC / IAM** | OIDC PKCE S256 Angular, gestion tokens, silent refresh, claims |
 | **Expert QA** | Stratégie Vitest/Playwright, coverage ≥ 80 %, A11y tests |
 | **Expert RGPD** | Conformité RGPD/CNIL, stockage navigateur, consentement, cookies |
-| **Product Owner** | GitHub Issues backlog, Epics, US, critères d'acceptation, priorisation |
+| **Product Owner** | Project GitHub org backlog, Epics, US, critères d'acceptation, priorisation |
 | **Scrum Master** | Coordination, sprints, impediments, backlog consistency |
 | **Architecte Modules** | Lazy-loading Angular, guards d'activation, route protection par module |
 | **Experts Java / Backend** | → **pivot-core** |
@@ -395,7 +395,7 @@ Dans **pivot-docs** — un fichier par catégorie, mis à jour en place. **Jamai
 | `any` TypeScript | Désactive la sécurité du typage |
 | Logique métier dans les composants | Viole la séparation des couches |
 | Module désactivé avec routes accessibles | Contournement restriction admin |
-| Implémenter sans US tracée dans GitHub Issues | Perte de traçabilité |
+| Implémenter sans draft/Issue tracé dans le Project GitHub org | Perte de traçabilité |
 
 ---
 
@@ -403,7 +403,7 @@ Dans **pivot-docs** — un fichier par catégorie, mis à jour en place. **Jamai
 
 Après **2 tentatives** (même stratégie ou variantes proches) :
 1. **Stopper** — ne pas continuer à boucler
-2. **Committer l'artifact de gate** avec `decision: ESCALATED` et contexte complet
+2. **Poster un commentaire de gate** sur la PR avec `decision: ESCALATED` et contexte complet
 3. **Signaler** à Alexandre : blocage, tentatives, raison de l'échec — label `needs-human-review`
 4. **Proposer** une alternative : approche différente, outil différent, contournement
 
