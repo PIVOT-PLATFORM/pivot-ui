@@ -20,15 +20,7 @@ describe('RegisterComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         RegisterComponent,
-        TranslocoTestingModule.forRoot({
-          langs: {
-            en: {
-              common: { error_generic: 'common.error_generic' },
-              auth: { register: { error_rate_limit: 'auth.register.error_rate_limit' } },
-            },
-            fr: {},
-          },
-        }),
+        TranslocoTestingModule.forRoot({ langs: { fr: {}, en: {} } }),
       ],
       providers: [
         provideHttpClient(),

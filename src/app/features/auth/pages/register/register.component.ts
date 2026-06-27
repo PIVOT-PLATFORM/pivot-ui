@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, signal, inject } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { AuthService } from '../../../../core/auth/service/auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -26,7 +26,6 @@ function strongPassword(c: AbstractControl): ValidationErrors | null {
 export class RegisterComponent {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
-  private readonly transloco = inject(TranslocoService);
 
   form = this.fb.group({
     firstName: ['', [Validators.required, Validators.minLength(2)]],
@@ -37,6 +36,7 @@ export class RegisterComponent {
 
   loading = signal(false);
   error = signal<string | null>(null);
+  errorParams = signal<Record<string, string>>({});
   success = signal(false);
   showPassword = signal(false);
 
@@ -61,10 +61,10 @@ export class RegisterComponent {
           this.success.set(true);
         } else if (err.status === 429) {
           const seconds: number = err.error?.retryAfterSeconds ?? 0;
-          const label = this.formatRetryAfter(seconds);
-          this.error.set(this.transloco.translate('auth.register.error_rate_limit', { time: label }));
+          this.error.set('auth.register.error_rate_limit');
+          this.errorParams.set({ time: this.formatRetryAfter(seconds) });
         } else {
-          this.error.set(this.transloco.translate('common.error_generic'));
+          this.error.set('common.error_generic');
         }
       },
     });
