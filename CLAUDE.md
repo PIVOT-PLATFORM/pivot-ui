@@ -218,7 +218,7 @@ Tout PR avec :
 | **2. Tests** | Vitest (TU composants + services) — **dans le même commit** |
 | **3. Qualité** | ESLint · TypeScript strict verts |
 | **4. UI / A11y / SCSS** | Composants Angular, styles, tokens, attributs ARIA |
-| **5. Backlog** | Mettre à jour le statut de l'US dans GitHub Issues · **obligatoire avant commit** |
+| **5. Project** | `Stage → Review` dans le Project GitHub (fin d'implémentation) · Issue trackée via PR · **obligatoire avant push** |
 | **6. E2E** | Spec Playwright (happy path + 1 erreur critique) |
 | **7. Commit** | `git add` fichier par fichier · commits atomiques · branche `feat/us-{id}-{slug}` |
 
