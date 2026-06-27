@@ -69,6 +69,9 @@ jobs:
     name: Semgrep - SAST
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write   # requis par upload-sarif
 
     steps:
       - name: Checkout
@@ -134,8 +137,13 @@ jobs:
           sarif: plumber-results.sarif
           output: plumber-results.json
           pbom-cyclonedx: plumber-pbom.cdx.json
+          # Politique projet = 90% (defaut action = 100%).
+          threshold: 90
+          # Token lecture public-repo pour resoudre les versions d'actions tierces
+          # (org IP allow list bloque sinon, 403). Optionnel.
+          metadata-token: ${{ secrets.PLUMBER_METADATA_TOKEN }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PLUMBER_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Upload Plumber SARIF
         uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4

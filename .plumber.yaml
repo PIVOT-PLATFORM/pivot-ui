@@ -6,7 +6,12 @@ github:
     # --- Supply chain : SHA pinning ---
     actionsMustBePinnedByCommitSha:
       enabled: true
-      trustedOwners: []
+      # slsa-framework exempté du SHA-pin : le générateur SLSA (compile-generator: false)
+      # télécharge son binaire depuis la Release au ref détecté par detect-env. builder-fetch.sh
+      # exige refs/tags/vX.Y.Z — un SHA brut fait échouer le build (exit 27). La réf TAG @v2.1.0
+      # est donc obligatoire et non un oubli. Source vérifiée : slsa-github-generator/builder-fetch.sh.
+      trustedOwners:
+        - slsa-framework
 
     actionsMustNotBeArchived:
       enabled: true
@@ -24,8 +29,11 @@ github:
         - gitleaks/gitleaks-action
         - getplumber/plumber
         - browser-actions/setup-chrome
+        - zaproxy/action-baseline
+        - zaproxy/action-full-scan
         - docker/setup-buildx-action
         - docker/login-action
+        - slsa-framework/slsa-github-generator
 
     # --- Images : pas de tags mutables ---
     containerImageMustNotUseForbiddenTags:

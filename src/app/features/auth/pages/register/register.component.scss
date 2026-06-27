@@ -1,0 +1,89 @@
+@use '../../../../../styles/tokens';
+
+:host { display: contents; }
+
+.auth-page {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 480px;
+  padding: 20px 36px 28px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  border-radius: 20px;
+  @media (max-width: 480px) { padding: 16px 20px 24px; }
+}
+
+.auth-brand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+.auth-brand-icon {
+  height: 100px;
+  width: 100px;
+  object-fit: contain;
+}
+
+.auth-title { font-size: var(--text-xl); font-weight: 700; color: var(--color-navy-900); margin-bottom: 6px; }
+.auth-subtitle { font-size: var(--text-sm); color: var(--color-gray-500); margin-bottom: 14px; }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  @media (max-width: 480px) { grid-template-columns: 1fr; }
+}
+
+.form-fields { display: flex; flex-direction: column; gap: 16px; }
+
+.password-wrapper {
+  position: relative;
+  .form-control { padding-right: 44px; }
+}
+
+.toggle-password {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; color: var(--color-gray-600);
+  // Cible tactile WCAG 2.5.8 (min 24×24).
+  min-width: 24px; min-height: 24px;
+  display: inline-flex; align-items: center; justify-content: center;
+  &:hover { color: var(--color-gray-700); }
+}
+
+.strength-bar {
+  height: 4px;
+  background: var(--color-gray-200);
+  border-radius: 99px;
+  margin-top: 6px;
+  overflow: hidden;
+
+  &__fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 300ms ease, background-color 300ms ease;
+  }
+}
+.strength-label { font-size: var(--text-xs); color: var(--color-gray-500); margin-top: 4px; }
+
+.auth-footer {
+  margin-top: 14px;
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--color-gray-500);
+}
+
+.terms-note {
+  font-size: var(--text-xs);
+  color: var(--color-gray-500);
+  text-align: center;
+  margin-top: 12px;
+  line-height: 1.5;
+}

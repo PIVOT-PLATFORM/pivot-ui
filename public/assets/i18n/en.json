@@ -1,0 +1,144 @@
+{
+  "common": {
+    "logo": "PIVOT",
+    "or": "or",
+    "error_generic": "An error occurred. Please try again."
+  },
+  "nav": {
+    "sign_out": "Sign out",
+    "lang_other": "FR",
+    "lang_current": "EN"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "admin": "Administration",
+    "expand": "Expand",
+    "collapse": "Collapse"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Access your PIVOT workspace",
+      "email": "Email",
+      "email_placeholder": "you@company.com",
+      "password": "Password",
+      "remember_me": "Remember me",
+      "forgot_password": "Forgot password?",
+      "submit": "Sign in",
+      "no_account": "No account yet?",
+      "register_link": "Create one",
+      "google": "Continue with Google",
+      "device_sent": "A verification code was sent to your email.",
+      "device_enter": "Enter the code →",
+      "error_invalid_credentials": "Incorrect email or password.",
+      "error_not_verified": "Your email is not verified yet. Check your inbox.",
+      "error_disabled": "Account disabled. Contact support.",
+      "error_rate_limit": "Too many attempts. Try again in a few minutes.",
+      "error_generic": "An error occurred. Please try again.",
+      "error_generic_credentials": "Incorrect email or password.",
+      "error_google_not_configured": "Google Sign-In is not configured in this environment.",
+      "google_disabled": "Coming soon",
+      "no_activation_email": "Didn't receive the activation email?",
+      "resend_link": "Resend",
+      "show_password": "Show password",
+      "hide_password": "Hide password"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Join PIVOT Platform",
+      "first_name": "First name",
+      "first_name_placeholder": "John",
+      "last_name": "Last name",
+      "last_name_placeholder": "Doe",
+      "email": "Professional email",
+      "email_placeholder": "john.doe@company.com",
+      "submit": "Create account",
+      "already_account": "Already have an account?",
+      "login_link": "Sign in",
+      "terms_intro": "By registering, you accept the ",
+      "terms_link": "Terms of Service",
+      "terms_and": " and the ",
+      "privacy_link": "Privacy Policy",
+      "terms_suffix": " of PIVOT.",
+      "success_title": "Check your email",
+      "success_body": "A confirmation link was sent to {{ email }}.\nClick it to activate your account.",
+      "success_no_email": "Didn't receive it? Check your spam or",
+      "success_back_login": "return to login",
+      "email_invalid": "Invalid email address.",
+      "password": {
+        "label": "Password",
+        "min_length": "Minimum 12 characters.",
+        "need_uppercase": "At least one uppercase letter.",
+        "need_number": "At least one digit.",
+        "need_special": "At least one special character."
+      },
+      "strength": {
+        "very_weak": "Very weak",
+        "weak": "Weak",
+        "medium": "Medium",
+        "strong": "Strong",
+        "very_strong": "Very strong"
+      }
+    },
+    "resend": {
+      "title": "Resend activation email",
+      "subtitle": "Enter your email to receive a new activation link.",
+      "email": "Email",
+      "email_placeholder": "you@company.com",
+      "submit": "Send activation link",
+      "back_login": "← Back to login",
+      "sent_title": "Email sent",
+      "sent_body": "If this email matches an unverified account, an activation link has been sent."
+    },
+    "verify_email": {
+      "loading": "Verifying…",
+      "success_title": "Email confirmed!",
+      "success_body": "Your account is active. You can now sign in.",
+      "success_cta": "Sign in",
+      "error_title": "Invalid link",
+      "error_body": "This link has expired or has already been used. Request a new link from the login page.",
+      "error_cta": "Back to login"
+    },
+    "forgot_password": {
+      "title": "Forgot password",
+      "subtitle": "Enter your email to receive a reset link.",
+      "email": "Email",
+      "email_placeholder": "you@company.com",
+      "submit": "Send link",
+      "back_login": "← Back to login",
+      "sent_title": "Check your email",
+      "sent_body": "If this email matches a PIVOT account, you will receive a reset link within a few minutes.",
+      "sent_back": "Back to login"
+    },
+    "reset_password": {
+      "title": "New password",
+      "subtitle": "Choose a secure password.",
+      "new_password": "New password",
+      "submit": "Reset password",
+      "invalid_link": "Invalid or expired link. ",
+      "request_new": "Request a new link.",
+      "success_title": "Password reset",
+      "success_body": "You can now sign in with your new password.",
+      "success_cta": "Sign in"
+    },
+    "device_confirm": {
+      "title": "Device verification",
+      "subtitle": "A 6-digit code was sent to your email. Enter it to confirm this login.",
+      "otp_label": "Verification code",
+      "otp_placeholder": "000000",
+      "submit": "Confirm",
+      "cancel": "← Cancel and return to login",
+      "error_rate_limit": "Too many attempts. Return to login.",
+      "error_invalid": "Incorrect or expired code. Check your email."
+    }
+  },
+  "legal": {
+    "mentions": "Legal notice",
+    "privacy": "Privacy",
+    "terms": "Terms"
+  }
+}

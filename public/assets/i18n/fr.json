@@ -1,0 +1,144 @@
+{
+  "common": {
+    "logo": "PIVOT",
+    "or": "ou",
+    "error_generic": "Une erreur est survenue. Réessayez."
+  },
+  "nav": {
+    "sign_out": "Se déconnecter",
+    "lang_other": "EN",
+    "lang_current": "FR"
+  },
+  "sidebar": {
+    "dashboard": "Tableau de bord",
+    "admin": "Administration",
+    "expand": "Développer",
+    "collapse": "Réduire"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "welcome": "Bienvenue"
+  },
+  "auth": {
+    "login": {
+      "title": "Connexion",
+      "subtitle": "Accédez à votre espace PIVOT",
+      "email": "Email",
+      "email_placeholder": "vous@entreprise.com",
+      "password": "Mot de passe",
+      "remember_me": "Se souvenir de moi",
+      "forgot_password": "Mot de passe oublié ?",
+      "submit": "Se connecter",
+      "no_account": "Pas encore de compte ?",
+      "register_link": "Créer un compte",
+      "google": "Continuer avec Google",
+      "device_sent": "Un code de vérification a été envoyé à votre email.",
+      "device_enter": "Entrer le code →",
+      "error_invalid_credentials": "Email ou mot de passe incorrect.",
+      "error_not_verified": "Votre email n'est pas encore vérifié. Vérifiez votre boîte email.",
+      "error_disabled": "Compte désactivé. Contactez le support.",
+      "error_rate_limit": "Trop de tentatives. Réessayez dans quelques minutes.",
+      "error_generic": "Une erreur est survenue. Réessayez.",
+      "error_generic_credentials": "Email ou mot de passe incorrect.",
+      "error_google_not_configured": "Google Sign-In non configuré dans cet environnement.",
+      "google_disabled": "Bientôt disponible",
+      "no_activation_email": "Vous n'avez pas reçu l'email d'activation ?",
+      "resend_link": "Renvoyer",
+      "show_password": "Afficher le mot de passe",
+      "hide_password": "Masquer le mot de passe"
+    },
+    "register": {
+      "title": "Créer un compte",
+      "subtitle": "Rejoignez PIVOT Platform",
+      "first_name": "Prénom",
+      "first_name_placeholder": "Jean",
+      "last_name": "Nom",
+      "last_name_placeholder": "Dupont",
+      "email": "Email professionnel",
+      "email_placeholder": "jean.dupont@entreprise.com",
+      "submit": "Créer mon compte",
+      "already_account": "Déjà un compte ?",
+      "login_link": "Se connecter",
+      "terms_intro": "En vous inscrivant, vous acceptez les ",
+      "terms_link": "Conditions d'utilisation",
+      "terms_and": " et la ",
+      "privacy_link": "Politique de confidentialité",
+      "terms_suffix": " de PIVOT.",
+      "success_title": "Vérifiez votre email",
+      "success_body": "Un lien de confirmation a été envoyé à {{ email }}.\nCliquez dessus pour activer votre compte.",
+      "success_no_email": "Email non reçu ? Vérifiez vos spams ou",
+      "success_back_login": "retournez à la connexion",
+      "email_invalid": "Adresse email invalide.",
+      "password": {
+        "label": "Mot de passe",
+        "min_length": "Minimum 12 caractères.",
+        "need_uppercase": "Au moins une majuscule.",
+        "need_number": "Au moins un chiffre.",
+        "need_special": "Au moins un caractère spécial."
+      },
+      "strength": {
+        "very_weak": "Très faible",
+        "weak": "Faible",
+        "medium": "Moyen",
+        "strong": "Fort",
+        "very_strong": "Très fort"
+      }
+    },
+    "resend": {
+      "title": "Renvoyer l'email d'activation",
+      "subtitle": "Entrez votre email pour recevoir un nouveau lien d'activation.",
+      "email": "Email",
+      "email_placeholder": "vous@entreprise.com",
+      "submit": "Renvoyer le lien",
+      "back_login": "← Retour à la connexion",
+      "sent_title": "Email envoyé",
+      "sent_body": "Si cet email correspond à un compte non vérifié, un lien d'activation vous a été envoyé."
+    },
+    "verify_email": {
+      "loading": "Vérification en cours…",
+      "success_title": "Email confirmé !",
+      "success_body": "Votre compte est actif. Vous pouvez maintenant vous connecter.",
+      "success_cta": "Se connecter",
+      "error_title": "Lien invalide",
+      "error_body": "Ce lien est expiré ou a déjà été utilisé. Demandez un nouveau lien depuis la page de connexion.",
+      "error_cta": "Retour à la connexion"
+    },
+    "forgot_password": {
+      "title": "Mot de passe oublié",
+      "subtitle": "Renseignez votre email pour recevoir un lien de réinitialisation.",
+      "email": "Email",
+      "email_placeholder": "vous@entreprise.com",
+      "submit": "Envoyer le lien",
+      "back_login": "← Retour à la connexion",
+      "sent_title": "Vérifiez votre email",
+      "sent_body": "Si cet email correspond à un compte PIVOT, vous recevrez un lien de réinitialisation dans quelques minutes.",
+      "sent_back": "Retour à la connexion"
+    },
+    "reset_password": {
+      "title": "Nouveau mot de passe",
+      "subtitle": "Choisissez un mot de passe sécurisé.",
+      "new_password": "Nouveau mot de passe",
+      "submit": "Réinitialiser",
+      "invalid_link": "Lien invalide ou expiré. ",
+      "request_new": "Demander un nouveau lien.",
+      "success_title": "Mot de passe réinitialisé",
+      "success_body": "Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
+      "success_cta": "Se connecter"
+    },
+    "device_confirm": {
+      "title": "Vérification de l'appareil",
+      "subtitle": "Un code à 6 chiffres a été envoyé à votre email. Entrez-le pour confirmer cette connexion.",
+      "otp_label": "Code de vérification",
+      "otp_placeholder": "000000",
+      "submit": "Confirmer",
+      "cancel": "← Annuler et retourner à la connexion",
+      "error_rate_limit": "Trop de tentatives. Retournez à la connexion.",
+      "error_invalid": "Code incorrect ou expiré. Vérifiez votre email."
+    }
+  },
+  "legal": {
+    "mentions": "Mentions légales",
+    "privacy": "Confidentialité",
+    "terms": "CGU"
+  }
+}

@@ -1,0 +1,101 @@
+<div class="auth-page">
+  <div class="card auth-card">
+    <div class="auth-brand">
+      <picture>
+        <source srcset="assets/brand/pivot-icon.webp?v=4" type="image/webp" />
+        <img src="assets/brand/pivot-icon.png?v=4" alt="PIVOT" class="auth-brand-icon" />
+      </picture>
+    </div>
+
+    @if (success()) {
+      <div class="success-block" style="text-align:center;padding:16px 0">
+        <div style="font-size:48px;margin-bottom:16px">✉️</div>
+        <h2 class="auth-title">{{ 'auth.register.success_title' | transloco }}</h2>
+        <p style="font-size:var(--text-sm);color:var(--color-gray-500);margin-top:8px;line-height:1.6">
+          {{ 'auth.register.success_body' | transloco: { email: form.value.email } }}
+        </p>
+        <p style="font-size:var(--text-xs);color:var(--color-gray-500);margin-top:16px">
+          {{ 'auth.register.success_no_email' | transloco }}
+          <a routerLink="/auth/login">{{ 'auth.register.success_back_login' | transloco }}</a>.
+        </p>
+      </div>
+    } @else {
+      <h1 class="auth-title">{{ 'auth.register.title' | transloco }}</h1>
+      <p class="auth-subtitle">{{ 'auth.register.subtitle' | transloco }}</p>
+
+      @if (error()) {
+        <div class="alert alert-error" style="margin-bottom:16px">{{ error() | transloco }}</div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="form-fields">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="firstName">{{ 'auth.register.first_name' | transloco }}</label>
+              <input id="firstName" type="text" formControlName="firstName" class="form-control"
+                     [class.is-invalid]="form.controls.firstName.invalid && form.controls.firstName.touched"
+                     [placeholder]="'auth.register.first_name_placeholder' | transloco"
+                     autocomplete="given-name"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="lastName">{{ 'auth.register.last_name' | transloco }}</label>
+              <input id="lastName" type="text" formControlName="lastName" class="form-control"
+                     [class.is-invalid]="form.controls.lastName.invalid && form.controls.lastName.touched"
+                     [placeholder]="'auth.register.last_name_placeholder' | transloco"
+                     autocomplete="family-name"/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="email">{{ 'auth.register.email' | transloco }}</label>
+            <input id="email" type="email" formControlName="email" class="form-control"
+                   [class.is-invalid]="form.controls.email.invalid && form.controls.email.touched"
+                   [placeholder]="'auth.register.email_placeholder' | transloco"
+                   autocomplete="email"/>
+            @if (form.controls.email.errors?.['email'] && form.controls.email.touched) {
+              <span class="form-error">{{ 'auth.register.email_invalid' | transloco }}</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">{{ 'auth.register.password.label' | transloco }}</label>
+            <div class="password-wrapper">
+              <input id="password" [type]="showPassword() ? 'text' : 'password'"
+                     formControlName="password" class="form-control"
+                     [class.is-invalid]="form.controls.password.invalid && form.controls.password.touched"
+                     placeholder="••••••••••••" autocomplete="new-password"/>
+              <button type="button" class="toggle-password" (click)="showPassword.set(!showPassword())">
+                @if (showPassword()) { <span>🙈</span> } @else { <span>👁</span> }
+              </button>
+            </div>
+            @if (form.value.password) {
+              <div class="strength-bar">
+                <div class="strength-bar__fill"
+                     [style.width]="passwordStrength().width"
+                     [style.background-color]="passwordStrength().color"></div>
+              </div>
+              @if (passwordStrength().labelKey) {
+                <span class="strength-label">{{ passwordStrength().labelKey | transloco }}</span>
+              }
+            }
+            @if (form.controls.password.touched && form.controls.password.errors?.['weak']; as weakErr) {
+              <span class="form-error">{{ weakErr | transloco }}</span>
+            }
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:24px" [disabled]="loading()">
+          @if (loading()) { <span class="spinner"></span> }
+          {{ 'auth.register.submit' | transloco }}
+        </button>
+        <p class="terms-note">
+          {{ 'auth.register.terms_intro' | transloco }}<a routerLink="/legal/cgu">{{ 'auth.register.terms_link' | transloco }}</a>{{ 'auth.register.terms_and' | transloco }}<a routerLink="/legal/confidentialite">{{ 'auth.register.privacy_link' | transloco }}</a>{{ 'auth.register.terms_suffix' | transloco }}
+        </p>
+      </form>
+
+      <p class="auth-footer">
+        {{ 'auth.register.already_account' | transloco }} <a routerLink="/auth/login">{{ 'auth.register.login_link' | transloco }}</a>
+      </p>
+    }
+  </div>
+</div>
