@@ -73,11 +73,12 @@ describe('RegisterComponent', () => {
     expect(component.success()).toBe(true);
   });
 
-  it('sets success on 400', () => {
+  it('sets generic error on 400 (validation @Valid — not a fake success)', () => {
     component.form.setValue(validForm());
     component.submit();
     httpMock.expectOne(`${environment.apiUrl}/auth/register`).flush('', { status: 400, statusText: 'Bad Request' });
-    expect(component.success()).toBe(true);
+    expect(component.success()).toBe(false);
+    expect(component.error()).toBe('common.error_generic');
   });
 
   it('sets rate limit error on 429', () => {
