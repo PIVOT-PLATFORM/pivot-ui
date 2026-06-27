@@ -70,7 +70,19 @@ test.describe('US-AUTH-002 — Forgot & Reset password', () => {
     await expect(page.locator('a[routerLink="/auth/login"]')).toBeVisible({ timeout: 5_000 });
   });
 
-  test('reset password — invalid/missing token shows error', async ({ page }) => {
+  test('reset password — token expiré en URL → état Lien expiré sans formulaire (CA#6)', async ({ page }) => {
+    await page.route('**/auth/check-reset-token**', (route) =>
+      route.fulfill({ status: 400, contentType: 'application/json', body: '{"message":"Token invalide ou expiré"}' })
+    );
+
+    await page.goto(`${RESET_URL}?token=expired-token`);
+
+    // check-reset-token 400 → tokenState = 'invalid' → pas de formulaire, lien "nouveau lien" affiché
+    await expect(page.locator('a[routerLink="/auth/forgot-password"]')).toBeVisible({ timeout: 5_000 });
+    await expect(page.locator('#newPassword, input[type="password"]')).toHaveCount(0);
+  });
+
+  test('reset password — soumission rejetée (race condition token) → état Lien expiré (CA#7)', async ({ page }) => {
     await page.route('**/auth/check-reset-token**', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
     );
