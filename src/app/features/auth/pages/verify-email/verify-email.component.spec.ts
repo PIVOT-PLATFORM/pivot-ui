@@ -46,17 +46,26 @@ describe('VerifyEmailComponent', () => {
     httpMock.verify();
   });
 
-  it('passe en succès quand le backend valide le token', () => {
-    const { component, httpMock } = setup('valid-token');
+  it('state initial est loading quand token fourni', () => {
+    const { component, httpMock } = setup('some-token');
+    expect(component.state()).toBe('loading');
     httpMock.expectOne(r => r.url === `${environment.apiUrl}/auth/verify-email`).flush({ message: 'ok' });
+    httpMock.verify();
+  });
+
+  it('passe en succès quand le backend valide le token', () => {
+    const { fixture, component, httpMock } = setup('valid-token');
+    httpMock.expectOne(r => r.url === `${environment.apiUrl}/auth/verify-email`).flush({ message: 'ok' });
+    fixture.detectChanges();
     expect(component.state()).toBe('success');
     httpMock.verify();
   });
 
   it('passe en erreur quand le backend rejette le token', () => {
-    const { component, httpMock } = setup('bad-token');
+    const { fixture, component, httpMock } = setup('bad-token');
     httpMock.expectOne(r => r.url === `${environment.apiUrl}/auth/verify-email`)
       .flush('', { status: 400, statusText: 'Bad Request' });
+    fixture.detectChanges();
     expect(component.state()).toBe('error');
     httpMock.verify();
   });

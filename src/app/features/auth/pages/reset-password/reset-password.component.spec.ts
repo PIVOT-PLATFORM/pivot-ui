@@ -71,11 +71,14 @@ describe('ResetPasswordComponent', () => {
   });
 
   it('succès → tokenState = success, loading = false', () => {
-    const { component, httpMock } = setup('reset-tok');
+    const { fixture, component, httpMock } = setup('reset-tok');
     httpMock.expectOne(r => r.url === CHECK_URL).flush({});
+    fixture.detectChanges();
     component.form.setValue({ newPassword: 'SecurePass123!' });
     component.submit();
+    fixture.detectChanges();
     httpMock.expectOne(r => r.url === RESET_URL).flush({ message: 'ok' });
+    fixture.detectChanges();
     expect(component.tokenState()).toBe('success');
     expect(component.loading()).toBe(false);
     httpMock.verify();
@@ -93,13 +96,26 @@ describe('ResetPasswordComponent', () => {
   });
 
   it('erreur 500 reset → message générique', () => {
-    const { component, httpMock } = setup('reset-tok');
+    const { fixture, component, httpMock } = setup('reset-tok');
     httpMock.expectOne(r => r.url === CHECK_URL).flush({});
+    fixture.detectChanges();
     component.form.setValue({ newPassword: 'SecurePass123!' });
     component.submit();
     httpMock.expectOne(r => r.url === RESET_URL).flush('', { status: 500, statusText: 'Server Error' });
+    fixture.detectChanges();
     expect(component.error()).toBe('common.error_generic');
     expect(component.loading()).toBe(false);
+    httpMock.verify();
+  });
+
+  it('affiche erreur mot de passe faible quand champ touched et invalide', () => {
+    const { fixture, component, httpMock } = setup('reset-tok');
+    httpMock.expectOne(r => r.url === CHECK_URL).flush({});
+    fixture.detectChanges();
+    component.form.controls.newPassword.setValue('weak');
+    component.form.controls.newPassword.markAsTouched();
+    fixture.detectChanges();
+    expect(component.form.controls.newPassword.errors).toBeTruthy();
     httpMock.verify();
   });
 

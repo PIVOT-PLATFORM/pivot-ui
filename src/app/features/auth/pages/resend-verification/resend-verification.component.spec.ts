@@ -52,7 +52,9 @@ describe('ResendVerificationComponent', () => {
     component.form.setValue({ email: 'user@example.com' });
     component.submit();
     expect(component.loading()).toBe(true);
+    fixture.detectChanges();
     httpMock.expectOne(r => r.url === URL).flush({ message: 'ok' });
+    fixture.detectChanges();
     expect(component.sent()).toBe(true);
     expect(component.loading()).toBe(false);
   });
@@ -63,6 +65,12 @@ describe('ResendVerificationComponent', () => {
     httpMock.expectOne(r => r.url === URL).flush('', { status: 404, statusText: 'Not Found' });
     expect(component.sent()).toBe(true);
     expect(component.loading()).toBe(false);
+  });
+
+  it('affiche alerte erreur quand signal error positionné', () => {
+    component.error.set('common.error_generic');
+    fixture.detectChanges();
+    expect(component.error()).toBe('common.error_generic');
   });
 
   it('does not submit while loading', () => {
