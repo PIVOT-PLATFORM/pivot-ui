@@ -36,44 +36,68 @@ function setup(token: string | null): {
 }
 
 describe('ResetPasswordComponent', () => {
-  const URL = `${environment.apiUrl}/auth/reset-password`;
+  const RESET_URL = `${environment.apiUrl}/auth/reset-password`;
+  const CHECK_URL = `${environment.apiUrl}/auth/check-reset-token`;
   afterEach(() => TestBed.resetTestingModule());
 
-  it('lit le token depuis la query string', () => {
+  it('token valide → checkResetToken appelé, tokenState = valid', () => {
     const { component, httpMock } = setup('reset-tok');
-    expect(component.token()).toBe('reset-tok');
+    httpMock.expectOne(r => r.url === CHECK_URL).flush({});
+    expect(component.tokenState()).toBe('valid');
     httpMock.verify();
   });
 
-  it('token absent → token() null, lien invalide', () => {
+  it('token absent → tokenState = invalid, pas de requête HTTP', () => {
     const { component, httpMock } = setup(null);
-    expect(component.token()).toBeNull();
+    expect(component.tokenState()).toBe('invalid');
+    httpMock.expectNone(() => true);
+    httpMock.verify();
+  });
+
+  it('token invalide (check 400) → tokenState = invalid', () => {
+    const { component, httpMock } = setup('bad-tok');
+    httpMock.expectOne(r => r.url === CHECK_URL).flush('', { status: 400, statusText: 'Bad Request' });
+    expect(component.tokenState()).toBe('invalid');
     httpMock.verify();
   });
 
   it('ne soumet pas quand le mot de passe est invalide', () => {
     const { component, httpMock } = setup('reset-tok');
+    httpMock.expectOne(r => r.url === CHECK_URL).flush({});
     component.submit();
-    httpMock.expectNone(r => r.url === URL);
+    httpMock.expectNone(r => r.url === RESET_URL);
     expect(component.loading()).toBe(false);
     httpMock.verify();
   });
 
-  it('succès → success=true, loading=false', () => {
+  it('succès → tokenState = success, loading = false', () => {
     const { component, httpMock } = setup('reset-tok');
+    httpMock.expectOne(r => r.url === CHECK_URL).flush({});
     component.form.setValue({ newPassword: 'SecurePass123!' });
     component.submit();
-    httpMock.expectOne(r => r.url === URL).flush({ message: 'ok' });
-    expect(component.success()).toBe(true);
+    httpMock.expectOne(r => r.url === RESET_URL).flush({ message: 'ok' });
+    expect(component.tokenState()).toBe('success');
     expect(component.loading()).toBe(false);
     httpMock.verify();
   });
 
-  it('erreur serveur → message générique', () => {
+  it('erreur 400 reset → tokenState = invalid', () => {
     const { component, httpMock } = setup('reset-tok');
+    httpMock.expectOne(r => r.url === CHECK_URL).flush({});
     component.form.setValue({ newPassword: 'SecurePass123!' });
     component.submit();
-    httpMock.expectOne(r => r.url === URL).flush('', { status: 400, statusText: 'Bad Request' });
+    httpMock.expectOne(r => r.url === RESET_URL).flush('', { status: 400, statusText: 'Bad Request' });
+    expect(component.tokenState()).toBe('invalid');
+    expect(component.loading()).toBe(false);
+    httpMock.verify();
+  });
+
+  it('erreur 500 reset → message générique', () => {
+    const { component, httpMock } = setup('reset-tok');
+    httpMock.expectOne(r => r.url === CHECK_URL).flush({});
+    component.form.setValue({ newPassword: 'SecurePass123!' });
+    component.submit();
+    httpMock.expectOne(r => r.url === RESET_URL).flush('', { status: 500, statusText: 'Server Error' });
     expect(component.error()).toBe('common.error_generic');
     expect(component.loading()).toBe(false);
     httpMock.verify();
@@ -81,10 +105,11 @@ describe('ResetPasswordComponent', () => {
 
   it('ne soumet pas deux fois pendant le chargement', () => {
     const { component, httpMock } = setup('reset-tok');
+    httpMock.expectOne(r => r.url === CHECK_URL).flush({});
     component.form.setValue({ newPassword: 'SecurePass123!' });
     component.submit();
     component.submit();
-    const reqs = httpMock.match(r => r.url === URL);
+    const reqs = httpMock.match(r => r.url === RESET_URL);
     expect(reqs).toHaveLength(1);
     reqs[0].flush({ message: 'ok' });
     httpMock.verify();

@@ -53,38 +53,41 @@ test.describe('US-AUTH-002 — Forgot & Reset password', () => {
   // Reset password
   // ---------------------------------------------------------------------------
   test('reset password — success redirects to login', async ({ page }) => {
+    await page.route('**/auth/check-reset-token**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
+    );
     await page.route(`${API}/auth/reset-password`, (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
     );
 
     await page.goto(`${RESET_URL}?token=valid-token-abc`);
-    await expect(page.locator('#newPassword, input[type="password"]').first()).toBeVisible();
+    await expect(page.locator('#newPassword, input[type="password"]').first()).toBeVisible({ timeout: 5_000 });
 
     await page.fill('#newPassword, input[type="password"]', 'NewStr0ng!Pass');
     await page.click('button[type="submit"]');
 
-    // Success: show confirmation or redirect
-    const success = page.locator('.success-block, [data-testid="reset-success"], h1');
-    await expect(success.first()).toBeVisible({ timeout: 5_000 });
+    // Success state : lien "retour login" affiché (unique au @case 'success')
+    await expect(page.locator('a[routerLink="/auth/login"]')).toBeVisible({ timeout: 5_000 });
   });
 
   test('reset password — invalid/missing token shows error', async ({ page }) => {
+    await page.route('**/auth/check-reset-token**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
+    );
     await page.route(`${API}/auth/reset-password`, (route) =>
       route.fulfill({ status: 400, contentType: 'application/json', body: '{"message":"Invalid token"}' })
     );
 
     await page.goto(`${RESET_URL}?token=expired-token`);
 
-    // Token présent → le formulaire s'affiche après l'hydratation Angular. On l'attend
-    // explicitement (isVisible() sans attente partait en race condition avant le rendu).
+    // Token check passes → formulaire affiché
     const pwdInput = page.locator('#newPassword, input[type="password"]').first();
     await expect(pwdInput).toBeVisible({ timeout: 5_000 });
 
     await pwdInput.fill('NewStr0ng!Pass');
     await page.click('button[type="submit"]');
 
-    // Le backend rejette le token (400) → message d'erreur visible.
-    const errEl = page.locator('.alert-error, .invalid-link, [data-testid="reset-error"]');
-    await expect(errEl.first()).toBeVisible({ timeout: 5_000 });
+    // Le backend rejette le reset (400) → tokenState = 'invalid' → lien "demander un nouveau lien" affiché
+    await expect(page.locator('a[routerLink="/auth/forgot-password"]')).toBeVisible({ timeout: 5_000 });
   });
 });
