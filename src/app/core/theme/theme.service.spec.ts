@@ -6,8 +6,20 @@ describe('ThemeService', () => {
 
   beforeEach(() => {
     localStorage.clear();
-    // Reset data-theme attribute before each test
     document.documentElement.removeAttribute('data-theme');
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: (query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => false,
+      }),
+    });
 
     TestBed.configureTestingModule({});
     service = TestBed.inject(ThemeService);
@@ -22,13 +34,12 @@ describe('ThemeService', () => {
 
   describe('initial theme resolution', () => {
     it('uses stored theme from localStorage when valid', () => {
-      localStorage.setItem('pivot_theme', 'ocean');
-      // Re-create service to pick up the stored value
+      localStorage.setItem('pivot_theme', 'dark');
       TestBed.resetTestingModule();
       TestBed.configureTestingModule({});
       const s = TestBed.inject(ThemeService);
       TestBed.flushEffects();
-      expect(s.theme()).toBe('ocean');
+      expect(s.theme()).toBe('dark');
     });
 
     it('ignores invalid stored value and falls back', () => {
@@ -37,8 +48,7 @@ describe('ThemeService', () => {
       TestBed.configureTestingModule({});
       const fallback = TestBed.inject(ThemeService);
       TestBed.flushEffects();
-      // Should be 'light' or 'dark' (depending on media query), never 'invalid-theme'
-      expect(['light', 'dark', 'ocean']).toContain(fallback.theme());
+      expect(['light', 'dark']).toContain(fallback.theme());
     });
   });
 
@@ -65,32 +75,22 @@ describe('ThemeService', () => {
 
     it('persists the theme to localStorage', () => {
       const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
-      service.setTheme('ocean');
+      service.setTheme('dark');
       TestBed.flushEffects();
-      expect(setItemSpy).toHaveBeenCalledWith('pivot_theme', 'ocean');
-    });
-
-    it('sets data-theme="ocean" for ocean theme', () => {
-      service.setTheme('ocean');
-      TestBed.flushEffects();
-      expect(document.documentElement.getAttribute('data-theme')).toBe('ocean');
+      expect(setItemSpy).toHaveBeenCalledWith('pivot_theme', 'dark');
     });
   });
 
-  describe('cycleTheme()', () => {
-    it('cycles light → dark → ocean → light', () => {
+  describe('toggleTheme()', () => {
+    it('toggles light → dark → light', () => {
       service.setTheme('light');
       TestBed.flushEffects();
 
-      service.cycleTheme();
+      service.toggleTheme();
       TestBed.flushEffects();
       expect(service.theme()).toBe('dark');
 
-      service.cycleTheme();
-      TestBed.flushEffects();
-      expect(service.theme()).toBe('ocean');
-
-      service.cycleTheme();
+      service.toggleTheme();
       TestBed.flushEffects();
       expect(service.theme()).toBe('light');
     });

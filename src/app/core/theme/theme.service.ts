@@ -4,7 +4,6 @@
  * Supported themes:
  *  - 'light'  → default, no data-theme attribute (CSS :root tokens apply)
  *  - 'dark'   → sets data-theme="dark" on <html>
- *  - 'ocean'  → sets data-theme="ocean" on <html>
  *
  * Persistence: localStorage key 'pivot_theme'.
  * Initial resolution: stored preference → prefers-color-scheme media query → 'light'.
@@ -15,9 +14,9 @@
 import { Injectable, signal, effect } from '@angular/core';
 
 /** Available UI themes. */
-export type Theme = 'light' | 'dark' | 'ocean';
+export type Theme = 'light' | 'dark';
 
-const VALID_THEMES: Theme[] = ['light', 'dark', 'ocean'];
+const VALID_THEMES: Theme[] = ['light', 'dark'];
 const STORAGE_KEY = 'pivot_theme';
 
 @Injectable({ providedIn: 'root' })
@@ -49,15 +48,9 @@ export class ThemeService {
     this._theme.set(theme);
   }
 
-  /**
-   * Cycles through themes in order: light → dark → ocean → light.
-   * Useful for a single toggle button.
-   */
-  cycleTheme(): void {
-    const current = this._theme();
-    const idx = VALID_THEMES.indexOf(current);
-    const next = VALID_THEMES[(idx + 1) % VALID_THEMES.length];
-    this._theme.set(next);
+  /** Toggles between light and dark. */
+  toggleTheme(): void {
+    this._theme.set(this._theme() === 'light' ? 'dark' : 'light');
   }
 
   private resolveInitialTheme(): Theme {
