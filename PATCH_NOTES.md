@@ -1,5 +1,9 @@
 # Notes de version — PIVOT UI
 
+## [Unreleased]
+
+---
+
 ## [0.0.0] — 28 juin 2026
 
 ### Interface d'authentification

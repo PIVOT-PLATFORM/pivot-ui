@@ -386,10 +386,11 @@ dossier `gates/`). La validation humaine vit dans le champ **Human Gate** du Pro
 
 ## Releases — PATCH_NOTES.md
 
-Après chaque release Semantic Release, mettre à jour `PATCH_NOTES.md` à la racine du repo :
+`PATCH_NOTES.md` est mis à jour **dans chaque PR** (embarqué avec le code) :
+- Ajouter les changements notables dans la section `## [Unreleased]` en tête de fichier
 - Rédigé en **français**, pour l'utilisateur final — pas le développeur
-- Décrire ce qui change concrètement en langage naturel — pas de référence aux commits ou tickets
-- Format : `## [version] — JJ mois AAAA` + bullet points
+- Langage naturel — pas de référence aux commits ou tickets
+- Après la release SR : renommer `[Unreleased]` en `[x.y.z] — JJ mois AAAA`
 - Fichier maintenu en place, **jamais de fichiers datés**
 
 ---
