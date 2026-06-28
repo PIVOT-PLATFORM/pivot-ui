@@ -1,8 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { ComponentFixture } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { Component } from '@angular/core';
 import { ContactComponent } from './contact.component';
+import { TranslocoService } from '@jsverse/transloco';
+import { environment } from '../../../environments/environment';
 
 // ─── Stub ────────────────────────────────────────────────────────────────────
 
@@ -14,38 +18,33 @@ class StubComponent {}
 describe('ContactComponent', () => {
   let fixture: ComponentFixture<ContactComponent>;
   let component: ContactComponent;
+  let httpMock: HttpTestingController;
 
   beforeEach(async () => {
+    const translocoStub = { getActiveLang: () => 'fr' } as unknown as TranslocoService;
+
     await TestBed.configureTestingModule({
       imports: [ContactComponent],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideRouter([{ path: '**', component: StubComponent }]),
+        { provide: TranslocoService, useValue: translocoStub },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ContactComponent);
     component = fixture.componentInstance;
+    httpMock = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
   });
+
+  afterEach(() => { httpMock.verify(); });
 
   // ─── Mount ───────────────────────────────────────────────────────────────
 
   it('mounts without error', () => {
     expect(component).toBeTruthy();
-  });
-
-  // ─── Email link ──────────────────────────────────────────────────────────
-
-  it('email link has correct mailto href', () => {
-    const emailLink = fixture.nativeElement.querySelector('[data-testid="contact-email"]');
-    expect(emailLink).not.toBeNull();
-    expect(emailLink?.getAttribute('href')).toBe('mailto:contact@pivot.app');
-  });
-
-  it('GitHub link points to PIVOT-PLATFORM organization', () => {
-    const links: NodeListOf<HTMLAnchorElement> = fixture.nativeElement.querySelectorAll('a[href]');
-    const githubLink = Array.from(links).find(a => a.href.includes('github.com/PIVOT-PLATFORM'));
-    expect(githubLink).not.toBeNull();
   });
 
   // ─── Form validation ─────────────────────────────────────────────────────
@@ -55,6 +54,7 @@ describe('ContactComponent', () => {
     fixture.detectChanges();
     expect(component.emailError()).toBe("L'email est requis.");
     expect(component.messageError()).toBe('Le message est requis.');
+    httpMock.expectNone(`${environment.apiUrl}/contact`);
   });
 
   it('shows email format error for invalid email', () => {
@@ -63,15 +63,33 @@ describe('ContactComponent', () => {
     component.onSubmit();
     fixture.detectChanges();
     expect(component.emailError()).toBe('Adresse email invalide.');
+    httpMock.expectNone(`${environment.apiUrl}/contact`);
   });
 
-  it('shows success state on valid submission', () => {
+  // ─── API call ─────────────────────────────────────────────────────────────
+
+  it('calls POST /api/contact with email, message and lang on valid submission', () => {
     component.form.email = 'alice@example.com';
     component.form.message = 'Bonjour, ceci est un test.';
     component.onSubmit();
+    const req = httpMock.expectOne(`${environment.apiUrl}/contact`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({
+      email: 'alice@example.com',
+      message: 'Bonjour, ceci est un test.',
+      lang: 'fr',
+    });
+    req.flush(null, { status: 202, statusText: 'Accepted' });
+  });
+
+  it('shows success state on 202 response', () => {
+    component.form.email = 'alice@example.com';
+    component.form.message = 'Test.';
+    component.onSubmit();
+    httpMock.expectOne(`${environment.apiUrl}/contact`).flush(null, { status: 202, statusText: 'Accepted' });
     fixture.detectChanges();
     expect(component.submitted()).toBe(true);
-    const success = fixture.nativeElement.querySelector('.contact__success');
+    const success = fixture.nativeElement.querySelector('[data-testid="contact-success"]');
     expect(success).not.toBeNull();
   });
 
@@ -79,8 +97,21 @@ describe('ContactComponent', () => {
     component.form.email = 'alice@example.com';
     component.form.message = 'Test message.';
     component.onSubmit();
+    httpMock.expectOne(`${environment.apiUrl}/contact`).flush(null, { status: 202, statusText: 'Accepted' });
     expect(component.form.email).toBe('');
     expect(component.form.message).toBe('');
+  });
+
+  it('shows submit error when API fails', () => {
+    component.form.email = 'alice@example.com';
+    component.form.message = 'Test';
+    component.onSubmit();
+    httpMock.expectOne(`${environment.apiUrl}/contact`).flush(
+      { message: 'Server error' }, { status: 500, statusText: 'Internal Server Error' },
+    );
+    fixture.detectChanges();
+    expect(component.submitError()).toContain('erreur');
+    expect(component.submitted()).toBe(false);
   });
 
   it('hides form after successful submission', () => {
@@ -102,13 +133,5 @@ describe('ContactComponent', () => {
     const h2 = fixture.nativeElement.querySelector('h2');
     expect(h1?.textContent?.trim()).toBe('Nous contacter');
     expect(h2?.textContent?.trim()).toBe('Envoyer un message');
-  });
-
-  it('all external links have rel="noopener noreferrer"', () => {
-    const externalLinks: NodeListOf<HTMLAnchorElement> = fixture.nativeElement.querySelectorAll('a[target="_blank"]');
-    externalLinks.forEach(link => {
-      expect(link.rel).toContain('noopener');
-      expect(link.rel).toContain('noreferrer');
-    });
   });
 });

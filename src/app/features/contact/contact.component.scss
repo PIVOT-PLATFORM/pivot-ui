@@ -248,6 +248,21 @@
   }
 }
 
+// ─── Error state ──────────────────────────────────────────────────────────────
+.contact__error {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: var(--color-error-light, rgba(220, 38, 38, 0.08));
+  border-radius: var(--radius-md);
+  color: var(--color-error);
+  font-size: var(--text-sm);
+  margin-bottom: 20px;
+
+  p { margin: 0; line-height: 1.5; }
+}
+
 // ─── Success state ────────────────────────────────────────────────────────────
 .contact__success {
   display: flex;
