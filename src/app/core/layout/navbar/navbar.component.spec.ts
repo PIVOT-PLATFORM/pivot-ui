@@ -176,4 +176,34 @@ describe('NavbarComponent', () => {
     it('closes user menu', () => { component.userMenuOpen.set(true); component.onDocumentClick(); expect(component.userMenuOpen()).toBe(false); });
     it('closes notif dropdown', () => { component.notifOpen.set(true); component.onDocumentClick(); expect(component.notifOpen()).toBe(false); });
   });
+
+  describe('setLang()', () => {
+    it('persists en to localStorage', () => {
+      component.setLang('en');
+      expect(localStorage.getItem('pivot_lang')).toBe('en');
+    });
+
+    it('persists fr to localStorage', () => {
+      component.setLang('fr');
+      expect(localStorage.getItem('pivot_lang')).toBe('fr');
+    });
+  });
+
+  describe('themeLabel()', () => {
+    it('returns dark label when theme is light', () => {
+      themeService.setTheme('light'); TestBed.flushEffects();
+      expect(component.themeLabel()).toBe('Passer en mode sombre');
+    });
+
+    it('returns light label when theme is dark', () => {
+      themeService.setTheme('dark'); TestBed.flushEffects();
+      expect(component.themeLabel()).toBe('Passer en mode clair');
+    });
+  });
+
+  describe('bugReportUrl', () => {
+    it('is a mailto link', () => {
+      expect(component.bugReportUrl).toMatch(/^mailto:/);
+    });
+  });
 });

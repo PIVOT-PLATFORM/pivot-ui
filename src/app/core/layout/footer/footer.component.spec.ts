@@ -60,8 +60,9 @@ describe('FooterComponent', () => {
     expect(el.querySelector('[role="contentinfo"]')).toBeTruthy();
   });
 
-  it('renders 7 footer links', () => {
+  it('renders all footer nav links', () => {
     const el: HTMLElement = fixture.nativeElement;
-    expect(el.querySelectorAll('.footer__link').length).toBe(7);
+    const EXPECTED_LINK_COUNT = 7; // legal, privacy, terms, accessibility, contact, faq, sitemap
+    expect(el.querySelectorAll('.footer__link').length).toBe(EXPECTED_LINK_COUNT);
   });
 });
