@@ -1,4 +1,4 @@
-﻿/**
+/**
  * HomeComponent — placeholder landing page for authenticated users.
  * Full implementation will follow in a dedicated US.
  */

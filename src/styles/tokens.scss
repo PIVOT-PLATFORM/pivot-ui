@@ -95,6 +95,30 @@
   --transition-base: 200ms ease;
 }
 
+// ─── Ocean theme ─────────────────────────────────────────────────────────────
+[data-theme="ocean"] {
+  --color-brand-50:  #0c2a3a;
+  --color-brand-100: #0e3d52;
+  --color-brand-500: #38bdf8;
+  --color-brand-600: #0ea5e9;
+  --color-navy-900:  #e0f2fe;
+  --color-gray-50:   #0a1929;
+  --color-gray-100:  #0d2137;
+  --color-gray-200:  #163347;
+  --color-gray-300:  #1e4460;
+  --color-gray-400:  #2e6080;
+  --color-gray-500:  #5b93b0;
+  --color-gray-600:  #90bfd4;
+  --color-gray-700:  #bdd9e8;
+  --color-gray-900:  #e0f2fe;
+  --surface-bg:      #071421;
+  --surface-card:    #0d2137;
+  --surface-sidebar: #050e18;
+  --surface-navbar:  #0d2137;
+  --color-error:     #f87171;
+  --color-success:   #34d399;
+}
+
 // ─── Dark theme ──────────────────────────────────────────────────────────────
 [data-theme="dark"] {
   --color-brand-50:  #1e3a5f;

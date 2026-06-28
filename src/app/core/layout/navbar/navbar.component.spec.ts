@@ -1,4 +1,4 @@
-﻿import { TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { ComponentFixture } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
@@ -37,6 +37,16 @@ describe('NavbarComponent', () => {
   beforeEach(async () => {
     localStorage.clear();
     document.documentElement.removeAttribute('data-theme');
+    window.matchMedia = (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }) as MediaQueryList;
 
     await TestBed.configureTestingModule({
       imports: [NavbarComponent],
@@ -79,7 +89,7 @@ describe('NavbarComponent', () => {
     });
 
     it('falls back to email initial when name is empty', () => {
-      const noName = { ...mockAuthResponse, user: { ...mockAuthResponse.user, firstName: null, lastName: null } };
+      const noName = { ...mockAuthResponse, user: { ...mockAuthResponse.user, firstName: null, lastName: null, email: 'z@example.com' } };
       authService.login({ email: 'z@example.com', password: 'pw' }).subscribe();
       httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush(noName);
       expect(component.initials()).toBe('Z');

@@ -1,11 +1,10 @@
-﻿/**
+/**
  * NavbarComponent — top navigation bar for the authenticated shell.
  */
 import {
   ChangeDetectionStrategy,
   Component,
   HostListener,
-  OnInit,
   computed,
   inject,
   signal,
@@ -122,7 +121,7 @@ export function avatarColor(name: string): string {
     @media (max-width:767px) { .navbar__username { display:none; } .navbar__nav { display:none; } .navbar__chevron { display:none; } }
   `],
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent {
   private readonly auth = inject(AuthService);
   private readonly themeService = inject(ThemeService);
 
@@ -163,10 +162,6 @@ export class NavbarComponent implements OnInit {
     };
     return labels[this.theme()];
   });
-
-  ngOnInit(): void {
-    // ThemeService is root-provided and self-initialising via effect()
-  }
 
   @HostListener('document:click')
   onDocumentClick(): void {
