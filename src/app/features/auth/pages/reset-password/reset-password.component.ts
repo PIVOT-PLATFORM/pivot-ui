@@ -80,7 +80,7 @@ function strongPassword(c: AbstractControl): ValidationErrors | null {
                 }
               </div>
 
-              <button type="submit" class="btn btn-primary btn-full btn-lg" [disabled]="loading()">
+              <button type="submit" class="btn btn-primary btn-full btn-lg" [disabled]="loading()" [attr.aria-busy]="loading()">
                 @if (loading()) { <span class="spinner"></span> }
                 {{ 'auth.reset_password.submit' | transloco }}
               </button>

@@ -44,7 +44,7 @@ import { HttpErrorResponse } from '@angular/common/http';
                      autocomplete="email" />
             </div>
 
-            <button type="submit" class="btn btn-primary btn-full btn-lg" [disabled]="loading()">
+            <button type="submit" class="btn btn-primary btn-full btn-lg" [disabled]="loading()" [attr.aria-busy]="loading()">
               @if (loading()) { <span class="spinner"></span> }
               {{ 'auth.resend.submit' | transloco }}
             </button>
