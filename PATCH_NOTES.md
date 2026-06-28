@@ -3,12 +3,12 @@
 ## [Unreleased]
 
 ### Page de contact
-- Nouvelle page de contact accessible depuis la navigation : adresse e-mail, lien GitHub Issues, lien documentation, lien communauté
-- Formulaire de contact avec validation (email + message) — champ nom retiré
-- La page affiche correctement la barre de navigation et le pied de page
+- Nouvelle page de contact avec formulaire fonctionnel (email + message)
+- Un e-mail de confirmation est envoyé automatiquement après soumission, dans la langue active (français ou anglais)
+- La page s'intègre dans la navigation principale (barre de navigation et pied de page)
 
 ### Signalement de bug
-- Le bouton de signalement de bug génère désormais un e-mail pré-rempli avec un formulaire structuré (description, étapes de reproduction, comportement attendu/observé, environnement)
+- Le bouton de signalement de bug génère un e-mail pré-rempli avec un formulaire structuré (description, étapes de reproduction, comportement attendu/observé, environnement)
 - Le modèle s'adapte automatiquement à la langue sélectionnée (français ou anglais)
 
 ## [0.4.0] — 1 juillet 2026
