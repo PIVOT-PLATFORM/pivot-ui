@@ -249,7 +249,7 @@ export class ContactComponent {
   readonly messageError = signal('');
 
   /** Simple email regex for client-side validation. */
-  private readonly EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  private readonly EMAIL_RE = /^[^\s@]+@[^\s@.]+\.[^\s@.]+$/;
 
   /**
    * Validates the form and sets error signals.
