@@ -24,11 +24,21 @@ import { RouterLink } from '@angular/router';
     </footer>
   `,
   styles: [`
-    .footer { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px 24px; padding:20px 0; margin-top:40px; border-top:1px solid var(--color-gray-200); }
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px 24px;
+      padding: 20px 48px;
+      background: var(--surface-navbar);
+      border-top: 1px solid var(--color-gray-200);
+    }
     .footer__copy { font-size:var(--text-xs); color:var(--color-gray-400); white-space:nowrap; }
     .footer__nav { display:flex; flex-wrap:wrap; gap:8px 20px; }
     .footer__link { font-size:var(--text-xs); color:var(--color-gray-400); text-decoration:none; white-space:nowrap; transition:color var(--transition-fast); &:hover { color:var(--color-gray-700); } &:focus-visible { outline:2px solid var(--color-brand-500); outline-offset:2px; border-radius:2px; } }
-    @media (max-width:767px) { .footer { flex-direction:column; align-items:flex-start; } }
+    @media (max-width:1024px) { .footer { padding:20px 32px; } }
+    @media (max-width:767px) { .footer { flex-direction:column; align-items:flex-start; padding:20px 16px; } }
   `],
 })
 export class FooterComponent {

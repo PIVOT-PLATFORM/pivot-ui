@@ -114,7 +114,7 @@ export function avatarColor(name: string): string {
     </header>
   `,
   styles: [`
-    .navbar { display:flex; align-items:center; height:64px; padding:0 40px; background:var(--surface-navbar); border-bottom:1px solid var(--color-gray-200); box-shadow:var(--shadow-sm); position:sticky; top:0; z-index:100; gap:16px; }
+    .navbar { display:flex; align-items:center; height:64px; padding:0 48px; background:var(--surface-navbar); border-bottom:1px solid var(--color-gray-200); box-shadow:var(--shadow-sm); position:sticky; top:0; z-index:100; gap:16px; }
     .navbar__left { display:flex; align-items:center; gap:24px; }
     .navbar__right { margin-left:auto; display:flex; align-items:center; gap:4px; }
     .navbar__logo { display:flex; align-items:center; gap:8px; text-decoration:none; border-radius:var(--radius-md); padding:4px; &:focus-visible { outline:2px solid var(--color-brand-500); outline-offset:2px; } }
@@ -122,7 +122,7 @@ export function avatarColor(name: string): string {
     .navbar__logo-text { font-size:var(--text-lg); font-weight:700; color:var(--color-navy-900); letter-spacing:0.04em; }
     .navbar__nav-link { font-size:var(--text-sm); font-weight:500; color:var(--color-gray-600); text-decoration:none; padding:6px 12px; border-radius:var(--radius-md); transition:background var(--transition-fast),color var(--transition-fast); &:hover { background:var(--color-gray-100); color:var(--color-gray-900); } &:focus-visible { outline:2px solid var(--color-brand-500); outline-offset:2px; } }
     .navbar__icon-btn { display:flex; align-items:center; justify-content:center; position:relative; width:38px; height:38px; border:none; background:none; border-radius:var(--radius-md); color:var(--color-gray-500); cursor:pointer; transition:background var(--transition-fast),color var(--transition-fast); svg { width:20px; height:20px; } &:hover { background:var(--color-gray-100); color:var(--color-gray-700); } &:focus-visible { outline:2px solid var(--color-brand-500); outline-offset:2px; } }
-    .navbar__lang-pill { display:flex; align-items:center; background:var(--color-gray-100); border-radius:999px; padding:3px; gap:0; }
+    .navbar__lang-pill { display:flex; align-items:center; background:var(--color-gray-100); border:1px solid var(--color-gray-200); border-radius:999px; padding:3px; gap:0; }
     .navbar__lang-sep { width:1px; height:12px; background:var(--color-gray-300); flex-shrink:0; }
     .navbar__lang-opt { border:none; background:transparent; color:var(--color-gray-500); font-size:var(--text-xs); font-weight:600; letter-spacing:0.05em; padding:4px 10px; border-radius:999px; cursor:pointer; transition:background var(--transition-fast),color var(--transition-fast),box-shadow var(--transition-fast); &--active { background:var(--surface-card); color:var(--color-gray-900); box-shadow:var(--shadow-sm); } &:not(.navbar__lang-opt--active):hover { color:var(--color-gray-700); } &:focus-visible { outline:2px solid var(--color-brand-500); outline-offset:2px; } }
     .navbar__badge { position:absolute; top:4px; right:4px; min-width:16px; height:16px; background:var(--color-error); color:#fff; font-size:10px; font-weight:700; line-height:1; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 3px; pointer-events:none; }

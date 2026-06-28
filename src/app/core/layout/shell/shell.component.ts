@@ -2,7 +2,7 @@
  * ShellComponent — authenticated application shell.
  *
  * Layout: full-width top navbar + scrollable content area + footer.
- * The sidebar has been removed in favour of a top-nav-only layout.
+ * Footer is full-width (hors du padding latéral) avec fond blanc — symétrie avec la navbar.
  */
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
@@ -34,13 +34,15 @@ import { FooterComponent } from '../footer/footer.component';
       background: var(--surface-bg);
       display: flex;
       flex-direction: column;
-      padding: 40px 40px 0;
     }
 
-    .shell__page { flex: 1; }
+    .shell__page {
+      flex: 1;
+      padding: 48px 48px 40px;
+    }
 
-    @media (max-width: 1024px) { .shell__content { padding: 32px 24px 0; } }
-    @media (max-width: 767px) { .shell__content { padding: 24px 16px 0; } }
+    @media (max-width: 1024px) { .shell__page { padding: 32px 32px 32px; } }
+    @media (max-width: 767px) { .shell__page { padding: 24px 16px 24px; } }
   `],
 })
 export class ShellComponent {}
