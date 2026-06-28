@@ -1,0 +1,288 @@
+// ContactComponent styles — tokens only
+// BEM: .contact, .contact-card, .form-field
+
+// ─── Page wrapper ────────────────────────────────────────────────────────────
+.contact {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+// ─── Header ──────────────────────────────────────────────────────────────────
+.contact__header {
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.contact__title {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--color-navy-900);
+  margin: 0;
+}
+
+.contact__subtitle {
+  font-size: var(--text-base);
+  color: var(--color-gray-500);
+  margin: 8px 0 0;
+}
+
+// ─── Contact cards grid ───────────────────────────────────────────────────────
+.contact__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 48px;
+}
+
+// ─── Contact card ─────────────────────────────────────────────────────────────
+.contact-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--surface-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+}
+
+.contact-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-lg);
+  flex-shrink: 0;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  &--email {
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--color-brand-600);
+  }
+
+  &--github {
+    background: rgba(17, 24, 39, 0.08);
+    color: var(--color-gray-700);
+  }
+
+  &--docs {
+    background: rgba(5, 150, 105, 0.1);
+    color: var(--color-success);
+  }
+
+  &--community {
+    background: rgba(124, 58, 237, 0.1);
+    color: #7C3AED;
+  }
+}
+
+.contact-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.contact-card__label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-gray-400);
+  margin: 0 0 2px;
+}
+
+.contact-card__value {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-navy-900);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contact-card__arrow {
+  font-size: var(--text-base);
+  color: var(--color-gray-400);
+  flex-shrink: 0;
+}
+
+// ─── Form section ─────────────────────────────────────────────────────────────
+.contact__form-section {
+  background: var(--surface-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  padding: 32px;
+}
+
+.contact__form-title {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--color-navy-900);
+  margin: 0 0 8px;
+}
+
+.contact__form-note {
+  font-size: var(--text-sm);
+  color: var(--color-gray-400);
+  margin: 0 0 24px;
+}
+
+.contact__form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+// ─── Form field ───────────────────────────────────────────────────────────────
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-field__label {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-gray-700);
+}
+
+.form-field__required {
+  color: var(--color-error);
+  margin-left: 2px;
+}
+
+.form-field__input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: var(--text-sm);
+  font-family: var(--font-sans);
+  color: var(--color-gray-900);
+  background: var(--surface-bg);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  box-sizing: border-box;
+  outline: none;
+
+  &::placeholder {
+    color: var(--color-gray-400);
+  }
+
+  &:focus {
+    border-color: var(--color-brand-500);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  }
+
+  &--error {
+    border-color: var(--color-error);
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+    }
+  }
+
+  &--textarea {
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.5;
+  }
+}
+
+.form-field__error {
+  font-size: var(--text-xs);
+  color: var(--color-error);
+  margin: 0;
+}
+
+// ─── Submit button ────────────────────────────────────────────────────────────
+.contact__submit {
+  align-self: flex-start;
+  padding: 10px 24px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  font-family: var(--font-sans);
+  color: #fff;
+  background: var(--color-brand-600);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  box-shadow: var(--btn-primary-shadow);
+  transition:
+    background var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+
+  &:hover {
+    background: var(--color-brand-700);
+    box-shadow: var(--btn-primary-shadow-hover);
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// ─── Success state ────────────────────────────────────────────────────────────
+.contact__success {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: var(--color-success-light);
+  border-radius: var(--radius-md);
+  color: var(--color-success-dark);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.contact__success-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+// ─── Responsive ──────────────────────────────────────────────────────────────
+@media (max-width: 640px) {
+  .contact {
+    padding: 24px 16px;
+  }
+
+  .contact__cards {
+    grid-template-columns: 1fr;
+  }
+
+  .contact__form-section {
+    padding: 20px 16px;
+  }
+
+  .contact__submit {
+    width: 100%;
+    text-align: center;
+  }
+}
