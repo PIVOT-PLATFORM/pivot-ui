@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, OnInit, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -18,7 +17,7 @@ function strongPassword(c: AbstractControl): ValidationErrors | null {
   selector: 'piv-reset-password',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslocoPipe],
+  imports: [ReactiveFormsModule, RouterLink, TranslocoPipe],
   template: `
     <div class="auth-page">
       <div class="card auth-card">
