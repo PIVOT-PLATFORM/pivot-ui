@@ -58,7 +58,7 @@ export function avatarColor(name: string): string {
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
           }
         </button>
-        <button class="navbar__icon-btn navbar__icon-btn--circle" [attr.aria-label]="'nav.help' | transloco" [title]="'nav.help' | transloco" type="button">
+        <button class="navbar__icon-btn" [attr.aria-label]="'nav.help' | transloco" [title]="'nav.help' | transloco" type="button">
           <span class="navbar__help-label" aria-hidden="true">?</span>
         </button>
         <a class="navbar__icon-btn" [href]="bugReportUrl" [attr.aria-label]="'nav.bug_report' | transloco" [title]="'nav.bug_report' | transloco">
@@ -141,13 +141,13 @@ export function avatarColor(name: string): string {
     .navbar__avatar { width:32px; height:32px; border-radius:50%; color:#fff; display:flex; align-items:center; justify-content:center; font-size:var(--text-xs); font-weight:700; flex-shrink:0; letter-spacing:0.03em; &--lg { width:40px; height:40px; font-size:var(--text-sm); } }
     .navbar__username { font-size:var(--text-sm); font-weight:500; color:var(--color-gray-700); }
     .navbar__chevron { width:16px; height:16px; color:var(--color-gray-400); transition:transform var(--transition-fast); &--open { transform:rotate(180deg); } }
-    .navbar__dropdown { position:absolute; top:calc(100% + 6px); right:0; min-width:256px; background:var(--surface-card); border:1px solid var(--color-gray-200); border-radius:var(--radius-xl); box-shadow:var(--shadow-lg); padding:6px; z-index:200; }
-    .navbar__dropdown-header { display:flex; align-items:center; gap:12px; padding:12px; }
-    .navbar__dropdown-identity { display:flex; flex-direction:column; gap:2px; min-width:0; }
+    .navbar__dropdown { position:absolute; top:calc(100% + 6px); right:0; min-width:272px; background:var(--surface-card); border:1px solid var(--color-gray-200); border-radius:var(--radius-xl); box-shadow:var(--shadow-lg); padding:8px; z-index:200; }
+    .navbar__dropdown-header { display:flex; align-items:center; gap:12px; padding:14px 14px 12px; }
+    .navbar__dropdown-identity { display:flex; flex-direction:column; gap:3px; min-width:0; }
     .navbar__dropdown-name { font-size:var(--text-sm); font-weight:600; color:var(--color-gray-900); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .navbar__dropdown-email { font-size:var(--text-xs); color:var(--color-gray-500); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .navbar__dropdown-sep { border:none; border-top:1px solid var(--color-gray-200); margin:4px 0; }
-    .navbar__dropdown-item { display:flex; align-items:center; gap:10px; width:100%; padding:9px 12px; border:none; background:none; border-radius:var(--radius-md); font-size:var(--text-sm); color:var(--color-gray-700); cursor:pointer; text-align:left; transition:background var(--transition-fast); svg { width:16px; height:16px; flex-shrink:0; color:var(--color-gray-400); } &:hover:not([aria-disabled="true"]) { background:var(--color-gray-100); } &[aria-disabled="true"] { opacity:.55; cursor:default; } &--danger { color:var(--color-error); svg { color:var(--color-error); } &:hover { background:var(--color-error-light); } } &:focus-visible { outline:2px solid var(--color-brand-500); outline-offset:2px; } }
+    .navbar__dropdown-sep { border:none; border-top:1px solid var(--color-gray-200); margin:6px 0; }
+    .navbar__dropdown-item { display:flex; align-items:center; gap:12px; width:100%; padding:11px 14px; border:none; background:none; border-radius:var(--radius-md); font-size:var(--text-sm); color:var(--color-gray-700); cursor:pointer; text-align:left; transition:background var(--transition-fast); svg { width:16px; height:16px; flex-shrink:0; color:var(--color-gray-400); } &:hover:not([aria-disabled="true"]) { background:var(--color-gray-100); } &[aria-disabled="true"] { opacity:.55; cursor:default; } &--danger { color:var(--color-error); svg { color:var(--color-error); } &:hover { background:var(--color-error-light); } } &:focus-visible { outline:2px solid var(--color-brand-500); outline-offset:2px; } }
     .navbar__soon { margin-left:auto; font-size:10px; font-weight:600; color:var(--color-brand-600); background:var(--color-brand-100); border-radius:4px; padding:2px 6px; letter-spacing:0.04em; text-transform:uppercase; flex-shrink:0; }
     @media (max-width:767px) { .navbar__username { display:none; } .navbar__nav { display:none; } .navbar__chevron { display:none; } }
   `],
