@@ -1,44 +1,39 @@
-import { Component, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+/**
+ * ShellComponent — authenticated application shell.
+ *
+ * Layout: full-width top navbar + scrollable content area.
+ * The sidebar has been removed in favour of a top-nav-only layout.
+ */
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from '../navbar/navbar.component';
-import { SidebarComponent } from '../sidebar/sidebar.component';
 
 @Component({
   selector: 'piv-shell',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, NavbarComponent, SidebarComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterOutlet, NavbarComponent],
   template: `
-    <div class="shell" [class.shell--collapsed]="sidebarCollapsed()">
-      <piv-sidebar [collapsed]="sidebarCollapsed()" (toggleCollapse)="sidebarCollapsed.set(!sidebarCollapsed())"/>
-      <div class="shell__main">
-        <piv-navbar (menuToggle)="sidebarCollapsed.set(!sidebarCollapsed())"/>
-        <main class="shell__content">
-          <router-outlet/>
-        </main>
-      </div>
+    <div class="shell">
+      <piv-navbar/>
+      <main class="shell__content">
+        <router-outlet/>
+      </main>
     </div>
   `,
   styles: [`
     .shell {
       display: flex;
+      flex-direction: column;
       height: 100vh;
       overflow: hidden;
     }
-    .shell__main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
+
     .shell__content {
       flex: 1;
       overflow-y: auto;
-      padding: 24px;
       background: var(--surface-bg);
     }
-  `]
+  `],
 })
-export class ShellComponent {
-  sidebarCollapsed = signal(false);
-}
+export class ShellComponent {}
