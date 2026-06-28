@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { environment } from '../../../../environments/environment';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '../../auth/service/auth.service';
 import { ThemeService } from '../../theme/theme.service';
@@ -62,7 +62,7 @@ export function avatarColor(name: string): string {
         <button class="navbar__icon-btn" [attr.aria-label]="'nav.help' | transloco" [title]="'nav.help' | transloco" type="button">
           <span class="navbar__help-label" aria-hidden="true">?</span>
         </button>
-        <a class="navbar__icon-btn" [href]="bugReportUrl" [attr.aria-label]="'nav.bug_report' | transloco" [title]="'nav.bug_report' | transloco">
+        <a class="navbar__icon-btn" [href]="bugReportUrl()" [attr.aria-label]="'nav.bug_report' | transloco" [title]="'nav.bug_report' | transloco">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2l1.88 1.88"/><path d="M14.12 3.88L16 2"/><path d="M9 7.13v-1a3.003 3.003 0 116 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 014-4h4a4 4 0 014 4v3c0 3.3-2.7 6-6 6z"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 4-4"/><path d="M17.47 9c1.93-.2 3.53-1.9 3.53-4"/><path d="M18 13h4"/><path d="M21 21c0-2.1-1.7-3.9-4-4"/></svg>
         </a>
         <div class="navbar__lang-pill" role="group" [attr.aria-label]="'nav.lang_aria' | transloco">
@@ -156,10 +156,32 @@ export class NavbarComponent {
   private readonly auth = inject(AuthService);
   private readonly themeService = inject(ThemeService);
   private readonly transloco = inject(TranslocoService);
-
-  readonly bugReportUrl = environment.bugReportUrl;
+  private readonly sanitizer = inject(DomSanitizer);
 
   readonly lang = toSignal(this.transloco.langChanges$, { initialValue: this.transloco.getActiveLang() });
+
+  readonly bugReportUrl: ReturnType<typeof computed<SafeUrl>> = computed(() => {
+    const fr = this.lang() === 'fr';
+    const subject = encodeURIComponent(fr ? '[PIVOT] Rapport de bug' : '[PIVOT] Bug Report');
+    const body = fr
+      ? encodeURIComponent(
+          '**Description du problème**\n[Décrivez le problème rencontré]\n\n' +
+          '**Étapes pour reproduire**\n1. \n2. \n3. \n\n' +
+          '**Comportement attendu**\n[Ce qui devrait se passer]\n\n' +
+          '**Comportement observé**\n[Ce qui se passe réellement]\n\n' +
+          '**Environnement**\n- Navigateur : \n- Système d\'exploitation : \n- Version PIVOT : ',
+        )
+      : encodeURIComponent(
+          '**Problem description**\n[Describe the issue]\n\n' +
+          '**Steps to reproduce**\n1. \n2. \n3. \n\n' +
+          '**Expected behavior**\n[What should happen]\n\n' +
+          '**Actual behavior**\n[What actually happens]\n\n' +
+          '**Environment**\n- Browser: \n- Operating system: \n- PIVOT version: ',
+        );
+    return this.sanitizer.bypassSecurityTrustUrl(
+      `mailto:bugs@pivot-platform.fr?subject=${subject}&body=${body}`,
+    );
+  });
 
   readonly user = this.auth.currentUser;
   readonly userMenuOpen = signal(false);

@@ -53,13 +53,11 @@ describe('ContactComponent', () => {
   it('shows error when submitting empty form', () => {
     component.onSubmit();
     fixture.detectChanges();
-    expect(component.nameError()).toBe('Le nom est requis.');
     expect(component.emailError()).toBe("L'email est requis.");
     expect(component.messageError()).toBe('Le message est requis.');
   });
 
   it('shows email format error for invalid email', () => {
-    component.form.name = 'Alice';
     component.form.email = 'not-an-email';
     component.form.message = 'Hello';
     component.onSubmit();
@@ -68,7 +66,6 @@ describe('ContactComponent', () => {
   });
 
   it('shows success state on valid submission', () => {
-    component.form.name = 'Alice';
     component.form.email = 'alice@example.com';
     component.form.message = 'Bonjour, ceci est un test.';
     component.onSubmit();
@@ -79,11 +76,9 @@ describe('ContactComponent', () => {
   });
 
   it('resets form fields after successful submission', () => {
-    component.form.name = 'Alice';
     component.form.email = 'alice@example.com';
     component.form.message = 'Test message.';
     component.onSubmit();
-    expect(component.form.name).toBe('');
     expect(component.form.email).toBe('');
     expect(component.form.message).toBe('');
   });

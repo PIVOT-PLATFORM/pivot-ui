@@ -18,7 +18,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 interface ContactForm {
-  name: string;
   email: string;
   message: string;
 }
@@ -153,30 +152,6 @@ interface ContactForm {
             novalidate
             aria-label="Formulaire de contact"
           >
-            <!-- Name -->
-            <div class="form-field">
-              <label class="form-field__label" for="contact-name">
-                Nom <span class="form-field__required" aria-hidden="true">*</span>
-              </label>
-              <input
-                id="contact-name"
-                type="text"
-                class="form-field__input"
-                [(ngModel)]="form.name"
-                name="name"
-                autocomplete="name"
-                aria-required="true"
-                [attr.aria-describedby]="nameError() ? 'contact-name-error' : null"
-                [class.form-field__input--error]="nameError()"
-                placeholder="Jean Dupont"
-              />
-              @if (nameError()) {
-                <p id="contact-name-error" class="form-field__error" role="alert">
-                  Le nom est requis.
-                </p>
-              }
-            </div>
-
             <!-- Email -->
             <div class="form-field">
               <label class="form-field__label" for="contact-email">
@@ -238,13 +213,12 @@ interface ContactForm {
 })
 export class ContactComponent {
   /** Form model — two-way bound via ngModel. */
-  form: ContactForm = { name: '', email: '', message: '' };
+  form: ContactForm = { email: '', message: '' };
 
   /** True after a successful (client-side) submission. */
   readonly submitted = signal(false);
 
   /** Validation error signals — computed on demand, not reactive to every keystroke. */
-  readonly nameError = signal('');
   readonly emailError = signal('');
   readonly messageError = signal('');
 
@@ -257,16 +231,10 @@ export class ContactComponent {
    */
   onSubmit(): void {
     // Reset errors
-    this.nameError.set('');
     this.emailError.set('');
     this.messageError.set('');
 
     let valid = true;
-
-    if (!this.form.name.trim()) {
-      this.nameError.set('Le nom est requis.');
-      valid = false;
-    }
 
     if (!this.form.email.trim()) {
       this.emailError.set('L\'email est requis.');
@@ -284,7 +252,7 @@ export class ContactComponent {
     if (valid) {
       // MVP: no backend — simulate success
       this.submitted.set(true);
-      this.form = { name: '', email: '', message: '' };
+      this.form = { email: '', message: '' };
     }
   }
 }

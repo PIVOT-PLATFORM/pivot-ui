@@ -21,14 +21,14 @@ export const routes: Routes = [
         loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
       },
       {
+        path: 'contact',
+        loadComponent: () => import('./features/contact/contact.component').then(m => m.ContactComponent),
+      },
+      {
         path: 'teams',
         loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
       },
     ],
-  },
-  {
-    path: 'contact',
-    loadComponent: () => import('./features/contact/contact.component').then(m => m.ContactComponent),
   },
   {
     path: 'legal',
@@ -50,10 +50,6 @@ export const routes: Routes = [
         loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
       },
     ],
-  },
-  {
-    path: 'contact',
-    loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
   },
   {
     path: 'faq',

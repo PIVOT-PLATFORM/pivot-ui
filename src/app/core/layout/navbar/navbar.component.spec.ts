@@ -203,7 +203,10 @@ describe('NavbarComponent', () => {
 
   describe('bugReportUrl', () => {
     it('is a mailto link', () => {
-      expect(component.bugReportUrl).toMatch(/^mailto:/);
+      fixture.detectChanges();
+      const el: HTMLElement = fixture.nativeElement;
+      const link = el.querySelector<HTMLAnchorElement>('a.navbar__icon-btn[href]');
+      expect(link?.href).toMatch(/mailto:/);
     });
   });
 
