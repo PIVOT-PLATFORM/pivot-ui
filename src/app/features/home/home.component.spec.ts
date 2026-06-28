@@ -6,7 +6,7 @@ import { provideRouter } from '@angular/router';
 import { signal, computed, Component } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import { HomeComponent } from './home.component';
-import { AuthService, UserInfo } from '../../core/auth/service/auth.service';
+import type { UserInfo } from '../../core/auth/service/auth.service';
 import { ModuleRegistryService } from '../../core/modules/module-registry.service';
 import type { PivotModuleUi } from '../../core/modules/module.model';
 
@@ -103,14 +103,14 @@ describe('HomeComponent', () => {
     component.loading.set(true);
     fixture.detectChanges();
     const skeletons = fixture.nativeElement.querySelectorAll('.module-card--skeleton');
-    expect(skeletons.length).toBe(3);
+    expect(skeletons).toHaveLength(3);
   });
 
   it('hides skeleton after load completes', () => {
     component.loading.set(false);
     fixture.detectChanges();
     const skeletons = fixture.nativeElement.querySelectorAll('.module-card--skeleton');
-    expect(skeletons.length).toBe(0);
+    expect(skeletons).toHaveLength(0);
   });
 
   it('shows empty state when activeModules=[] and comingSoonModules=[]', () => {
@@ -137,7 +137,7 @@ describe('HomeComponent', () => {
     component.loading.set(false);
     fixture.detectChanges();
     const cards = fixture.nativeElement.querySelectorAll('.module-card--active');
-    expect(cards.length).toBe(2);
+    expect(cards).toHaveLength(2);
   });
 
   it('does not show empty state when active modules exist', () => {
