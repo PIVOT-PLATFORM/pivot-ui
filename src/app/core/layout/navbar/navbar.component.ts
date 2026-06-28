@@ -124,6 +124,7 @@ export function avatarColor(name: string): string {
   styles: [`
     .navbar { display:flex; align-items:center; height:64px; padding:0 48px; background:var(--surface-navbar); border-bottom:1px solid var(--navbar-border-color); box-shadow:var(--shadow-sm); position:sticky; top:0; z-index:100; gap:16px; }
     .navbar__left { display:flex; align-items:center; gap:24px; }
+    .navbar__nav { display:flex; align-items:center; gap:4px; }
     .navbar__right { margin-left:auto; display:flex; align-items:center; gap:4px; }
     .navbar__logo { display:flex; align-items:center; gap:8px; text-decoration:none; border-radius:var(--radius-md); padding:4px; &:focus-visible { outline:2px solid rgba(255,255,255,0.6); outline-offset:2px; } }
     .navbar__logo-icon { width:32px; height:32px; flex-shrink:0; }
