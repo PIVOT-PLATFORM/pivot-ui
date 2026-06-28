@@ -1,3 +1,10 @@
+# [0.2.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.1.0...v0.2.0) (2026-06-28)
+
+
+### Features
+
+* **ui:** ThemeService — light/dark/ocean themes with CSS token overrides ([#46](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/46)) ([1e1171b](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/1e1171be1755c9ed31d5187c8b3cfdcf2f3c38c2))
+
 # [0.1.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.0.0...v0.1.0) (2026-06-28)
 
 

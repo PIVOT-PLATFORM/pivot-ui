@@ -1,6 +1,6 @@
 # Notes de version — PIVOT UI
 
-## [Unreleased]
+## [0.2.0] — 28 juin 2026
 
 ### Thèmes visuels
 - Deux thèmes disponibles : Clair et Sombre
