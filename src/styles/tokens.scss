@@ -165,21 +165,21 @@
   --surface-bg:      #0f172a;
   --surface-card:    #1e293b;
   --surface-sidebar: #0b1120;
-  --surface-navbar:  #1e293b;
+  --surface-navbar:  linear-gradient(135deg, #07060e 0%, #0c0a1c 25%, #12103a 55%, #1a1248 80%, #1e1450 100%);
   --color-error:     #f87171;
   --color-success:   #34d399;
-  // Navbar tokens — fond sombre solide
-  --navbar-border-color:      var(--color-gray-200);
-  --navbar-logo-color:        var(--color-navy-900);
-  --navbar-text:              var(--color-gray-600);
-  --navbar-text-hover:        var(--color-gray-900);
-  --navbar-hover-bg:          var(--color-gray-100);
-  --navbar-active-bg:         var(--color-brand-100);
-  --navbar-active-color:      var(--color-brand-600);
-  --navbar-pill-bg:           var(--color-gray-100);
-  --navbar-pill-border:       var(--color-gray-200);
-  --navbar-pill-active-bg:    var(--surface-card);
-  --navbar-pill-active-color: var(--color-navy-900);
-  --navbar-pill-sep:          var(--color-gray-300);
+  // Navbar tokens — gradient noir premium teinté violet (même pattern que light)
+  --navbar-border-color:      transparent;
+  --navbar-logo-color:        #ffffff;
+  --navbar-text:              rgba(255,255,255,0.75);
+  --navbar-text-hover:        #ffffff;
+  --navbar-hover-bg:          rgba(255,255,255,0.08);
+  --navbar-active-bg:         rgba(255,255,255,0.13);
+  --navbar-active-color:      #ffffff;
+  --navbar-pill-bg:           rgba(255,255,255,0.08);
+  --navbar-pill-border:       rgba(255,255,255,0.15);
+  --navbar-pill-active-bg:    rgba(255,255,255,0.18);
+  --navbar-pill-active-color: #ffffff;
+  --navbar-pill-sep:          rgba(255,255,255,0.2);
 }
 
