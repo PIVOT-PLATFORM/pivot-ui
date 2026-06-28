@@ -2,6 +2,7 @@
   "common": {
     "logo": "PIVOT",
     "or": "or",
+    "loading": "Loading…",
     "error_generic": "An error occurred. Please try again.",
     "field_required": "This field is required."
   },

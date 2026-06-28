@@ -35,10 +35,6 @@ import { HttpErrorResponse } from '@angular/common/http';
           <h1 class="auth-title">{{ 'auth.resend.title' | transloco }}</h1>
           <p class="auth-subtitle">{{ 'auth.resend.subtitle' | transloco }}</p>
 
-          @if (error()) {
-            <div class="alert alert-error" style="margin-bottom:16px">{{ error() }}</div>
-          }
-
           <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
             <div class="form-group" style="margin-bottom:20px">
               <label class="form-label" for="email">{{ 'auth.resend.email' | transloco }}</label>
@@ -49,9 +45,12 @@ import { HttpErrorResponse } from '@angular/common/http';
             </div>
 
             <button type="submit" class="btn btn-primary btn-full btn-lg" [disabled]="loading()">
-              @if (loading()) { <span class="spinner"></span> }
+              @if (loading()) { <span class="spinner" aria-hidden="true"></span> }
               {{ 'auth.resend.submit' | transloco }}
             </button>
+            <span role="status" aria-live="polite" aria-atomic="true" class="sr-only">
+              @if (loading()) { {{ 'common.loading' | transloco }} }
+            </span>
           </form>
 
           <p class="auth-footer" style="margin-top:24px">
@@ -83,13 +82,11 @@ export class ResendVerificationComponent {
   });
 
   loading = signal(false);
-  error = signal<string | null>(null);
   sent = signal(false);
 
   submit(): void {
     if (this.form.invalid || this.loading()) return;
     this.loading.set(true);
-    this.error.set(null);
 
     this.auth.resendVerification(this.form.value.email!).subscribe({
       next: () => { this.sent.set(true); this.loading.set(false); },

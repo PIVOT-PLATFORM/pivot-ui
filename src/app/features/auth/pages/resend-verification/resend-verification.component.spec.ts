@@ -67,10 +67,24 @@ describe('ResendVerificationComponent', () => {
     expect(component.loading()).toBe(false);
   });
 
-  it('affiche alerte erreur quand signal error positionné', () => {
-    component.error.set('common.error_generic');
+  it('affiche le bloc succès après envoi (DOM)', () => {
+    component.form.setValue({ email: 'user@example.com' });
+    component.submit();
+    httpMock.expectOne(r => r.url === URL).flush({ message: 'ok' });
     fixture.detectChanges();
-    expect(component.error()).toBe('common.error_generic');
+    expect(fixture.nativeElement.querySelector('.success-block')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('form')).toBeFalsy();
+  });
+
+  it('does not submit twice when first call returns error', () => {
+    component.form.setValue({ email: 'user@example.com' });
+    component.submit();
+    component.submit();
+    const reqs = httpMock.match(r => r.url === URL);
+    expect(reqs).toHaveLength(1);
+    reqs[0].flush('', { status: 500, statusText: 'Server Error' });
+    expect(component.sent()).toBe(true);
+    expect(component.loading()).toBe(false);
   });
 
   it('does not submit while loading', () => {

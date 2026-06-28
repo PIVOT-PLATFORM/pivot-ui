@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, OnInit, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -18,7 +17,7 @@ function strongPassword(c: AbstractControl): ValidationErrors | null {
   selector: 'piv-reset-password',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslocoPipe],
+  imports: [ReactiveFormsModule, RouterLink, TranslocoPipe],
   template: `
     <div class="auth-page">
       <div class="card auth-card">
@@ -75,16 +74,22 @@ function strongPassword(c: AbstractControl): ValidationErrors | null {
                 <label class="form-label" for="newPassword">{{ 'auth.reset_password.new_password' | transloco }}</label>
                 <input id="newPassword" type="password" formControlName="newPassword" class="form-control"
                        [class.is-invalid]="form.controls.newPassword.invalid && form.controls.newPassword.touched"
-                       placeholder="••••••••••••" autocomplete="new-password"/>
-                @if (form.controls.newPassword.touched && form.controls.newPassword.errors?.['weak']; as weakErr) {
-                  <span class="form-error">{{ weakErr | transloco }}</span>
-                }
+                       placeholder="••••••••••••" autocomplete="new-password"
+                       aria-describedby="newPassword-error"/>
+                <span id="newPassword-error" class="form-error" role="alert">
+                  @if (form.controls.newPassword.touched && form.controls.newPassword.errors?.['weak']; as weakErr) {
+                    {{ weakErr | transloco }}
+                  }
+                </span>
               </div>
 
               <button type="submit" class="btn btn-primary btn-full btn-lg" [disabled]="loading()">
-                @if (loading()) { <span class="spinner"></span> }
+                @if (loading()) { <span class="spinner" aria-hidden="true"></span> }
                 {{ 'auth.reset_password.submit' | transloco }}
               </button>
+              <span role="status" aria-live="polite" aria-atomic="true" class="sr-only">
+                @if (loading()) { {{ 'common.loading' | transloco }} }
+              </span>
             </form>
           }
         }
@@ -115,7 +120,7 @@ export class ResetPasswordComponent implements OnInit {
   }
 
   submit(): void {
-    if (this.form.invalid || this.loading()) return;
+    if (this.form.invalid || this.loading() || this.tokenState() !== 'valid') return;
     this.loading.set(true);
     this.error.set(null);
 
