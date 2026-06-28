@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { environment } from '../../../../environments/environment';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '../../auth/service/auth.service';
 import { ThemeService } from '../../theme/theme.service';
@@ -57,6 +58,12 @@ export function avatarColor(name: string): string {
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
           }
         </button>
+        <button class="navbar__icon-btn navbar__icon-btn--circle" [attr.aria-label]="'nav.help' | transloco" [title]="'nav.help' | transloco" type="button">
+          <span class="navbar__help-label" aria-hidden="true">?</span>
+        </button>
+        <a class="navbar__icon-btn" [href]="bugReportUrl" [attr.aria-label]="'nav.bug_report' | transloco" [title]="'nav.bug_report' | transloco">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2l1.88 1.88"/><path d="M14.12 3.88L16 2"/><path d="M9 7.13v-1a3.003 3.003 0 116 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 014-4h4a4 4 0 014 4v3c0 3.3-2.7 6-6 6z"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 4-4"/><path d="M17.47 9c1.93-.2 3.53-1.9 3.53-4"/><path d="M18 13h4"/><path d="M21 21c0-2.1-1.7-3.9-4-4"/></svg>
+        </a>
         <div class="navbar__lang-pill" role="group" [attr.aria-label]="'nav.lang_aria' | transloco">
           <button class="navbar__lang-opt" [class.navbar__lang-opt--active]="lang() === 'fr'" (click)="setLang('fr')" type="button" [attr.aria-pressed]="lang() === 'fr'">FR</button>
           <span class="navbar__lang-sep" aria-hidden="true"></span>
@@ -123,7 +130,8 @@ export function avatarColor(name: string): string {
     .navbar__logo-icon { width:32px; height:32px; flex-shrink:0; }
     .navbar__logo-text { font-size:var(--text-lg); font-weight:700; color:var(--color-navy-900); letter-spacing:0.04em; }
     .navbar__nav-link { font-size:var(--text-sm); font-weight:500; color:var(--color-gray-600); text-decoration:none; padding:6px 12px; border-radius:var(--radius-md); transition:background var(--transition-fast),color var(--transition-fast); &:hover { background:var(--color-gray-100); color:var(--color-gray-900); } &:focus-visible { outline:2px solid var(--color-brand-500); outline-offset:2px; } &--active { color:var(--color-brand-600); background:var(--color-brand-50); font-weight:600; } }
-    .navbar__icon-btn { display:flex; align-items:center; justify-content:center; position:relative; width:38px; height:38px; border:none; background:none; border-radius:var(--radius-md); color:var(--color-gray-500); cursor:pointer; transition:background var(--transition-fast),color var(--transition-fast); svg { width:20px; height:20px; } &:hover { background:var(--color-gray-100); color:var(--color-gray-700); } &:focus-visible { outline:2px solid var(--color-brand-500); outline-offset:2px; } }
+    .navbar__icon-btn { display:flex; align-items:center; justify-content:center; position:relative; width:38px; height:38px; border:none; background:none; border-radius:var(--radius-md); color:var(--color-gray-500); cursor:pointer; transition:background var(--transition-fast),color var(--transition-fast); text-decoration:none; svg { width:20px; height:20px; } &:hover { background:var(--color-gray-100); color:var(--color-gray-700); } &:focus-visible { outline:2px solid var(--color-brand-500); outline-offset:2px; } &--circle { border-radius:50%; background:var(--color-gray-100); border:1px solid var(--color-gray-200); &:hover { background:var(--color-gray-200); } } }
+    .navbar__help-label { font-size:var(--text-sm); font-weight:700; color:var(--color-gray-600); line-height:1; }
     .navbar__lang-pill { display:flex; align-items:center; background:var(--color-gray-100); border:1px solid var(--color-gray-200); border-radius:999px; padding:3px; gap:0; }
     .navbar__lang-sep { width:1px; height:12px; background:var(--color-gray-300); flex-shrink:0; }
     .navbar__lang-opt { border:none; background:transparent; color:var(--color-gray-500); font-size:var(--text-xs); font-weight:600; letter-spacing:0.05em; padding:4px 10px; border-radius:999px; cursor:pointer; transition:background var(--transition-fast),color var(--transition-fast),box-shadow var(--transition-fast); &--active { background:var(--surface-card); color:var(--color-gray-900); box-shadow:var(--shadow-sm); } &:not(.navbar__lang-opt--active):hover { color:var(--color-gray-700); } &:focus-visible { outline:2px solid var(--color-brand-500); outline-offset:2px; } }
@@ -148,6 +156,8 @@ export class NavbarComponent {
   private readonly auth = inject(AuthService);
   private readonly themeService = inject(ThemeService);
   private readonly transloco = inject(TranslocoService);
+
+  readonly bugReportUrl = environment.bugReportUrl;
 
   readonly lang = toSignal(this.transloco.langChanges$, { initialValue: this.transloco.getActiveLang() });
 

@@ -14,6 +14,8 @@
     "notifications": "Notifications",
     "notif_count": "{{ count }} notifications",
     "user_menu": "Menu de {{ name }}",
+    "help": "Aide",
+    "bug_report": "Remonter un bug",
     "home": "Accueil",
     "modules": "Modules",
     "teams": "Mes équipes",
