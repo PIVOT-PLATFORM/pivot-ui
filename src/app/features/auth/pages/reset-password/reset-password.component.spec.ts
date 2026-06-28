@@ -95,6 +95,16 @@ describe('ResetPasswordComponent', () => {
     httpMock.verify();
   });
 
+  it('ne soumet pas si tokenState est invalid', () => {
+    const { component, httpMock } = setup('reset-tok');
+    httpMock.expectOne(r => r.url === CHECK_URL).flush('', { status: 400, statusText: 'Bad Request' });
+    component.form.setValue({ newPassword: 'SecurePass123!' });
+    component.submit();
+    httpMock.expectNone(r => r.url === RESET_URL);
+    expect(component.loading()).toBe(false);
+    httpMock.verify();
+  });
+
   it('erreur 500 reset → message générique', () => {
     const { fixture, component, httpMock } = setup('reset-tok');
     httpMock.expectOne(r => r.url === CHECK_URL).flush({});

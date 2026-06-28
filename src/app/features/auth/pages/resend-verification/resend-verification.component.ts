@@ -35,10 +35,6 @@ import { HttpErrorResponse } from '@angular/common/http';
           <h1 class="auth-title">{{ 'auth.resend.title' | transloco }}</h1>
           <p class="auth-subtitle">{{ 'auth.resend.subtitle' | transloco }}</p>
 
-          @if (error()) {
-            <div class="alert alert-error" style="margin-bottom:16px">{{ error() | transloco }}</div>
-          }
-
           <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
             <div class="form-group" style="margin-bottom:20px">
               <label class="form-label" for="email">{{ 'auth.resend.email' | transloco }}</label>
@@ -83,13 +79,11 @@ export class ResendVerificationComponent {
   });
 
   loading = signal(false);
-  error = signal<string | null>(null);
   sent = signal(false);
 
   submit(): void {
     if (this.form.invalid || this.loading()) return;
     this.loading.set(true);
-    this.error.set(null);
 
     this.auth.resendVerification(this.form.value.email!).subscribe({
       next: () => { this.sent.set(true); this.loading.set(false); },

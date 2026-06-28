@@ -67,12 +67,6 @@ describe('ResendVerificationComponent', () => {
     expect(component.loading()).toBe(false);
   });
 
-  it('affiche alerte erreur quand signal error positionné', () => {
-    component.error.set('common.error_generic');
-    fixture.detectChanges();
-    expect(component.error()).toBe('common.error_generic');
-  });
-
   it('does not submit while loading', () => {
     component.form.setValue({ email: 'user@example.com' });
     component.submit();
