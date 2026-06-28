@@ -32,7 +32,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
       flex-wrap: wrap;
       gap: 12px 24px;
       padding: 20px 48px;
-      background: var(--surface-navbar);
+      background: var(--surface-card);
       border-top: 1px solid var(--color-gray-200);
     }
     .footer__copy { font-size:var(--text-xs); color:var(--color-gray-400); white-space:nowrap; }

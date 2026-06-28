@@ -43,7 +43,7 @@
   --surface-bg:      #F4F5F7;
   --surface-card:    #FFFFFF;
   --surface-sidebar: var(--color-navy-900);
-  --surface-navbar:  #FFFFFF;
+  --surface-navbar:  linear-gradient(135deg, #1e1b4b 0%, #312e81 20%, #4338ca 45%, #6d28d9 70%, #7c3aed 100%);
 
   // Auth pages gradient — dark indigo → violet (brand identity)
   --auth-gradient: linear-gradient(
@@ -54,6 +54,20 @@
     #6d28d9 70%,
     #7c3aed 100%
   );
+
+  // Navbar tokens — light theme (gradient dark bg → textes blancs)
+  --navbar-border-color:      transparent;
+  --navbar-logo-color:        #ffffff;
+  --navbar-text:              rgba(255,255,255,0.82);
+  --navbar-text-hover:        #ffffff;
+  --navbar-hover-bg:          rgba(255,255,255,0.12);
+  --navbar-active-bg:         rgba(255,255,255,0.18);
+  --navbar-active-color:      #ffffff;
+  --navbar-pill-bg:           rgba(255,255,255,0.12);
+  --navbar-pill-border:       rgba(255,255,255,0.22);
+  --navbar-pill-active-bg:    rgba(255,255,255,0.28);
+  --navbar-pill-active-color: #ffffff;
+  --navbar-pill-sep:          rgba(255,255,255,0.3);
 
   // Typography
   --font-sans: 'Inter', 'Segoe UI', Arial, sans-serif;
@@ -117,6 +131,19 @@
   --surface-navbar:  #0d2137;
   --color-error:     #f87171;
   --color-success:   #34d399;
+  // Navbar tokens — fond sombre solide
+  --navbar-border-color:      var(--color-gray-200);
+  --navbar-logo-color:        var(--color-navy-900);
+  --navbar-text:              var(--color-gray-600);
+  --navbar-text-hover:        var(--color-gray-900);
+  --navbar-hover-bg:          var(--color-gray-100);
+  --navbar-active-bg:         var(--color-brand-100);
+  --navbar-active-color:      var(--color-brand-600);
+  --navbar-pill-bg:           var(--color-gray-100);
+  --navbar-pill-border:       var(--color-gray-200);
+  --navbar-pill-active-bg:    var(--surface-card);
+  --navbar-pill-active-color: var(--color-navy-900);
+  --navbar-pill-sep:          var(--color-gray-300);
 }
 
 // ─── Dark theme ──────────────────────────────────────────────────────────────
@@ -141,5 +168,18 @@
   --surface-navbar:  #1e293b;
   --color-error:     #f87171;
   --color-success:   #34d399;
+  // Navbar tokens — fond sombre solide
+  --navbar-border-color:      var(--color-gray-200);
+  --navbar-logo-color:        var(--color-navy-900);
+  --navbar-text:              var(--color-gray-600);
+  --navbar-text-hover:        var(--color-gray-900);
+  --navbar-hover-bg:          var(--color-gray-100);
+  --navbar-active-bg:         var(--color-brand-100);
+  --navbar-active-color:      var(--color-brand-600);
+  --navbar-pill-bg:           var(--color-gray-100);
+  --navbar-pill-border:       var(--color-gray-200);
+  --navbar-pill-active-bg:    var(--surface-card);
+  --navbar-pill-active-color: var(--color-navy-900);
+  --navbar-pill-sep:          var(--color-gray-300);
 }
 
