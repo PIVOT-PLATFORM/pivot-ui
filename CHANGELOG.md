@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v1.0.0...v1.1.0) (2026-06-28)
+
+
+### Features
+
+* **modules:** PivotModuleDto, PivotModuleUi, ModuleRegistryService ([#45](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/45)) ([27d108e](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/27d108e1266298979f10d01c7624b72795ca52ba))
+
 # 1.0.0 (2026-06-28)
 
 
