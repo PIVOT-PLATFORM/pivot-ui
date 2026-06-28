@@ -1,5 +1,12 @@
 # Notes de version — PIVOT UI
 
+## [Unreleased]
+
+### Système de modules
+- Intégration de l'API de modules : la liste des modules disponibles est désormais chargée dynamiquement selon les droits de votre organisation
+
+---
+
 ## [0.5.0] — 1 juillet 2026
 
 ### Page de contact
@@ -57,12 +64,5 @@
 ---
 
 ## [0.1.0] — 28 juin 2026
-
-### Système de modules
-- Intégration de l'API de modules : la liste des modules disponibles est désormais chargée dynamiquement selon les droits de votre organisation
-
----
-
-## [0.0.0] — 28 juin 2026
 
 ### Interface d'authentification
