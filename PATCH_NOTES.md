@@ -3,7 +3,7 @@
 ## [Unreleased]
 
 ### Thèmes visuels
-- Trois thèmes disponibles : Clair, Sombre et Océan
+- Deux thèmes disponibles : Clair et Sombre
 - Le thème est mémorisé entre les sessions et respecte automatiquement la préférence système (clair/sombre)
 
 ---
