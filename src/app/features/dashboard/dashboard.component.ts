@@ -1,21 +1,23 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { AuthService } from '../../core/auth/service/auth.service';
 
 @Component({
   selector: 'piv-dashboard',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [TranslocoPipe],
   template: `
     <div class="dashboard">
-      <h1 class="dashboard__greeting">Bonjour, {{ user()?.firstName }} !</h1>
-      <p class="dashboard__subtitle">Bienvenue sur votre tableau de bord PIVOT.</p>
+      <h1 class="dashboard__greeting">{{ 'dashboard.greeting' | transloco: { name: user()?.firstName } }}</h1>
+      <p class="dashboard__subtitle">{{ 'dashboard.subtitle' | transloco }}</p>
       <div class="dashboard__cards">
         <div class="card dashboard__card">
-          <p class="dashboard__card-label">Rôle</p>
+          <p class="dashboard__card-label">{{ 'dashboard.card_role' | transloco }}</p>
           <p class="dashboard__card-value">{{ user()?.role }}</p>
         </div>
         <div class="card dashboard__card">
-          <p class="dashboard__card-label">Organisation</p>
+          <p class="dashboard__card-label">{{ 'dashboard.card_org' | transloco }}</p>
           <p class="dashboard__card-value">{{ user()?.tenantSlug }}</p>
         </div>
       </div>

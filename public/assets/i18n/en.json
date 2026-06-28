@@ -9,7 +9,24 @@
   "nav": {
     "sign_out": "Sign out",
     "lang_other": "FR",
-    "lang_current": "EN"
+    "lang_current": "EN",
+    "lang_aria": "Language",
+    "notifications": "Notifications",
+    "notif_count": "{{ count }} notifications",
+    "user_menu": "{{ name }}'s menu",
+    "home": "Home",
+    "modules": "Modules",
+    "teams": "My teams",
+    "dropdown": {
+      "user_menu_aria": "User menu",
+      "profile": "My profile",
+      "preferences": "Preferences",
+      "security": "Security",
+      "my_data": "My data",
+      "coming_soon": "Soon",
+      "coming_soon_a11y": "Coming soon",
+      "logout": "Sign out"
+    }
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -18,8 +35,25 @@
     "collapse": "Collapse"
   },
   "dashboard": {
-    "title": "Dashboard",
-    "welcome": "Welcome"
+    "greeting": "Hello, {{ name }}!",
+    "subtitle": "Welcome to your PIVOT dashboard.",
+    "card_role": "Role",
+    "card_org": "Organisation"
+  },
+  "footer": {
+    "copy": "Made by the PIVOT team",
+    "legal": "Legal notice",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "accessibility": "Accessibility",
+    "contact": "Contact",
+    "faq": "FAQ",
+    "sitemap": "Sitemap"
+  },
+  "coming_soon": {
+    "title": "Page under construction",
+    "subtitle": "This section will be available soon.",
+    "back": "Back to home"
   },
   "auth": {
     "login": {

@@ -1,20 +1,28 @@
 import { TestBed } from '@angular/core/testing';
 import { ComponentFixture } from '@angular/core/testing';
+import { importProvidersFrom } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { Component } from '@angular/core';
-import { of } from 'rxjs';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 import { NavbarComponent, avatarColor } from './navbar.component';
 import { AuthService } from '../../auth/service/auth.service';
 import { ThemeService } from '../../theme/theme.service';
 import { environment } from '../../../../environments/environment';
 
-const mockTranslocoService = {
-  langChanges$: of('fr'),
-  getActiveLang: () => 'fr',
-  setActiveLang: vi.fn(),
+const TRANSLOCO_FR = {
+  nav: {
+    home: 'Accueil', modules: 'Modules', teams: 'Mes équipes',
+    lang_aria: 'Langue', notifications: 'Notifications',
+    notif_count: '{{ count }} notifications', user_menu: 'Menu de {{ name }}',
+    sign_out: 'Se déconnecter',
+    dropdown: {
+      user_menu_aria: 'Menu utilisateur', profile: 'Mon profil',
+      preferences: 'Préférences', security: 'Sécurité', my_data: 'Mes données',
+      coming_soon: 'Bientôt', coming_soon_a11y: 'Bientôt disponible', logout: 'Déconnexion',
+    },
+  },
 };
 
 @Component({ template: '', standalone: true })
@@ -62,7 +70,13 @@ describe('NavbarComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([{ path: '**', component: StubComponent }]),
-        { provide: TranslocoService, useValue: mockTranslocoService },
+        importProvidersFrom(
+          TranslocoTestingModule.forRoot({
+            langs: { fr: TRANSLOCO_FR, en: TRANSLOCO_FR },
+            translocoConfig: { defaultLang: 'fr', availableLangs: ['fr', 'en'] },
+            preloadLangs: true,
+          }),
+        ),
       ],
     }).compileComponents();
 

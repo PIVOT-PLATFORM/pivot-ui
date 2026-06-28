@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '../../auth/service/auth.service';
 import { ThemeService } from '../../theme/theme.service';
 
@@ -32,7 +32,7 @@ export function avatarColor(name: string): string {
   selector: 'piv-navbar',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, TranslocoPipe],
   template: `
     <header class="navbar" role="banner">
       <div class="navbar__left">
@@ -44,9 +44,9 @@ export function avatarColor(name: string): string {
           <span class="navbar__logo-text">PIVOT</span>
         </a>
         <nav class="navbar__nav" aria-label="Navigation principale">
-          <a routerLink="/dashboard" routerLinkActive="navbar__nav-link--active" class="navbar__nav-link">Accueil</a>
-          <a routerLink="/home" routerLinkActive="navbar__nav-link--active" class="navbar__nav-link">Modules</a>
-          <a routerLink="/teams" routerLinkActive="navbar__nav-link--active" class="navbar__nav-link">Mes équipes</a>
+          <a routerLink="/dashboard" routerLinkActive="navbar__nav-link--active" class="navbar__nav-link">{{ 'nav.home' | transloco }}</a>
+          <a routerLink="/home" routerLinkActive="navbar__nav-link--active" class="navbar__nav-link">{{ 'nav.modules' | transloco }}</a>
+          <a routerLink="/teams" routerLinkActive="navbar__nav-link--active" class="navbar__nav-link">{{ 'nav.teams' | transloco }}</a>
         </nav>
       </div>
       <div class="navbar__right">
@@ -57,25 +57,25 @@ export function avatarColor(name: string): string {
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
           }
         </button>
-        <div class="navbar__lang-pill" role="group" aria-label="Langue">
+        <div class="navbar__lang-pill" role="group" [attr.aria-label]="'nav.lang_aria' | transloco">
           <button class="navbar__lang-opt" [class.navbar__lang-opt--active]="lang() === 'fr'" (click)="setLang('fr')" type="button" [attr.aria-pressed]="lang() === 'fr'">FR</button>
           <span class="navbar__lang-sep" aria-hidden="true"></span>
           <button class="navbar__lang-opt" [class.navbar__lang-opt--active]="lang() === 'en'" (click)="setLang('en')" type="button" [attr.aria-pressed]="lang() === 'en'">EN</button>
         </div>
-        <button class="navbar__icon-btn" (click)="notifOpen.set(!notifOpen())" [attr.aria-expanded]="notifOpen()" aria-haspopup="menu" aria-label="Notifications" type="button">
+        <button class="navbar__icon-btn" (click)="notifOpen.set(!notifOpen())" [attr.aria-expanded]="notifOpen()" aria-haspopup="menu" [attr.aria-label]="'nav.notifications' | transloco" type="button">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
           @if (notifCount() > 0) {
-            <span class="navbar__badge" [attr.aria-label]="notifCount() + ' notifications'">{{ notifCount() }}</span>
+            <span class="navbar__badge" [attr.aria-label]="'nav.notif_count' | transloco: { count: notifCount() }">{{ notifCount() }}</span>
           }
         </button>
         <div class="navbar__user">
-          <button class="navbar__user-btn" (click)="toggleUserMenu($event)" [attr.aria-expanded]="userMenuOpen()" aria-haspopup="menu" type="button" [attr.aria-label]="'Menu de ' + displayName()">
+          <button class="navbar__user-btn" (click)="toggleUserMenu($event)" [attr.aria-expanded]="userMenuOpen()" aria-haspopup="menu" type="button" [attr.aria-label]="'nav.user_menu' | transloco: { name: displayName() }">
             <span class="navbar__avatar" [style.background]="userAvatarColor()" aria-hidden="true">{{ initials() }}</span>
             <span class="navbar__username">{{ displayName() }}</span>
             <svg class="navbar__chevron" [class.navbar__chevron--open]="userMenuOpen()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           @if (userMenuOpen()) {
-            <div class="navbar__dropdown" role="menu" aria-label="Menu utilisateur" (click)="$event.stopPropagation()">
+            <div class="navbar__dropdown" role="menu" [attr.aria-label]="'nav.dropdown.user_menu_aria' | transloco" (click)="$event.stopPropagation()">
               <div class="navbar__dropdown-header" role="none">
                 <span class="navbar__avatar navbar__avatar--lg" [style.background]="userAvatarColor()" aria-hidden="true">{{ initials() }}</span>
                 <div class="navbar__dropdown-identity" role="none">
@@ -86,28 +86,28 @@ export function avatarColor(name: string): string {
               <hr class="navbar__dropdown-sep" role="none"/>
               <button class="navbar__dropdown-item" role="menuitem" type="button" aria-disabled="true">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                Mon profil
-                <span class="navbar__soon" aria-label="Bientôt disponible">Bientôt</span>
+                {{ 'nav.dropdown.profile' | transloco }}
+                <span class="navbar__soon" [attr.aria-label]="'nav.dropdown.coming_soon_a11y' | transloco">{{ 'nav.dropdown.coming_soon' | transloco }}</span>
               </button>
               <button class="navbar__dropdown-item" role="menuitem" type="button" aria-disabled="true">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-                Préférences
-                <span class="navbar__soon" aria-label="Bientôt disponible">Bientôt</span>
+                {{ 'nav.dropdown.preferences' | transloco }}
+                <span class="navbar__soon" [attr.aria-label]="'nav.dropdown.coming_soon_a11y' | transloco">{{ 'nav.dropdown.coming_soon' | transloco }}</span>
               </button>
               <button class="navbar__dropdown-item" role="menuitem" type="button" aria-disabled="true">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                Sécurité
-                <span class="navbar__soon" aria-label="Bientôt disponible">Bientôt</span>
+                {{ 'nav.dropdown.security' | transloco }}
+                <span class="navbar__soon" [attr.aria-label]="'nav.dropdown.coming_soon_a11y' | transloco">{{ 'nav.dropdown.coming_soon' | transloco }}</span>
               </button>
               <button class="navbar__dropdown-item" role="menuitem" type="button" aria-disabled="true">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
-                Mes données
-                <span class="navbar__soon" aria-label="Bientôt disponible">Bientôt</span>
+                {{ 'nav.dropdown.my_data' | transloco }}
+                <span class="navbar__soon" [attr.aria-label]="'nav.dropdown.coming_soon_a11y' | transloco">{{ 'nav.dropdown.coming_soon' | transloco }}</span>
               </button>
               <hr class="navbar__dropdown-sep" role="none"/>
               <button class="navbar__dropdown-item navbar__dropdown-item--danger" (click)="logout()" role="menuitem" type="button">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                Déconnexion
+                {{ 'nav.dropdown.logout' | transloco }}
               </button>
             </div>
           }

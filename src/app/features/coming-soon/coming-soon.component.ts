@@ -1,17 +1,18 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'piv-coming-soon',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  imports: [RouterLink, TranslocoPipe],
   template: `
     <div class="coming-soon">
       <svg class="coming-soon__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <h1 class="coming-soon__title">Page en cours de construction</h1>
-      <p class="coming-soon__subtitle">Cette section sera disponible prochainement.</p>
-      <a routerLink="/" class="coming-soon__back">Retour à l'accueil</a>
+      <h1 class="coming-soon__title">{{ 'coming_soon.title' | transloco }}</h1>
+      <p class="coming-soon__subtitle">{{ 'coming_soon.subtitle' | transloco }}</p>
+      <a routerLink="/" class="coming-soon__back">{{ 'coming_soon.back' | transloco }}</a>
     </div>
   `,
   styles: [`

@@ -3,23 +3,24 @@
  */
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'piv-footer',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  imports: [RouterLink, TranslocoPipe],
   template: `
     <footer class="footer" role="contentinfo">
-      <span class="footer__copy">© {{ year }} PIVOT — Réalisé par l'équipe PIVOT</span>
+      <span class="footer__copy">© {{ year }} PIVOT — {{ 'footer.copy' | transloco }}</span>
       <nav class="footer__nav" aria-label="Liens du site">
-        <a routerLink="/legal/mentions-legales" class="footer__link">Mentions légales</a>
-        <a routerLink="/legal/confidentialite" class="footer__link">Confidentialité</a>
-        <a routerLink="/legal/cgu" class="footer__link">CGU</a>
-        <a routerLink="/legal/accessibilite" class="footer__link">Accessibilité</a>
-        <a routerLink="/contact" class="footer__link">Contact</a>
-        <a routerLink="/faq" class="footer__link">FAQ</a>
-        <a routerLink="/plan-du-site" class="footer__link">Plan du site</a>
+        <a routerLink="/legal/mentions-legales" class="footer__link">{{ 'footer.legal' | transloco }}</a>
+        <a routerLink="/legal/confidentialite" class="footer__link">{{ 'footer.privacy' | transloco }}</a>
+        <a routerLink="/legal/cgu" class="footer__link">{{ 'footer.terms' | transloco }}</a>
+        <a routerLink="/legal/accessibilite" class="footer__link">{{ 'footer.accessibility' | transloco }}</a>
+        <a routerLink="/contact" class="footer__link">{{ 'footer.contact' | transloco }}</a>
+        <a routerLink="/faq" class="footer__link">{{ 'footer.faq' | transloco }}</a>
+        <a routerLink="/plan-du-site" class="footer__link">{{ 'footer.sitemap' | transloco }}</a>
       </nav>
     </footer>
   `,
