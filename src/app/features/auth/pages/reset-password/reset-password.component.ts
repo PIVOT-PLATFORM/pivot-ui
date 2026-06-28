@@ -83,10 +83,13 @@ function strongPassword(c: AbstractControl): ValidationErrors | null {
                 </span>
               </div>
 
-              <button type="submit" class="btn btn-primary btn-full btn-lg" [disabled]="loading()" [attr.aria-busy]="loading()">
-                @if (loading()) { <span class="spinner"></span> }
+              <button type="submit" class="btn btn-primary btn-full btn-lg" [disabled]="loading()">
+                @if (loading()) { <span class="spinner" aria-hidden="true"></span> }
                 {{ 'auth.reset_password.submit' | transloco }}
               </button>
+              <span role="status" aria-live="polite" aria-atomic="true" class="sr-only">
+                @if (loading()) { {{ 'common.loading' | transloco }} }
+              </span>
             </form>
           }
         }

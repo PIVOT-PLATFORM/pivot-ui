@@ -67,6 +67,15 @@ describe('ResendVerificationComponent', () => {
     expect(component.loading()).toBe(false);
   });
 
+  it('affiche le bloc succès après envoi (DOM)', () => {
+    component.form.setValue({ email: 'user@example.com' });
+    component.submit();
+    httpMock.expectOne(r => r.url === URL).flush({ message: 'ok' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.success-block')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('form')).toBeFalsy();
+  });
+
   it('does not submit twice when first call returns error', () => {
     component.form.setValue({ email: 'user@example.com' });
     component.submit();

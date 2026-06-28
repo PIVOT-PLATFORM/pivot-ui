@@ -2,6 +2,7 @@
   "common": {
     "logo": "PIVOT",
     "or": "ou",
+    "loading": "Chargement en cours…",
     "error_generic": "Une erreur est survenue. Réessayez.",
     "field_required": "Ce champ est obligatoire."
   },
