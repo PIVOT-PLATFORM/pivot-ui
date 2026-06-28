@@ -33,11 +33,7 @@ import { NavbarComponent } from '../navbar/navbar.component';
       flex: 1;
       overflow-y: auto;
       background: var(--surface-bg);
-      padding: 40px 48px;
-    }
-
-    @media (max-width: 1024px) {
-      .shell__content { padding: 32px 24px; }
+      padding: 40px 32px;
     }
 
     @media (max-width: 767px) {

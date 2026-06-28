@@ -107,7 +107,7 @@ export function avatarColor(name: string): string {
     </header>
   `,
   styles: [`
-    .navbar { display:flex; align-items:center; height:64px; padding:0 20px; background:var(--surface-navbar); border-bottom:1px solid var(--color-gray-200); box-shadow:var(--shadow-sm); position:sticky; top:0; z-index:100; gap:16px; }
+    .navbar { display:flex; align-items:center; height:64px; padding:0 32px; background:var(--surface-navbar); border-bottom:1px solid var(--color-gray-200); box-shadow:var(--shadow-sm); position:sticky; top:0; z-index:100; gap:16px; }
     .navbar__left { display:flex; align-items:center; gap:24px; }
     .navbar__right { margin-left:auto; display:flex; align-items:center; gap:4px; }
     .navbar__logo { display:flex; align-items:center; gap:8px; text-decoration:none; border-radius:var(--radius-md); padding:4px; &:focus-visible { outline:2px solid var(--color-brand-500); outline-offset:2px; } }

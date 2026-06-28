@@ -22,7 +22,7 @@ import { AuthService } from '../../core/auth/service/auth.service';
     </div>
   `,
   styles: [`
-    .dashboard { max-width: 1200px; margin: 0 auto; }
+    .dashboard { max-width: 1200px; }
     .dashboard__greeting { font-size: var(--text-2xl); font-weight: 700; color: var(--color-navy-900); margin: 0 0 6px; }
     .dashboard__subtitle { font-size: var(--text-sm); color: var(--color-gray-500); margin: 0 0 32px; }
     .dashboard__cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
