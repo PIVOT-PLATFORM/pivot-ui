@@ -3,9 +3,21 @@
 ## [Unreleased]
 
 ### Navigation & interface principale
-- Nouvelle barre de navigation en haut de l'écran : logo PIVOT, lien "Mes équipes", cloche de notifications, menu utilisateur avec avatar personnalisé
-- Sélecteur de thème directement dans le menu utilisateur
-- Mise en page épurée sans panneau latéral — plus d'espace pour le contenu
+- Barre de navigation repensée : liens **Accueil**, **Modules**, **Mes équipes** avec indicateur de page active
+- Basculeur de thème clair/sombre en un clic (lune / soleil)
+- Sélecteur de langue **FR | EN** en forme de pilule, avec langue active mise en évidence
+- Bouton **?** (aide) et bouton **bug** pour remonter un problème par email
+- Menu utilisateur enrichi : avatar coloré, nom, email, raccourcis vers Profil / Préférences / Sécurité / Mes données (bientôt disponibles) et déconnexion
+- Identité visuelle brand : navbar et footer en dégradé indigo → violet (thème clair) ou noir premium teinté violet (thème sombre)
+- Footer complet : copyright, liens légaux, accessibilité, contact, FAQ, plan du site
+
+### Internationalisation
+- Interface disponible en français et en anglais — la langue est mémorisée entre les sessions
+- Toutes les sections de l'application (navigation, tableau de bord, footer, pages à venir) respectent la langue choisie
+
+### Thèmes visuels
+- Thème **clair** : dégradé indigo → violet sur la navbar et le footer, contenu sur fond gris clair
+- Thème **sombre** : fond noir premium (#09090b), navbar et footer en dégradé noir teinté violet
 
 ---
 
