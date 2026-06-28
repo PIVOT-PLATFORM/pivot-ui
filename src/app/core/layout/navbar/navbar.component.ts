@@ -55,9 +55,11 @@ export function avatarColor(name: string): string {
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
           }
         </button>
-        <button class="navbar__lang-btn" (click)="switchLang()" [attr.aria-label]="lang() === 'fr' ? 'Switch to English' : 'Passer en français'" [title]="lang() === 'fr' ? 'Switch to English' : 'Passer en français'" type="button">
-          {{ lang() === 'fr' ? 'FR' : 'EN' }}
-        </button>
+        <div class="navbar__lang-pill" role="group" aria-label="Langue">
+          <button class="navbar__lang-opt" [class.navbar__lang-opt--active]="lang() === 'fr'" (click)="setLang('fr')" type="button" [attr.aria-pressed]="lang() === 'fr'">FR</button>
+          <span class="navbar__lang-sep" aria-hidden="true"></span>
+          <button class="navbar__lang-opt" [class.navbar__lang-opt--active]="lang() === 'en'" (click)="setLang('en')" type="button" [attr.aria-pressed]="lang() === 'en'">EN</button>
+        </div>
         <button class="navbar__icon-btn" (click)="notifOpen.set(!notifOpen())" [attr.aria-expanded]="notifOpen()" aria-haspopup="menu" aria-label="Notifications" type="button">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
           @if (notifCount() > 0) {
@@ -112,7 +114,7 @@ export function avatarColor(name: string): string {
     </header>
   `,
   styles: [`
-    .navbar { display:flex; align-items:center; height:64px; padding:0 32px; background:var(--surface-navbar); border-bottom:1px solid var(--color-gray-200); box-shadow:var(--shadow-sm); position:sticky; top:0; z-index:100; gap:16px; }
+    .navbar { display:flex; align-items:center; height:64px; padding:0 40px; background:var(--surface-navbar); border-bottom:1px solid var(--color-gray-200); box-shadow:var(--shadow-sm); position:sticky; top:0; z-index:100; gap:16px; }
     .navbar__left { display:flex; align-items:center; gap:24px; }
     .navbar__right { margin-left:auto; display:flex; align-items:center; gap:4px; }
     .navbar__logo { display:flex; align-items:center; gap:8px; text-decoration:none; border-radius:var(--radius-md); padding:4px; &:focus-visible { outline:2px solid var(--color-brand-500); outline-offset:2px; } }
@@ -120,7 +122,9 @@ export function avatarColor(name: string): string {
     .navbar__logo-text { font-size:var(--text-lg); font-weight:700; color:var(--color-navy-900); letter-spacing:0.04em; }
     .navbar__nav-link { font-size:var(--text-sm); font-weight:500; color:var(--color-gray-600); text-decoration:none; padding:6px 12px; border-radius:var(--radius-md); transition:background var(--transition-fast),color var(--transition-fast); &:hover { background:var(--color-gray-100); color:var(--color-gray-900); } &:focus-visible { outline:2px solid var(--color-brand-500); outline-offset:2px; } }
     .navbar__icon-btn { display:flex; align-items:center; justify-content:center; position:relative; width:38px; height:38px; border:none; background:none; border-radius:var(--radius-md); color:var(--color-gray-500); cursor:pointer; transition:background var(--transition-fast),color var(--transition-fast); svg { width:20px; height:20px; } &:hover { background:var(--color-gray-100); color:var(--color-gray-700); } &:focus-visible { outline:2px solid var(--color-brand-500); outline-offset:2px; } }
-    .navbar__lang-btn { display:flex; align-items:center; justify-content:center; height:28px; padding:0 8px; border:1px solid var(--color-gray-200); background:none; border-radius:var(--radius-md); font-size:var(--text-xs); font-weight:600; color:var(--color-gray-500); cursor:pointer; letter-spacing:0.06em; transition:all var(--transition-fast); &:hover { background:var(--color-gray-100); border-color:var(--color-gray-300); color:var(--color-gray-700); } &:focus-visible { outline:2px solid var(--color-brand-500); outline-offset:2px; } }
+    .navbar__lang-pill { display:flex; align-items:center; background:var(--color-gray-100); border-radius:999px; padding:3px; gap:0; }
+    .navbar__lang-sep { width:1px; height:12px; background:var(--color-gray-300); flex-shrink:0; }
+    .navbar__lang-opt { border:none; background:transparent; color:var(--color-gray-500); font-size:var(--text-xs); font-weight:600; letter-spacing:0.05em; padding:4px 10px; border-radius:999px; cursor:pointer; transition:background var(--transition-fast),color var(--transition-fast),box-shadow var(--transition-fast); &--active { background:var(--surface-card); color:var(--color-gray-900); box-shadow:var(--shadow-sm); } &:not(.navbar__lang-opt--active):hover { color:var(--color-gray-700); } &:focus-visible { outline:2px solid var(--color-brand-500); outline-offset:2px; } }
     .navbar__badge { position:absolute; top:4px; right:4px; min-width:16px; height:16px; background:var(--color-error); color:#fff; font-size:10px; font-weight:700; line-height:1; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 3px; pointer-events:none; }
     .navbar__user { position:relative; }
     .navbar__user-btn { display:flex; align-items:center; gap:8px; padding:5px 10px; border:none; background:none; border-radius:var(--radius-md); cursor:pointer; transition:background var(--transition-fast); &:hover { background:var(--color-gray-100); } &:focus-visible { outline:2px solid var(--color-brand-500); outline-offset:2px; } }
@@ -186,10 +190,9 @@ export class NavbarComponent {
   }
 
   toggleTheme(): void { this.themeService.toggleTheme(); }
-  switchLang(): void {
-    const next = this.transloco.getActiveLang() === 'fr' ? 'en' : 'fr';
-    this.transloco.setActiveLang(next);
-    localStorage.setItem('pivot_lang', next);
+  setLang(lang: string): void {
+    this.transloco.setActiveLang(lang);
+    localStorage.setItem('pivot_lang', lang);
   }
   logout(): void { this.auth.logout().subscribe(); }
 }

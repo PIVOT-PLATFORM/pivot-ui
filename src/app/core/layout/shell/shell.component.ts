@@ -34,14 +34,13 @@ import { FooterComponent } from '../footer/footer.component';
       background: var(--surface-bg);
       display: flex;
       flex-direction: column;
-      padding: 40px 32px 0;
+      padding: 40px 40px 0;
     }
 
     .shell__page { flex: 1; }
 
-    @media (max-width: 767px) {
-      .shell__content { padding: 24px 16px 0; }
-    }
+    @media (max-width: 1024px) { .shell__content { padding: 32px 24px 0; } }
+    @media (max-width: 767px) { .shell__content { padding: 24px 16px 0; } }
   `],
 })
 export class ShellComponent {}
