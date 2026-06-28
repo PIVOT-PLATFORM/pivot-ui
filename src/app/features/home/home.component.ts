@@ -3,15 +3,17 @@
  * Full implementation will follow in a dedicated US.
  */
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'piv-home',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [TranslocoPipe],
   template: `
     <div class="home-placeholder">
-      <h1>Accueil</h1>
-      <p>Page en cours de construction.</p>
+      <h1>{{ 'home.title' | transloco }}</h1>
+      <p>{{ 'home.subtitle' | transloco }}</p>
     </div>
   `,
   styles: [`

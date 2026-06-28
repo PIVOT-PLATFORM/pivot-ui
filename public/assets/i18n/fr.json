@@ -52,6 +52,10 @@
     "faq": "FAQ",
     "sitemap": "Plan du site"
   },
+  "home": {
+    "title": "Accueil",
+    "subtitle": "Page en cours de construction."
+  },
   "coming_soon": {
     "title": "Page en cours de construction",
     "subtitle": "Cette section sera disponible prochainement.",

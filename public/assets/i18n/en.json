@@ -52,6 +52,10 @@
     "faq": "FAQ",
     "sitemap": "Sitemap"
   },
+  "home": {
+    "title": "Home",
+    "subtitle": "Page under construction."
+  },
   "coming_soon": {
     "title": "Page under construction",
     "subtitle": "This section will be available soon.",
