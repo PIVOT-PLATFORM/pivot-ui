@@ -66,7 +66,6 @@ export function avatarColor(name: string): string {
         </a>
         <div class="navbar__lang-pill" role="group" [attr.aria-label]="'nav.lang_aria' | transloco">
           <button class="navbar__lang-opt" [class.navbar__lang-opt--active]="lang() === 'fr'" (click)="setLang('fr')" type="button" [attr.aria-pressed]="lang() === 'fr'">FR</button>
-          <span class="navbar__lang-sep" aria-hidden="true"></span>
           <button class="navbar__lang-opt" [class.navbar__lang-opt--active]="lang() === 'en'" (click)="setLang('en')" type="button" [attr.aria-pressed]="lang() === 'en'">EN</button>
         </div>
         <button class="navbar__icon-btn" (click)="notifOpen.set(!notifOpen())" [attr.aria-expanded]="notifOpen()" aria-haspopup="menu" [attr.aria-label]="'nav.notifications' | transloco" type="button">
@@ -132,8 +131,7 @@ export function avatarColor(name: string): string {
     .navbar__nav-link { font-size:var(--text-sm); font-weight:500; color:var(--navbar-text); text-decoration:none; padding:6px 12px; border-radius:var(--radius-md); transition:background var(--transition-fast),color var(--transition-fast); &:hover { background:var(--navbar-hover-bg); color:var(--navbar-text-hover); } &:focus-visible { outline:2px solid rgba(255,255,255,0.6); outline-offset:2px; } &--active { color:var(--navbar-active-color); background:var(--navbar-active-bg); font-weight:600; } }
     .navbar__icon-btn { display:flex; align-items:center; justify-content:center; position:relative; width:38px; height:38px; border:none; background:none; border-radius:var(--radius-md); color:var(--navbar-text); cursor:pointer; transition:background var(--transition-fast),color var(--transition-fast); text-decoration:none; svg { width:20px; height:20px; } &:hover { background:var(--navbar-hover-bg); color:var(--navbar-text-hover); } &:focus-visible { outline:2px solid rgba(255,255,255,0.6); outline-offset:2px; } }
     .navbar__help-label { font-size:var(--text-sm); font-weight:700; color:var(--navbar-text); line-height:1; }
-    .navbar__lang-pill { display:flex; align-items:center; background:var(--navbar-pill-bg); border:1px solid var(--navbar-pill-border); border-radius:999px; padding:3px; gap:0; }
-    .navbar__lang-sep { width:1px; height:12px; background:var(--navbar-pill-sep); flex-shrink:0; }
+    .navbar__lang-pill { display:flex; align-items:center; background:var(--navbar-pill-bg); border:1px solid var(--navbar-pill-border); border-radius:999px; padding:3px; gap:2px; }
     .navbar__lang-opt { border:none; background:transparent; color:var(--navbar-text); font-size:var(--text-xs); font-weight:600; letter-spacing:0.05em; padding:4px 10px; border-radius:999px; cursor:pointer; transition:background var(--transition-fast),color var(--transition-fast),box-shadow var(--transition-fast); &--active { background:var(--navbar-pill-active-bg); color:var(--navbar-pill-active-color); box-shadow:var(--shadow-sm); } &:not(.navbar__lang-opt--active):hover { color:var(--navbar-text-hover); } &:focus-visible { outline:2px solid rgba(255,255,255,0.6); outline-offset:2px; } }
     .navbar__badge { position:absolute; top:4px; right:4px; min-width:16px; height:16px; background:var(--color-error); color:#fff; font-size:10px; font-weight:700; line-height:1; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 3px; pointer-events:none; }
     .navbar__user { position:relative; }
