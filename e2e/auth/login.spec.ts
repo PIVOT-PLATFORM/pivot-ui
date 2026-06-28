@@ -267,8 +267,8 @@ test.describe('US-AUTH-002 — Login', () => {
 
     // Open user dropdown in the navbar
     await page.locator('.navbar__user').click();
-    // Click the sign-out button (`.user-dropdown__item` with error color)
-    await page.locator('.user-dropdown__item').click();
+    // Click the sign-out button (`.navbar__dropdown-item--danger` = logout)
+    await page.locator('.navbar__dropdown-item--danger').click();
 
     // Should redirect to the login page
     await expect(page).toHaveURL(new RegExp(LOGIN_URL), { timeout: 10_000 });

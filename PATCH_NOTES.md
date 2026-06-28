@@ -1,5 +1,26 @@
 # Notes de version — PIVOT UI
 
+## [Unreleased]
+
+### Navigation & interface principale
+- Barre de navigation repensée : liens **Accueil**, **Modules**, **Mes équipes** avec indicateur de page active
+- Basculeur de thème clair/sombre en un clic (lune / soleil)
+- Sélecteur de langue **FR | EN** en forme de pilule, avec langue active mise en évidence
+- Bouton **?** (aide) et bouton **bug** pour remonter un problème par email
+- Menu utilisateur enrichi : avatar coloré, nom, email, raccourcis vers Profil / Préférences / Sécurité / Mes données (bientôt disponibles) et déconnexion
+- Identité visuelle brand : navbar et footer en dégradé indigo → violet (thème clair) ou noir premium teinté violet (thème sombre)
+- Footer complet : copyright, liens légaux, accessibilité, contact, FAQ, plan du site
+
+### Internationalisation
+- Interface disponible en français et en anglais — la langue est mémorisée entre les sessions
+- Toutes les sections de l'application (navigation, tableau de bord, footer, pages à venir) respectent la langue choisie
+
+### Thèmes visuels
+- Thème **clair** : dégradé indigo → violet sur la navbar et le footer, contenu sur fond gris clair
+- Thème **sombre** : fond noir premium (#09090b), navbar et footer en dégradé noir teinté violet
+
+---
+
 ## [0.2.0] — 28 juin 2026
 
 ### Thèmes visuels
@@ -18,14 +39,3 @@
 ## [0.0.0] — 28 juin 2026
 
 ### Interface d'authentification
-
-Première version complète de l'interface d'authentification.
-
-- **Connexion** : formulaire avec validation et gestion des erreurs
-- **Inscription** : formulaire avec vérification de la robustesse du mot de passe en temps réel
-- **Vérification d'e-mail** : page de confirmation et renvoi du lien de vérification
-- **Mot de passe oublié** : demande de réinitialisation par e-mail
-- **Réinitialisation de mot de passe** : formulaire sécurisé avec vérification du lien avant affichage
-- **Confirmation d'appareil** : saisie du code OTP reçu par e-mail sur nouvel appareil
-- **Accessibilité** : interface conforme WCAG 2.1 AA — lecteurs d'écran, navigation clavier, contrastes, régions live
-- **Internationalisation** : interface disponible en français et en anglais

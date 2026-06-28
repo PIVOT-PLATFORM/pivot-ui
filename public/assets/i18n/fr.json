@@ -9,7 +9,26 @@
   "nav": {
     "sign_out": "Se déconnecter",
     "lang_other": "EN",
-    "lang_current": "FR"
+    "lang_current": "FR",
+    "lang_aria": "Langue",
+    "notifications": "Notifications",
+    "notif_count": "{{ count }} notifications",
+    "user_menu": "Menu de {{ name }}",
+    "help": "Aide",
+    "bug_report": "Remonter un bug",
+    "home": "Accueil",
+    "modules": "Modules",
+    "teams": "Mes équipes",
+    "dropdown": {
+      "user_menu_aria": "Menu utilisateur",
+      "profile": "Mon profil",
+      "preferences": "Préférences",
+      "security": "Sécurité",
+      "my_data": "Mes données",
+      "coming_soon": "Bientôt",
+      "coming_soon_a11y": "Bientôt disponible",
+      "logout": "Déconnexion"
+    }
   },
   "sidebar": {
     "dashboard": "Tableau de bord",
@@ -18,8 +37,29 @@
     "collapse": "Réduire"
   },
   "dashboard": {
-    "title": "Tableau de bord",
-    "welcome": "Bienvenue"
+    "greeting": "Bonjour, {{ name }} !",
+    "subtitle": "Bienvenue sur votre tableau de bord PIVOT.",
+    "card_role": "Rôle",
+    "card_org": "Organisation"
+  },
+  "footer": {
+    "copy": "Réalisé par l'équipe PIVOT",
+    "legal": "Mentions légales",
+    "privacy": "Confidentialité",
+    "terms": "CGU",
+    "accessibility": "Accessibilité",
+    "contact": "Contact",
+    "faq": "FAQ",
+    "sitemap": "Plan du site"
+  },
+  "home": {
+    "title": "Accueil",
+    "subtitle": "Page en cours de construction."
+  },
+  "coming_soon": {
+    "title": "Page en cours de construction",
+    "subtitle": "Cette section sera disponible prochainement.",
+    "back": "Retour à l'accueil"
   },
   "auth": {
     "login": {

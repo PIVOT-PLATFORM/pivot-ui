@@ -43,7 +43,7 @@
   --surface-bg:      #F4F5F7;
   --surface-card:    #FFFFFF;
   --surface-sidebar: var(--color-navy-900);
-  --surface-navbar:  #FFFFFF;
+  --surface-navbar:  linear-gradient(135deg, #1e1b4b 0%, #312e81 20%, #4338ca 45%, #6d28d9 70%, #7c3aed 100%);
 
   // Auth pages gradient — dark indigo → violet (brand identity)
   --auth-gradient: linear-gradient(
@@ -54,6 +54,20 @@
     #6d28d9 70%,
     #7c3aed 100%
   );
+
+  // Navbar tokens — light theme (gradient dark bg → textes blancs)
+  --navbar-border-color:      transparent;
+  --navbar-logo-color:        #ffffff;
+  --navbar-text:              rgba(255,255,255,0.82);
+  --navbar-text-hover:        #ffffff;
+  --navbar-hover-bg:          rgba(255,255,255,0.12);
+  --navbar-active-bg:         rgba(255,255,255,0.18);
+  --navbar-active-color:      #ffffff;
+  --navbar-pill-bg:           rgba(255,255,255,0.12);
+  --navbar-pill-border:       rgba(255,255,255,0.22);
+  --navbar-pill-active-bg:    rgba(255,255,255,0.28);
+  --navbar-pill-active-color: #ffffff;
+  --navbar-pill-sep:          rgba(255,255,255,0.3);
 
   // Typography
   --font-sans: 'Inter', 'Segoe UI', Arial, sans-serif;
@@ -95,6 +109,43 @@
   --transition-base: 200ms ease;
 }
 
+// ─── Ocean theme ─────────────────────────────────────────────────────────────
+[data-theme="ocean"] {
+  --color-brand-50:  #0c2a3a;
+  --color-brand-100: #0e3d52;
+  --color-brand-500: #38bdf8;
+  --color-brand-600: #0ea5e9;
+  --color-navy-900:  #e0f2fe;
+  --color-gray-50:   #0a1929;
+  --color-gray-100:  #0d2137;
+  --color-gray-200:  #163347;
+  --color-gray-300:  #1e4460;
+  --color-gray-400:  #2e6080;
+  --color-gray-500:  #5b93b0;
+  --color-gray-600:  #90bfd4;
+  --color-gray-700:  #bdd9e8;
+  --color-gray-900:  #e0f2fe;
+  --surface-bg:      #071421;
+  --surface-card:    #0d2137;
+  --surface-sidebar: #050e18;
+  --surface-navbar:  #0d2137;
+  --color-error:     #f87171;
+  --color-success:   #34d399;
+  // Navbar tokens — fond sombre solide
+  --navbar-border-color:      var(--color-gray-200);
+  --navbar-logo-color:        var(--color-navy-900);
+  --navbar-text:              var(--color-gray-600);
+  --navbar-text-hover:        var(--color-gray-900);
+  --navbar-hover-bg:          var(--color-gray-100);
+  --navbar-active-bg:         var(--color-brand-100);
+  --navbar-active-color:      var(--color-brand-600);
+  --navbar-pill-bg:           var(--color-gray-100);
+  --navbar-pill-border:       var(--color-gray-200);
+  --navbar-pill-active-bg:    var(--surface-card);
+  --navbar-pill-active-color: var(--color-navy-900);
+  --navbar-pill-sep:          var(--color-gray-300);
+}
+
 // ─── Dark theme ──────────────────────────────────────────────────────────────
 [data-theme="dark"] {
   --color-brand-50:  #1e3a5f;
@@ -111,11 +162,24 @@
   --color-gray-600:  #cbd5e1;
   --color-gray-700:  #e2e8f0;
   --color-gray-900:  #f8fafc;
-  --surface-bg:      #0f172a;
-  --surface-card:    #1e293b;
-  --surface-sidebar: #0b1120;
-  --surface-navbar:  #1e293b;
+  --surface-bg:      #09090b;
+  --surface-card:    #111113;
+  --surface-sidebar: #050506;
+  --surface-navbar:  linear-gradient(135deg, #07060e 0%, #0c0a1c 25%, #12103a 55%, #1a1248 80%, #1e1450 100%);
   --color-error:     #f87171;
   --color-success:   #34d399;
+  // Navbar tokens — gradient noir premium teinté violet (même pattern que light)
+  --navbar-border-color:      transparent;
+  --navbar-logo-color:        #ffffff;
+  --navbar-text:              rgba(255,255,255,0.75);
+  --navbar-text-hover:        #ffffff;
+  --navbar-hover-bg:          rgba(255,255,255,0.08);
+  --navbar-active-bg:         rgba(255,255,255,0.13);
+  --navbar-active-color:      #ffffff;
+  --navbar-pill-bg:           rgba(255,255,255,0.08);
+  --navbar-pill-border:       rgba(255,255,255,0.15);
+  --navbar-pill-active-bg:    rgba(255,255,255,0.18);
+  --navbar-pill-active-color: #ffffff;
+  --navbar-pill-sep:          rgba(255,255,255,0.2);
 }
 

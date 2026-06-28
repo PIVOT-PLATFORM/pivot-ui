@@ -1,44 +1,19 @@
-import { Component, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+/**
+ * ShellComponent — authenticated application shell.
+ *
+ * Layout: full-width top navbar + scrollable content area + footer.
+ */
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from '../navbar/navbar.component';
-import { SidebarComponent } from '../sidebar/sidebar.component';
+import { FooterComponent } from '../footer/footer.component';
 
 @Component({
   selector: 'piv-shell',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, NavbarComponent, SidebarComponent],
-  template: `
-    <div class="shell" [class.shell--collapsed]="sidebarCollapsed()">
-      <piv-sidebar [collapsed]="sidebarCollapsed()" (toggleCollapse)="sidebarCollapsed.set(!sidebarCollapsed())"/>
-      <div class="shell__main">
-        <piv-navbar (menuToggle)="sidebarCollapsed.set(!sidebarCollapsed())"/>
-        <main class="shell__content">
-          <router-outlet/>
-        </main>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .shell {
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
-    .shell__main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    .shell__content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 24px;
-      background: var(--surface-bg);
-    }
-  `]
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterOutlet, NavbarComponent, FooterComponent],
+  templateUrl: './shell.component.html',
+  styleUrl: './shell.component.scss',
 })
-export class ShellComponent {
-  sidebarCollapsed = signal(false);
-}
+export class ShellComponent {}
