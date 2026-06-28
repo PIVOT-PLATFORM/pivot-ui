@@ -25,7 +25,7 @@ const HASH_MULTIPLIER = 31;
 export function avatarColor(name: string): string {
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + (hash * HASH_MULTIPLIER);
+    hash = (name.codePointAt(i) ?? 0) + (hash * HASH_MULTIPLIER);
   }
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
