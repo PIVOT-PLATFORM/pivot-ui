@@ -74,10 +74,13 @@ function strongPassword(c: AbstractControl): ValidationErrors | null {
                 <label class="form-label" for="newPassword">{{ 'auth.reset_password.new_password' | transloco }}</label>
                 <input id="newPassword" type="password" formControlName="newPassword" class="form-control"
                        [class.is-invalid]="form.controls.newPassword.invalid && form.controls.newPassword.touched"
-                       placeholder="••••••••••••" autocomplete="new-password"/>
-                @if (form.controls.newPassword.touched && form.controls.newPassword.errors?.['weak']; as weakErr) {
-                  <span class="form-error">{{ weakErr | transloco }}</span>
-                }
+                       placeholder="••••••••••••" autocomplete="new-password"
+                       aria-describedby="newPassword-error"/>
+                <span id="newPassword-error" class="form-error" role="alert">
+                  @if (form.controls.newPassword.touched && form.controls.newPassword.errors?.['weak']; as weakErr) {
+                    {{ weakErr | transloco }}
+                  }
+                </span>
               </div>
 
               <button type="submit" class="btn btn-primary btn-full btn-lg" [disabled]="loading()" [attr.aria-busy]="loading()">
