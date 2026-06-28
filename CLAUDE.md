@@ -384,6 +384,18 @@ dossier `gates/`). La validation humaine vit dans le champ **Human Gate** du Pro
 
 ---
 
+## Releases — PATCH_NOTES.md
+
+`PATCH_NOTES.md` est mis à jour **dans chaque PR** (embarqué avec le code) :
+- Ajouter les changements notables dans la section `## [Unreleased]` en tête de fichier
+- Rédigé en **français**, pour l'utilisateur final — pas le développeur
+- Langage naturel — pas de référence aux commits ou tickets
+- Après la release SR : le script `.scripts/prepare-patch-notes.sh` renomme `[Unreleased]` automatiquement
+- Fichier maintenu en place, **jamais de fichiers datés**
+- **Exception** : PRs `chore` / `ci` / `docs` sans impact utilisateur visible — pas de mise à jour PATCH_NOTES
+
+---
+
 ## Audits
 
 Dans **pivot-docs** — un fichier par catégorie, mis à jour en place. **Jamais de fichiers datés.**
