@@ -1,6 +1,6 @@
 # Notes de version — PIVOT UI
 
-## [Unreleased]
+## [0.3.0] — 28 juin 2026
 
 ### Navigation & interface principale
 - Barre de navigation repensée : liens **Accueil**, **Modules**, **Mes équipes** avec indicateur de page active

@@ -1,3 +1,10 @@
+# [0.3.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.2.0...v0.3.0) (2026-06-28)
+
+
+### Features
+
+* **ui:** redesign shell and navbar — top-nav layout, theme toggle, user menu ([#49](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/49)) ([f63d423](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/f63d423cbd53d2bc385c2d4884123590e1caf3e8)), closes [#4338ca](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/4338ca) [#7c3aed](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/7c3aed) [#09090b](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/09090b)
+
 # [0.2.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.1.0...v0.2.0) (2026-06-28)
 
 
