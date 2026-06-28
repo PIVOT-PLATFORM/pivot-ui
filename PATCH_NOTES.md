@@ -1,5 +1,11 @@
 # Notes de version — PIVOT UI
 
+## [Unreleased]
+
+### Page de contact
+- Nouvelle page de contact accessible depuis la navigation : adresse e-mail, lien GitHub Issues, lien documentation, lien communauté
+- Formulaire de contact simple avec validation des champs
+
 ## [0.4.0] — 1 juillet 2026
 
 ### Page d'accueil
