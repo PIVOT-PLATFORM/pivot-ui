@@ -206,4 +206,43 @@ describe('NavbarComponent', () => {
       expect(component.bugReportUrl).toMatch(/^mailto:/);
     });
   });
+
+  describe('dropdown rendering', () => {
+    it('renders dropdown when userMenuOpen is true', () => {
+      const e = new MouseEvent('click');
+      component.toggleUserMenu(e);
+      fixture.detectChanges();
+      const el: HTMLElement = fixture.nativeElement;
+      expect(el.querySelector('.navbar__dropdown')).toBeTruthy();
+    });
+
+    it('renders logout button inside open dropdown', () => {
+      const e = new MouseEvent('click');
+      component.toggleUserMenu(e);
+      fixture.detectChanges();
+      const el: HTMLElement = fixture.nativeElement;
+      expect(el.querySelector('.navbar__dropdown-item--danger')).toBeTruthy();
+    });
+
+    it('hides dropdown when userMenuOpen is false', () => {
+      fixture.detectChanges();
+      const el: HTMLElement = fixture.nativeElement;
+      expect(el.querySelector('.navbar__dropdown')).toBeNull();
+    });
+  });
+
+  describe('notification badge', () => {
+    it('renders badge when notifCount > 0', () => {
+      component.notifCount.set(3);
+      fixture.detectChanges();
+      const el: HTMLElement = fixture.nativeElement;
+      expect(el.querySelector('.navbar__badge')).toBeTruthy();
+    });
+
+    it('hides badge when notifCount is 0', () => {
+      fixture.detectChanges();
+      const el: HTMLElement = fixture.nativeElement;
+      expect(el.querySelector('.navbar__badge')).toBeNull();
+    });
+  });
 });
