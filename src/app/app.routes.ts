@@ -37,7 +37,23 @@ export const routes: Routes = [
         path: 'cgu',
         loadComponent: () => import('./features/legal/terms.component').then(m => m.TermsComponent),
       },
+      {
+        path: 'accessibilite',
+        loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
+      },
     ],
+  },
+  {
+    path: 'contact',
+    loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
+  },
+  {
+    path: 'faq',
+    loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
+  },
+  {
+    path: 'plan-du-site',
+    loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
   },
   { path: '**', redirectTo: 'auth/login' },
 ];

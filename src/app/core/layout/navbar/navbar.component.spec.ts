@@ -4,10 +4,18 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { Component } from '@angular/core';
+import { of } from 'rxjs';
+import { TranslocoService } from '@jsverse/transloco';
 import { NavbarComponent, avatarColor } from './navbar.component';
 import { AuthService } from '../../auth/service/auth.service';
 import { ThemeService } from '../../theme/theme.service';
 import { environment } from '../../../../environments/environment';
+
+const mockTranslocoService = {
+  langChanges$: of('fr'),
+  getActiveLang: () => 'fr',
+  setActiveLang: vi.fn(),
+};
 
 @Component({ template: '', standalone: true })
 class StubComponent {}
@@ -54,6 +62,7 @@ describe('NavbarComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([{ path: '**', component: StubComponent }]),
+        { provide: TranslocoService, useValue: mockTranslocoService },
       ],
     }).compileComponents();
 
