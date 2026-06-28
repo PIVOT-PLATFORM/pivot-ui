@@ -12,6 +12,20 @@ import {
   platformBrowserTesting,
 } from '@angular/platform-browser/testing';
 
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => false,
+  }),
+});
+
 getTestBed().initTestEnvironment(
   BrowserTestingModule,
   platformBrowserTesting([provideZonelessChangeDetection()]),
