@@ -1,0 +1,110 @@
+import { TestBed } from '@angular/core/testing';
+import { ThemeService } from './theme.service';
+
+describe('ThemeService', () => {
+  let service: ThemeService;
+
+  beforeEach(() => {
+    localStorage.clear();
+    // Reset data-theme attribute before each test
+    document.documentElement.removeAttribute('data-theme');
+
+    TestBed.configureTestingModule({});
+    service = TestBed.inject(ThemeService);
+
+    // Flush the initial effect so it runs before assertions
+    TestBed.flushEffects();
+  });
+
+  it('creates the service', () => {
+    expect(service).toBeTruthy();
+  });
+
+  describe('initial theme resolution', () => {
+    it('uses stored theme from localStorage when valid', () => {
+      localStorage.setItem('pivot_theme', 'ocean');
+      // Re-create service to pick up the stored value
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({});
+      const s = TestBed.inject(ThemeService);
+      TestBed.flushEffects();
+      expect(s.theme()).toBe('ocean');
+    });
+
+    it('ignores invalid stored value and falls back', () => {
+      localStorage.setItem('pivot_theme', 'invalid-theme');
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({});
+      const fallback = TestBed.inject(ThemeService);
+      TestBed.flushEffects();
+      // Should be 'light' or 'dark' (depending on media query), never 'invalid-theme'
+      expect(['light', 'dark', 'ocean']).toContain(fallback.theme());
+    });
+  });
+
+  describe('setTheme()', () => {
+    it('updates the theme signal', () => {
+      service.setTheme('dark');
+      TestBed.flushEffects();
+      expect(service.theme()).toBe('dark');
+    });
+
+    it('sets data-theme attribute on <html> for non-light themes', () => {
+      service.setTheme('dark');
+      TestBed.flushEffects();
+      expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+    });
+
+    it('removes data-theme attribute when theme is light', () => {
+      service.setTheme('dark');
+      TestBed.flushEffects();
+      service.setTheme('light');
+      TestBed.flushEffects();
+      expect(document.documentElement.hasAttribute('data-theme')).toBe(false);
+    });
+
+    it('persists the theme to localStorage', () => {
+      const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
+      service.setTheme('ocean');
+      TestBed.flushEffects();
+      expect(setItemSpy).toHaveBeenCalledWith('pivot_theme', 'ocean');
+    });
+
+    it('sets data-theme="ocean" for ocean theme', () => {
+      service.setTheme('ocean');
+      TestBed.flushEffects();
+      expect(document.documentElement.getAttribute('data-theme')).toBe('ocean');
+    });
+  });
+
+  describe('cycleTheme()', () => {
+    it('cycles light → dark → ocean → light', () => {
+      service.setTheme('light');
+      TestBed.flushEffects();
+
+      service.cycleTheme();
+      TestBed.flushEffects();
+      expect(service.theme()).toBe('dark');
+
+      service.cycleTheme();
+      TestBed.flushEffects();
+      expect(service.theme()).toBe('ocean');
+
+      service.cycleTheme();
+      TestBed.flushEffects();
+      expect(service.theme()).toBe('light');
+    });
+  });
+
+  describe('effect side-effects', () => {
+    it('applies correct data-theme when service is created with stored dark preference', () => {
+      localStorage.setItem('pivot_theme', 'dark');
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({});
+      const darkService = TestBed.inject(ThemeService);
+      TestBed.flushEffects();
+      expect(darkService.theme()).toBe('dark');
+      expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+    });
+  });
+});
