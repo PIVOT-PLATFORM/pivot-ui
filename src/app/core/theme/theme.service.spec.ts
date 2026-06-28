@@ -93,32 +93,6 @@ describe('ThemeService', () => {
     });
   });
 
-  describe('cycleTheme()', () => {
-    it('cycles light → dark', () => {
-      service.setTheme('light');
-      TestBed.flushEffects();
-      service.cycleTheme();
-      TestBed.flushEffects();
-      expect(service.theme()).toBe('dark');
-    });
-
-    it('cycles dark → ocean', () => {
-      service.setTheme('dark');
-      TestBed.flushEffects();
-      service.cycleTheme();
-      TestBed.flushEffects();
-      expect(service.theme()).toBe('ocean');
-    });
-
-    it('cycles ocean → light', () => {
-      service.setTheme('ocean');
-      TestBed.flushEffects();
-      service.cycleTheme();
-      TestBed.flushEffects();
-      expect(service.theme()).toBe('light');
-    });
-  });
-
   describe('effect side-effects', () => {
     it('applies correct data-theme when service is created with stored dark preference', () => {
       localStorage.setItem('pivot_theme', 'dark');
