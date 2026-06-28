@@ -1,5 +1,13 @@
 # Notes de version — PIVOT UI
 
+## [Unreleased]
+
+### Thèmes visuels
+- Trois thèmes disponibles : Clair, Sombre et Océan
+- Le thème est mémorisé entre les sessions et respecte automatiquement la préférence système (clair/sombre)
+
+---
+
 ## [0.1.0] — 28 juin 2026
 
 ### Système de modules
