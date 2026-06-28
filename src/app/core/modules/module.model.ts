@@ -1,24 +1,26 @@
 /**
- * Module system contracts for PIVOT — mirrors PivotModuleDto returned by the backend API.
+ * Module model — shared types for the PIVOT module system.
  *
- * PivotModuleDto  — raw API shape (what /api/modules returns)
- * PivotModuleUi   — enriched with static UI metadata (icon, route, etc.)
- * ModuleStatus    — operational status reported by the backend
+ * PivotModuleDto  — raw API shape (what GET /api/modules returns)
+ * PivotModuleUi   — enriched with static UI metadata (icon, route, color, description)
+ * ModuleStatus    — operational status as reported by the backend
+ *
+ * Backend mirror: fr.pivot.modules.registry.PivotModuleDto (pivot-core)
  */
 
-/** Operational status of a module as reported by the backend. */
+/** Operational status of a module instance as reported by the backend. */
 export type ModuleStatus = 'online' | 'preview' | 'offline';
 
 /**
  * Raw DTO returned by GET /api/modules.
- * Maps directly to fr.pivot.modules.registry.PivotModuleDto (pivot-core).
+ * Maps directly to fr.pivot.modules.registry.PivotModuleDto.
  */
 export interface PivotModuleDto {
-  /** Stable identifier e.g. "whiteboard", "session". */
+  /** Stable identifier, e.g. "whiteboard", "session". */
   id: string;
-  /** Human-readable name provided by the backend. */
+  /** Human-readable display name. */
   name: string;
-  /** Semver string e.g. "1.2.0". */
+  /** Semver string, e.g. "1.2.0". */
   version: string;
   /** Whether the module is enabled for the current tenant. */
   enabled: boolean;
@@ -31,9 +33,9 @@ export interface PivotModuleDto {
  * Used by components and guards — never sent to the API.
  */
 export interface PivotModuleUi extends PivotModuleDto {
-  /** Inline SVG string (viewBox 0 0 24 24, Heroicons/Lucide style). */
+  /** Inline SVG string (viewBox 0 0 24 24, Heroicons/Lucide-compatible). */
   icon: string;
-  /** Short description shown in the UI, max 80 characters. */
+  /** Short description shown in module cards, max ~80 characters. */
   description: string;
   /** Angular router path, e.g. /whiteboard. */
   route: string;
