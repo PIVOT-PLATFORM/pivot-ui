@@ -384,6 +384,16 @@ dossier `gates/`). La validation humaine vit dans le champ **Human Gate** du Pro
 
 ---
 
+## Releases — PATCH_NOTES.md
+
+Après chaque release Semantic Release, mettre à jour `PATCH_NOTES.md` à la racine du repo :
+- Rédigé en **français**, pour l'utilisateur final — pas le développeur
+- Décrire ce qui change concrètement en langage naturel — pas de référence aux commits ou tickets
+- Format : `## [version] — JJ mois AAAA` + bullet points
+- Fichier maintenu en place, **jamais de fichiers datés**
+
+---
+
 ## Audits
 
 Dans **pivot-docs** — un fichier par catégorie, mis à jour en place. **Jamais de fichiers datés.**
