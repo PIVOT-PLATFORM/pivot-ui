@@ -10,7 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '../../auth/service/auth.service';
 import { ThemeService } from '../../theme/theme.service';
@@ -32,7 +32,7 @@ export function avatarColor(name: string): string {
   selector: 'piv-navbar',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  imports: [RouterLink, RouterLinkActive],
   template: `
     <header class="navbar" role="banner">
       <div class="navbar__left">
@@ -44,7 +44,9 @@ export function avatarColor(name: string): string {
           <span class="navbar__logo-text">PIVOT</span>
         </a>
         <nav class="navbar__nav" aria-label="Navigation principale">
-          <a routerLink="/teams" class="navbar__nav-link">Mes équipes</a>
+          <a routerLink="/dashboard" routerLinkActive="navbar__nav-link--active" class="navbar__nav-link">Accueil</a>
+          <a routerLink="/home" routerLinkActive="navbar__nav-link--active" class="navbar__nav-link">Modules</a>
+          <a routerLink="/teams" routerLinkActive="navbar__nav-link--active" class="navbar__nav-link">Mes équipes</a>
         </nav>
       </div>
       <div class="navbar__right">
@@ -120,7 +122,7 @@ export function avatarColor(name: string): string {
     .navbar__logo { display:flex; align-items:center; gap:8px; text-decoration:none; border-radius:var(--radius-md); padding:4px; &:focus-visible { outline:2px solid var(--color-brand-500); outline-offset:2px; } }
     .navbar__logo-icon { width:32px; height:32px; flex-shrink:0; }
     .navbar__logo-text { font-size:var(--text-lg); font-weight:700; color:var(--color-navy-900); letter-spacing:0.04em; }
-    .navbar__nav-link { font-size:var(--text-sm); font-weight:500; color:var(--color-gray-600); text-decoration:none; padding:6px 12px; border-radius:var(--radius-md); transition:background var(--transition-fast),color var(--transition-fast); &:hover { background:var(--color-gray-100); color:var(--color-gray-900); } &:focus-visible { outline:2px solid var(--color-brand-500); outline-offset:2px; } }
+    .navbar__nav-link { font-size:var(--text-sm); font-weight:500; color:var(--color-gray-600); text-decoration:none; padding:6px 12px; border-radius:var(--radius-md); transition:background var(--transition-fast),color var(--transition-fast); &:hover { background:var(--color-gray-100); color:var(--color-gray-900); } &:focus-visible { outline:2px solid var(--color-brand-500); outline-offset:2px; } &--active { color:var(--color-brand-600); background:var(--color-brand-50); font-weight:600; } }
     .navbar__icon-btn { display:flex; align-items:center; justify-content:center; position:relative; width:38px; height:38px; border:none; background:none; border-radius:var(--radius-md); color:var(--color-gray-500); cursor:pointer; transition:background var(--transition-fast),color var(--transition-fast); svg { width:20px; height:20px; } &:hover { background:var(--color-gray-100); color:var(--color-gray-700); } &:focus-visible { outline:2px solid var(--color-brand-500); outline-offset:2px; } }
     .navbar__lang-pill { display:flex; align-items:center; background:var(--color-gray-100); border:1px solid var(--color-gray-200); border-radius:999px; padding:3px; gap:0; }
     .navbar__lang-sep { width:1px; height:12px; background:var(--color-gray-300); flex-shrink:0; }
