@@ -125,22 +125,17 @@ describe('NavbarComponent', () => {
     });
   });
 
-  describe('theme cycling', () => {
-    it('advances light to dark', () => {
+  describe('toggleTheme()', () => {
+    it('switches light to dark', () => {
       themeService.setTheme('light'); TestBed.flushEffects();
-      component.cycleTheme(); TestBed.flushEffects();
+      component.toggleTheme(); TestBed.flushEffects();
       expect(component.theme()).toBe('dark');
     });
 
-    it('wraps ocean to light', () => {
-      themeService.setTheme('ocean'); TestBed.flushEffects();
-      component.cycleTheme(); TestBed.flushEffects();
+    it('switches dark to light', () => {
+      themeService.setTheme('dark'); TestBed.flushEffects();
+      component.toggleTheme(); TestBed.flushEffects();
       expect(component.theme()).toBe('light');
-    });
-
-    it('setTheme sets specific theme', () => {
-      component.setTheme('ocean'); TestBed.flushEffects();
-      expect(component.theme()).toBe('ocean');
     });
   });
 
