@@ -1,6 +1,6 @@
 # Notes de version — PIVOT UI
 
-## [Unreleased]
+## [1.0.0] — 28 juin 2026
 
 ---
 
