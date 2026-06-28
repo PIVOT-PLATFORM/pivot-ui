@@ -97,10 +97,7 @@ describe('ModuleRegistryService', () => {
       expect(active.some(m => m.id === 'session')).toBe(false);
     });
 
-    it('includes enabled modules with comingSoon: false', () => {
-      // Simulate a module not in metadata (unknown id) → defaultMeta → comingSoon: true
-      // To test the true path we'd need a non-comingSoon metadata entry.
-      // Verify enrichment still works for known id:
+    it('enriches known module id with icon, color and route from MODULE_METADATA', () => {
       service.loadModules().subscribe();
       httpMock.expectOne(`${environment.apiUrl}/modules`).flush([makeDto('whiteboard', true)]);
 
@@ -151,6 +148,56 @@ describe('ModuleRegistryService', () => {
       const enriched = service.enrichedModules();
       expect(enriched[0].route).toBe('/unknown-module');
       expect(enriched[0].color).toBe('#6B7280');
+    });
+
+    it('resets signal to [] and completes without error on HTTP 500', () => {
+      let completed = false;
+      let errored = false;
+
+      service.loadModules().subscribe({
+        complete: () => (completed = true),
+        error: () => (errored = true),
+      });
+
+      httpMock
+        .expectOne(`${environment.apiUrl}/modules`)
+        .flush('Server error', { status: 500, statusText: 'Internal Server Error' });
+
+      expect(errored).toBe(false);
+      expect(completed).toBe(true);
+      expect(service.modules().length).toBe(0);
+    });
+
+    it('resets signal to [] and completes without error on network failure', () => {
+      let completed = false;
+      let errored = false;
+
+      service.loadModules().subscribe({
+        complete: () => (completed = true),
+        error: () => (errored = true),
+      });
+
+      httpMock
+        .expectOne(`${environment.apiUrl}/modules`)
+        .error(new ProgressEvent('network-error'));
+
+      expect(errored).toBe(false);
+      expect(completed).toBe(true);
+      expect(service.modules().length).toBe(0);
+    });
+
+    it('updates computed signals reactively on second loadModules() call', () => {
+      service.loadModules().subscribe();
+      httpMock.expectOne(`${environment.apiUrl}/modules`).flush([makeDto('whiteboard')]);
+      expect(service.modules().length).toBe(1);
+
+      service.loadModules().subscribe();
+      httpMock
+        .expectOne(`${environment.apiUrl}/modules`)
+        .flush([makeDto('whiteboard'), makeDto('session')]);
+
+      expect(service.modules().length).toBe(2);
+      expect(service.enrichedModules().length).toBe(2);
     });
   });
 });

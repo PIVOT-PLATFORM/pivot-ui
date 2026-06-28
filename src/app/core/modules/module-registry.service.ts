@@ -9,7 +9,7 @@
  */
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, catchError, of, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import type { PivotModuleDto, PivotModuleUi, ModuleStatus } from './module.model';
 import { MODULE_METADATA, defaultMeta } from './module-metadata';
@@ -65,10 +65,19 @@ export class ModuleRegistryService {
   /**
    * Fetches the module list from the backend and updates the internal signal.
    * Call once on app init or on tenant switch.
+   *
+   * On HTTP error the signal is reset to [] and the observable completes without
+   * error — callers do not need to handle the error case.
    */
   loadModules(): Observable<PivotModuleDto[]> {
     return this.http
       .get<PivotModuleDto[]>(`${this.apiUrl}/modules`)
-      .pipe(tap(modules => this._modules.set(modules)));
+      .pipe(
+        tap(modules => this._modules.set(modules)),
+        catchError(() => {
+          this._modules.set([]);
+          return of([]);
+        }),
+      );
   }
 }
