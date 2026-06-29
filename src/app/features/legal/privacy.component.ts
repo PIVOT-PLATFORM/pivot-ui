@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Location } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'piv-privacy',
@@ -10,6 +12,10 @@ import { Location } from '@angular/common';
     <div class="legal-page">
       <div class="legal-card">
         <button class="back-link" type="button" (click)="goBack()">← Retour</button>
+
+        @if (lang() === 'en') {
+          <p class="legal-lang-notice">⚠ This document is legally binding in French only.</p>
+        }
 
         <h1>Politique de confidentialité</h1>
         <p class="updated">Dernière mise à jour : juin 2026 — Conforme RGPD (Règlement UE 2016/679)</p>
@@ -153,9 +159,12 @@ import { Location } from '@angular/common';
     ul { padding-left: 20px; }
     code { background: var(--surface-bg); padding: 1px 5px; border-radius: 3px; font-size: 0.85em; }
     a { color: var(--color-brand-600); }
+    :host-context([data-theme="dark"]) .legal-page { background: var(--auth-gradient); }
   `]
 })
 export class PrivacyComponent {
   private readonly location = inject(Location);
+  private readonly transloco = inject(TranslocoService);
+  readonly lang = toSignal(this.transloco.langChanges$, { initialValue: this.transloco.getActiveLang() });
   goBack(): void { this.location.back(); }
 }
