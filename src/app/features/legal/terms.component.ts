@@ -1,25 +1,17 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Location } from '@angular/common';
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'piv-terms',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe],
+  imports: [],
   template: `
     <div class="legal-page">
       <div class="legal-card">
-        <button class="back-link" type="button" (click)="goBack()">
-          {{ 'legal.back' | transloco }}
-        </button>
+        <button class="back-link" type="button" (click)="goBack()">← Retour</button>
 
-        @if (lang() === 'en') {
-          <p class="legal-lang-notice">{{ 'legal.fr_only_notice' | transloco }}</p>
-        }
-
-        <h1>{{ 'legal.terms_title' | transloco }}</h1>
+        <h1>Conditions Générales d'Utilisation</h1>
         <p class="updated">Version 0.1 — Juin 2026 (pré-production)</p>
 
         <h2>Article 1 — Objet</h2>
@@ -180,9 +172,5 @@ import { toSignal } from '@angular/core/rxjs-interop';
 })
 export class TermsComponent {
   private readonly location = inject(Location);
-  private readonly transloco = inject(TranslocoService);
-
-  readonly lang = toSignal(this.transloco.langChanges$, { initialValue: this.transloco.getActiveLang() });
-
   goBack(): void { this.location.back(); }
 }
