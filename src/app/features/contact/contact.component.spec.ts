@@ -5,13 +5,36 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideRouter } from '@angular/router';
 import { Component } from '@angular/core';
 import { ContactComponent } from './contact.component';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 import { environment } from '../../../environments/environment';
 
 // ─── Stub ────────────────────────────────────────────────────────────────────
 
 @Component({ template: '', standalone: true })
 class StubComponent {}
+
+const frTranslations = {
+  contact: {
+    title: 'Nous contacter',
+    subtitle: "Une question ? Un problème ? L'équipe PIVOT vous répond.",
+    main_aria: 'Page de contact',
+    form_aria: 'Formulaire de contact',
+    form: {
+      title: 'Envoyer un message',
+      email: 'Email',
+      email_placeholder: 'jean.dupont@example.com',
+      email_required: "L'email est requis.",
+      email_invalid: 'Adresse email invalide.',
+      message: 'Message',
+      message_placeholder: 'Décrivez votre demande…',
+      message_required: 'Le message est requis.',
+      submit: 'Envoyer le message',
+      submit_loading: 'Envoi en cours…',
+    },
+    success: 'Message envoyé ! Un email de confirmation vous a été adressé.',
+    error: "Une erreur s'est produite. Veuillez réessayer ou nous écrire directement à contact@pivot.app.",
+  },
+};
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
@@ -21,15 +44,18 @@ describe('ContactComponent', () => {
   let httpMock: HttpTestingController;
 
   beforeEach(async () => {
-    const translocoStub = { getActiveLang: () => 'fr' } as unknown as TranslocoService;
-
     await TestBed.configureTestingModule({
-      imports: [ContactComponent],
+      imports: [
+        ContactComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { fr: frTranslations, en: {} },
+          translocoConfig: { defaultLang: 'fr', availableLangs: ['fr', 'en'] },
+        }),
+      ],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([{ path: '**', component: StubComponent }]),
-        { provide: TranslocoService, useValue: translocoStub },
       ],
     }).compileComponents();
 

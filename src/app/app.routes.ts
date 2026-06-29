@@ -1,5 +1,24 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/auth/guard/auth.guard';
+import { authMatchGuard } from './core/auth/guard/auth.guard';
+
+const LEGAL_CHILDREN: Routes = [
+  {
+    path: 'mentions-legales',
+    loadComponent: () => import('./features/legal/legal-notice.component').then(m => m.LegalNoticeComponent),
+  },
+  {
+    path: 'confidentialite',
+    loadComponent: () => import('./features/legal/privacy.component').then(m => m.PrivacyComponent),
+  },
+  {
+    path: 'cgu',
+    loadComponent: () => import('./features/legal/terms.component').then(m => m.TermsComponent),
+  },
+  {
+    path: 'accessibilite',
+    loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
+  },
+];
 
 export const routes: Routes = [
   {
@@ -8,7 +27,7 @@ export const routes: Routes = [
   },
   {
     path: '',
-    canActivate: [authGuard],
+    canMatch: [authMatchGuard],
     loadComponent: () => import('./core/layout/shell/shell.component').then(m => m.ShellComponent),
     children: [
       { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -28,29 +47,19 @@ export const routes: Routes = [
         path: 'teams',
         loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
       },
-    ],
-  },
-  {
-    path: 'legal',
-    children: [
+      { path: 'legal', children: LEGAL_CHILDREN },
       {
-        path: 'mentions-legales',
-        loadComponent: () => import('./features/legal/legal-notice.component').then(m => m.LegalNoticeComponent),
+        path: 'faq',
+        loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
       },
       {
-        path: 'confidentialite',
-        loadComponent: () => import('./features/legal/privacy.component').then(m => m.PrivacyComponent),
-      },
-      {
-        path: 'cgu',
-        loadComponent: () => import('./features/legal/terms.component').then(m => m.TermsComponent),
-      },
-      {
-        path: 'accessibilite',
+        path: 'plan-du-site',
         loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
       },
     ],
   },
+  // Public fallback for unauthenticated access (auth shell footer links, etc.)
+  { path: 'legal', children: LEGAL_CHILDREN },
   {
     path: 'faq',
     loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),

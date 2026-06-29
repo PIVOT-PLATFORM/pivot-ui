@@ -1,17 +1,25 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Location } from '@angular/common';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'piv-privacy',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  imports: [TranslocoPipe],
   template: `
     <div class="legal-page">
       <div class="legal-card">
-        <a routerLink="/auth/login" class="back-link">← Retour à la connexion</a>
+        <button class="back-link" type="button" (click)="goBack()">
+          {{ 'legal.back' | transloco }}
+        </button>
 
-        <h1>Politique de confidentialité</h1>
+        @if (lang() === 'en') {
+          <p class="legal-lang-notice">{{ 'legal.fr_only_notice' | transloco }}</p>
+        }
+
+        <h1>{{ 'legal.privacy_title' | transloco }}</h1>
         <p class="updated">Dernière mise à jour : juin 2026 — Conforme RGPD (Règlement UE 2016/679)</p>
 
         <h2>1. Responsable du traitement</h2>
@@ -109,38 +117,57 @@ import { RouterLink } from '@angular/router';
   `,
   styles: [`
     .legal-page {
-      min-height: 100vh;
-      background: var(--auth-gradient);
       display: flex;
       align-items: flex-start;
       justify-content: center;
       padding: 40px 24px;
+      background: var(--surface-bg);
     }
     .legal-card {
-      background: #fff;
+      background: var(--surface-card);
       border-radius: 16px;
       padding: 48px;
       max-width: 760px;
       width: 100%;
-      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      box-shadow: var(--shadow-md);
       @media (max-width: 600px) { padding: 28px 20px; }
     }
     .back-link {
       display: inline-block;
       margin-bottom: 28px;
-      color: #5b21b6;
+      color: var(--color-brand-600);
       font-size: 0.875rem;
       font-weight: 500;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
       text-decoration: none;
       &:hover { text-decoration: underline; }
+      &:focus-visible { outline: 2px solid var(--color-brand-500); outline-offset: 2px; border-radius: 2px; }
     }
-    h1 { font-size: 1.75rem; font-weight: 700; color: #1e1b4b; margin-bottom: 4px; }
-    .updated { font-size: 0.8rem; color: #6b7280; margin-bottom: 32px; }
-    h2 { font-size: 1.1rem; font-weight: 600; color: #312e81; margin: 28px 0 10px; }
-    p, li { font-size: 0.9375rem; color: #374151; line-height: 1.7; }
+    .legal-lang-notice {
+      font-size: 0.875rem;
+      color: var(--color-warning, #b45309);
+      background: rgba(251, 191, 36, 0.1);
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin-bottom: 24px;
+    }
+    h1 { font-size: 1.75rem; font-weight: 700; color: var(--color-navy-900); margin-bottom: 4px; }
+    .updated { font-size: 0.8rem; color: var(--color-gray-500); margin-bottom: 32px; }
+    h2 { font-size: 1.1rem; font-weight: 600; color: var(--color-brand-700, #312e81); margin: 28px 0 10px; }
+    p, li { font-size: 0.9375rem; color: var(--color-gray-700); line-height: 1.7; }
     ul { padding-left: 20px; }
-    code { background: #f3f4f6; padding: 1px 5px; border-radius: 3px; font-size: 0.85em; }
-    a { color: #5b21b6; }
+    code { background: var(--surface-bg); padding: 1px 5px; border-radius: 3px; font-size: 0.85em; }
+    a { color: var(--color-brand-600); }
   `]
 })
-export class PrivacyComponent {}
+export class PrivacyComponent {
+  private readonly location = inject(Location);
+  private readonly transloco = inject(TranslocoService);
+
+  readonly lang = toSignal(this.transloco.langChanges$, { initialValue: this.transloco.getActiveLang() });
+
+  goBack(): void { this.location.back(); }
+}

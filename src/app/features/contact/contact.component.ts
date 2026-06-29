@@ -14,9 +14,8 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { ContactApiService } from './contact-api.service';
 
 interface ContactForm {
@@ -28,21 +27,19 @@ interface ContactForm {
   selector: 'piv-contact',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule, TranslocoPipe],
   template: `
-    <main class="contact" aria-label="Page de contact">
+    <main class="contact" [attr.aria-label]="'contact.main_aria' | transloco">
 
       <!-- ─── Header ──────────────────────────────────────────────────────── -->
       <header class="contact__header">
-        <h1 class="contact__title">Nous contacter</h1>
-        <p class="contact__subtitle">
-          Une question&nbsp;? Un problème&nbsp;? L'équipe PIVOT vous répond.
-        </p>
+        <h1 class="contact__title">{{ 'contact.title' | transloco }}</h1>
+        <p class="contact__subtitle">{{ 'contact.subtitle' | transloco }}</p>
       </header>
 
       <!-- ─── Contact form ─────────────────────────────────────────────────── -->
       <section class="contact__form-section" aria-labelledby="form-heading">
-        <h2 id="form-heading" class="contact__form-title">Envoyer un message</h2>
+        <h2 id="form-heading" class="contact__form-title">{{ 'contact.form.title' | transloco }}</h2>
 
         @if (submitted()) {
           <div class="contact__success" role="status" aria-live="polite" data-testid="contact-success">
@@ -50,7 +47,7 @@ interface ContactForm {
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
               <polyline points="22 4 12 14.01 9 11.01"/>
             </svg>
-            <p>Message envoyé ! Un email de confirmation vous a été adressé.</p>
+            <p>{{ 'contact.success' | transloco }}</p>
           </div>
         }
 
@@ -64,12 +61,13 @@ interface ContactForm {
             class="contact__form"
             (ngSubmit)="onSubmit()"
             novalidate
-            aria-label="Formulaire de contact"
+            [attr.aria-label]="'contact.form_aria' | transloco"
           >
             <!-- Email -->
             <div class="form-field">
               <label class="form-field__label" for="contact-email">
-                Email <span class="form-field__required" aria-hidden="true">*</span>
+                {{ 'contact.form.email' | transloco }}
+                <span class="form-field__required" aria-hidden="true">*</span>
               </label>
               <input
                 id="contact-email"
@@ -81,7 +79,7 @@ interface ContactForm {
                 aria-required="true"
                 [attr.aria-describedby]="emailError() ? 'contact-email-error' : null"
                 [class.form-field__input--error]="emailError()"
-                placeholder="jean.dupont@example.com"
+                [placeholder]="'contact.form.email_placeholder' | transloco"
                 data-testid="contact-email-input"
               />
               @if (emailError()) {
@@ -94,7 +92,8 @@ interface ContactForm {
             <!-- Message -->
             <div class="form-field">
               <label class="form-field__label" for="contact-message">
-                Message <span class="form-field__required" aria-hidden="true">*</span>
+                {{ 'contact.form.message' | transloco }}
+                <span class="form-field__required" aria-hidden="true">*</span>
               </label>
               <textarea
                 id="contact-message"
@@ -104,18 +103,18 @@ interface ContactForm {
                 aria-required="true"
                 [attr.aria-describedby]="messageError() ? 'contact-message-error' : null"
                 [class.form-field__input--error]="messageError()"
-                placeholder="Décrivez votre demande…"
+                [placeholder]="'contact.form.message_placeholder' | transloco"
                 rows="5"
               ></textarea>
               @if (messageError()) {
                 <p id="contact-message-error" class="form-field__error" role="alert">
-                  Le message est requis.
+                  {{ messageError() }}
                 </p>
               }
             </div>
 
             <button type="submit" class="contact__submit" [disabled]="loading()">
-              {{ loading() ? 'Envoi en cours…' : 'Envoyer le message' }}
+              {{ loading() ? ('contact.form.submit_loading' | transloco) : ('contact.form.submit' | transloco) }}
             </button>
           </form>
         }
@@ -155,15 +154,15 @@ export class ContactComponent {
     let valid = true;
 
     if (!this.form.email.trim()) {
-      this.emailError.set("L'email est requis.");
+      this.emailError.set(this.transloco.translate('contact.form.email_required'));
       valid = false;
     } else if (!this.EMAIL_RE.test(this.form.email)) {
-      this.emailError.set('Adresse email invalide.');
+      this.emailError.set(this.transloco.translate('contact.form.email_invalid'));
       valid = false;
     }
 
     if (!this.form.message.trim()) {
-      this.messageError.set('Le message est requis.');
+      this.messageError.set(this.transloco.translate('contact.form.message_required'));
       valid = false;
     }
 
@@ -185,9 +184,7 @@ export class ContactComponent {
           this.loading.set(false);
         },
         error: () => {
-          this.submitError.set(
-            "Une erreur s'est produite. Veuillez réessayer ou nous écrire directement à contact@pivot.app.",
-          );
+          this.submitError.set(this.transloco.translate('contact.error'));
           this.loading.set(false);
         },
       });
