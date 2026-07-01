@@ -17,6 +17,7 @@ const TRANSLOCO_FR = {
     lang_aria: 'Langue', notifications: 'Notifications',
     notif_count: '{{ count }} notifications', user_menu: 'Menu de {{ name }}',
     sign_out: 'Se déconnecter',
+    theme_to_dark: 'Passer en mode sombre', theme_to_light: 'Passer en mode clair',
     dropdown: {
       user_menu_aria: 'Menu utilisateur', profile: 'Mon profil',
       preferences: 'Préférences', security: 'Sécurité', my_data: 'Mes données',
@@ -203,7 +204,10 @@ describe('NavbarComponent', () => {
 
   describe('bugReportUrl', () => {
     it('is a mailto link', () => {
-      expect(component.bugReportUrl).toMatch(/^mailto:/);
+      fixture.detectChanges();
+      const el: HTMLElement = fixture.nativeElement;
+      const link = el.querySelector<HTMLAnchorElement>('a.navbar__icon-btn[href]');
+      expect(link?.href).toMatch(/mailto:/);
     });
   });
 

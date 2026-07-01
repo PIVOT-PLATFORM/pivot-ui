@@ -43,11 +43,12 @@ Concise et directe. Techniquement précise. Pas de récapitulatifs inutiles.
 | Framework | Angular 22 · TypeScript strict |
 | Styles | SCSS · BEM · tokens CSS |
 | HTTP | Angular HttpClient · RxJS |
-| State | Signals Angular (Angular 17+) · NgRx si complexité croissante |
+| State | Signals Angular · NgRx si complexité croissante |
 | Auth | OIDC PKCE S256 (client Angular) · angular-oauth2-oidc |
-| Temps réel | WebSocket STOMP (ngx-stomp ou ng2-stompjs) |
+| Temps réel | WebSocket STOMP — `@stomp/rx-stomp` (ng2-stompjs deprecated, ngx-stomp non maintenu) |
 | Tests unitaires | Vitest |
 | Tests E2E | Playwright (Chromium) |
+| i18n | Transloco — tous libellés externalisés, jamais de chaîne littérale dans les templates |
 | Build | Angular CLI · esbuild |
 | CI/CD | GitHub Actions · SonarCloud · Semantic Release · Plumber |
 | Déploiement | Docker (nginx) |
@@ -75,8 +76,7 @@ pivot-ui/
 │   └── styles/                # Global SCSS, tokens, variables
 ├── e2e/                       # Specs Playwright
 ├── .github/
-│   ├── workflows/
-│   └── ISSUE_TEMPLATE/
+│   └── workflows/
 ├── .plumber.yaml              # Config Plumber (CI/CD compliance)
 └── Dockerfile                 # nginx production
 ```
@@ -96,12 +96,13 @@ Toute contribution mobilise les experts concernés — les mentionner explicitem
 | **Expert DevSecOps** | CI/CD GitHub Actions, SonarCloud, Semgrep, Gitleaks, Plumber, SBOM |
 | **Expert Red Team** | XSS, CSRF, OIDC bypass frontend, exposition tokens, clickjacking |
 | **Expert Blue Team** | CSP, SRI, headers sécurité nginx, réponse aux rapports Red Team |
-| **Expert OIDC / IAM** | OIDC PKCE S256 Angular, gestion tokens, silent refresh, claims |
-| **Expert QA** | Stratégie Vitest/Playwright, coverage ≥ 80 %, A11y tests |
+| **Expert OIDC / IAM** | OIDC PKCE S256 Angular, gestion tokens, rotating refresh token OIDC enterprise (géré côté serveur — jamais stocké en Local Storage/sessionStorage), claims — **silent refresh via iframe interdit** |
+| **Expert QA** | Stratégie Vitest/Playwright, coverage ≥ 85 %, A11y tests |
 | **Expert RGPD** | Conformité RGPD/CNIL, stockage navigateur, consentement, cookies |
 | **Product Owner** | Project GitHub org backlog, Epics, US, critères d'acceptation, priorisation |
 | **Scrum Master** | Coordination, sprints, impediments, backlog consistency |
 | **Architecte Modules** | Lazy-loading Angular, guards d'activation, route protection par module |
+| **Expert PR Review** | Relecture croisée neutre : cohérence architecture Angular, lisibilité, dette technique, respect des standards PIVOT — intervient quand les experts dev signalent "prêt pour review" |
 | **Experts Java / Backend** | → **pivot-core** |
 
 ### Faire appel aux experts
@@ -128,11 +129,12 @@ Toute contribution mobilise les experts concernés — les mentionner explicitem
 
 ---
 
-## Backlog — GitHub Project (org)
+## Backlog — fichiers markdown
 
-> **Source de vérité : `pivot-docs/backlog/README.md`.** Le backlog opérationnel vit dans le
-> **Project org `PIVOT-PLATFORM` (« PIVOT Platform »)**. Tant que le produit n'est pas public,
-> les items sont des **drafts** (pas d'Issues repo ; conversion à l'implémentation).
+> **Sources de vérité :**
+> - Hiérarchie backlog + conventions : `pivot-docs/backlog/README.md`
+> - Sprints, assignation US, état avancement : **`pivot-docs/backlog/SPRINTS.md`**
+> - **Backlog opérationnel :** fichiers markdown dans `pivot-docs/backlog/` — un fichier par US/Enabler avec frontmatter (`Stage`, `Human Gate`, `Priority`, `Phase`).
 
 ### Hiérarchie
 `EPIC → FEATURE (valeur) / ENABLER (technique) → US` · clé `E01 → F01.1 / EN01.1 → US01.1.1`.
@@ -144,34 +146,12 @@ Toute contribution mobilise les experts concernés — les mentionner explicitem
 | Item Type | Epic / Feature / Enabler / US |
 | Parent | clé du parent (ex. `E01`, `F01.1`) |
 | Stage | Backlog / Ready / In progress / Review / Done |
-| Human Gate | needs-human-valid / human-validated |
+| Human Gate | needs-human-valid / human-validated / human-reject |
 | Priority | Critical / High / Medium / Low |
 | Module | core / auth / admin / oidc / whiteboard / session / roadmap / survey / quiz (extensible) |
 | Phase | MVP / v1-enterprise / phase-3 |
 | Sprint | Sprint 1…N |
 | Size | XS / S / M / L / XL |
-
-### Règles dures
-- **Human Gate** : aucune implémentation tant que `Human Gate = needs-human-valid` (posé par le **mainteneur seul** ; Claude le consomme, ne le pose jamais).
-- **Verrou MVP** : seuls les items `Phase: MVP` éligibles tant que « MVP terminé » non déclaré.
-- **Lecture Project** : Claude lit l'état du Project **au démarrage de session** (pas d'automation live).
-- **Draft → Issue** : à `human-validated` (+ MVP), Claude **convertit le draft en Issue** (repo selon module) et passe `Stage → In progress`. **1 draft = 1 Issue = 1 repo**.
-- **Transitions Stage autorisées pour Claude** :
-  - `Backlog → Ready` : DoR satisfaite, en attente de `human-validated`
-  - `Ready → In progress` : démarrage implémentation (après `human-validated`)
-  - `In progress → Review` : implémentation terminée, recette humaine attendue
-  - **`Review → Done` : mainteneur uniquement — jamais Claude**
-- US bloquée → retour `Backlog` + note.
-
-### Workflow autonome (boucle de session)
-
-1. **Lecture** — au démarrage de session, Claude lit l'état du Project GitHub (Human Gate, Stage, Phase).
-2. **Si `Human Gate = human-validated` et `Phase: MVP`** :
-   - Convertit le draft en Issue dans le repo cible.
-   - Passe `Stage → In progress`.
-   - Implémente (Breaking Point 1 d'abord si non encore validé).
-3. **Fin d'implémentation** → passe `Stage → Review` (recette mainteneur).
-4. **`Review → Done`** : mainteneur uniquement — jamais Claude.
 
 ### Template US, Definition of Ready, vagues → `pivot-docs/backlog/README.md`.
 
@@ -196,7 +176,7 @@ Demander explicitement la validation du mainteneur sur **deux points** :
 **Exceptions (pas de consultation requise) :**
 - Correctifs sécurité sur vecteur exploitable immédiatement
 - ESLint / TypeScript / tests cassés bloquant la CI
-- Bugs dont la cause racine est clairement identifiée
+- Bugs dont la cause racine est clairement identifiée et le périmètre limité à un seul composant — **notifier le mainteneur a posteriori dans les 24h**
 
 ### Breaking Point 2 : Gate 4 MERGE < 60 ou hard block
 
@@ -210,19 +190,43 @@ Tout PR avec :
 
 ---
 
-## Workflow — Ordre d'exécution par US
+## Workflow — Organisation par sprint
+
+Travail organisé par sprint. Référence : **`pivot-docs/backlog/SPRINTS.md`**.
+
+**Principes :**
+- **Une branche par US / Enabler** — `feat/{us-id}-{slug}` (ex. `feat/us03-1-1-admin-active-module`)
+- **Agents en parallèle** — un agent par item du sprint, branches séparées
+- **Backlog pivot-docs** — mises à jour `Stage`/`Human Gate` dans le frontmatter US + SPRINTS.md, committés sur la branche de l'US
+
+## Workflow — Autoloop PR par US
+
+Après implémentation sur `feat/{us-id}-{slug}` :
+
+1. Ouvrir une PR (draft) vers `main`
+2. **Autoloop** (10 itérations max) :
+   - **En parallèle :**
+     - **Review neutre** — Expert PR Review : architecture, AC, sécurité, dette, a11y, i18n
+     - **CI** — `npx tsc --noEmit` + `npm run lint` + `npm run test:ci` + build prod = 0 erreur/warning
+   - **Corrections** — tous les findings résolus, commit `fix({scope}): ...`
+   - **Convergence** — Gate 4 ≥ 85 ET CI verte → sortir
+3. Gate 4 vert → `Stage: Review` dans frontmatter US + SPRINTS.md + signal mainteneur
+4. Blocage 10 boucles → Breaking Point 2
+
+## Workflow — Ordre d'exécution par US (dans un sprint)
 
 | Étape | Contenu |
 |-------|---------|
 | **1. Code** | Composants Angular + TSDoc · Services · Guards |
-| **2. Tests** | Vitest (TU composants + services) — **dans le même commit** |
+| **2. Tests** | Vitest TU composants + services — **dans le même commit** |
 | **3. Qualité** | ESLint · TypeScript strict verts |
-| **4. UI / A11y / SCSS** | Composants Angular, styles, tokens, attributs ARIA |
-| **5. Project** | `Stage → Review` dans le Project GitHub (fin d'implémentation) · Issue trackée via PR · **obligatoire avant push** |
-| **6. E2E** | Spec Playwright (happy path + 1 erreur critique) |
-| **7. Commit** | `git add` fichier par fichier · commits atomiques · branche `feat/us-{id}-{slug}` |
+| **4. UI / i18n / A11y** | Composants Angular, styles, tokens, ARIA |
+| **5. Gate 2** | Coverage check : ≥ 85 % → continuer · 70–84 % → compléter · < 70 % → stop |
+| **6. Backlog** | Mise à jour SPRINTS.md + statut US **obligatoire avant commit** |
+| **7. E2E** | Spec Playwright (happy path + 1 erreur critique) |
+| **8. Commit** | `git add` fichier par fichier · commits atomiques sur branche `feat/{us-id}-{slug}` |
 
-> **E2E différable** si environnement indisponible. Étapes 5 et 7 non différables.
+> **E2E différable** si environnement indisponible. Étapes 6 et 8 non différables.
 
 ### Approche tests
 
@@ -253,25 +257,26 @@ Rapporter ✅ ou stderr complet. Toute erreur ou warning non justifié = **stop,
 
 | Préfixe | Usage | Exemple |
 |---------|-------|---------|
-| `feat/us-{id}-{slug}` | Nouvelle US | `feat/us-42-whiteboard-toolbar` |
-| `fix/{id}-{slug}` | Correction de bug | `fix/67-auth-redirect-loop` |
-| `refactor/{id}-{slug}` | Refactoring | `refactor/89-signals-migration` |
+| `feat/{us-id}-{slug}` | Implémentation d'une US / Enabler | `feat/us03-1-2-admin-desactive-module` |
+| `fix/{id}-{slug}` | Correction bug hors sprint | `fix/67-auth-redirect-loop` |
+| `refactor/{id}-{slug}` | Refactoring hors sprint | `refactor/89-signals-migration` |
 | `chore/{slug}` | CI, deps, config | `chore/eslint-config` |
-| `docs/{slug}` | Documentation | `docs/adr-state-management` |
+| `docs/{slug}` | Documentation hors sprint | `docs/adr-state-management` |
 
 **Règles :**
 - Jamais de travail direct sur `main`
-- Une branche = une US = une PR
-- Rebase avant merge : `git rebase -i origin/main` → squash WIP
+- **Une branche = un item de sprint** (US ou Enabler)
+- **Backlog pivot-docs et PATCH_NOTES.md committés sur la branche de l'US**
+- Rebase avant merge → squash WIP
 - `git push --force-with-lease` uniquement sur branches de travail
 
-**Création de branche — procédure obligatoire :**
+**Création de branche US — procédure obligatoire :**
 ```bash
 git checkout main
 git pull origin main
-git checkout -b feat/us-{id}-{slug}
+git checkout -b feat/{us-id}-{slug}
 ```
-Sauf si la branche existe déjà → `git checkout {branche}` directement.
+Branche existante → `git checkout feat/{us-id}-{slug}` directement.
 
 ---
 
@@ -282,9 +287,14 @@ Format **Conventional Commits** (`type(scope): message`) — alimente Semantic R
 | Commit | Contenu typique |
 |--------|----------------|
 | `feat(ui):` | composant Angular, service, route |
+| `fix(ui):` | correction bug frontend |
 | `feat(modules):` | lazy-loading, route guard, activation module |
+| `fix(modules):` | correction bug module system |
 | `feat(auth):` | OIDC Angular, intercepteur token, guard auth |
+| `fix(auth):` | correction bug auth / session |
 | `feat(ws):` | WebSocket STOMP client Angular |
+| `fix(ws):` | correction bug WebSocket / STOMP |
+| `test:` | ajout ou correction de tests (Vitest, Playwright) sans changement de code prod |
 | `feat(a11y):` | accessibilité WCAG, attributs ARIA |
 | `style(ui):` | SCSS, tokens CSS, design system |
 | `ci:` | GitHub Actions workflows, Plumber |
@@ -298,11 +308,11 @@ Co-author sur chaque commit : `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthro
 ## Gates ACDD — Confidence Gates
 
 Score 0–100, jamais booléen. Scores/décisions consignés en **commentaire de PR** (plus de
-dossier `gates/`). La validation humaine vit dans le champ **Human Gate** du Project.
+dossier `gates/`). La validation humaine vit dans le champ **Human Gate** du frontmatter US (pivot-docs).
 
 | Gate | Moment | Seuils |
 |------|--------|--------|
-| **1 — READINESS** | Avant implémentation | ≥ 70 → Breaking Point 1 · < 70 → clarification PO |
+| **1 — READINESS** | Avant implémentation | ≥ 70 → déclenche Breaking Point 1 (demande validation mainteneur) · mainteneur pose ensuite `Human Gate: human-validated` · < 70 → clarification PO d'abord |
 | **2 — COVERAGE** | Par commit | ≥ 85 → continuer · 70–84 → compléter tests · < 70 → stop |
 | **3 — QUALITY** | Après CI verte | Hard blocks : secret Gitleaks, label `security`/`breaking-change`, modif contrat module/OIDC |
 | **4 — MERGE CONFIDENCE** | Avant merge | ≥ 85 → merge autonome · 60–84 → merge documenté · < 60 → Breaking Point 2 |
@@ -348,17 +358,20 @@ dossier `gates/`). La validation humaine vit dans le champ **Human Gate** du Pro
 - OnPush change detection par défaut (`ChangeDetectionStrategy.OnPush`)
 - Signals Angular pour le state local — `signal()`, `computed()`, `effect()`
 - RxJS pour l'asynchrone HTTP et WebSocket — pas de Promise sauf interop
-- SCSS BEM ou tokens centralisés — pas de styles inline
+- SCSS BEM + tokens centralisés — pas de styles inline
 - WCAG 2.1 AA sur tous les éléments interactifs (ARIA, focus, contraste)
 - Pas de logique métier dans les composants — déléguer aux services
 - `inject()` plutôt que constructeur pour les dépendances (Angular 14+)
 - Routes lazy-loaded par feature module — jamais de barrel d'import massif
+- TSDoc sur tous les services, guards et pipes publics
+- i18n : **Transloco** — tous les libellés externalisés, jamais de chaîne littérale dans les templates ou services
+- Garde fonctionnels (`CanActivateFn`) — jamais de classe `CanActivate` (deprecated Angular 15+)
 
 ### Général
 
 - Pas de secrets dans le code — variables d'environnement
-- `// NOSONAR — <justification courte>` (SonarCloud faux positif — justification obligatoire)
-- `// nosemgrep: <rule-id>` (Semgrep faux positif)
+- **`// NOSONAR` : zéro, jamais.** Tout faux positif Sonar se marque côté SonarCloud (UI "Won't fix" / "False positive", ou exclusion centralisée) — aucune exception.
+- **`// nosemgrep` : interdit par défaut**, autorisé **uniquement avec la validation explicite du mainteneur**. Sans validation, exclusion côté config Semgrep (`.semgrepignore` / `--exclude-rule`), jamais en commentaire inline.
 
 ---
 
@@ -377,16 +390,16 @@ dossier `gates/`). La validation humaine vit dans le champ **Human Gate** du Pro
 | Flux | Détail |
 |------|--------|
 | PKCE S256 | Standard — pas de client_secret côté navigateur |
-| Access token | En mémoire uniquement — jamais dans Local Storage ou Cookie |
-| Refresh token | Silent refresh via iframe OIDC ou rotating refresh token |
-| Guard Angular | `canActivate` vérifie token valide avant navigation |
+| Access token | En mémoire uniquement — **jamais dans Local Storage, sessionStorage, IndexedDB ou Cookie** |
+| Refresh token | Rotating refresh token (OIDC enterprise) · Opaque token TTL géré côté serveur (auth locale) · **silent refresh via iframe = interdit** (incompatible avec le modèle opaque token) |
+| Guard Angular | Fonction `CanActivateFn` vérifie token valide avant navigation — **jamais de classe `CanActivate` (deprecated Angular 15+)** |
 | Intercepteur | Ajoute `Authorization: Bearer {token}` sur toutes les requêtes API |
 
 ---
 
 ## Releases — PATCH_NOTES.md
 
-`PATCH_NOTES.md` est mis à jour **dans chaque PR** (embarqué avec le code) :
+`PATCH_NOTES.md` (situé à la racine de `pivot-ui/`) est mis à jour **dans chaque PR** (embarqué avec le code) :
 - Ajouter les changements notables dans la section `## [Unreleased]` en tête de fichier
 - Rédigé en **français**, pour l'utilisateur final — pas le développeur
 - Langage naturel — pas de référence aux commits ou tickets
@@ -410,12 +423,25 @@ Dans **pivot-docs** — un fichier par catégorie, mis à jour en place. **Jamai
 | `git push --force` sur `main` | Jamais — le mainteneur uniquement si nécessaire |
 | `git add .` en bloc | Risque d'inclure `.env`, clés, tokens |
 | Merger avec label `security` sans revue humaine | Hard block Gate 4 |
-| Commiter `.env`, tokens, secrets | Exposition définitive |
-| Access token dans Local Storage | Vulnérable XSS — mémoire uniquement |
+| Access token dans Local Storage, sessionStorage, IndexedDB ou Cookie | Vulnérable XSS — mémoire JavaScript uniquement |
 | `any` TypeScript | Désactive la sécurité du typage |
 | Logique métier dans les composants | Viole la séparation des couches |
 | Module désactivé avec routes accessibles | Contournement restriction admin |
-| Implémenter sans draft/Issue tracé dans le Project GitHub org | Perte de traçabilité |
+| Implémenter sans US tracée dans les fichiers markdown backlog | Perte de traçabilité |
+| JWT (HS*/RS*) côté Angular | Remplacé par opaque tokens — jamais stocker ni parser un JWT côté client |
+| `userId` passé dans le body d'une requête Angular (`/api/account/*`) | Mass assignment / IDOR — identité extraite du token porteur par le backend |
+| Commiter `.env`, tokens, secrets, certificats | Exposition définitive |
+| `tenantId` passé en query param ou header custom côté Angular | IDOR — tenantId toujours résolu depuis le token par le backend |
+| Logique de filtrage tenant côté Angular (côté client) | Non-fiable — le backend est la seule autorité d'isolation |
+
+---
+
+## Règle transversale sécurité — Isolation tenant (côté Angular)
+
+- Ne jamais passer de `tenantId` ou `userId` en query param, header custom ou body côté Angular
+- L'isolation tenant est **exclusivement gérée côté backend** (TenantContext du token porteur)
+- Si un endpoint retourne 403 ou 404, ne pas retry avec un autre tenantId — traiter comme une erreur finale
+- Contenu affiché : utiliser **Angular interpolation `{{ val }}`** — jamais `innerHTML` avec données utilisateur
 
 ---
 
@@ -423,9 +449,11 @@ Dans **pivot-docs** — un fichier par catégorie, mis à jour en place. **Jamai
 
 Après **2 tentatives** (même stratégie ou variantes proches) :
 1. **Stopper** — ne pas continuer à boucler
-2. **Poster un commentaire de gate** sur la PR avec `decision: ESCALATED` et contexte complet
+2. **Poster un commentaire de gate sur la PR** avec `decision: ESCALATED`, contexte complet, tentatives effectuées — **jamais committer un fichier de gate**
 3. **Signaler** au mainteneur : blocage, tentatives, raison de l'échec — label `needs-human-review`
 4. **Proposer** une alternative : approche différente, outil différent, contournement
+
+Ne jamais enchaîner plus de 2 tentatives sans informer le mainteneur.
 
 ---
 
@@ -435,21 +463,27 @@ Index : `.project/skills/_index.yaml`
 
 | Skill | Fichier | Charger quand |
 |-------|---------|---------------|
-| Angular Architecture | `skill-angular-architecture.yaml` | Tout fichier .ts / .html / .scss |
-| OIDC & Auth Angular | `skill-oidc-angular.yaml` | Fichier auth/, guard, intercepteur, AC sécurité |
-| Module System Angular | `skill-module-system-angular.yaml` | Feature module, lazy-loading, route guard |
-| AC Traceability | `skill-ac-traceability.yaml` | **Toujours** — toute implémentation d'US, Gate 2, Gate 4 |
-| Testing Strategy | `skill-testing-strategy.yaml` | Nouveau test Vitest, coverage < 80 %, spec Playwright |
-| DevOps CI/CD | `skill-devops-cicd.yaml` | Fichier .github/workflows/, Dockerfile, config CI |
-| Accessibility | `skill-accessibility.yaml` | Tout composant interactif, AC A11y |
-| RGPD | `skill-rgpd.yaml` | US touchant données personnelles (email, profil, contenu) |
+| `skill-angular-architecture` | `skill-angular-architecture.yaml` | Tout fichier .ts / .html / .scss |
+| `skill-oidc-angular` | `skill-oidc-angular.yaml` | Fichier auth/, guard, intercepteur, AC sécurité |
+| `skill-module-system-angular` | `skill-module-system-angular.yaml` | Feature module, lazy-loading, route guard |
+| `skill-ac-traceability` | `skill-ac-traceability.yaml` | **Toujours** — toute implémentation d'US, Gate 2, Gate 4 |
+| `skill-testing-strategy` | `skill-testing-strategy.yaml` | Nouveau test Vitest, coverage < 85 %, spec Playwright |
+| `skill-devops-cicd` | `skill-devops-cicd.yaml` | Fichier .github/workflows/, Dockerfile, config CI |
+| `skill-accessibility` | `skill-accessibility.yaml` | Tout composant interactif, AC A11y |
+| `skill-rgpd` | `skill-rgpd.yaml` | US touchant données personnelles (email, profil, contenu) |
+| `skill-observability` | `skill-observability.yaml` | Nouveau log Angular, nouvelle métrique, monitoring erreurs |
+| `skill-i18n` | `skill-i18n.yaml` | Fichier fr.json/en.json, pipe translate, `getActiveLang()`, langue UI |
+| `skill-ux-design-system` | `skill-ux-design-system.yaml` | SCSS BEM, tokens CSS, design system, tout composant UI |
+| `skill-security-redteam` | `skill-security-redteam.yaml` | US auth/données user, `[innerHTML]`, AC sécurité, rapport Red Team |
+| `skill-security-blueteam` | `skill-security-blueteam.yaml` | nginx.conf, rapport Red Team reçu, gestion token Angular |
+| `skill-pr-reviewer` | `skill-pr-reviewer.yaml` | Gate 3 (qualité CI), Gate 4 (décision merge), review PR |
 
 **Règle :** avant d'écrire du code, identifier les skills applicables via l'index et les lire.
-La skill `pivot-ac-traceability` est toujours chargée pour toute US.
+La skill `skill-ac-traceability` est toujours chargée pour toute US.
 
 ---
 
-## Parallelisation
+## Parallélisation
 
 Lancer un maximum d'actions en parallèle dans chaque message :
 

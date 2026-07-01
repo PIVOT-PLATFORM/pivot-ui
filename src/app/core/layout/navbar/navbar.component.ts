@@ -11,7 +11,6 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { environment } from '../../../../environments/environment';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '../../auth/service/auth.service';
 import { ThemeService } from '../../theme/theme.service';
@@ -46,8 +45,8 @@ export function avatarColor(name: string): string {
           <span class="navbar__logo-text">PIVOT</span>
         </a>
         <nav class="navbar__nav" aria-label="Navigation principale">
-          <a routerLink="/dashboard" routerLinkActive="navbar__nav-link--active" class="navbar__nav-link">{{ 'nav.home' | transloco }}</a>
-          <a routerLink="/home" routerLinkActive="navbar__nav-link--active" class="navbar__nav-link">{{ 'nav.modules' | transloco }}</a>
+          <a routerLink="/home" routerLinkActive="navbar__nav-link--active" class="navbar__nav-link">{{ 'nav.home' | transloco }}</a>
+          <a routerLink="/dashboard" routerLinkActive="navbar__nav-link--active" class="navbar__nav-link">{{ 'nav.modules' | transloco }}</a>
           <a routerLink="/teams" routerLinkActive="navbar__nav-link--active" class="navbar__nav-link">{{ 'nav.teams' | transloco }}</a>
         </nav>
       </div>
@@ -62,14 +61,14 @@ export function avatarColor(name: string): string {
         <button class="navbar__icon-btn" [attr.aria-label]="'nav.help' | transloco" [title]="'nav.help' | transloco" type="button">
           <span class="navbar__help-label" aria-hidden="true">?</span>
         </button>
-        <a class="navbar__icon-btn" [href]="bugReportUrl" [attr.aria-label]="'nav.bug_report' | transloco" [title]="'nav.bug_report' | transloco">
+        <a class="navbar__icon-btn" [href]="bugReportUrl()" [attr.aria-label]="'nav.bug_report' | transloco" [title]="'nav.bug_report' | transloco">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2l1.88 1.88"/><path d="M14.12 3.88L16 2"/><path d="M9 7.13v-1a3.003 3.003 0 116 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 014-4h4a4 4 0 014 4v3c0 3.3-2.7 6-6 6z"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 4-4"/><path d="M17.47 9c1.93-.2 3.53-1.9 3.53-4"/><path d="M18 13h4"/><path d="M21 21c0-2.1-1.7-3.9-4-4"/></svg>
         </a>
         <div class="navbar__lang-pill" role="group" [attr.aria-label]="'nav.lang_aria' | transloco">
           <button class="navbar__lang-opt" [class.navbar__lang-opt--active]="lang() === 'fr'" (click)="setLang('fr')" type="button" [attr.aria-pressed]="lang() === 'fr'">FR</button>
           <button class="navbar__lang-opt" [class.navbar__lang-opt--active]="lang() === 'en'" (click)="setLang('en')" type="button" [attr.aria-pressed]="lang() === 'en'">EN</button>
         </div>
-        <button class="navbar__icon-btn" [attr.aria-label]="'nav.notifications' | transloco" type="button" aria-disabled="true" title="Bientôt disponible">
+        <button class="navbar__icon-btn" [attr.aria-label]="'nav.notifications' | transloco" type="button" aria-disabled="true" [title]="'nav.dropdown.coming_soon_a11y' | transloco">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
           @if (notifCount() > 0) {
             <span class="navbar__badge" [attr.aria-label]="'nav.notif_count' | transloco: { count: notifCount() }">{{ notifCount() }}</span>
@@ -132,7 +131,7 @@ export function avatarColor(name: string): string {
     .navbar__logo-text { font-size:var(--text-lg); font-weight:700; color:var(--navbar-logo-color); letter-spacing:0.04em; }
     .navbar__nav-link { font-size:var(--text-sm); font-weight:500; color:var(--navbar-text); text-decoration:none; padding:6px 12px; border-radius:var(--radius-md); transition:background var(--transition-fast),color var(--transition-fast); &:hover { background:var(--navbar-hover-bg); color:var(--navbar-text-hover); } &:focus-visible { outline:2px solid rgba(255,255,255,0.6); outline-offset:2px; } &--active { color:var(--navbar-active-color); background:var(--navbar-active-bg); font-weight:600; } }
     .navbar__icon-btn { display:flex; align-items:center; justify-content:center; position:relative; width:38px; height:38px; border:none; background:none; border-radius:var(--radius-md); color:var(--navbar-text); cursor:pointer; transition:background var(--transition-fast),color var(--transition-fast); text-decoration:none; svg { width:20px; height:20px; } &:hover { background:var(--navbar-hover-bg); color:var(--navbar-text-hover); } &:focus-visible { outline:2px solid rgba(255,255,255,0.6); outline-offset:2px; } }
-    .navbar__help-label { font-size:var(--text-sm); font-weight:700; color:var(--navbar-text); line-height:1; }
+    .navbar__help-label { font-size:var(--text-sm); font-weight:700; color:var(--navbar-text); line-height:1; width:22px; height:22px; border-radius:50%; border:1.5px solid rgba(255,255,255,0.75); display:flex; align-items:center; justify-content:center; }
     .navbar__lang-pill { display:flex; align-items:center; background:var(--navbar-pill-bg); border:1px solid var(--navbar-pill-border); border-radius:999px; padding:3px; gap:2px; }
     .navbar__lang-opt { border:none; background:transparent; color:var(--navbar-text); font-size:var(--text-xs); font-weight:600; letter-spacing:0.05em; padding:4px 10px; border-radius:999px; cursor:pointer; transition:background var(--transition-fast),color var(--transition-fast),box-shadow var(--transition-fast); &--active { background:var(--navbar-pill-active-bg); color:var(--navbar-pill-active-color); box-shadow:var(--shadow-sm); } &:not(.navbar__lang-opt--active):hover { color:var(--navbar-text-hover); } &:focus-visible { outline:2px solid rgba(255,255,255,0.6); outline-offset:2px; } }
     .navbar__badge { position:absolute; top:4px; right:4px; min-width:16px; height:16px; background:var(--color-error); color:#fff; font-size:10px; font-weight:700; line-height:1; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 3px; pointer-events:none; }
@@ -156,10 +155,28 @@ export class NavbarComponent {
   private readonly auth = inject(AuthService);
   private readonly themeService = inject(ThemeService);
   private readonly transloco = inject(TranslocoService);
-
-  readonly bugReportUrl = environment.bugReportUrl;
-
   readonly lang = toSignal(this.transloco.langChanges$, { initialValue: this.transloco.getActiveLang() });
+
+  readonly bugReportUrl = computed<string>(() => {
+    const fr = this.lang() === 'fr';
+    const subject = encodeURIComponent(fr ? '[PIVOT] Rapport de bug' : '[PIVOT] Bug Report');
+    const body = fr
+      ? encodeURIComponent(
+          '**Description du problème**\n[Décrivez le problème rencontré]\n\n' +
+          '**Étapes pour reproduire**\n1. \n2. \n3. \n\n' +
+          '**Comportement attendu**\n[Ce qui devrait se passer]\n\n' +
+          '**Comportement observé**\n[Ce qui se passe réellement]\n\n' +
+          '**Environnement**\n- Navigateur : \n- Système d\'exploitation : \n- Version PIVOT : ',
+        )
+      : encodeURIComponent(
+          '**Problem description**\n[Describe the issue]\n\n' +
+          '**Steps to reproduce**\n1. \n2. \n3. \n\n' +
+          '**Expected behavior**\n[What should happen]\n\n' +
+          '**Actual behavior**\n[What actually happens]\n\n' +
+          '**Environment**\n- Browser: \n- Operating system: \n- PIVOT version: ',
+        );
+    return `mailto:bugs@pivot-platform.fr?subject=${subject}&body=${body}`;
+  });
 
   readonly user = this.auth.currentUser;
   readonly userMenuOpen = signal(false);
@@ -184,9 +201,12 @@ export class NavbarComponent {
 
   readonly userAvatarColor = computed<string>(() => avatarColor(this.displayName() || '?'));
 
-  readonly themeLabel = computed<string>(() =>
-    this.theme() === 'light' ? 'Passer en mode sombre' : 'Passer en mode clair'
-  );
+  readonly themeLabel = computed<string>(() => {
+    this.lang();
+    return this.transloco.translate(
+      this.theme() === 'light' ? 'nav.theme_to_dark' : 'nav.theme_to_light'
+    );
+  });
 
   @HostListener('document:click')
   onDocumentClick(): void {

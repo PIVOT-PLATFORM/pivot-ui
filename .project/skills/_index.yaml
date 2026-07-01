@@ -1,6 +1,6 @@
 skill:
   id: pivot-ui-skills-index
-  version: "1.0"
+  version: "1.2"
   name: "Skills Index — pivot-ui"
   description: >
     Index de toutes les skills PIVOT-UI et leurs règles de chargement.
@@ -77,10 +77,73 @@ skills:
       agents: [Expert_QA, Dev_Agent]
       triggers:
         - "tout nouveau fichier de test Vitest ou spec Playwright"
-        - "coverage < 80 %"
+        - "coverage < 85 %"
         - "nouvelle spec E2E"
 
-  # ── DEVOPS & SÉCURITÉ ────────────────────────────────────────────────────────
+  # ── I18N ─────────────────────────────────────────────────────────────────────
+
+  - id: pivot-i18n-frontend
+    file: .project/skills/skill-i18n.yaml
+    priority: 1
+    load_when:
+      agents: [Architecte_Angular, Dev_Agent]
+      triggers:
+        - "fr.json ou en.json créé ou modifié"
+        - "pipe transloco ajouté dans un template"
+        - "getActiveLang() ou setActiveLang() utilisé"
+        - "US touchant langue interface, formulaire multilingue ou payload lang"
+        - "nouveau libellé UI visible par l'utilisateur"
+
+  # ── UX / DESIGN SYSTEM ───────────────────────────────────────────────────────
+
+  - id: pivot-ux-design-system
+    file: .project/skills/skill-ux-design-system.yaml
+    priority: 1
+    load_when:
+      agents: [Expert_UX_UI, Architecte_Angular, Dev_Agent]
+      triggers:
+        - "tout fichier .scss créé ou modifié"
+        - "nouveau composant Angular avec template HTML"
+        - "modification des tokens CSS"
+        - "US avec critère visuel, design ou responsive"
+
+  # ── SÉCURITÉ ─────────────────────────────────────────────────────────────────
+
+  - id: pivot-security-redteam
+    file: .project/skills/skill-security-redteam.yaml
+    priority: 1
+    load_when:
+      agents: [Expert_Red_Team, Security_Agent]
+      triggers:
+        - "US touchant auth, stockage navigateur ou données utilisateur"
+        - "nouveau composant avec [innerHTML] ou données utilisateur affichées"
+        - "rapport Red Team reçu"
+        - "AC sécurité présent dans l'US"
+
+  - id: pivot-security-blueteam
+    file: .project/skills/skill-security-blueteam.yaml
+    priority: 1
+    load_when:
+      agents: [Expert_Blue_Team, Security_Agent]
+      triggers:
+        - "nginx.conf modifié"
+        - "rapport Red Team reçu (réponse obligatoire)"
+        - "modification de la gestion du token Angular"
+        - "nouveau mécanisme d'authentification OIDC"
+
+  # ── REVIEW PR ────────────────────────────────────────────────────────────────
+
+  - id: pivot-pr-reviewer
+    file: .project/skills/skill-pr-reviewer.yaml
+    priority: 1
+    load_when:
+      agents: [PR_Review_Agent, Expert_PR_Review]
+      triggers:
+        - "Gate 3 — vérification qualité CI"
+        - "Gate 4 — décision de merge"
+        - "signal 'prêt pour review' d'un Dev_Agent"
+
+  # ── DEVOPS & OBSERVABILITÉ ───────────────────────────────────────────────────
 
   - id: pivot-devops-cicd
     file: .project/skills/skill-devops-cicd.yaml
@@ -120,24 +183,26 @@ loading_protocol:
 
   description: >
     Claude injecte les skills dans son contexte avant d'implémenter une US.
-    Les skills priority 1 sont toujours chargées sur trigger.
+    Les skills priority 1 sont chargées sur trigger.
     Les skills priority 2 sont chargées quand les triggers correspondent.
 
   example: |
     US 42 — Activation de module whiteboard (côté Angular)
     Target: src/app/features/whiteboard/ + src/app/core/modules/
     Skills chargées:
-      - pivot-angular-architecture   # priority 1 — fichiers .ts/.html
-      - pivot-oidc-angular           # priority 1 — guard auth présent
-      - pivot-module-system-angular  # priority 1 — US module activable
-      - pivot-accessibility          # priority 1 — composant interactif
-      - pivot-ac-traceability        # priority 1 — toujours
-      - pivot-testing-strategy       # priority 1 — tests requis
+      - pivot-angular-architecture    # priority 1 — fichiers .ts/.html
+      - pivot-oidc-angular            # priority 1 — guard auth présent
+      - pivot-module-system-angular   # priority 1 — US module activable
+      - pivot-accessibility           # priority 1 — composant interactif
+      - pivot-security-redteam        # priority 1 — AC sécurité + données user
+      - pivot-ac-traceability         # priority 1 — toujours
+      - pivot-testing-strategy        # priority 1 — tests requis
 
   skill_conflict_rule: >
     En cas de conflit entre deux skills, la plus spécifique gagne.
     pivot-oidc-angular prime sur pivot-angular-architecture pour les fichiers auth/.
     pivot-module-system-angular prime sur pivot-angular-architecture pour les fichiers features/.
+    pivot-security-blueteam prime sur pivot-security-redteam pour les corrections de vulnérabilités.
 
   priority_levels:
     1: "Toujours chargée sur trigger — standards fondamentaux"

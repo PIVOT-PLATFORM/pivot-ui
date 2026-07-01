@@ -1,5 +1,24 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/auth/guard/auth.guard';
+import { authMatchGuard } from './core/auth/guard/auth.guard';
+
+const LEGAL_CHILDREN: Routes = [
+  {
+    path: 'mentions-legales',
+    loadComponent: () => import('./features/legal/legal-notice.component').then(m => m.LegalNoticeComponent),
+  },
+  {
+    path: 'confidentialite',
+    loadComponent: () => import('./features/legal/privacy.component').then(m => m.PrivacyComponent),
+  },
+  {
+    path: 'cgu',
+    loadComponent: () => import('./features/legal/terms.component').then(m => m.TermsComponent),
+  },
+  {
+    path: 'accessibilite',
+    loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
+  },
+];
 
 export const routes: Routes = [
   {
@@ -8,7 +27,7 @@ export const routes: Routes = [
   },
   {
     path: '',
-    canActivate: [authGuard],
+    canMatch: [authMatchGuard],
     loadComponent: () => import('./core/layout/shell/shell.component').then(m => m.ShellComponent),
     children: [
       { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -21,36 +40,33 @@ export const routes: Routes = [
         loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
       },
       {
+        path: 'contact',
+        loadComponent: () => import('./features/contact/contact.component').then(m => m.ContactComponent),
+      },
+      {
         path: 'teams',
         loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
       },
-    ],
-  },
-  {
-    path: 'legal',
-    children: [
+      { path: 'legal', children: LEGAL_CHILDREN },
       {
-        path: 'mentions-legales',
-        loadComponent: () => import('./features/legal/legal-notice.component').then(m => m.LegalNoticeComponent),
+        path: 'faq',
+        loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
       },
       {
-        path: 'confidentialite',
-        loadComponent: () => import('./features/legal/privacy.component').then(m => m.PrivacyComponent),
-      },
-      {
-        path: 'cgu',
-        loadComponent: () => import('./features/legal/terms.component').then(m => m.TermsComponent),
-      },
-      {
-        path: 'accessibilite',
+        path: 'plan-du-site',
         loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
       },
     ],
   },
+  // Public fallback routes — accessible without authentication.
+  // ContactComponent and legal pages are stateless (no auth dependency),
+  // so loading them here is safe. authMatchGuard returns false (no redirect)
+  // on unauthenticated requests, causing Angular to fall through to these routes.
   {
     path: 'contact',
-    loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
+    loadComponent: () => import('./features/contact/contact.component').then(m => m.ContactComponent),
   },
+  { path: 'legal', children: LEGAL_CHILDREN },
   {
     path: 'faq',
     loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),

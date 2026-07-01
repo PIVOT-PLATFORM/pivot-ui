@@ -1,5 +1,22 @@
 # Notes de version — PIVOT UI
 
+## [Unreleased]
+
+### Page de contact
+- Nouvelle page de contact avec formulaire fonctionnel (email + message)
+- Un e-mail de confirmation est envoyé automatiquement après soumission, dans la langue active (français ou anglais)
+- La page s'intègre dans la navigation principale (barre de navigation et pied de page)
+- Tous les textes du formulaire (labels, bouton, messages d'erreur, confirmation) sont traduits en français et en anglais
+
+### Pages légales
+- Les pages Mentions légales, Politique de confidentialité et CGU affichent désormais la barre de navigation et le pied de page lorsque l'utilisateur est connecté
+- Le bouton « Retour » navigue vers la page précédente (adapté au contexte : application ou page de connexion)
+- Une notice informe les utilisateurs anglophones que la version française est la seule version juridiquement opposable
+
+### Signalement de bug
+- Le bouton de signalement de bug génère un e-mail pré-rempli avec un formulaire structuré (description, étapes de reproduction, comportement attendu/observé, environnement)
+- Le modèle s'adapte automatiquement à la langue sélectionnée (français ou anglais)
+
 ## [0.4.0] — 1 juillet 2026
 
 ### Page d'accueil

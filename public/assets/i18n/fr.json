@@ -4,7 +4,8 @@
     "or": "ou",
     "loading": "Chargement en cours…",
     "error_generic": "Une erreur est survenue. Réessayez.",
-    "field_required": "Ce champ est obligatoire."
+    "field_required": "Ce champ est obligatoire.",
+    "back": "Retour"
   },
   "nav": {
     "sign_out": "Se déconnecter",
@@ -19,6 +20,8 @@
     "home": "Accueil",
     "modules": "Modules",
     "teams": "Mes équipes",
+    "theme_to_dark": "Passer en mode sombre",
+    "theme_to_light": "Passer en mode clair",
     "dropdown": {
       "user_menu_aria": "Menu utilisateur",
       "profile": "Mon profil",
@@ -73,6 +76,8 @@
       "submit": "Se connecter",
       "no_account": "Pas encore de compte ?",
       "register_link": "Créer un compte",
+      "need_help": "Une question ?",
+      "contact_link": "Contactez-nous",
       "google": "Continuer avec Google",
       "device_sent": "Un code de vérification a été envoyé à votre email.",
       "device_enter": "Entrer le code →",
@@ -184,9 +189,34 @@
       "error_invalid": "Code incorrect ou expiré. Vérifiez votre email."
     }
   },
+  "contact": {
+    "title": "Nous contacter",
+    "subtitle": "Une question ? Un problème ? L'équipe PIVOT vous répond.",
+    "main_aria": "Page de contact",
+    "form_aria": "Formulaire de contact",
+    "form": {
+      "title": "Envoyer un message",
+      "email": "Email",
+      "email_placeholder": "jean.dupont@example.com",
+      "email_required": "L'email est requis.",
+      "email_invalid": "Adresse email invalide.",
+      "message": "Message",
+      "message_placeholder": "Décrivez votre demande…",
+      "message_required": "Le message est requis.",
+      "submit": "Envoyer le message",
+      "submit_loading": "Envoi en cours…"
+    },
+    "success": "Message envoyé ! Un email de confirmation vous a été adressé.",
+    "error": "Une erreur s'est produite. Veuillez réessayer ou nous écrire directement à contact@pivot.app."
+  },
   "legal": {
     "mentions": "Mentions légales",
     "privacy": "Confidentialité",
-    "terms": "CGU"
+    "terms": "CGU",
+    "back": "← Retour",
+    "fr_only_notice": "⚠ Ce document est juridiquement contraignant en français uniquement.",
+    "mentions_title": "Mentions légales",
+    "privacy_title": "Politique de confidentialité",
+    "terms_title": "Conditions Générales d'Utilisation"
   }
 }

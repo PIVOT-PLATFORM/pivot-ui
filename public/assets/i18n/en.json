@@ -4,7 +4,8 @@
     "or": "or",
     "loading": "Loading…",
     "error_generic": "An error occurred. Please try again.",
-    "field_required": "This field is required."
+    "field_required": "This field is required.",
+    "back": "Back"
   },
   "nav": {
     "sign_out": "Sign out",
@@ -19,6 +20,8 @@
     "home": "Home",
     "modules": "Modules",
     "teams": "My teams",
+    "theme_to_dark": "Switch to dark mode",
+    "theme_to_light": "Switch to light mode",
     "dropdown": {
       "user_menu_aria": "User menu",
       "profile": "My profile",
@@ -73,6 +76,8 @@
       "submit": "Sign in",
       "no_account": "No account yet?",
       "register_link": "Create one",
+      "need_help": "Have a question?",
+      "contact_link": "Contact us",
       "google": "Continue with Google",
       "device_sent": "A verification code was sent to your email.",
       "device_enter": "Enter the code →",
@@ -184,9 +189,34 @@
       "error_invalid": "Incorrect or expired code. Check your email."
     }
   },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "A question? A problem? The PIVOT team will get back to you.",
+    "main_aria": "Contact page",
+    "form_aria": "Contact form",
+    "form": {
+      "title": "Send a message",
+      "email": "Email",
+      "email_placeholder": "john.doe@example.com",
+      "email_required": "Email is required.",
+      "email_invalid": "Invalid email address.",
+      "message": "Message",
+      "message_placeholder": "Describe your request…",
+      "message_required": "Message is required.",
+      "submit": "Send message",
+      "submit_loading": "Sending…"
+    },
+    "success": "Message sent! A confirmation email has been sent to you.",
+    "error": "An error occurred. Please try again or write to us at contact@pivot.app."
+  },
   "legal": {
     "mentions": "Legal notice",
     "privacy": "Privacy",
-    "terms": "Terms"
+    "terms": "Terms",
+    "back": "← Back",
+    "fr_only_notice": "⚠ This document is legally binding in French only.",
+    "mentions_title": "Legal Notice",
+    "privacy_title": "Privacy Policy",
+    "terms_title": "Terms of Service"
   }
 }
