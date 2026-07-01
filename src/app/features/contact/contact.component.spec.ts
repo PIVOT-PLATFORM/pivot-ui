@@ -140,6 +140,16 @@ describe('ContactComponent', () => {
     expect(component.submitted()).toBe(false);
   });
 
+  it('disables submit button while request is in-flight', () => {
+    component.form.email = 'alice@example.com';
+    component.form.message = 'Test';
+    component.onSubmit();
+    fixture.detectChanges();
+    const btn = fixture.nativeElement.querySelector('button[type="submit"]');
+    expect(btn?.disabled).toBe(true);
+    httpMock.expectOne(`${environment.apiUrl}/contact`).flush(null, { status: 202, statusText: 'Accepted' });
+  });
+
   it('hides form after successful submission', () => {
     component.submitted.set(true);
     fixture.detectChanges();

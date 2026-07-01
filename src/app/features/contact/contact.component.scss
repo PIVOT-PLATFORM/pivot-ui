@@ -57,105 +57,6 @@
   margin: 8px 0 0;
 }
 
-// ─── Contact cards grid ───────────────────────────────────────────────────────
-.contact__cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
-  margin-bottom: 48px;
-}
-
-// ─── Contact card ─────────────────────────────────────────────────────────────
-.contact-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: var(--surface-card);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
-  padding: 20px;
-  text-decoration: none;
-  color: inherit;
-  transition:
-    transform var(--transition-base),
-    box-shadow var(--transition-base);
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--color-brand-500);
-    outline-offset: 2px;
-  }
-}
-
-.contact-card__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-lg);
-  flex-shrink: 0;
-
-  svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  &--email {
-    background: rgba(37, 99, 235, 0.1);
-    color: var(--color-brand-600);
-  }
-
-  &--github {
-    background: rgba(17, 24, 39, 0.08);
-    color: var(--color-gray-700);
-  }
-
-  &--docs {
-    background: rgba(5, 150, 105, 0.1);
-    color: var(--color-success);
-  }
-
-  &--community {
-    background: rgba(124, 58, 237, 0.1);
-    color: var(--color-brand-community, #5B21B6);
-  }
-}
-
-.contact-card__body {
-  flex: 1;
-  min-width: 0;
-}
-
-.contact-card__label {
-  font-size: var(--text-xs);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-gray-400);
-  margin: 0 0 2px;
-}
-
-.contact-card__value {
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--color-navy-900);
-  margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.contact-card__arrow {
-  font-size: var(--text-base);
-  color: var(--color-gray-400);
-  flex-shrink: 0;
-}
-
 // ─── Form section ─────────────────────────────────────────────────────────────
 .contact__form-section {
   margin-top: 8px;
@@ -311,14 +212,6 @@
 
 // ─── Responsive ──────────────────────────────────────────────────────────────
 @media (max-width: 640px) {
-  .contact {
-    padding: 24px 16px;
-  }
-
-  .contact__cards {
-    grid-template-columns: 1fr;
-  }
-
   .contact__form-section {
     padding: 20px 16px;
   }
