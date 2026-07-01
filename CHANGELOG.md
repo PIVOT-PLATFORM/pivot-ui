@@ -1,3 +1,10 @@
+# [0.4.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.3.0...v0.4.0) (2026-07-01)
+
+
+### Features
+
+* **ui:** HomeComponent — module grid, coming-soon cards, module registry ([#47](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/47)) ([762a4ac](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/762a4ac7b71aee3f6ed8baa9cb513d462591615e))
+
 # [0.3.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.2.0...v0.3.0) (2026-06-28)
 
 

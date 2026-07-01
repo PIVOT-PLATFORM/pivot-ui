@@ -1,6 +1,6 @@
 # Notes de version — PIVOT UI
 
-## [Unreleased]
+## [0.4.0] — 1 juillet 2026
 
 ### Page d'accueil
 - Nouvelle page d'accueil après connexion : message de bienvenue personnalisé et grille des modules disponibles
