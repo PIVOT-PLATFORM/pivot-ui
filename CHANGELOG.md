@@ -1,3 +1,10 @@
+# [0.5.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.4.0...v0.5.0) (2026-07-01)
+
+
+### Features
+
+* **ui:** ContactComponent — contact cards, form validation, public route ([#48](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/48)) ([db8648d](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/db8648d2b95b91594c16552cb5fe8ec41c039a33)), closes [#7C3AED](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/7C3AED) [#4338ca](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/4338ca)
+
 # [0.4.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.3.0...v0.4.0) (2026-07-01)
 
 

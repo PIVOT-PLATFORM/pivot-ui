@@ -1,6 +1,6 @@
 # Notes de version — PIVOT UI
 
-## [Unreleased]
+## [0.5.0] — 1 juillet 2026
 
 ### Page de contact
 - Nouvelle page de contact avec formulaire fonctionnel (email + message)
