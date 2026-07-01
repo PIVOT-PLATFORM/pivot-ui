@@ -31,7 +31,7 @@ interface ContactForm {
   imports: [FormsModule, TranslocoPipe],
   template: `
     <div class="contact-page">
-      <div class="contact-layout" role="main" [attr.aria-label]="'contact.main_aria' | transloco">
+      <main class="contact-layout" [attr.aria-label]="'contact.main_aria' | transloco">
 
       <!-- ─── Back ────────────────────────────────────────────────────────── -->
       <button class="contact__back" type="button" (click)="goBack()">← {{ 'common.back' | transloco }}</button>
@@ -125,7 +125,7 @@ interface ContactForm {
         }
       </section>
 
-      </div><!-- /.contact-layout -->
+      </main>
     </div>
   `,
   styleUrl: './contact.component.scss',
