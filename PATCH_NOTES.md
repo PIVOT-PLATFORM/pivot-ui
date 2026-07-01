@@ -1,5 +1,15 @@
 # Notes de version — PIVOT UI
 
+## [Unreleased]
+
+### Page d'accueil
+- Nouvelle page d'accueil après connexion : message de bienvenue personnalisé et grille des modules disponibles
+- Chaque module affiche son icône, son nom et une courte description
+- Section "Modules à venir" pour les outils en préparation
+- État vide clair avec message explicatif si aucun module n'est encore activé pour votre organisation
+
+---
+
 ## [0.3.0] — 28 juin 2026
 
 ### Navigation & interface principale
