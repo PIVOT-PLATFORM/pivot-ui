@@ -165,6 +165,15 @@ describe('HomeComponent', () => {
     expect(component.loading()).toBe(false);
   });
 
+  it('falls back to "vous" when firstName and email are both null', () => {
+    Object.defineProperty(component, 'user', {
+      get: () => computed(() => null),
+    });
+    fixture.detectChanges();
+    const h1 = fixture.nativeElement.querySelector('h1');
+    expect(h1?.textContent).toContain('vous');
+  });
+
   it('hexToRgba converts #7C3AED with alpha 0.1 correctly', () => {
     const result = component.hexToRgba('#7C3AED', 0.1);
     expect(result).toBe('rgba(124, 58, 237, 0.1)');
