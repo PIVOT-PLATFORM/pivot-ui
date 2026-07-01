@@ -472,6 +472,11 @@ Index : `.project/skills/_index.yaml`
 | `skill-accessibility` | `skill-accessibility.yaml` | Tout composant interactif, AC A11y |
 | `skill-rgpd` | `skill-rgpd.yaml` | US touchant données personnelles (email, profil, contenu) |
 | `skill-observability` | `skill-observability.yaml` | Nouveau log Angular, nouvelle métrique, monitoring erreurs |
+| `skill-i18n` | `skill-i18n.yaml` | Fichier fr.json/en.json, pipe translate, `getActiveLang()`, langue UI |
+| `skill-ux-design-system` | `skill-ux-design-system.yaml` | SCSS BEM, tokens CSS, design system, tout composant UI |
+| `skill-security-redteam` | `skill-security-redteam.yaml` | US auth/données user, `[innerHTML]`, AC sécurité, rapport Red Team |
+| `skill-security-blueteam` | `skill-security-blueteam.yaml` | nginx.conf, rapport Red Team reçu, gestion token Angular |
+| `skill-pr-reviewer` | `skill-pr-reviewer.yaml` | Gate 3 (qualité CI), Gate 4 (décision merge), review PR |
 
 **Règle :** avant d'écrire du code, identifier les skills applicables via l'index et les lire.
 La skill `skill-ac-traceability` est toujours chargée pour toute US.

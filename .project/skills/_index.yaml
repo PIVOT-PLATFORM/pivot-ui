@@ -1,6 +1,6 @@
 skill:
   id: pivot-ui-skills-index
-  version: "1.1"
+  version: "1.2"
   name: "Skills Index — pivot-ui"
   description: >
     Index de toutes les skills PIVOT-UI et leurs règles de chargement.
@@ -79,6 +79,33 @@ skills:
         - "tout nouveau fichier de test Vitest ou spec Playwright"
         - "coverage < 85 %"
         - "nouvelle spec E2E"
+
+  # ── I18N ─────────────────────────────────────────────────────────────────────
+
+  - id: pivot-i18n-frontend
+    file: .project/skills/skill-i18n.yaml
+    priority: 1
+    load_when:
+      agents: [Architecte_Angular, Dev_Agent]
+      triggers:
+        - "fr.json ou en.json créé ou modifié"
+        - "pipe transloco ajouté dans un template"
+        - "getActiveLang() ou setActiveLang() utilisé"
+        - "US touchant langue interface, formulaire multilingue ou payload lang"
+        - "nouveau libellé UI visible par l'utilisateur"
+
+  # ── UX / DESIGN SYSTEM ───────────────────────────────────────────────────────
+
+  - id: pivot-ux-design-system
+    file: .project/skills/skill-ux-design-system.yaml
+    priority: 1
+    load_when:
+      agents: [Expert_UX_UI, Architecte_Angular, Dev_Agent]
+      triggers:
+        - "tout fichier .scss créé ou modifié"
+        - "nouveau composant Angular avec template HTML"
+        - "modification des tokens CSS"
+        - "US avec critère visuel, design ou responsive"
 
   # ── SÉCURITÉ ─────────────────────────────────────────────────────────────────
 
