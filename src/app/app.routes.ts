@@ -58,7 +58,10 @@ export const routes: Routes = [
       },
     ],
   },
-  // Public fallback for unauthenticated access (auth shell footer links, etc.)
+  // Public fallback routes — accessible without authentication.
+  // ContactComponent and legal pages are stateless (no auth dependency),
+  // so loading them here is safe. authMatchGuard returns false (no redirect)
+  // on unauthenticated requests, causing Angular to fall through to these routes.
   {
     path: 'contact',
     loadComponent: () => import('./features/contact/contact.component').then(m => m.ContactComponent),
