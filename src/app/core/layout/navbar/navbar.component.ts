@@ -202,7 +202,7 @@ export class NavbarComponent {
   readonly userAvatarColor = computed<string>(() => avatarColor(this.displayName() || '?'));
 
   readonly themeLabel = computed<string>(() => {
-    const _ = this.lang();
+    this.lang();
     return this.transloco.translate(
       this.theme() === 'light' ? 'nav.theme_to_dark' : 'nav.theme_to_light'
     );
