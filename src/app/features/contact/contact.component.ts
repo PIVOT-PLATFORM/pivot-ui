@@ -59,7 +59,7 @@ interface ContactForm {
         @if (!submitted()) {
           @if (submitError()) {
             <div class="contact__error" role="alert" aria-live="assertive">
-              <p>{{ submitError() }}</p>
+              <p>{{ submitError() | transloco }}</p>
             </div>
           }
           <form
@@ -90,7 +90,7 @@ interface ContactForm {
               />
               @if (emailError()) {
                 <p id="contact-email-error" class="form-field__error" role="alert">
-                  {{ emailError() }}
+                  {{ emailError() | transloco }}
                 </p>
               }
             </div>
@@ -115,7 +115,7 @@ interface ContactForm {
               ></textarea>
               @if (messageError()) {
                 <p id="contact-message-error" class="form-field__error" role="alert">
-                  {{ messageError() }}
+                  {{ messageError() | transloco }}
                 </p>
               }
             </div>
@@ -165,15 +165,15 @@ export class ContactComponent {
     let valid = true;
 
     if (!this.form.email.trim()) {
-      this.emailError.set(this.transloco.translate('contact.form.email_required'));
+      this.emailError.set('contact.form.email_required');
       valid = false;
     } else if (!this.EMAIL_RE.test(this.form.email)) {
-      this.emailError.set(this.transloco.translate('contact.form.email_invalid'));
+      this.emailError.set('contact.form.email_invalid');
       valid = false;
     }
 
     if (!this.form.message.trim()) {
-      this.messageError.set(this.transloco.translate('contact.form.message_required'));
+      this.messageError.set('contact.form.message_required');
       valid = false;
     }
 
@@ -195,7 +195,7 @@ export class ContactComponent {
           this.loading.set(false);
         },
         error: () => {
-          this.submitError.set(this.transloco.translate('contact.error'));
+          this.submitError.set('contact.error');
           this.loading.set(false);
         },
       });

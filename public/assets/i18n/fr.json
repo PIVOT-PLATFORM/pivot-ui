@@ -20,6 +20,8 @@
     "home": "Accueil",
     "modules": "Modules",
     "teams": "Mes équipes",
+    "theme_to_dark": "Passer en mode sombre",
+    "theme_to_light": "Passer en mode clair",
     "dropdown": {
       "user_menu_aria": "Menu utilisateur",
       "profile": "Mon profil",
@@ -212,7 +214,7 @@
     "privacy": "Confidentialité",
     "terms": "CGU",
     "back": "← Retour",
-    "fr_only_notice": "",
+    "fr_only_notice": "⚠ Ce document est juridiquement contraignant en français uniquement.",
     "mentions_title": "Mentions légales",
     "privacy_title": "Politique de confidentialité",
     "terms_title": "Conditions Générales d'Utilisation"

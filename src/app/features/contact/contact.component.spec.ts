@@ -78,8 +78,8 @@ describe('ContactComponent', () => {
   it('shows error when submitting empty form', () => {
     component.onSubmit();
     fixture.detectChanges();
-    expect(component.emailError()).toBe("L'email est requis.");
-    expect(component.messageError()).toBe('Le message est requis.');
+    expect(component.emailError()).toBe('contact.form.email_required');
+    expect(component.messageError()).toBe('contact.form.message_required');
     httpMock.expectNone(`${environment.apiUrl}/contact`);
   });
 
@@ -88,7 +88,7 @@ describe('ContactComponent', () => {
     component.form.message = 'Hello';
     component.onSubmit();
     fixture.detectChanges();
-    expect(component.emailError()).toBe('Adresse email invalide.');
+    expect(component.emailError()).toBe('contact.form.email_invalid');
     httpMock.expectNone(`${environment.apiUrl}/contact`);
   });
 
@@ -152,7 +152,7 @@ describe('ContactComponent', () => {
       { message: 'Server error' }, { status: 500, statusText: 'Internal Server Error' },
     );
     fixture.detectChanges();
-    expect(component.submitError()).toContain('erreur');
+    expect(component.submitError()).toBe('contact.error');
     expect(component.submitted()).toBe(false);
   });
 

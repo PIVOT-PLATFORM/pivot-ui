@@ -45,8 +45,8 @@ export function avatarColor(name: string): string {
           <span class="navbar__logo-text">PIVOT</span>
         </a>
         <nav class="navbar__nav" aria-label="Navigation principale">
-          <a routerLink="/dashboard" routerLinkActive="navbar__nav-link--active" class="navbar__nav-link">{{ 'nav.home' | transloco }}</a>
-          <a routerLink="/home" routerLinkActive="navbar__nav-link--active" class="navbar__nav-link">{{ 'nav.modules' | transloco }}</a>
+          <a routerLink="/home" routerLinkActive="navbar__nav-link--active" class="navbar__nav-link">{{ 'nav.home' | transloco }}</a>
+          <a routerLink="/dashboard" routerLinkActive="navbar__nav-link--active" class="navbar__nav-link">{{ 'nav.modules' | transloco }}</a>
           <a routerLink="/teams" routerLinkActive="navbar__nav-link--active" class="navbar__nav-link">{{ 'nav.teams' | transloco }}</a>
         </nav>
       </div>
@@ -68,7 +68,7 @@ export function avatarColor(name: string): string {
           <button class="navbar__lang-opt" [class.navbar__lang-opt--active]="lang() === 'fr'" (click)="setLang('fr')" type="button" [attr.aria-pressed]="lang() === 'fr'">FR</button>
           <button class="navbar__lang-opt" [class.navbar__lang-opt--active]="lang() === 'en'" (click)="setLang('en')" type="button" [attr.aria-pressed]="lang() === 'en'">EN</button>
         </div>
-        <button class="navbar__icon-btn" [attr.aria-label]="'nav.notifications' | transloco" type="button" aria-disabled="true" title="Bientôt disponible">
+        <button class="navbar__icon-btn" [attr.aria-label]="'nav.notifications' | transloco" type="button" aria-disabled="true" [title]="'nav.dropdown.coming_soon_a11y' | transloco">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
           @if (notifCount() > 0) {
             <span class="navbar__badge" [attr.aria-label]="'nav.notif_count' | transloco: { count: notifCount() }">{{ notifCount() }}</span>
@@ -201,9 +201,12 @@ export class NavbarComponent {
 
   readonly userAvatarColor = computed<string>(() => avatarColor(this.displayName() || '?'));
 
-  readonly themeLabel = computed<string>(() =>
-    this.theme() === 'light' ? 'Passer en mode sombre' : 'Passer en mode clair'
-  );
+  readonly themeLabel = computed<string>(() => {
+    const _ = this.lang();
+    return this.transloco.translate(
+      this.theme() === 'light' ? 'nav.theme_to_dark' : 'nav.theme_to_light'
+    );
+  });
 
   @HostListener('document:click')
   onDocumentClick(): void {

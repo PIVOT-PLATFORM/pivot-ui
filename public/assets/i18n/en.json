@@ -20,6 +20,8 @@
     "home": "Home",
     "modules": "Modules",
     "teams": "My teams",
+    "theme_to_dark": "Switch to dark mode",
+    "theme_to_light": "Switch to light mode",
     "dropdown": {
       "user_menu_aria": "User menu",
       "profile": "My profile",

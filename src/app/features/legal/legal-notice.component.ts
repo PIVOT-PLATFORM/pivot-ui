@@ -1,23 +1,23 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Location } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'piv-legal-notice',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [],
+  imports: [TranslocoPipe],
   template: `
     <div class="legal-page">
       <div class="legal-card">
-        <button class="back-link" type="button" (click)="goBack()">← Retour</button>
+        <button class="back-link" type="button" (click)="goBack()">← {{ 'common.back' | transloco }}</button>
 
         @if (lang() === 'en') {
-          <p class="legal-lang-notice">⚠ This document is legally binding in French only.</p>
+          <p class="legal-lang-notice">{{ 'legal.fr_only_notice' | transloco }}</p>
         }
 
-        <h1>Mentions légales</h1>
+        <h1>{{ 'legal.mentions_title' | transloco }}</h1>
         <p class="updated">Dernière mise à jour : juin 2026</p>
 
         <h2>1. Éditeur</h2>
