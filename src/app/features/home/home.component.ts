@@ -14,17 +14,15 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/service/auth.service';
 import { ModuleRegistryService } from '../../core/modules/module-registry.service';
-import type { PivotModuleUi } from '../../core/modules/module.model';
 
 @Component({
   selector: 'piv-home',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink],
+  imports: [RouterLink],
   template: `
     <main class="home" aria-label="Accueil">
 
@@ -177,5 +175,4 @@ export class HomeComponent implements OnInit {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
-  readonly _moduleType!: PivotModuleUi;
 }
