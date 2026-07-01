@@ -155,7 +155,7 @@ export class ContactComponent {
   /** Non-empty if the API call fails. */
   readonly submitError = signal('');
 
-  private readonly EMAIL_RE = /^[^\s@]+@[^\s@.]+\.[^\s@.]+$/;
+  private readonly EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   onSubmit(): void {
     this.emailError.set('');

@@ -92,6 +92,22 @@ describe('ContactComponent', () => {
     httpMock.expectNone(`${environment.apiUrl}/contact`);
   });
 
+  it('accepts email with subdomain (alice@sub.domain.com)', () => {
+    component.form.email = 'alice@sub.domain.com';
+    component.form.message = 'Test';
+    component.onSubmit();
+    expect(component.emailError()).toBe('');
+    httpMock.expectOne(`${environment.apiUrl}/contact`).flush(null, { status: 202, statusText: 'Accepted' });
+  });
+
+  it('accepts email with multi-part TLD (alice@domain.co.uk)', () => {
+    component.form.email = 'alice@domain.co.uk';
+    component.form.message = 'Test';
+    component.onSubmit();
+    expect(component.emailError()).toBe('');
+    httpMock.expectOne(`${environment.apiUrl}/contact`).flush(null, { status: 202, statusText: 'Accepted' });
+  });
+
   // ─── API call ─────────────────────────────────────────────────────────────
 
   it('calls POST /api/contact with email, message and lang on valid submission', () => {
@@ -140,7 +156,7 @@ describe('ContactComponent', () => {
     expect(component.submitted()).toBe(false);
   });
 
-  it('disables submit button while request is in-flight', () => {
+  it('disables submit button while request is in-flight, re-enables after response', () => {
     component.form.email = 'alice@example.com';
     component.form.message = 'Test';
     component.onSubmit();
@@ -148,6 +164,7 @@ describe('ContactComponent', () => {
     const btn = fixture.nativeElement.querySelector('button[type="submit"]');
     expect(btn?.disabled).toBe(true);
     httpMock.expectOne(`${environment.apiUrl}/contact`).flush(null, { status: 202, statusText: 'Accepted' });
+    expect(component.loading()).toBe(false);
   });
 
   it('hides form after successful submission', () => {
@@ -158,6 +175,24 @@ describe('ContactComponent', () => {
   });
 
   // ─── Accessibility ───────────────────────────────────────────────────────
+
+  it('sets aria-invalid on email field when validation fails', () => {
+    component.form.email = 'not-an-email';
+    component.form.message = 'Hello';
+    component.onSubmit();
+    fixture.detectChanges();
+    const input = fixture.nativeElement.querySelector('#contact-email');
+    expect(input?.getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it('sets aria-invalid on message field when validation fails', () => {
+    component.form.email = 'alice@example.com';
+    component.form.message = '';
+    component.onSubmit();
+    fixture.detectChanges();
+    const textarea = fixture.nativeElement.querySelector('#contact-message');
+    expect(textarea?.getAttribute('aria-invalid')).toBe('true');
+  });
 
   it('has a main landmark with aria-label', () => {
     const main = fixture.nativeElement.querySelector('main');
