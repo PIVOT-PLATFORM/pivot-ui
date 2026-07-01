@@ -4,7 +4,8 @@
     "or": "or",
     "loading": "Loading…",
     "error_generic": "An error occurred. Please try again.",
-    "field_required": "This field is required."
+    "field_required": "This field is required.",
+    "back": "Back"
   },
   "nav": {
     "sign_out": "Sign out",
@@ -73,6 +74,8 @@
       "submit": "Sign in",
       "no_account": "No account yet?",
       "register_link": "Create one",
+      "need_help": "Have a question?",
+      "contact_link": "Contact us",
       "google": "Continue with Google",
       "device_sent": "A verification code was sent to your email.",
       "device_enter": "Enter the code →",

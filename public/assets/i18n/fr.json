@@ -4,7 +4,8 @@
     "or": "ou",
     "loading": "Chargement en cours…",
     "error_generic": "Une erreur est survenue. Réessayez.",
-    "field_required": "Ce champ est obligatoire."
+    "field_required": "Ce champ est obligatoire.",
+    "back": "Retour"
   },
   "nav": {
     "sign_out": "Se déconnecter",
@@ -73,6 +74,8 @@
       "submit": "Se connecter",
       "no_account": "Pas encore de compte ?",
       "register_link": "Créer un compte",
+      "need_help": "Une question ?",
+      "contact_link": "Contactez-nous",
       "google": "Continuer avec Google",
       "device_sent": "Un code de vérification a été envoyé à votre email.",
       "device_enter": "Entrer le code →",

@@ -2,10 +2,40 @@
 // BEM: .contact, .contact-card, .form-field
 
 // ─── Page wrapper ────────────────────────────────────────────────────────────
-.contact {
-  max-width: 720px;
-  margin: 0 auto;
+.contact-page {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
   padding: 40px 24px;
+  background: var(--surface-bg);
+  min-height: 100vh;
+}
+
+.contact-layout {
+  background: var(--surface-card);
+  border-radius: 16px;
+  padding: 48px;
+  max-width: 720px;
+  width: 100%;
+  box-shadow: var(--shadow-md);
+
+  @media (max-width: 600px) { padding: 28px 20px; }
+}
+
+// ─── Back button ─────────────────────────────────────────────────────────────
+.contact__back {
+  display: inline-block;
+  margin-bottom: 24px;
+  color: var(--color-brand-600);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+
+  &:hover { text-decoration: underline; }
+  &:focus-visible { outline: 2px solid var(--color-brand-500); outline-offset: 2px; border-radius: 2px; }
 }
 
 // ─── Header ──────────────────────────────────────────────────────────────────
@@ -128,10 +158,7 @@
 
 // ─── Form section ─────────────────────────────────────────────────────────────
 .contact__form-section {
-  background: var(--surface-card);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
-  padding: 32px;
+  margin-top: 8px;
 }
 
 .contact__form-title {

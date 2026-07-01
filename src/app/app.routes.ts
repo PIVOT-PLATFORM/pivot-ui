@@ -59,6 +59,10 @@ export const routes: Routes = [
     ],
   },
   // Public fallback for unauthenticated access (auth shell footer links, etc.)
+  {
+    path: 'contact',
+    loadComponent: () => import('./features/contact/contact.component').then(m => m.ContactComponent),
+  },
   { path: 'legal', children: LEGAL_CHILDREN },
   {
     path: 'faq',

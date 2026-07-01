@@ -14,6 +14,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { ContactApiService } from './contact-api.service';
@@ -29,7 +30,11 @@ interface ContactForm {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule, TranslocoPipe],
   template: `
-    <main class="contact" [attr.aria-label]="'contact.main_aria' | transloco">
+    <div class="contact-page">
+      <div class="contact-layout" role="main" [attr.aria-label]="'contact.main_aria' | transloco">
+
+      <!-- ─── Back ────────────────────────────────────────────────────────── -->
+      <button class="contact__back" type="button" (click)="goBack()">← {{ 'common.back' | transloco }}</button>
 
       <!-- ─── Header ──────────────────────────────────────────────────────── -->
       <header class="contact__header">
@@ -120,13 +125,17 @@ interface ContactForm {
         }
       </section>
 
-    </main>
+      </div><!-- /.contact-layout -->
+    </div>
   `,
   styleUrl: './contact.component.scss',
 })
 export class ContactComponent {
   private readonly api = inject(ContactApiService);
   private readonly transloco = inject(TranslocoService);
+  private readonly location = inject(Location);
+
+  goBack(): void { this.location.back(); }
 
   /** Form model — two-way bound via ngModel. */
   form: ContactForm = { email: '', message: '' };
