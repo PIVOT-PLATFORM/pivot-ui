@@ -11,7 +11,6 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '../../auth/service/auth.service';
 import { ThemeService } from '../../theme/theme.service';
@@ -156,11 +155,9 @@ export class NavbarComponent {
   private readonly auth = inject(AuthService);
   private readonly themeService = inject(ThemeService);
   private readonly transloco = inject(TranslocoService);
-  private readonly sanitizer = inject(DomSanitizer);
-
   readonly lang = toSignal(this.transloco.langChanges$, { initialValue: this.transloco.getActiveLang() });
 
-  readonly bugReportUrl: ReturnType<typeof computed<SafeUrl>> = computed(() => {
+  readonly bugReportUrl = computed<string>(() => {
     const fr = this.lang() === 'fr';
     const subject = encodeURIComponent(fr ? '[PIVOT] Rapport de bug' : '[PIVOT] Bug Report');
     const body = fr
@@ -178,9 +175,7 @@ export class NavbarComponent {
           '**Actual behavior**\n[What actually happens]\n\n' +
           '**Environment**\n- Browser: \n- Operating system: \n- PIVOT version: ',
         );
-    return this.sanitizer.bypassSecurityTrustUrl(
-      `mailto:bugs@pivot-platform.fr?subject=${subject}&body=${body}`,
-    );
+    return `mailto:bugs@pivot-platform.fr?subject=${subject}&body=${body}`;
   });
 
   readonly user = this.auth.currentUser;
