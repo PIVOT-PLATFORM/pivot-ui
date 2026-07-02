@@ -5,7 +5,8 @@
     "loading": "Loading…",
     "error_generic": "An error occurred. Please try again.",
     "field_required": "This field is required.",
-    "back": "Back"
+    "back": "Back",
+    "close": "Close"
   },
   "nav": {
     "sign_out": "Sign out",
@@ -187,6 +188,10 @@
       "cancel": "← Cancel and return to login",
       "error_rate_limit": "Too many attempts. Return to login.",
       "error_invalid": "Incorrect or expired code. Check your email."
+    },
+    "session": {
+      "expired": "Session expired, please sign in again.",
+      "expired_remember_me": "Your long-lived session has expired, please sign in again."
     }
   },
   "contact": {

@@ -1,0 +1,21 @@
+<div class="toast-container">
+  @for (toast of toastService.toasts(); track toast.id) {
+    <div
+      class="toast"
+      [class.toast--warning]="toast.type === 'warning'"
+      [class.toast--error]="toast.type === 'error'"
+      role="alert"
+      [attr.data-testid]="'toast-' + toast.type"
+    >
+      <p class="toast__message">{{ toast.messageKey | transloco }}</p>
+      <button
+        type="button"
+        class="toast__close"
+        (click)="toastService.dismiss(toast.id)"
+        [attr.aria-label]="'common.close' | transloco"
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  }
+</div>
