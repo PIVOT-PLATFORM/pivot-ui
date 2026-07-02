@@ -68,26 +68,31 @@ Concise et directe. Techniquement précise. Pas de récapitulatifs inutiles.
 pivot-ui/
 ├── src/
 │   ├── app/
-│   │   ├── core/              # Services singleton, guards, interceptors, auth
-│   │   ├── shared/            # Composants, pipes, directives réutilisables
-│   │   ├── features/          # Feature modules lazy-loaded par module PIVOT
-│   │   │   ├── whiteboard/
-│   │   │   ├── session/
-│   │   │   ├── roadmap/
-│   │   │   ├── survey/
-│   │   │   └── quiz/
-│   │   └── app.*.ts           # Root component / config / routes
+│   │   ├── core/              # Exporté dans @pivot/ui-core
+│   │   │   ├── auth/          # OidcService, AuthInterceptor, AuthGuard
+│   │   │   ├── tenant/        # TenantService, TenantContextDirective
+│   │   │   ├── shell/         # HeaderComponent, FooterComponent, NavigationService
+│   │   │   └── modules/       # ModuleGuard, ModuleStatusService
+│   │   ├── shared/            # Composants shell partagés (pas de feature métier ici)
+│   │   ├── features/          # Portail shell uniquement
+│   │   │   ├── home/          # Grille modules, dashboard
+│   │   │   ├── account/       # Espace compte utilisateur
+│   │   │   └── admin/         # Admin tenant (modules, utilisateurs)
+│   │   └── app.*.ts
 │   ├── assets/
 │   ├── environments/
-│   └── styles/                # Global SCSS, tokens, variables
-├── e2e/                       # Specs Playwright
+│   └── styles/                # Global SCSS — migre vers @pivot/design-system
+├── e2e/
 ├── .github/
 │   └── workflows/
-├── .plumber.yaml              # Config Plumber (CI/CD compliance)
+├── .plumber.yaml
 └── Dockerfile                 # nginx production
 ```
 
-Backend API → **pivot-core** (repo séparé).
+**Features métier (whiteboard, quiz, roadmap…) → repos `pivot-xxx-ui` dédiés, jamais dans pivot-ui.**
+WebSocket STOMP (`@stomp/rx-stomp`) → dans les repos modules qui en ont besoin (pivot-collaboratif-ui, etc.), pas dans pivot-ui.
+
+Backend API → **pivot-core** (repo séparé). Design system → **pivot-design-system** (`@pivot/design-system`).
 
 ---
 
