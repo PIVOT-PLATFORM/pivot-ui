@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Expiration de session
+- Lorsque votre session expire, vous êtes automatiquement déconnecté et redirigé vers la page de connexion
+- Un message vous informe de l'expiration : « Session expirée, veuillez vous reconnecter » — ou « Votre session longue a expiré » si vous aviez coché « Se souvenir de moi »
+- Si plusieurs onglets PIVOT sont ouverts, la déconnexion s'applique à tous les onglets simultanément
+- La page sur laquelle vous étiez au moment de l'expiration est mémorisée afin de vous y ramener après reconnexion
+
 ### Système de modules
 - Intégration de l'API de modules : la liste des modules disponibles est désormais chargée dynamiquement selon les droits de votre organisation
 
