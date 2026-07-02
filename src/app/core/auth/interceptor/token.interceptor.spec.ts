@@ -1,10 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient, withInterceptors, HttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors, HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
-import { provideRouter, Router } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { Component } from '@angular/core';
 import { tokenInterceptor } from './token.interceptor';
 import { AuthService } from '../service/auth.service';
+import { SessionExpiryService } from '../service/session-expiry.service';
 
 @Component({ template: '', standalone: true })
 class StubComponent {}
@@ -108,61 +109,55 @@ describe('tokenInterceptor', () => {
     });
   });
 
-  describe('401 handling — session restore', () => {
-    it('should attempt auth.refresh() on 401 from a non-auth endpoint', () => {
-      const refreshToken = 'refreshed-token';
-      const refreshExpiresAt = Date.now() + 3600_000;
+  describe('401 handling — session expiry (US01.1.5)', () => {
+    it('AC-01 — delegates to SessionExpiryService.onSessionExpired() on 401 from a non-auth endpoint', () => {
+      const sessionExpiry = TestBed.inject(SessionExpiryService);
+      const expirySpy = vi.spyOn(sessionExpiry, 'onSessionExpired').mockImplementation(() => {});
 
-      httpClient.get(TEST_URL).subscribe({ error: () => {} });
-
-      // Trigger 401 on initial request
-      const req = httpMock.expectOne(TEST_URL);
-      req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
-
-      // Interceptor should now call /auth/refresh
-      const refreshReq = httpMock.expectOne(AUTH_URL);
-      expect(refreshReq.request.method).toBe('POST');
-      refreshReq.flush({
-        accessToken: refreshToken,
-        expiresAt: refreshExpiresAt,
-        user: {
-          id: 1, email: 'a@b.com', firstName: null, lastName: null,
-          role: 'USER', emailVerified: true, tenantId: 1, tenantSlug: 'slug',
-        },
+      let receivedStatus = 0;
+      httpClient.get(TEST_URL).subscribe({
+        error: (err: HttpErrorResponse) => { receivedStatus = err.status; },
       });
 
-      // After refresh, interceptor retries the original request
-      const retried = httpMock.expectOne(TEST_URL);
-      expect(retried.request.headers.get('Authorization')).toBe(`Bearer ${refreshToken}`);
-      retried.flush({});
-    });
-
-    it('should navigate to /auth/login if refresh fails after a 401', () => {
-      const routerInstance: Router = TestBed.inject(Router);
-      const navigateSpy = vi.spyOn(routerInstance, 'navigate');
-
-      httpClient.get(TEST_URL).subscribe({ error: () => {} });
-
-      // 401 on original request
       httpMock.expectOne(TEST_URL).flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
 
-      // Refresh also fails
-      httpMock.expectOne(AUTH_URL).flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
-
-      expect(navigateSpy).toHaveBeenCalledWith(['/auth/login']);
+      expect(expirySpy).toHaveBeenCalledTimes(1);
+      // L'erreur 401 est propagée à l'appelant (pas avalée par l'intercepteur)
+      expect(receivedStatus).toBe(401);
     });
 
-    it('should NOT attempt refresh on 401 from an auth endpoint', () => {
+    it('AC-05 — does NOT attempt any silent refresh on 401 (opaque token model, 401 is the only expiry signal)', () => {
+      const sessionExpiry = TestBed.inject(SessionExpiryService);
+      vi.spyOn(sessionExpiry, 'onSessionExpired').mockImplementation(() => {});
+
+      httpClient.get(TEST_URL).subscribe({ error: () => {} });
+      httpMock.expectOne(TEST_URL).flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+
+      // Aucun appel /auth/refresh, aucun retry de la requête d'origine
+      httpMock.expectNone(AUTH_URL);
+      httpMock.expectNone(TEST_URL);
+    });
+
+    it('does NOT trigger session expiry on 401 from an auth endpoint (login error, boot refresh…)', () => {
+      const sessionExpiry = TestBed.inject(SessionExpiryService);
+      const expirySpy = vi.spyOn(sessionExpiry, 'onSessionExpired').mockImplementation(() => {});
       const authOnlyUrl = 'http://localhost:8080/api/auth/login';
 
       httpClient.post(authOnlyUrl, {}).subscribe({ error: () => {} });
+      httpMock.expectOne(authOnlyUrl).flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
 
-      const req = httpMock.expectOne(authOnlyUrl);
-      expect(req.request.method).toBe('POST');
-      req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
-
-      // No refresh call expected
+      expect(expirySpy).not.toHaveBeenCalled();
       httpMock.expectNone(AUTH_URL);
+    });
+
+    it('does NOT trigger session expiry on non-401 errors', () => {
+      const sessionExpiry = TestBed.inject(SessionExpiryService);
+      const expirySpy = vi.spyOn(sessionExpiry, 'onSessionExpired').mockImplementation(() => {});
+
+      httpClient.get(TEST_URL).subscribe({ error: () => {} });
+      httpMock.expectOne(TEST_URL).flush('Server error', { status: 500, statusText: 'Internal Server Error' });
+
+      expect(expirySpy).not.toHaveBeenCalled();
     });
   });
 });
