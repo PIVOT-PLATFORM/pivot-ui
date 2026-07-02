@@ -2,21 +2,27 @@
 
 ## Projet
 
-**PIVOT-UI** — frontend Angular de la suite collaborative PIVOT.
+**PIVOT-UI** — frontend shell Angular de la suite collaborative PIVOT. Double rôle :
+
+1. **Application shell** : portail (accueil, admin, compte utilisateur), header/footer, routing inter-modules, OIDC PKCE client.
+2. **Librairie npm partagée** : publie `@pivot/ui-core` (GitHub Packages) — consommé par tous les repos `pivot-xxx-ui`.
 
 Partenaire de `pivot-core` (backend Java/Spring Boot + API REST).
+Design system dans **pivot-design-system** (`@pivot/design-system`) — pivot-ui le consomme et le réexporte.
 
 **Vision :** interface réactive, accessible (WCAG 2.1 AA), activable par module — sans lock-in SaaS.
 
-**Modules prévus (lazy-loaded par module activé) :**
+**Ce que @pivot/ui-core exporte :**
 
-| Module | Description | Inspiration |
-|--------|-------------|-------------|
-| `whiteboard` | Tableau blanc collaboratif temps réel | PouetPouet |
-| `session` | Sessions live : QUIZ, POLL, WORDCLOUD, BRAINSTORM, QA | Klaxoon |
-| `roadmap` | Roadmap / Gantt intégré | - |
-| `survey` | Système de sondage | - |
-| `quiz` | Quiz interactif gamifié | Kahoot |
+| Package | Contenu |
+|---------|---------|
+| `@pivot/ui-core/auth` | OidcService, AuthInterceptor, AuthGuard |
+| `@pivot/ui-core/tenant` | TenantService, TenantContextDirective |
+| `@pivot/ui-core/shell` | HeaderComponent, FooterComponent, NavigationService |
+| `@pivot/ui-core/modules` | ModuleGuard, ModuleStatusService |
+| `@pivot/design-system` | Ré-export complet de `@pivot/design-system` |
+
+**Modules fonctionnels** : dans les repos dédiés (`pivot-pilotage-ui`, `pivot-agilite-ui`, `pivot-collaboratif-ui`). pivot-ui ne contient PAS les features métier.
 
 **Déploiement :**
 - Image Docker nginx (assets statiques + reverse proxy API)
