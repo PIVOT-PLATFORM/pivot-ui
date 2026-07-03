@@ -8,6 +8,15 @@
 - Si plusieurs onglets PIVOT sont ouverts, la déconnexion s'applique à tous les onglets simultanément
 - La page sur laquelle vous étiez au moment de l'expiration est mémorisée afin de vous y ramener après reconnexion
 
+### Connexion
+- Après connexion, vous retrouvez directement la page que vous tentiez d'ouvrir avant d'être renvoyé à l'écran de connexion (votre contexte de navigation est préservé, y compris après une vérification d'appareil)
+- Sans page d'origine, la connexion vous amène désormais sur la page d'accueil
+- Sécurité renforcée : toute tentative de redirection vers un site externe après connexion est bloquée
+- Une adresse inconnue saisie dans le navigateur vous ramène à la page d'accueil lorsque vous êtes connecté
+
+### Interface
+- Un indicateur de chargement accessible (annoncé aux lecteurs d'écran) s'affiche lorsque l'ouverture d'une page prend plus d'une demi-seconde
+
 ### Système de modules
 - Intégration de l'API de modules : la liste des modules disponibles est désormais chargée dynamiquement selon les droits de votre organisation
 
