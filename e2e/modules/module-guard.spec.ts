@@ -4,22 +4,29 @@
  * The core structural AC ("bundle du module non chargé si désactivé — lazy-loading
  * respecté") cannot be verified by Vitest, since Vitest never exercises the real
  * Angular Router lazy `import()` machinery — it must be checked at the network level
- * in a real browser. This spec:
+ * in a real browser.
  *
- * 1. Authenticates via the stubbed /auth/refresh (see e2e/auth/session-restore.spec.ts
- *    for the same pattern).
- * 2. Stubs GET /api/modules/whiteboard/status to return enabled:false, then navigates
- *    directly to /whiteboard and asserts NO script/document request for the module's
- *    route chunk is ever issued — the guard must reject before the Router resolves
- *    the route's `loadComponent()` dynamic import.
- * 3. Repeats with enabled:true and asserts the chunk IS requested and the route
- *    actually renders.
+ * Strategy: land on `/home` first (full page load — main bundle + shell chunk are
+ * fetched once, and cached — that's the noise we want to exclude), then drive an
+ * **in-app** navigation to `/whiteboard` the same way the browser's back/forward
+ * buttons do (`pushState` + `popstate`), which Angular's Router picks up without a
+ * full page reload. From that clean baseline, the ONLY script request that can occur
+ * is the module route's own `loadComponent()` chunk:
+ *
+ * - disabled → guard denies before the Router resolves the dynamic import → redirects
+ *   to `/home`, which is already loaded → zero additional script requests.
+ * - enabled → guard allows → the Router resolves the dynamic import → exactly one new
+ *   script request (the shared `ComingSoonComponent` chunk, not yet loaded this session).
+ *
+ * This avoids depending on chunk filenames, which are content-hashed in the production
+ * build CI actually exercises (`chunk-XXXX.js` — no readable component name in the URL,
+ * unlike `ng serve`'s dev-mode naming).
  */
 
 import { test, expect, type Page } from '@playwright/test';
 
 const API = 'http://localhost:8080/api';
-const DASHBOARD_URL = '/dashboard';
+const HOME_URL = '/home';
 
 const AUTH_RESPONSE = {
   accessToken: 'opaque-token-module-guard-e2e',
@@ -57,6 +64,14 @@ async function stubModuleStatus(page: Page, moduleId: string, enabled: boolean):
   );
 }
 
+/** Navigates in-app (SPA), without a full page reload, so already-loaded chunks are not re-requested. */
+async function navigateInApp(page: Page, path: string): Promise<void> {
+  await page.evaluate((target) => {
+    history.pushState({}, '', target);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  }, path);
+}
+
 test.describe('EN03.2 / US03.2.2 — moduleGuard bundle isolation', () => {
   test('disabled module — no script chunk request is issued, user is redirected to /home', async ({
     page,
@@ -64,57 +79,60 @@ test.describe('EN03.2 / US03.2.2 — moduleGuard bundle isolation', () => {
     await stubAuthenticatedSession(page);
     await stubModuleStatus(page, 'whiteboard', false);
 
-    // Land on an authenticated page first so we have a clean baseline before probing /whiteboard.
-    await page.goto(DASHBOARD_URL);
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 10_000 });
+    // Land on /home first (full load) — the redirect target below is already cached.
+    await page.goto(HOME_URL);
+    await expect(page).toHaveURL(/\/home/, { timeout: 10_000 });
 
     const scriptRequests: string[] = [];
     page.on('request', (req) => {
       if (req.resourceType() === 'script') scriptRequests.push(req.url());
     });
 
-    await page.goto('/whiteboard');
+    await navigateInApp(page, '/whiteboard');
 
-    // Guard denies → redirected to /home, never actually rendering the module route.
+    // Guard denies → redirected back to /home, never actually rendering the module route.
     await expect(page).toHaveURL(/\/home/, { timeout: 10_000 });
-
-    // No request whose URL contains "coming-soon" was ever issued — the only page
-    // component chunks loaded are for /dashboard and /home, never the module's route.
-    expect(scriptRequests.some((url) => url.includes('coming-soon'))).toBe(false);
-
-    // Toast is shown and announced via role="alert".
     await expect(page.getByRole('alert')).toBeVisible();
+
+    // No script chunk was ever requested for the denied navigation attempt — the guard
+    // rejected before the Router could resolve the route's loadComponent() dynamic import,
+    // and the /home redirect target was already loaded (no new chunk needed for it either).
+    expect(scriptRequests).toHaveLength(0);
   });
 
-  test('enabled module — the route chunk is requested and the placeholder page renders', async ({
+  test('enabled module — exactly one new script chunk is requested and the placeholder page renders', async ({
     page,
   }) => {
     await stubAuthenticatedSession(page);
     await stubModuleStatus(page, 'whiteboard', true);
 
-    await page.goto(DASHBOARD_URL);
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 10_000 });
+    await page.goto(HOME_URL);
+    await expect(page).toHaveURL(/\/home/, { timeout: 10_000 });
 
     const scriptRequests: string[] = [];
     page.on('request', (req) => {
       if (req.resourceType() === 'script') scriptRequests.push(req.url());
     });
 
-    await page.goto('/whiteboard');
+    await navigateInApp(page, '/whiteboard');
 
-    // Guard allows → stays on /whiteboard, module placeholder renders.
+    // Guard allows → Router resolves loadComponent() → placeholder renders on /whiteboard.
     await expect(page).toHaveURL(/\/whiteboard/, { timeout: 10_000 });
     await expect(page.locator('.coming-soon')).toBeVisible();
 
-    expect(scriptRequests.some((url) => url.includes('coming-soon'))).toBe(true);
+    // Exactly one new chunk was fetched — the module route's own bundle (shared
+    // ComingSoonComponent chunk), never requested before this specific navigation.
+    expect(scriptRequests).toHaveLength(1);
   });
 
   test('interstitial loading state is shown while the status check is pending', async ({ page }) => {
     await stubAuthenticatedSession(page);
 
-    // Delay the status response to give the interstitial time to appear.
+    // Delay the status response to give the interstitial time to appear. Generous delay
+    // (well under the 5s default assertion timeout) to stay robust under CI/parallel
+    // worker contention, which can stretch wall-clock timing significantly.
     await page.route(`${API}/modules/whiteboard/status`, async (route) => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -122,22 +140,18 @@ test.describe('EN03.2 / US03.2.2 — moduleGuard bundle isolation', () => {
       });
     });
 
-    await page.goto(DASHBOARD_URL);
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 10_000 });
+    await page.goto(HOME_URL);
+    await expect(page).toHaveURL(/\/home/, { timeout: 10_000 });
 
     // The overlay (mounted inside ShellComponent) can only be observed while the shell
     // itself stays mounted across the transition — i.e. an in-app (SPA) navigation, not
     // a fresh full-page load (on a cold load, the Router resolves every guard in the
     // whole matched tree, including the parent shell's, before instantiating anything,
-    // so the shell — and the overlay it hosts — would not exist yet either). We drive
-    // an in-app navigation the same way the browser's back/forward buttons do (pushState
-    // + popstate), which Angular's Router picks up without a full page reload.
-    await page.evaluate(() => {
-      history.pushState({}, '', '/whiteboard');
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    });
+    // so the shell — and the overlay it hosts — would not exist yet either).
+    await navigateInApp(page, '/whiteboard');
 
-    await expect(page.getByRole('status')).toBeVisible();
+    // Scoped to the overlay specifically — /home's empty-state also uses role="status".
+    await expect(page.locator('.module-access-overlay[role="status"]')).toBeVisible();
     await expect(page).toHaveURL(/\/whiteboard/, { timeout: 10_000 });
   });
 });
