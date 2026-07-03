@@ -42,6 +42,8 @@ async function fillRegisterForm(page: Page, user = VALID_USER): Promise<void> {
   await page.fill('#lastName', user.lastName);
   await page.fill('#email', user.email);
   await page.fill('#password', user.password);
+  // US01.2.4: confirmPassword is required — the submit button stays disabled without it.
+  await page.fill('#confirmPassword', user.password);
 }
 
 test.describe('US-AUTH-002 — Register', () => {
