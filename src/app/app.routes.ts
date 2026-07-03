@@ -2,6 +2,7 @@ import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
 import { authMatchGuard } from './core/auth/guard/auth.guard';
 import { AuthService } from './core/auth/service/auth.service';
+import { adminGuard } from './core/auth/guard/admin.guard';
 
 /**
  * Cible de redirection pour toute route inexistante (US01.1.4) :
@@ -57,6 +58,12 @@ export const routes: Routes = [
       {
         path: 'teams',
         loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
+      },
+      {
+        path: 'admin/modules',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/admin/modules/admin-modules.component').then(m => m.AdminModulesComponent),
       },
       { path: 'legal', children: LEGAL_CHILDREN },
       {

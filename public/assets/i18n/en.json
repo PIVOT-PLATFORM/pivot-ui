@@ -230,5 +230,37 @@
     "mentions_title": "Legal Notice",
     "privacy_title": "Privacy Policy",
     "terms_title": "Terms of Service"
+  },
+  "admin": {
+    "modules": {
+      "list": {
+        "title": "Modules",
+        "subtitle": "Activate or deactivate PIVOT modules for your organisation.",
+        "empty": "No module available for your plan",
+        "error": "Unable to load modules. Please try again.",
+        "retry": "Retry"
+      },
+      "card": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "action_activate": "Activate",
+        "action_deactivate": "Deactivate",
+        "toggle_activate": "Activate {{ name }}",
+        "toggle_deactivate": "Deactivate {{ name }}",
+        "not_in_plan": "This module is not included in your plan"
+      },
+      "toast": {
+        "activated": "Module {{ name }} activated",
+        "deactivated": "Module {{ name }} deactivated",
+        "activate_error": "Could not activate module {{ name }}. Please try again.",
+        "deactivate_error": "Could not deactivate module {{ name }}. Please try again."
+      },
+      "confirm": {
+        "title": "Deactivate {{ name }}?",
+        "message": "Connected users will be blocked. Confirm?",
+        "confirm": "Deactivate",
+        "cancel": "Cancel"
+      }
+    }
   }
 }
