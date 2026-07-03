@@ -1,5 +1,16 @@
 # Notes de version — PIVOT UI
 
+## [Unreleased]
+
+### Sécurité des mots de passe
+- Un indicateur de force s'affiche désormais en temps réel sous le champ mot de passe (inscription et réinitialisation), avec un niveau clairement indiqué : « Faible », « Moyen » ou « Fort »
+- Une liste de critères se coche au fur et à mesure de la saisie (longueur, majuscule, chiffre, caractère spécial)
+- Le bouton d'inscription reste désactivé tant que le mot de passe ne respecte pas l'ensemble des critères
+- L'erreur « Les mots de passe ne correspondent pas » s'affiche désormais uniquement après avoir quitté le champ de confirmation, pas à chaque frappe
+- Indicateur et checklist entièrement accessibles : niveaux annoncés aux lecteurs d'écran, critères identifiables sans dépendre de la couleur
+
+---
+
 ## [0.7.0] — 3 juillet 2026
 
 ### Connexion

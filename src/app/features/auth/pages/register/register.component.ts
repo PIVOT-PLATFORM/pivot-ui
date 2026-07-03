@@ -1,44 +1,73 @@
-import { ChangeDetectionStrategy, Component, signal, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  Validators,
+  AbstractControl,
+  ValidationErrors,
+} from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { AuthService } from '../../../../core/auth/service/auth.service';
+import { PasswordPolicyService } from '../../../../core/auth/service/password-policy.service';
+import { PasswordStrengthComponent } from '../../../../shared/components/password-strength/password-strength.component';
 import { HttpErrorResponse } from '@angular/common/http';
 
-function strongPassword(c: AbstractControl): ValidationErrors | null {
-  const v: string = c.value || '';
-  if (v.length < 12) return { weak: 'auth.register.password.min_length' };
-  if (!/[A-Z]/.test(v)) return { weak: 'auth.register.password.need_uppercase' };
-  if (!/\d/.test(v)) return { weak: 'auth.register.password.need_number' };
-  if (!/[^A-Za-z0-9]/.test(v)) return { weak: 'auth.register.password.need_special' };
-  return null;
+/**
+ * Validateur de groupe : les champs `password` et `confirmPassword` doivent être égaux.
+ * L'erreur est portée par le groupe (`passwordMismatch`) — affichée sous le champ
+ * « Confirmer » uniquement après blur (US01.2.4).
+ */
+function passwordsMatch(group: AbstractControl): ValidationErrors | null {
+  const password = group.get('password')?.value;
+  const confirm = group.get('confirmPassword')?.value;
+  return password && confirm && password !== confirm ? { passwordMismatch: true } : null;
 }
 
 @Component({
   selector: 'piv-register',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslocoPipe],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslocoPipe, PasswordStrengthComponent],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
 })
 export class RegisterComponent {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
+  private readonly passwordPolicy = inject(PasswordPolicyService);
 
-  form = this.fb.group({
-    firstName: ['', [Validators.required, Validators.minLength(2)]],
-    lastName: ['', [Validators.required, Validators.minLength(2)]],
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, strongPassword]],
-  });
+  form = this.fb.group(
+    {
+      firstName: ['', [Validators.required, Validators.minLength(2)]],
+      lastName: ['', [Validators.required, Validators.minLength(2)]],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, this.passwordPolicy.validator()]],
+      confirmPassword: ['', [Validators.required]],
+    },
+    { validators: [passwordsMatch] },
+  );
 
   loading = signal(false);
   error = signal<string | null>(null);
   errorParams = signal<Record<string, string>>({});
   success = signal(false);
   showPassword = signal(false);
+
+  /** Mot de passe courant — alimente PasswordStrengthComponent en temps réel. */
+  passwordValue = signal('');
+
+  constructor() {
+    // Politique chargée une seule fois (aucun appel API à la frappe).
+    this.passwordPolicy.load();
+    this.form.controls.password.valueChanges.subscribe((v) => this.passwordValue.set(v ?? ''));
+    // Si la politique arrive après une saisie, revalider le champ avec les vraies règles.
+    effect(() => {
+      this.passwordPolicy.policy();
+      this.form.controls.password.updateValueAndValidity({ emitEvent: false });
+    });
+  }
 
   submit(): void {
     this.form.markAllAsTouched();
@@ -70,24 +99,9 @@ export class RegisterComponent {
     });
   }
 
-  passwordStrength(): { labelKey: string; color: string; width: string } {
-    const v = this.form.value.password || '';
-    let score = 0;
-    if (v.length >= 12) score++;
-    if (/[A-Z]/.test(v)) score++;
-    if (/\d/.test(v)) score++;
-    if (/[^A-Za-z0-9]/.test(v)) score++;
-    if (v.length >= 20) score++;
-
-    const levels = [
-      { labelKey: '', color: 'transparent', width: '0%' },
-      { labelKey: 'auth.register.strength.very_weak', color: '#DC2626', width: '20%' },
-      { labelKey: 'auth.register.strength.weak', color: '#F59E0B', width: '40%' },
-      { labelKey: 'auth.register.strength.medium', color: '#EAB308', width: '60%' },
-      { labelKey: 'auth.register.strength.strong', color: '#22C55E', width: '80%' },
-      { labelKey: 'auth.register.strength.very_strong', color: '#15803D', width: '100%' },
-    ];
-    return levels[score] || levels[0];
+  /** Erreur « mots de passe différents » — visible uniquement après blur du champ Confirmer. */
+  showMismatchError(): boolean {
+    return this.form.controls.confirmPassword.touched && this.form.errors?.['passwordMismatch'] === true;
   }
 
   private formatRetryAfter(seconds: number): string {

@@ -73,7 +73,8 @@
               <input id="password" [type]="showPassword() ? 'text' : 'password'"
                      formControlName="password" class="form-control"
                      [class.is-invalid]="form.controls.password.invalid && form.controls.password.touched"
-                     placeholder="••••••••••••" autocomplete="new-password"/>
+                     placeholder="••••••••••••" autocomplete="new-password"
+                     aria-describedby="register-password-meter register-password-criteria"/>
               <button type="button" class="toggle-password"
                       [attr.aria-label]="(showPassword() ? 'auth.register.hide_password' : 'auth.register.show_password') | transloco"
                       (click)="showPassword.set(!showPassword())">
@@ -84,23 +85,28 @@
                 }
               </button>
             </div>
-            @if (form.value.password) {
-              <div class="strength-bar">
-                <div class="strength-bar__fill"
-                     [style.width]="passwordStrength().width"
-                     [style.background-color]="passwordStrength().color"></div>
-              </div>
-              @if (passwordStrength().labelKey) {
-                <span class="strength-label">{{ passwordStrength().labelKey | transloco }}</span>
-              }
-            }
-            @if (form.controls.password.touched && form.controls.password.errors?.['weak']; as weakErr) {
-              <span class="form-error">{{ weakErr | transloco }}</span>
+            <piv-password-strength [password]="passwordValue()" idPrefix="register-password" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="confirmPassword">{{ 'auth.register.confirm_password' | transloco }}</label>
+            <input id="confirmPassword" [type]="showPassword() ? 'text' : 'password'"
+                   formControlName="confirmPassword" class="form-control"
+                   [class.is-invalid]="showMismatchError() || (form.controls.confirmPassword.invalid && form.controls.confirmPassword.touched)"
+                   placeholder="••••••••••••" autocomplete="new-password"
+                   [attr.aria-describedby]="showMismatchError() ? 'confirm-password-error' : null"/>
+            @if (form.controls.confirmPassword.errors?.['required'] && form.controls.confirmPassword.touched) {
+              <span class="form-error">{{ 'common.field_required' | transloco }}</span>
+            } @else if (showMismatchError()) {
+              <span id="confirm-password-error" class="form-error" role="alert">
+                {{ 'auth.register.password_mismatch' | transloco }}
+              </span>
             }
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:24px" [disabled]="loading()">
+        <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:24px"
+                [disabled]="form.invalid || loading()">
           @if (loading()) { <span class="spinner"></span> }
           {{ 'auth.register.submit' | transloco }}
         </button>

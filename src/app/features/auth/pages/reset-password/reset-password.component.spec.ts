@@ -32,6 +32,10 @@ function setup(token: string | null): {
   const component = fixture.componentInstance;
   const httpMock = TestBed.inject(HttpTestingController);
   fixture.detectChanges(); // ngOnInit → lecture du token
+  // US01.2.4 : la politique de mot de passe est chargée une fois au démarrage du composant
+  httpMock
+    .expectOne((r) => r.url === `${environment.apiUrl}/auth/password-policy`)
+    .flush({ minLength: 12, minUppercase: 1, minDigits: 1, minSpecial: 1 });
   return { fixture, component, httpMock };
 }
 
@@ -47,10 +51,10 @@ describe('ResetPasswordComponent', () => {
     httpMock.verify();
   });
 
-  it('token absent → tokenState = invalid, pas de requête HTTP', () => {
+  it('token absent → tokenState = invalid, pas de requête de vérification', () => {
     const { component, httpMock } = setup(null);
     expect(component.tokenState()).toBe('invalid');
-    httpMock.expectNone(() => true);
+    httpMock.expectNone((r) => r.url === CHECK_URL);
     httpMock.verify();
   });
 

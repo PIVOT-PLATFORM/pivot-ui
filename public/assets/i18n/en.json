@@ -120,20 +120,27 @@
       "show_password": "Show password",
       "hide_password": "Hide password",
       "password": {
-        "label": "Password",
-        "min_length": "Minimum 12 characters.",
-        "need_uppercase": "At least one uppercase letter.",
-        "need_number": "At least one digit.",
-        "need_special": "At least one special character."
+        "label": "Password"
       },
+      "confirm_password": "Confirm password",
+      "password_mismatch": "Passwords do not match.",
+      "error_rate_limit": "Too many attempts. Try again in {{ time }}."
+    },
+    "password": {
       "strength": {
-        "very_weak": "Very weak",
+        "label": "Password strength:",
         "weak": "Weak",
         "medium": "Medium",
         "strong": "Strong",
-        "very_strong": "Very strong"
-      },
-      "error_rate_limit": "Too many attempts. Try again in {{ time }}."
+        "criteria_met": "met",
+        "criteria_not_met": "not met",
+        "criteria": {
+          "min_length": "At least {{ count }} characters",
+          "uppercase": "At least {{ count }} uppercase letter(s)",
+          "digit": "At least {{ count }} digit(s)",
+          "special": "At least {{ count }} special character(s)"
+        }
+      }
     },
     "resend": {
       "title": "Resend activation email",
