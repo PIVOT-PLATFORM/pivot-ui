@@ -1,5 +1,16 @@
+import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
 import { authMatchGuard } from './core/auth/guard/auth.guard';
+import { AuthService } from './core/auth/service/auth.service';
+
+/**
+ * Cible de redirection pour toute route inexistante (US01.1.4) :
+ * - utilisateur authentifié → `/home` (un `returnUrl` pointant vers une route
+ *   inconnue retombe donc sur /home après login) ;
+ * - visiteur anonyme → `/auth/login` (comportement historique conservé).
+ */
+export const notFoundRedirect = (): string =>
+  inject(AuthService).isAuthenticated() ? '/home' : '/auth/login';
 
 const LEGAL_CHILDREN: Routes = [
   {
@@ -75,5 +86,5 @@ export const routes: Routes = [
     path: 'plan-du-site',
     loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
   },
-  { path: '**', redirectTo: 'auth/login' },
+  { path: '**', redirectTo: notFoundRedirect },
 ];
