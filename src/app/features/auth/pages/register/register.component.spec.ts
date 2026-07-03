@@ -16,6 +16,13 @@ describe('RegisterComponent', () => {
   let component: RegisterComponent;
   let httpMock: HttpTestingController;
 
+  /** US01.2.4 : la politique de mot de passe est chargée une fois au démarrage du composant. */
+  function flushPasswordPolicy(): void {
+    httpMock
+      .expectOne(`${environment.apiUrl}/auth/password-policy`)
+      .flush({ minLength: 12, minUppercase: 1, minDigits: 1, minSpecial: 1 });
+  }
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
@@ -33,6 +40,7 @@ describe('RegisterComponent', () => {
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
+    flushPasswordPolicy();
   });
 
   afterEach(() => httpMock.verify());
@@ -56,6 +64,7 @@ describe('RegisterComponent', () => {
     lastName: 'Martin',
     email: 'alice@example.com',
     password: 'SecurePass1!',
+    confirmPassword: 'SecurePass1!',
   });
 
   it('submits and sets success on 200', () => {
@@ -129,58 +138,65 @@ describe('RegisterComponent', () => {
     reqs[0].flush({});
   });
 
-  describe('passwordStrength()', () => {
-    it('returns 0% for empty password', () => {
-      component.form.patchValue({ password: '' });
-      expect(component.passwordStrength().width).toBe('0%');
-    });
-
-    it('returns 100% for very strong password (≥20 chars, all criteria)', () => {
-      component.form.patchValue({ password: 'SuperSecure123!!Extra' });
-      expect(component.passwordStrength().width).toBe('100%');
-    });
-
-    it('returns 0% for password with no criteria met', () => {
-      component.form.patchValue({ password: 'a' });
-      expect(component.passwordStrength().width).toBe('0%');
-    });
-
-    it('returns 20% for password with exactly one criterion (uppercase only)', () => {
-      component.form.patchValue({ password: 'A' });
-      expect(component.passwordStrength().width).toBe('20%');
-    });
-
-    it('increases score with length + uppercase + digit + special', () => {
-      component.form.patchValue({ password: 'Abc123!secure' });
-      const s = component.passwordStrength();
-      expect(['60%', '80%', '100%']).toContain(s.width);
-    });
-  });
-
-  describe('strongPassword validator', () => {
-    it('is invalid when password < 12 chars', () => {
-      component.form.patchValue({ password: 'Short1!' });
-      expect(component.form.get('password')!.errors).toBeTruthy();
+  describe('US01.2.4 — politique de robustesse du mot de passe', () => {
+    it('form is invalid (button disabled) while the password does not satisfy the policy', () => {
+      component.form.patchValue({ password: 'short' });
+      expect(component.form.controls.password.errors).toEqual({ passwordPolicy: true });
+      expect(component.form.invalid).toBe(true);
     });
 
     it('is invalid without uppercase', () => {
       component.form.patchValue({ password: 'alllowercase1!' });
-      expect(component.form.get('password')!.errors).toBeTruthy();
+      expect(component.form.controls.password.errors).toBeTruthy();
     });
 
-    it('is invalid without digit', () => {
+    it('is invalid without a digit', () => {
       component.form.patchValue({ password: 'NoDigitsHere!!' });
-      expect(component.form.get('password')!.errors).toBeTruthy();
+      expect(component.form.controls.password.errors).toBeTruthy();
     });
 
-    it('is invalid without special char', () => {
+    it('is invalid without a special character', () => {
       component.form.patchValue({ password: 'NoSpecialChar123' });
-      expect(component.form.get('password')!.errors).toBeTruthy();
+      expect(component.form.controls.password.errors).toBeTruthy();
     });
 
-    it('is valid when all criteria met', () => {
+    it('is valid once every criterion of the policy is satisfied', () => {
       component.form.patchValue({ password: 'SecurePass123!' });
-      expect(component.form.get('password')!.errors).toBeNull();
+      expect(component.form.controls.password.errors).toBeNull();
+    });
+
+    it('feeds passwordValue() in real time for PasswordStrengthComponent (no API call per keystroke)', () => {
+      component.form.controls.password.setValue('Abcdefghi1!x');
+      expect(component.passwordValue()).toBe('Abcdefghi1!x');
+      httpMock.expectNone(`${environment.apiUrl}/auth/password-policy`);
+    });
+
+    it('button stays disabled while passwords differ (form-level passwordMismatch)', () => {
+      component.form.setValue({ ...validForm(), confirmPassword: 'Different123!' });
+      expect(component.form.invalid).toBe(true);
+    });
+
+    it('showMismatchError() is false until the confirm field has been touched (no error while typing)', () => {
+      component.form.setValue({ ...validForm(), confirmPassword: 'Different123!' });
+      expect(component.showMismatchError()).toBe(false);
+    });
+
+    it('showMismatchError() is true once the confirm field has been touched and values differ', () => {
+      component.form.setValue({ ...validForm(), confirmPassword: 'Different123!' });
+      component.form.controls.confirmPassword.markAsTouched();
+      expect(component.showMismatchError()).toBe(true);
+    });
+
+    it('showMismatchError() is false when passwords match', () => {
+      component.form.setValue(validForm());
+      component.form.controls.confirmPassword.markAsTouched();
+      expect(component.showMismatchError()).toBe(false);
+    });
+
+    it('does not submit when passwords differ, even if individually valid', () => {
+      component.form.setValue({ ...validForm(), confirmPassword: 'Different123!' });
+      component.submit();
+      httpMock.expectNone(`${environment.apiUrl}/auth/register`);
     });
   });
 });
