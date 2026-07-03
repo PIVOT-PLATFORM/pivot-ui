@@ -172,7 +172,7 @@ test.describe('US-AUTH-002 — Login', () => {
   // -------------------------------------------------------------------------
   // 1. Login nominal
   // -------------------------------------------------------------------------
-  test('login nominal — successful login redirects to /dashboard', async ({ page, context }) => {
+  test('login nominal — successful login redirects to /home (US01.1.4)', async ({ page, context }) => {
     await stubLoginOk(page, context);
     // Stub refresh for potential subsequent calls
     await page.unroute(`${API}/auth/refresh`);
@@ -180,7 +180,7 @@ test.describe('US-AUTH-002 — Login', () => {
 
     await fillAndSubmitLogin(page, VALID_CREDENTIALS);
 
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 10_000 });
+    await expect(page).toHaveURL(/\/home/, { timeout: 10_000 });
     // Dashboard shows the user's first name
     await expect(page.locator('h1')).toContainText('Alice');
   });
@@ -214,7 +214,7 @@ test.describe('US-AUTH-002 — Login', () => {
     await fillAndSubmitLogin(page, VALID_CREDENTIALS, false /* already checked above */);
 
     // Wait for navigation to confirm login succeeded
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 10_000 });
+    await expect(page).toHaveURL(/\/home/, { timeout: 10_000 });
 
     const cookies = await context.cookies();
     const sessionCookie = cookies.find((c) => c.name === SESSION_COOKIE);
@@ -239,7 +239,7 @@ test.describe('US-AUTH-002 — Login', () => {
 
     await fillAndSubmitLogin(page, VALID_CREDENTIALS);
 
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 10_000 });
+    await expect(page).toHaveURL(/\/home/, { timeout: 10_000 });
 
     const cookies = await context.cookies();
     const sessionCookie = cookies.find((c) => c.name === SESSION_COOKIE);
@@ -260,7 +260,7 @@ test.describe('US-AUTH-002 — Login', () => {
     await stubRefreshOk(page);
 
     await fillAndSubmitLogin(page, VALID_CREDENTIALS);
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 10_000 });
+    await expect(page).toHaveURL(/\/home/, { timeout: 10_000 });
 
     // --- Logout ---
     await stubLogout(page, context);

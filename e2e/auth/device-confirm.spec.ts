@@ -69,7 +69,7 @@ test.describe('US-AUTH-002 — Device MFA (OTP)', () => {
     await expect(page.locator(`a[href*="device-confirm"], a[routerLink*="device-confirm"]`)).toBeVisible();
   });
 
-  test('device confirm — valid OTP redirects to dashboard', async ({ page, context }) => {
+  test('device confirm — valid OTP redirects to /home (US01.1.4)', async ({ page, context }) => {
     await stubDeviceVerifyOk(page, context);
     // Pas d'override de /auth/refresh ici : pendant la MFA device, aucune session n'existe
     // encore (le token n'est émis qu'après /device/verify). Laisser le 401 du beforeEach —
@@ -82,7 +82,7 @@ test.describe('US-AUTH-002 — Device MFA (OTP)', () => {
 
     await otpInput.fill('123456');
     await page.click('button[type="submit"]');
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 8_000 });
+    await expect(page).toHaveURL(/\/home/, { timeout: 8_000 });
   });
 
   test('device confirm — invalid OTP shows error', async ({ page }) => {
