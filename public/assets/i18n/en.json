@@ -262,5 +262,19 @@
         "cancel": "Cancel"
       }
     }
+  },
+  "modules": {
+    "guard": {
+      "checking": "Checking module access…",
+      "disabled": "{{ module }} module not available",
+      "adminLink": "Manage modules",
+      "names": {
+        "whiteboard": "Whiteboard",
+        "session": "Live sessions",
+        "roadmap": "Roadmap",
+        "survey": "Surveys",
+        "quiz": "Quiz"
+      }
+    }
   }
 }

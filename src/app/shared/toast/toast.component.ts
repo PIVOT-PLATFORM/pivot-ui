@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ToastService } from './toast.service';
 
@@ -14,7 +15,7 @@ import { ToastService } from './toast.service';
 @Component({
   selector: 'piv-toast-container',
   standalone: true,
-  imports: [TranslocoPipe],
+  imports: [TranslocoPipe, RouterLink],
   templateUrl: './toast.component.html',
   styleUrl: './toast.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

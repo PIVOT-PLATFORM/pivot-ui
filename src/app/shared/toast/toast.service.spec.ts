@@ -71,4 +71,21 @@ describe('ToastService', () => {
     service.dismiss(9999);
     expect(service.toasts()).toHaveLength(1);
   });
+
+  it('show() attaches an optional action link', () => {
+    service.show('modules.guard.disabled', 'warning', { module: 'whiteboard' }, {
+      labelKey: 'modules.guard.adminLink',
+      route: '/admin/modules',
+    });
+
+    expect(service.toasts()[0].action).toEqual({
+      labelKey: 'modules.guard.adminLink',
+      route: '/admin/modules',
+    });
+  });
+
+  it('show() without an action leaves it undefined', () => {
+    service.show('auth.session.expired', 'warning');
+    expect(service.toasts()[0].action).toBeUndefined();
+  });
 });

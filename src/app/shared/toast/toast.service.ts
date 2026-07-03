@@ -3,6 +3,14 @@ import { Injectable, signal } from '@angular/core';
 /** Types visuels de toast supportés par le shell PIVOT. */
 export type ToastType = 'info' | 'warning' | 'error';
 
+/** Lien d'action optionnel affiché dans un toast (clé Transloco, jamais de libellé en dur). */
+export interface ToastAction {
+  /** Clé de traduction Transloco du libellé du lien (ex. `modules.guard.adminLink`). */
+  labelKey: string;
+  /** Cible de routing Angular, ex. `/admin/modules`. */
+  route: string;
+}
+
 /** Un toast affiché par le conteneur global (clé Transloco, jamais de libellé en dur). */
 export interface Toast {
   /** Identifiant unique (généré par le service). */
@@ -13,6 +21,8 @@ export interface Toast {
   type: ToastType;
   /** Paramètres d'interpolation Transloco optionnels (ex. `{ name: 'whiteboard' }`). */
   params?: Record<string, string | number>;
+  /** Lien d'action optionnel (ex. accès direct à l'administration des modules). */
+  action?: ToastAction;
 }
 
 /** Durée d'affichage avant fermeture automatique (ms). */
@@ -45,9 +55,15 @@ export class ToastService {
    * @param messageKey clé Transloco du message
    * @param type       type visuel (défaut `info`)
    * @param params     paramètres d'interpolation Transloco optionnels
+   * @param action     lien d'action optionnel (clé Transloco + route)
    * @returns l'identifiant du toast affiché (existant si dédupliqué)
    */
-  show(messageKey: string, type: ToastType = 'info', params?: Record<string, string | number>): number {
+  show(
+    messageKey: string,
+    type: ToastType = 'info',
+    params?: Record<string, string | number>,
+    action?: ToastAction
+  ): number {
     const existing = this._toasts().find(
       t => t.messageKey === messageKey && JSON.stringify(t.params) === JSON.stringify(params)
     );
@@ -55,7 +71,7 @@ export class ToastService {
       return existing.id;
     }
     const id = ++this.nextId;
-    this._toasts.update(list => [...list, { id, messageKey, type, params }]);
+    this._toasts.update(list => [...list, { id, messageKey, type, params, action }]);
     setTimeout(() => this.dismiss(id), TOAST_AUTO_DISMISS_MS);
     return id;
   }

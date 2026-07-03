@@ -44,3 +44,22 @@ export interface PivotModuleUi extends PivotModuleDto {
   /** CSS accent color for the module card, e.g. '#3B82F6'. */
   color: string;
 }
+
+/**
+ * Raw DTO returned by GET /api/modules/{id}/status.
+ * Maps directly to fr.pivot.modules.registry.ModuleStatusDto (pivot-core).
+ *
+ * HTTP semantics (EN03.2 / US03.2.2 — decision documented on both sides of the contract):
+ * - 200 { enabled: false } — module registered but disabled for the current tenant.
+ * - 200 { enabled: true }  — module registered and enabled for the current tenant.
+ * - 404                    — module id not registered in the backend ModuleRegistry at all
+ *                            (distinct from "disabled"); the moduleGuard treats this the
+ *                            same as `enabled: false` (deny + redirect), since from the
+ *                            navigating user's perspective both cases mean "no access".
+ * No 403 is ever returned by this endpoint by design — see ModuleStatusDto (pivot-core)
+ * JavaDoc for the full rationale.
+ */
+export interface ModuleStatusDto {
+  /** {@code true} if the module is enabled for the current tenant. */
+  enabled: boolean;
+}
