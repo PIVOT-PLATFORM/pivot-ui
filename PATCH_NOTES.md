@@ -32,6 +32,13 @@
 - Si plusieurs onglets PIVOT sont ouverts, la déconnexion s'applique à tous les onglets simultanément
 - La page sur laquelle vous étiez au moment de l'expiration est mémorisée afin de vous y ramener après reconnexion
 
+### Administration des modules
+- Les administrateurs disposent désormais d'une page dédiée (`/admin/modules`) pour activer ou désactiver les modules PIVOT de leur organisation
+- Chaque module affiche clairement son statut (Actif / Inactif) et un bouton pour basculer son activation
+- La désactivation d'un module demande une confirmation, car les utilisateurs connectés seront bloqués
+- Un message clair s'affiche si un module n'est pas inclus dans le plan de l'organisation
+- Des notifications confirment le succès ou l'échec de chaque action
+
 ### Système de modules
 - Intégration de l'API de modules : la liste des modules disponibles est désormais chargée dynamiquement selon les droits de votre organisation
 
