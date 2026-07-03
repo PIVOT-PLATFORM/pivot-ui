@@ -1,23 +1,16 @@
-import { ChangeDetectionStrategy, Component, OnInit, signal, inject } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, OnInit, effect, signal, inject } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { AuthService } from '../../../../core/auth/service/auth.service';
-
-function strongPassword(c: AbstractControl): ValidationErrors | null {
-  const v: string = c.value || '';
-  if (v.length < 12) return { weak: 'auth.register.password.min_length' };
-  if (!/[A-Z]/.test(v)) return { weak: 'auth.register.password.need_uppercase' };
-  if (!/\d/.test(v)) return { weak: 'auth.register.password.need_number' };
-  if (!/[^A-Za-z0-9]/.test(v)) return { weak: 'auth.register.password.need_special' };
-  return null;
-}
+import { PasswordPolicyService } from '../../../../core/auth/service/password-policy.service';
+import { PasswordStrengthComponent } from '../../../../shared/components/password-strength/password-strength.component';
 
 @Component({
   selector: 'piv-reset-password',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, TranslocoPipe],
+  imports: [ReactiveFormsModule, RouterLink, TranslocoPipe, PasswordStrengthComponent],
   template: `
     <div class="auth-page">
       <div class="card auth-card">
@@ -75,15 +68,11 @@ function strongPassword(c: AbstractControl): ValidationErrors | null {
                 <input id="newPassword" type="password" formControlName="newPassword" class="form-control"
                        [class.is-invalid]="form.controls.newPassword.invalid && form.controls.newPassword.touched"
                        placeholder="••••••••••••" autocomplete="new-password"
-                       aria-describedby="newPassword-error"/>
-                <span id="newPassword-error" class="form-error" role="alert">
-                  @if (form.controls.newPassword.touched && form.controls.newPassword.errors?.['weak']; as weakErr) {
-                    {{ weakErr | transloco }}
-                  }
-                </span>
+                       aria-describedby="reset-password-meter reset-password-criteria"/>
+                <piv-password-strength [password]="passwordValue()" idPrefix="reset-password" />
               </div>
 
-              <button type="submit" class="btn btn-primary btn-full btn-lg" [disabled]="loading()">
+              <button type="submit" class="btn btn-primary btn-full btn-lg" [disabled]="form.invalid || loading()">
                 @if (loading()) { <span class="spinner" aria-hidden="true"></span> }
                 {{ 'auth.reset_password.submit' | transloco }}
               </button>
@@ -102,12 +91,27 @@ export class ResetPasswordComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly auth = inject(AuthService);
+  private readonly passwordPolicy = inject(PasswordPolicyService);
 
-  form = this.fb.group({ newPassword: ['', [Validators.required, strongPassword]] });
+  form = this.fb.group({ newPassword: ['', [Validators.required, this.passwordPolicy.validator()]] });
   tokenState = signal<'checking' | 'valid' | 'invalid' | 'success'>('checking');
   private rawToken: string | null = null;
   loading = signal(false);
   error = signal<string | null>(null);
+
+  /** Mot de passe courant — alimente PasswordStrengthComponent en temps réel. */
+  passwordValue = signal('');
+
+  constructor() {
+    // Politique chargée une seule fois (aucun appel API à la frappe).
+    this.passwordPolicy.load();
+    this.form.controls.newPassword.valueChanges.subscribe((v) => this.passwordValue.set(v ?? ''));
+    // Si la politique arrive après une saisie, revalider le champ avec les vraies règles.
+    effect(() => {
+      this.passwordPolicy.policy();
+      this.form.controls.newPassword.updateValueAndValidity({ emitEvent: false });
+    });
+  }
 
   ngOnInit(): void {
     this.rawToken = this.route.snapshot.queryParamMap.get('token');
