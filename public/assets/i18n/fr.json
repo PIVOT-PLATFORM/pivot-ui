@@ -230,5 +230,37 @@
     "mentions_title": "Mentions légales",
     "privacy_title": "Politique de confidentialité",
     "terms_title": "Conditions Générales d'Utilisation"
+  },
+  "admin": {
+    "modules": {
+      "list": {
+        "title": "Modules",
+        "subtitle": "Activez ou désactivez les modules PIVOT pour votre organisation.",
+        "empty": "Aucun module disponible pour votre plan",
+        "error": "Impossible de charger les modules. Réessayez.",
+        "retry": "Réessayer"
+      },
+      "card": {
+        "active": "Actif",
+        "inactive": "Inactif",
+        "action_activate": "Activer",
+        "action_deactivate": "Désactiver",
+        "toggle_activate": "Activer {{ name }}",
+        "toggle_deactivate": "Désactiver {{ name }}",
+        "not_in_plan": "Ce module n'est pas inclus dans votre plan"
+      },
+      "toast": {
+        "activated": "Module {{ name }} activé",
+        "deactivated": "Module {{ name }} désactivé",
+        "activate_error": "Impossible d'activer le module {{ name }}. Réessayez.",
+        "deactivate_error": "Impossible de désactiver le module {{ name }}. Réessayez."
+      },
+      "confirm": {
+        "title": "Désactiver {{ name }} ?",
+        "message": "Les utilisateurs connectés seront bloqués. Confirmer ?",
+        "confirm": "Désactiver",
+        "cancel": "Annuler"
+      }
+    }
   }
 }

@@ -1,5 +1,16 @@
 # Notes de version — PIVOT UI
 
+## [Unreleased]
+
+### Administration des modules
+- Les administrateurs disposent désormais d'une page dédiée (`/admin/modules`) pour activer ou désactiver les modules PIVOT de leur organisation
+- Chaque module affiche clairement son statut (Actif / Inactif) et un bouton pour basculer son activation
+- La désactivation d'un module demande une confirmation, car les utilisateurs connectés seront bloqués
+- Un message clair s'affiche si un module n'est pas inclus dans le plan de l'organisation
+- Des notifications confirment le succès ou l'échec de chaque action
+
+---
+
 ## [0.8.0] — 3 juillet 2026
 
 ### Sécurité des mots de passe

@@ -1,0 +1,85 @@
+<main class="admin-modules" [attr.aria-label]="'admin.modules.list.title' | transloco">
+  <header class="admin-modules__header">
+    <h1 class="admin-modules__title">{{ 'admin.modules.list.title' | transloco }}</h1>
+    <p class="admin-modules__subtitle">{{ 'admin.modules.list.subtitle' | transloco }}</p>
+  </header>
+
+  @if (loading()) {
+    <div class="sr-only" role="status">{{ 'common.loading' | transloco }}</div>
+    <ul class="admin-modules__grid" aria-hidden="true" data-testid="admin-modules-skeleton">
+      @for (i of skeletonPlaceholders; track i) {
+        <li class="admin-modules__card admin-modules__card--skeleton"></li>
+      }
+    </ul>
+  } @else if (loadError()) {
+    <div class="admin-modules__error-state" role="alert" data-testid="admin-modules-error">
+      <p>{{ 'admin.modules.list.error' | transloco }}</p>
+      <button type="button" class="btn btn-secondary" (click)="load()" data-testid="admin-modules-retry">
+        {{ 'admin.modules.list.retry' | transloco }}
+      </button>
+    </div>
+  } @else if (isEmpty()) {
+    <div class="admin-modules__empty-state" data-testid="admin-modules-empty">
+      <p>{{ 'admin.modules.list.empty' | transloco }}</p>
+    </div>
+  } @else {
+    <ul class="admin-modules__grid" data-testid="admin-modules-grid">
+      @for (module of modules(); track module.id) {
+        <li
+          class="admin-modules__card"
+          [class.admin-modules__card--inactive]="!module.enabled"
+          [attr.data-testid]="'module-card-' + module.id"
+        >
+          <div class="admin-modules__card-header">
+            <h2 class="admin-modules__card-title">{{ module.name }}</h2>
+            <span
+              class="admin-modules__badge"
+              [class.admin-modules__badge--active]="module.enabled"
+              [class.admin-modules__badge--inactive]="!module.enabled"
+              [attr.data-testid]="'module-status-' + module.id"
+            >
+              {{ (module.enabled ? 'admin.modules.card.active' : 'admin.modules.card.inactive') | transloco }}
+            </span>
+          </div>
+
+          @if (module.description) {
+            <p class="admin-modules__card-description">{{ module.description }}</p>
+          }
+
+          @if (service.cardError(module.id) === 'not-in-plan') {
+            <p class="admin-modules__card-error" role="alert" [attr.data-testid]="'module-card-error-' + module.id">
+              {{ 'admin.modules.card.not_in_plan' | transloco }}
+            </p>
+          }
+
+          <button
+            type="button"
+            class="admin-modules__toggle"
+            [class.admin-modules__toggle--active]="module.enabled"
+            [attr.aria-label]="(module.enabled ? 'admin.modules.card.toggle_deactivate' : 'admin.modules.card.toggle_activate') | transloco: { name: module.name }"
+            [attr.aria-pressed]="module.enabled"
+            [disabled]="service.isInFlight(module.id)"
+            [attr.data-testid]="'module-toggle-' + module.id"
+            (click)="onToggle(module)"
+          >
+            @if (service.isInFlight(module.id)) {
+              <span class="spinner" aria-hidden="true"></span>
+            } @else {
+              {{ (module.enabled ? 'admin.modules.card.action_deactivate' : 'admin.modules.card.action_activate') | transloco }}
+            }
+          </button>
+        </li>
+      }
+    </ul>
+  }
+
+  <piv-confirm-dialog
+    [open]="isConfirmOpen()"
+    [title]="'admin.modules.confirm.title' | transloco: { name: confirmTargetName() }"
+    [message]="'admin.modules.confirm.message' | transloco"
+    [confirmLabel]="'admin.modules.confirm.confirm' | transloco"
+    [cancelLabel]="'admin.modules.confirm.cancel' | transloco"
+    (confirmed)="confirmDeactivate()"
+    (cancelled)="cancelDeactivate()"
+  />
+</main>
