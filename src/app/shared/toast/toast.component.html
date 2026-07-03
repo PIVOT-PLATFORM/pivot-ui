@@ -8,6 +8,13 @@
       [attr.data-testid]="'toast-' + toast.type"
     >
       <p class="toast__message">{{ toast.messageKey | transloco: toast.params }}</p>
+      @if (toast.action) {
+        <a
+          class="toast__action"
+          [routerLink]="toast.action.route"
+          (click)="toastService.dismiss(toast.id)"
+        >{{ toast.action.labelKey | transloco }}</a>
+      }
       <button
         type="button"
         class="toast__close"

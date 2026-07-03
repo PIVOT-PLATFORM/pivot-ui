@@ -7,6 +7,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from '../navbar/navbar.component';
 import { FooterComponent } from '../footer/footer.component';
+import { ModuleAccessOverlayComponent } from '../../modules/module-access-overlay.component';
 
 /**
  * Le conteneur global de toasts (`piv-toast-container`) est monté une seule
@@ -17,7 +18,7 @@ import { FooterComponent } from '../footer/footer.component';
   selector: 'piv-shell',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, NavbarComponent, FooterComponent],
+  imports: [RouterOutlet, NavbarComponent, FooterComponent, ModuleAccessOverlayComponent],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss',
 })

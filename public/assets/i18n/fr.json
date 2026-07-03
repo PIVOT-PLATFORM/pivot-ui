@@ -262,5 +262,24 @@
         "cancel": "Annuler"
       }
     }
+  },
+  "modules": {
+    "guard": {
+      "checking": "Vérification de l'accès au module…",
+      "disabled": "Module {{ module }} non disponible",
+      "adminLink": "Gérer les modules",
+      "names": {
+        "whiteboard": "Tableau blanc",
+        "session": "Sessions live",
+        "roadmap": "Roadmap",
+        "survey": "Sondages",
+        "quiz": "Quiz"
+      }
+    }
+  },
+  "notifications": {
+    "toast": {
+      "dismiss": "Fermer la notification"
+    }
   }
 }
