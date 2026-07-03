@@ -1,6 +1,6 @@
 # Notes de version — PIVOT UI
 
-## [Unreleased]
+## [0.9.0] — 3 juillet 2026
 
 ### Administration des modules
 - Les administrateurs disposent désormais d'une page dédiée (`/admin/modules`) pour activer ou désactiver les modules PIVOT de leur organisation

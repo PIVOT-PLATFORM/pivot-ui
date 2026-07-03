@@ -1,3 +1,10 @@
+# [0.9.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.8.0...v0.9.0) (2026-07-03)
+
+
+### Features
+
+* **ui:** admin module activation UI (US03.1.1/US03.1.2/US03.2.1) ([#66](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/66)) ([bb15b2d](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/bb15b2dcdcef02ffe9d746018f2e65be708d7fa4))
+
 # [0.8.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.7.0...v0.8.0) (2026-07-03)
 
 
