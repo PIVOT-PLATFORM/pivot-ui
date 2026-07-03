@@ -130,9 +130,11 @@ describe('tokenInterceptor', () => {
       const sessionExpiry = TestBed.inject(SessionExpiryService);
       vi.spyOn(sessionExpiry, 'onSessionExpired').mockImplementation(() => {});
 
-      httpClient.get(TEST_URL).subscribe({ error: () => {} });
+      let errorReceived = false;
+      httpClient.get(TEST_URL).subscribe({ error: () => { errorReceived = true; } });
       httpMock.expectOne(TEST_URL).flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
 
+      expect(errorReceived).toBe(true);
       // Aucun appel /auth/refresh, aucun retry de la requête d'origine
       httpMock.expectNone(AUTH_URL);
       httpMock.expectNone(TEST_URL);
