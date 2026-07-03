@@ -51,6 +51,27 @@ describe('RouteLoadingComponent', () => {
     expect(indicator()).toBeNull();
   });
 
+  // Assertion stricte (toBe(false), pas seulement l'absence DOM) : distingue
+  // un signal initialisé à `false` d'un signal `undefined` (les deux sont
+  // falsy dans le template @if, mais seul `false` correspond au contrat de
+  // ROUTE_LOADING_DELAY_MS / initialValue documenté).
+  it('le signal visible() vaut strictement false au repos', () => {
+    expect(fixture.componentInstance.visible()).toBe(false);
+  });
+
+  it('ignore un événement routeur étranger (ni Start/End/Cancel/Error) sans interrompre un chargement en cours', () => {
+    events.next(new NavigationStart(1, '/dashboard'));
+    vi.advanceTimersByTime(200);
+
+    // Événement hors du filtre métier (ni NavigationStart/End/Cancel/Error) :
+    // ne doit ni annuler ni perturber le timer de 500 ms en cours.
+    events.next({} as RouterEvent);
+
+    vi.advanceTimersByTime(ROUTE_LOADING_DELAY_MS - 200);
+    fixture.detectChanges();
+    expect(indicator()).not.toBeNull();
+  });
+
   it('n affiche pas l indicateur avant 500 ms (pas de flash visuel)', () => {
     events.next(new NavigationStart(1, '/dashboard'));
     vi.advanceTimersByTime(ROUTE_LOADING_DELAY_MS - 1);

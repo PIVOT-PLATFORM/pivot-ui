@@ -78,6 +78,25 @@ describe('isSafeReturnUrl', () => {
         expect(isSafeReturnUrl(url)).toBe(false);
       },
     );
+
+    // Bornes exactes de la plage de caractères de contrôle : U+001F (unit
+    // separator) est le dernier code rejeté, U+0020 (espace) le premier
+    // accepté ; U+007F (DEL) est rejeté, U+007E (~) est accepté.
+    it('rejette le caractère U+001F (borne haute de la plage basse)', () => {
+      expect(isSafeReturnUrl('/home' + String.fromCharCode(0x1f))).toBe(false);
+    });
+
+    it('accepte le caractère U+0020 espace (juste au-dessus de la plage basse)', () => {
+      expect(isSafeReturnUrl('/home' + String.fromCharCode(0x20) + 'x')).toBe(true);
+    });
+
+    it('rejette le caractère U+007F DEL', () => {
+      expect(isSafeReturnUrl('/home' + String.fromCharCode(0x7f))).toBe(false);
+    });
+
+    it('accepte le caractère U+007E ~ (juste en dessous de DEL)', () => {
+      expect(isSafeReturnUrl('/home' + String.fromCharCode(0x7e))).toBe(true);
+    });
   });
 
   describe('valeurs vides ou absentes', () => {

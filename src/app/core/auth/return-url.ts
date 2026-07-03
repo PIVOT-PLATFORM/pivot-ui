@@ -38,22 +38,68 @@ function isSafeCandidate(value: string): boolean {
   );
 }
 
+/** Borne supérieure (incluse) de la plage basse des caractères de contrôle ASCII (unit separator). */
+const CONTROL_RANGE_LOW_MAX = 31;
+
+/** Code du caractère de contrôle DEL. */
+const CONTROL_CHAR_DEL = 127;
+
 /**
- * Détecte les caractères de contrôle ASCII (U+0000–U+001F, U+007F).
+ * Détecte les caractères de contrôle ASCII (codes 0 à {@link CONTROL_RANGE_LOW_MAX}, et DEL).
  * Les navigateurs suppriment tab/CR/LF des URLs, ce qui permettrait de
  * transformer `/&#9;/evil.com` en `//evil.com` après nettoyage navigateur.
+ *
+ * Implémenté via `Array.prototype.some` (plutôt qu'une boucle `for` indexée) :
+ * un compteur de boucle manuel est une surface de mutation inutile pour les
+ * outils de mutation testing (un mutateur `i++` → `i--` transforme la boucle
+ * en boucle infinie pour toute chaîne sans caractère de contrôle — observé en
+ * CI : mutant tué uniquement par la limite de garde de Stryker après ~39 000
+ * itérations, alourdissant significativement le temps total du job).
  *
  * @param value chaîne à inspecter
  * @returns `true` si un caractère de contrôle est présent
  */
 function hasControlCharacter(value: string): boolean {
-  for (let i = 0; i < value.length; i++) {
-    const code = value.charCodeAt(i);
-    if (code <= 0x1f || code === 0x7f) {
-      return true;
+  return Array.from(value).some((char) => {
+    const code = char.codePointAt(0) ?? 0;
+    return code <= CONTROL_RANGE_LOW_MAX || code === CONTROL_CHAR_DEL;
+  });
+}
+
+/**
+ * Décode `value` autant de fois que nécessaire (jusqu'à {@link MAX_DECODE_PASSES}
+ * passes) et retourne chaque forme intermédiaire rencontrée — défense en
+ * profondeur contre le double encodage (`%252F` → `%2F` → `/`).
+ *
+ * Bornée par la croissance de la liste retournée plutôt que par un compteur
+ * de boucle manuel (`for (...; pass++)`) : un compteur est une surface de
+ * mutation inutile pour les outils de mutation testing (un mutateur `++` →
+ * `--` peut transformer la condition de sortie en boucle infinie). Ici, la
+ * seule façon de continuer est d'ajouter une valeur à `candidates`, ce qui
+ * fait mécaniquement progresser la condition d'arrêt.
+ *
+ * @param value valeur brute à décoder
+ * @returns `null` si un décodage échoue (encodage malformé) ; sinon la liste
+ *          `[value, ...formes décodées]`
+ */
+function decodeCandidates(value: string): string[] | null {
+  const candidates: string[] = [value];
+  let current = value;
+  while (candidates.length <= MAX_DECODE_PASSES) {
+    let decoded: string;
+    try {
+      decoded = decodeURIComponent(current);
+    } catch {
+      // Encodage malformé (%zz…) → valeur suspecte, rejet.
+      return null;
     }
+    if (decoded === current) {
+      break;
+    }
+    candidates.push(decoded);
+    current = decoded;
   }
-  return false;
+  return candidates;
 }
 
 /**
@@ -68,23 +114,8 @@ export function isSafeReturnUrl(value: string | null | undefined): boolean {
   if (typeof value !== 'string' || value.length === 0) {
     return false;
   }
-  const candidates: string[] = [value];
-  let current = value;
-  for (let pass = 0; pass < MAX_DECODE_PASSES; pass++) {
-    let decoded: string;
-    try {
-      decoded = decodeURIComponent(current);
-    } catch {
-      // Encodage malformé (%zz…) → valeur suspecte, rejet.
-      return false;
-    }
-    if (decoded === current) {
-      break;
-    }
-    candidates.push(decoded);
-    current = decoded;
-  }
-  return candidates.every(isSafeCandidate);
+  const candidates = decodeCandidates(value);
+  return candidates !== null && candidates.every(isSafeCandidate);
 }
 
 /**
