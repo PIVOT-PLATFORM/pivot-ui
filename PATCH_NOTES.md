@@ -1,5 +1,18 @@
 # Notes de version — PIVOT UI
 
+## [Unreleased]
+
+### Connexion
+- Après connexion, vous retrouvez directement la page que vous tentiez d'ouvrir avant d'être renvoyé à l'écran de connexion (votre contexte de navigation est préservé, y compris après une vérification d'appareil)
+- Sans page d'origine, la connexion vous amène désormais sur la page d'accueil
+- Sécurité renforcée : toute tentative de redirection vers un site externe après connexion est bloquée
+- Une adresse inconnue saisie dans le navigateur vous ramène à la page d'accueil lorsque vous êtes connecté
+
+### Interface
+- Un indicateur de chargement accessible (annoncé aux lecteurs d'écran) s'affiche lorsque l'ouverture d'une page prend plus d'une demi-seconde
+
+---
+
 ## [0.6.0] — 3 juillet 2026
 
 ### Expiration de session
