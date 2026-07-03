@@ -1,7 +1,12 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
+import { Component } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { ToastComponent } from './toast.component';
 import { ToastService } from './toast.service';
+
+@Component({ template: '', standalone: true })
+class StubRoute {}
 
 describe('ToastComponent', () => {
   let fixture: ComponentFixture<ToastComponent>;
@@ -16,12 +21,14 @@ describe('ToastComponent', () => {
             fr: {
               auth: { session: { expired: 'Session expirée, veuillez vous reconnecter.' } },
               common: { close: 'Fermer' },
+              modules: { guard: { adminLink: 'Gérer les modules' } },
             },
             en: {},
           },
           translocoConfig: { availableLangs: ['fr', 'en'], defaultLang: 'fr' },
         }),
       ],
+      providers: [provideRouter([{ path: 'admin/modules', component: StubRoute }])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ToastComponent);
@@ -59,5 +66,30 @@ describe('ToastComponent', () => {
 
     expect(el.querySelectorAll('.toast')).toHaveLength(0);
     expect(toastService.toasts()).toEqual([]);
+  });
+
+  it('renders an action link when the toast has one, and dismisses on click', () => {
+    toastService.show('auth.session.expired', 'warning', undefined, {
+      labelKey: 'modules.guard.adminLink',
+      route: '/admin/modules',
+    });
+    fixture.detectChanges();
+
+    const el: HTMLElement = fixture.nativeElement;
+    const link = el.querySelector<HTMLAnchorElement>('.toast__action');
+    expect(link?.textContent?.trim()).toBe('Gérer les modules');
+
+    link?.click();
+    fixture.detectChanges();
+
+    expect(toastService.toasts()).toEqual([]);
+  });
+
+  it('renders no action link when the toast has none', () => {
+    toastService.show('auth.session.expired', 'warning');
+    fixture.detectChanges();
+
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('.toast__action')).toBeNull();
   });
 });
