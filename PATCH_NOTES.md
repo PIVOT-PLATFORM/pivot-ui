@@ -45,6 +45,9 @@
 
 ### Système de modules
 - Intégration de l'API de modules : la liste des modules disponibles est désormais chargée dynamiquement selon les droits de votre organisation
+- **Protection d'accès aux modules** : si un module est désactivé pour votre organisation, l'accès à sa page est désormais bloqué automatiquement — vous êtes redirigé vers l'accueil avec un message explicatif ("Module non disponible"), et les administrateurs voient un lien direct vers la gestion des modules
+- Un indicateur de chargement s'affiche brièvement pendant la vérification de l'accès à un module, pour éviter tout affichage incomplet
+- Le contenu (code) d'un module désactivé n'est jamais téléchargé par votre navigateur
 
 ---
 
