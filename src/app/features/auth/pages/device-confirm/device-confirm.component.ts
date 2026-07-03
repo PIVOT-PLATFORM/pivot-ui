@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { AuthService } from '../../../../core/auth/service/auth.service';
 import { DeviceService } from '../../../../core/auth/service/device.service';
+import { PostLoginRedirectService } from '../../../../core/auth/service/post-login-redirect.service';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
@@ -55,7 +56,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 export class DeviceConfirmComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
+  private readonly postLoginRedirect = inject(PostLoginRedirectService);
   private readonly auth = inject(AuthService);
   private readonly device = inject(DeviceService);
 
@@ -87,7 +88,11 @@ export class DeviceConfirmComponent implements OnInit {
       this.device.getDeviceName(),
       this.rememberMe()
     ).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      // US01.1.4 — fin du flux MFA : redirection vers l'URL d'origine
+      // (returnUrl mémorisé en session Angular par la page de login), sinon /home.
+      next: () => void this.postLoginRedirect.redirectAfterLogin(
+        this.route.snapshot.queryParamMap.get('returnUrl')
+      ),
       error: (err: HttpErrorResponse) => {
         this.loading.set(false);
         this.error.set(err.status === 429

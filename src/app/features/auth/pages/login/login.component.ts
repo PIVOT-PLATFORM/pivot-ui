@@ -1,10 +1,11 @@
 import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { AuthService } from '../../../../core/auth/service/auth.service';
 import { DeviceService } from '../../../../core/auth/service/device.service';
+import { PostLoginRedirectService } from '../../../../core/auth/service/post-login-redirect.service';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import type { AuthResponse } from '../../../../core/auth/service/auth.service';
 import { GOOGLE_CLIENT_ID } from '../../../../app.config';
@@ -21,7 +22,8 @@ export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly deviceService = inject(DeviceService);
-  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly postLoginRedirect = inject(PostLoginRedirectService);
   private readonly googleClientId = inject(GOOGLE_CLIENT_ID);
 
   // Google OAuth flow not yet implemented — button always disabled until loginWithGoogle() is wired
@@ -65,8 +67,14 @@ export class LoginComponent {
           this.pendingFingerprint.set(fingerprint);
           this.pendingRememberMe.set(this.form.value.rememberMe ?? false);
           this.requiresDeviceVerification.set(true);
+          // US01.1.4 — le passage par /auth/device-confirm perd le query param :
+          // on bascule le returnUrl en session Angular pour la fin du flux MFA.
+          const returnUrl = this.returnUrlParam();
+          if (returnUrl) this.postLoginRedirect.remember(returnUrl);
         } else {
-          this.router.navigate(['/dashboard']);
+          // US01.1.4 — redirection vers l'URL d'origine (returnUrl validé
+          // contre l'open redirect), sinon /home.
+          void this.postLoginRedirect.redirectAfterLogin(this.returnUrlParam());
         }
       },
       error: (err: HttpErrorResponse) => {
@@ -78,6 +86,11 @@ export class LoginComponent {
 
   onGoogleLogin(): void {
     this.error.set('auth.login.error_google_not_configured');
+  }
+
+  /** Query param `returnUrl` de l'URL courante (`null` si absent) — US01.1.4. */
+  private returnUrlParam(): string | null {
+    return this.route.snapshot.queryParamMap.get('returnUrl');
   }
 
   private mapError(err: HttpErrorResponse): string {
