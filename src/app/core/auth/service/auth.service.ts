@@ -61,6 +61,10 @@ export class AuthService {
   private readonly _accessToken = signal<string | null>(null);
   private readonly _user = signal<UserInfo | null>(null);
   private readonly _tokenExpiresAt = signal<number>(0);
+  // Remember-me actif sur la session courante (US01.1.5 — pilote le libellé du toast
+  // d'expiration). En mémoire uniquement : perdu au reload (le refresh cookie ne
+  // renvoie pas ce flag) → le toast générique est alors utilisé, comportement sûr.
+  private readonly _rememberMe = signal<boolean>(false);
 
   /**
    * Authentifié = token présent ET non expiré (expiresAt en epoch-ms).
@@ -76,6 +80,8 @@ export class AuthService {
   readonly currentUser = computed(() => this._user());
   readonly accessToken = computed(() => this._accessToken());
   readonly tokenExpiresAt = computed(() => this._tokenExpiresAt());
+  /** `true` si la session courante a été ouverte avec « Se souvenir de moi » (US01.1.5). */
+  readonly rememberMe = computed(() => this._rememberMe());
 
   /** Millisecondes avant expiration du token (≤ 0 si expiré/absent). Base pour l'auto-refresh. */
   millisUntilExpiry(): number {
@@ -117,6 +123,7 @@ export class AuthService {
     }).pipe(tap(resp => {
       if (resp.status === 200 && resp.body) {
         this.storeAuth(resp.body);
+        this._rememberMe.set(req.rememberMe ?? false);
       }
     }));
   }
@@ -141,7 +148,10 @@ export class AuthService {
   verifyDeviceOtp(deviceFingerprint: string, otp: string, deviceName?: string, rememberMe?: boolean): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/device/verify`, {
       deviceFingerprint, otp, deviceName, rememberMe: rememberMe ?? false
-    }, { withCredentials: true }).pipe(tap(res => this.storeAuth(res)));
+    }, { withCredentials: true }).pipe(tap(res => {
+      this.storeAuth(res);
+      this._rememberMe.set(rememberMe ?? false);
+    }));
   }
 
   /**
@@ -200,9 +210,21 @@ export class AuthService {
     this._tokenExpiresAt.set(res.expiresAt);
   }
 
+  /**
+   * Purge locale de la session (US01.1.5 — expiration détectée via 401).
+   *
+   * Aucun appel HTTP : le serveur a déjà invalidé le token (c'est la cause du 401),
+   * un POST /auth/logout échouerait avec le même 401. Le token ne vivant qu'en
+   * mémoire, la purge des signals suffit — aucun stockage navigateur à nettoyer.
+   */
+  clearSession(): void {
+    this.clearAuth();
+  }
+
   private clearAuth(): void {
     this._accessToken.set(null);
     this._user.set(null);
     this._tokenExpiresAt.set(0);
+    this._rememberMe.set(false);
   }
 }

@@ -254,4 +254,47 @@ describe('AuthService', () => {
       req.flush(mockAuthResponse);
     });
   });
+
+  describe('rememberMe tracking + clearSession() (US01.1.5)', () => {
+    it('rememberMe() is false by default', () => {
+      expect(service.rememberMe()).toBe(false);
+    });
+
+    it('AC-06 — rememberMe() is true after a login with rememberMe', () => {
+      service.login({ email: 'a@b.com', password: 'pass', rememberMe: true }).subscribe();
+      httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush(mockAuthResponse);
+
+      expect(service.rememberMe()).toBe(true);
+    });
+
+    it('rememberMe() stays false after a login without rememberMe', () => {
+      service.login({ email: 'a@b.com', password: 'pass', rememberMe: false }).subscribe();
+      httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush(mockAuthResponse);
+
+      expect(service.rememberMe()).toBe(false);
+    });
+
+    it('rememberMe() is tracked through device OTP verification', () => {
+      service.verifyDeviceOtp('fp-1', '123456', 'PC', true).subscribe();
+      httpMock.expectOne(`${environment.apiUrl}/auth/device/verify`).flush(mockAuthResponse);
+
+      expect(service.rememberMe()).toBe(true);
+    });
+
+    it('AC-01 — clearSession() purges token, user and rememberMe without any HTTP call', () => {
+      service.login({ email: 'a@b.com', password: 'pass', rememberMe: true }).subscribe();
+      httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush(mockAuthResponse);
+      expect(service.accessToken()).not.toBeNull();
+
+      service.clearSession();
+
+      // Purge locale uniquement — aucun POST /auth/logout (le serveur a déjà invalidé le token)
+      httpMock.expectNone(`${environment.apiUrl}/auth/logout`);
+      expect(service.accessToken()).toBeNull();
+      expect(service.currentUser()).toBeNull();
+      expect(service.tokenExpiresAt()).toBe(0);
+      expect(service.rememberMe()).toBe(false);
+      expect(service.isAuthenticated()).toBe(false);
+    });
+  });
 });

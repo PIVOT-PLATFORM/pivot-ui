@@ -5,7 +5,8 @@
     "loading": "Chargement en cours…",
     "error_generic": "Une erreur est survenue. Réessayez.",
     "field_required": "Ce champ est obligatoire.",
-    "back": "Retour"
+    "back": "Retour",
+    "close": "Fermer"
   },
   "nav": {
     "sign_out": "Se déconnecter",
@@ -187,6 +188,10 @@
       "cancel": "← Annuler et retourner à la connexion",
       "error_rate_limit": "Trop de tentatives. Retournez à la connexion.",
       "error_invalid": "Code incorrect ou expiré. Vérifiez votre email."
+    },
+    "session": {
+      "expired": "Session expirée, veuillez vous reconnecter.",
+      "expired_remember_me": "Votre session longue a expiré, veuillez vous reconnecter."
     }
   },
   "contact": {
