@@ -1,0 +1,20 @@
+// Indicateur global de navigation (US01.1.4) — BEM + tokens centralisés.
+.route-loading {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-lg);
+  color: var(--color-navy-900);
+
+  &__spinner {
+    width: 20px;
+    height: 20px;
+  }
+}

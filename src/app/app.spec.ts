@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { App } from './app';
 
@@ -10,6 +11,7 @@ describe('App', () => {
         // Le conteneur global de toasts (US01.1.5) utilise le pipe transloco
         TranslocoTestingModule.forRoot({ langs: { fr: {}, en: {} } }),
       ],
+      providers: [provideRouter([])],
     }).compileComponents();
   });
 
@@ -23,5 +25,11 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('piv-toast-container')).not.toBeNull();
+  });
+
+  it('embarque l indicateur global de navigation (US01.1.4)', () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).querySelector('piv-route-loading')).not.toBeNull();
   });
 });
