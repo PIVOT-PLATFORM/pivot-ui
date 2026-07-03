@@ -1,6 +1,6 @@
 # Notes de version — PIVOT UI
 
-## [Unreleased]
+## [0.6.0] — 3 juillet 2026
 
 ### Expiration de session
 - Lorsque votre session expire, vous êtes automatiquement déconnecté et redirigé vers la page de connexion

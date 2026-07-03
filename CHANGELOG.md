@@ -1,3 +1,10 @@
+# [0.6.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.5.0...v0.6.0) (2026-07-03)
+
+
+### Features
+
+* **auth:** US01.1.5 — Expiration de session (front) + auto-logout ([#63](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/63)) ([ef0374a](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/ef0374a92a06f522af69f086f04f50f8481d8830))
+
 # [0.5.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.4.0...v0.5.0) (2026-07-01)
 
 
