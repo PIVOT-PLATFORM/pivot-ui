@@ -21,6 +21,13 @@
 - Si plusieurs onglets PIVOT sont ouverts, la déconnexion s'applique à tous les onglets simultanément
 - La page sur laquelle vous étiez au moment de l'expiration est mémorisée afin de vous y ramener après reconnexion
 
+### Sécurité des mots de passe
+- Un indicateur de force s'affiche désormais en temps réel sous le champ mot de passe (inscription et réinitialisation), avec un niveau clairement indiqué : « Faible », « Moyen » ou « Fort »
+- Une liste de critères se coche au fur et à mesure de la saisie (longueur, majuscule, chiffre, caractère spécial)
+- Le bouton d'inscription reste désactivé tant que le mot de passe ne respecte pas l'ensemble des critères
+- L'erreur « Les mots de passe ne correspondent pas » s'affiche désormais uniquement après avoir quitté le champ de confirmation, pas à chaque frappe
+- Indicateur et checklist entièrement accessibles : niveaux annoncés aux lecteurs d'écran, critères identifiables sans dépendre de la couleur
+
 ### Système de modules
 - Intégration de l'API de modules : la liste des modules disponibles est désormais chargée dynamiquement selon les droits de votre organisation
 
