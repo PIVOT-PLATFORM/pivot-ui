@@ -1,3 +1,10 @@
+# [0.10.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.9.0...v0.10.0) (2026-07-03)
+
+
+### Features
+
+* **modules:** EN03.2/US03.2.2 - moduleGuard bloque accès module désactivé ([#67](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/67)) ([19bacf5](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/19bacf5b22b659876082df280ce13bc7703832f1))
+
 # [0.9.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.8.0...v0.9.0) (2026-07-03)
 
 

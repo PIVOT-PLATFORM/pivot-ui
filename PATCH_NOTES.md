@@ -1,6 +1,6 @@
 # Notes de version — PIVOT UI
 
-## [Unreleased]
+## [0.10.0] — 3 juillet 2026
 
 ### Système de modules
 - **Protection d'accès aux modules** : si un module est désactivé pour votre organisation, l'accès à sa page est désormais bloqué automatiquement — vous êtes redirigé vers l'accueil avec un message explicatif ("Module non disponible"), et les administrateurs voient un lien direct vers la gestion des modules
