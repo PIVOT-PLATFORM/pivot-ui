@@ -7,7 +7,7 @@
       role="alert"
       [attr.data-testid]="'toast-' + toast.type"
     >
-      <p class="toast__message">{{ toast.messageKey | transloco }}</p>
+      <p class="toast__message">{{ toast.messageKey | transloco: toast.params }}</p>
       <button
         type="button"
         class="toast__close"

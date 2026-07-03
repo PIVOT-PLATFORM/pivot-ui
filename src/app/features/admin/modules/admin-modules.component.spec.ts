@@ -161,9 +161,13 @@ describe('AdminModulesComponent', () => {
     expect(
       fixture.nativeElement.querySelector('[data-testid="module-status-whiteboard"]').textContent.trim()
     ).toBe('Actif');
-    expect(toastService.toasts().some(t => t.type === 'success' && t.text === 'Module Whiteboard activé')).toBe(
-      true
-    );
+    expect(
+      toastService
+        .toasts()
+        .some(
+          t => t.type === 'info' && t.messageKey === 'admin.modules.toast.activated' && t.params?.['name'] === 'Whiteboard'
+        )
+    ).toBe(true);
   });
 
   it('disables the toggle while its own request is in flight, without affecting other cards', () => {
@@ -238,7 +242,13 @@ describe('AdminModulesComponent', () => {
     expect(fixture.nativeElement.querySelector('[data-testid="module-status-quiz"]').textContent.trim()).toBe(
       'Inactif'
     );
-    expect(toastService.toasts().some(t => t.type === 'success' && t.text === 'Module Quiz désactivé')).toBe(true);
+    expect(
+      toastService
+        .toasts()
+        .some(
+          t => t.type === 'info' && t.messageKey === 'admin.modules.toast.deactivated' && t.params?.['name'] === 'Quiz'
+        )
+    ).toBe(true);
   });
 
   it('confirmDeactivate() is a no-op if called with no pending confirmation target', () => {

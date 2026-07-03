@@ -11,6 +11,8 @@ export interface Toast {
   messageKey: string;
   /** Type visuel — pilote le modificateur BEM et la sémantique ARIA. */
   type: ToastType;
+  /** Paramètres d'interpolation Transloco optionnels (ex. `{ name: 'whiteboard' }`). */
+  params?: Record<string, string | number>;
 }
 
 /** Durée d'affichage avant fermeture automatique (ms). */
@@ -35,20 +37,25 @@ export class ToastService {
   /**
    * Affiche un toast.
    *
-   * Déduplication : si un toast avec la même clé est déjà affiché, il n'est pas
-   * dupliqué (ex. plusieurs requêtes parallèles en 401 au même instant).
+   * Déduplication : si un toast avec la même clé et les mêmes paramètres est déjà
+   * affiché, il n'est pas dupliqué (ex. plusieurs requêtes parallèles en 401 au
+   * même instant). Deux toasts avec la même clé mais des paramètres différents
+   * (ex. deux modules distincts activés coup sur coup) ne sont pas dédupliqués.
    *
    * @param messageKey clé Transloco du message
    * @param type       type visuel (défaut `info`)
+   * @param params     paramètres d'interpolation Transloco optionnels
    * @returns l'identifiant du toast affiché (existant si dédupliqué)
    */
-  show(messageKey: string, type: ToastType = 'info'): number {
-    const existing = this._toasts().find(t => t.messageKey === messageKey);
+  show(messageKey: string, type: ToastType = 'info', params?: Record<string, string | number>): number {
+    const existing = this._toasts().find(
+      t => t.messageKey === messageKey && JSON.stringify(t.params) === JSON.stringify(params)
+    );
     if (existing) {
       return existing.id;
     }
     const id = ++this.nextId;
-    this._toasts.update(list => [...list, { id, messageKey, type }]);
+    this._toasts.update(list => [...list, { id, messageKey, type, params }]);
     setTimeout(() => this.dismiss(id), TOAST_AUTO_DISMISS_MS);
     return id;
   }

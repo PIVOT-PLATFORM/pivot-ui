@@ -17,7 +17,7 @@
  */
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { Observable } from 'rxjs';
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { AdminModuleService } from './admin-module.service';
 import type { AdminModuleDto } from './admin-module.model';
 import { ToastService } from '../../../shared/toast/toast.service';
@@ -34,7 +34,6 @@ import { ConfirmDialogComponent } from '../../../shared/confirm-dialog/confirm-d
 export class AdminModulesComponent implements OnInit {
   protected readonly service = inject(AdminModuleService);
   private readonly toast = inject(ToastService);
-  private readonly transloco = inject(TranslocoService);
 
   /** Module pending a deactivate confirmation, or null when the dialog is closed. */
   private readonly confirmTarget = signal<AdminModuleDto | null>(null);
@@ -106,14 +105,14 @@ export class AdminModulesComponent implements OnInit {
   ): void {
     const name = module.name;
     request(module).subscribe({
-      next: () => this.toast.success(this.transloco.translate(successKey, { name })),
+      next: () => this.toast.show(successKey, 'info', { name }),
       error: () => {
         const kind = this.service.cardError(module.id);
-        const message =
-          kind === 'not-in-plan'
-            ? this.transloco.translate('admin.modules.card.not_in_plan')
-            : this.transloco.translate(errorKey, { name });
-        this.toast.error(message);
+        if (kind === 'not-in-plan') {
+          this.toast.show('admin.modules.card.not_in_plan', 'error');
+        } else {
+          this.toast.show(errorKey, 'error', { name });
+        }
       },
     });
   }
