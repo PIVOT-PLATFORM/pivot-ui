@@ -1,6 +1,6 @@
 # Notes de version — PIVOT UI
 
-## [Unreleased]
+## [0.8.0] — 3 juillet 2026
 
 ### Sécurité des mots de passe
 - Un indicateur de force s'affiche désormais en temps réel sous le champ mot de passe (inscription et réinitialisation), avec un niveau clairement indiqué : « Faible », « Moyen » ou « Fort »

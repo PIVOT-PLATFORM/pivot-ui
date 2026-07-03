@@ -1,3 +1,10 @@
+# [0.8.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.7.0...v0.8.0) (2026-07-03)
+
+
+### Features
+
+* **ui:** PasswordStrengthComponent — indicateur de robustesse du mot de passe (US01.2.4) ([#65](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/65)) ([16c6de8](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/16c6de835a51d4b4900a51ca70bc6f6e69b19936)), closes [#125](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/125)
+
 # [0.7.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.6.0...v0.7.0) (2026-07-03)
 
 
