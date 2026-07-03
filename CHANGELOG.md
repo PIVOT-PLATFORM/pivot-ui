@@ -1,3 +1,10 @@
+# [0.7.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.6.0...v0.7.0) (2026-07-03)
+
+
+### Features
+
+* **auth:** US01.1.4 — Redirection post-login ([#64](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/64)) ([6093214](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/6093214e11a24d5655f51f17fdcd9eea1c261217)), closes [#125](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/125)
+
 # [0.6.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.5.0...v0.6.0) (2026-07-03)
 
 

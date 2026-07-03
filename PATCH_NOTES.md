@@ -1,6 +1,6 @@
 # Notes de version — PIVOT UI
 
-## [Unreleased]
+## [0.7.0] — 3 juillet 2026
 
 ### Connexion
 - Après connexion, vous retrouvez directement la page que vous tentiez d'ouvrir avant d'être renvoyé à l'écran de connexion (votre contexte de navigation est préservé, y compris après une vérification d'appareil)
