@@ -5,12 +5,16 @@ import { provideRouter } from '@angular/router';
 import { ShellComponent } from './shell.component';
 import { NavbarComponent } from '../navbar/navbar.component';
 import { FooterComponent } from '../footer/footer.component';
+import { ToastComponent } from '../../../shared/toast/toast.component';
 
 @Component({ selector: 'piv-navbar', template: '', standalone: true })
 class StubNavbar {}
 
 @Component({ selector: 'piv-footer', template: '', standalone: true })
 class StubFooter {}
+
+@Component({ selector: 'piv-toast', template: '', standalone: true })
+class StubToast {}
 
 @Component({ template: '', standalone: true })
 class StubRoute {}
@@ -25,8 +29,8 @@ describe('ShellComponent', () => {
       providers: [provideRouter([{ path: '**', component: StubRoute }])],
     })
       .overrideComponent(ShellComponent, {
-        remove: { imports: [NavbarComponent, FooterComponent] },
-        add: { imports: [StubNavbar, StubFooter] },
+        remove: { imports: [NavbarComponent, FooterComponent, ToastComponent] },
+        add: { imports: [StubNavbar, StubFooter, StubToast] },
       })
       .compileComponents();
 
