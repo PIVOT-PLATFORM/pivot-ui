@@ -276,10 +276,5 @@
         "quiz": "Quiz"
       }
     }
-  },
-  "notifications": {
-    "toast": {
-      "dismiss": "Fermer la notification"
-    }
   }
 }
