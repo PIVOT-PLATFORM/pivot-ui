@@ -1,0 +1,164 @@
+<main class="tenants-list" [attr.aria-label]="'superadmin.tenants.list.title' | transloco">
+  <header class="tenants-list__header">
+    <h1 class="tenants-list__title">{{ 'superadmin.tenants.list.title' | transloco }}</h1>
+    <p class="tenants-list__subtitle">{{ 'superadmin.tenants.list.subtitle' | transloco }}</p>
+  </header>
+
+  <form
+    class="tenants-list__filters"
+    [attr.aria-label]="'superadmin.tenants.filters.form_aria' | transloco"
+    (ngSubmit)="onFilterSubmit()"
+  >
+    <div class="tenants-list__filter-field">
+      <label for="tenant-filter-name">{{ 'superadmin.tenants.filters.name' | transloco }}</label>
+      <input
+        id="tenant-filter-name"
+        name="name"
+        type="search"
+        [ngModel]="filters().name"
+        (ngModelChange)="onNameInput($event)"
+        data-testid="tenant-filter-name"
+      />
+    </div>
+
+    <div class="tenants-list__filter-field">
+      <label for="tenant-filter-plan">{{ 'superadmin.tenants.filters.plan' | transloco }}</label>
+      <select
+        id="tenant-filter-plan"
+        name="plan"
+        [ngModel]="filters().plan"
+        (ngModelChange)="onPlanChange($event)"
+        data-testid="tenant-filter-plan"
+      >
+        <option value="">{{ 'superadmin.tenants.filters.plan_all' | transloco }}</option>
+        <option value="SAAS">{{ 'superadmin.tenants.filters.plan_saas' | transloco }}</option>
+        <option value="ENTERPRISE">{{ 'superadmin.tenants.filters.plan_enterprise' | transloco }}</option>
+        <option value="TRIAL">{{ 'superadmin.tenants.filters.plan_trial' | transloco }}</option>
+      </select>
+    </div>
+
+    <div class="tenants-list__filter-field">
+      <label for="tenant-filter-active">{{ 'superadmin.tenants.filters.is_active' | transloco }}</label>
+      <select
+        id="tenant-filter-active"
+        name="isActive"
+        [ngModel]="filters().isActive"
+        (ngModelChange)="onIsActiveChange($event)"
+        data-testid="tenant-filter-active"
+      >
+        <option value="">{{ 'superadmin.tenants.filters.is_active_all' | transloco }}</option>
+        <option value="true">{{ 'superadmin.tenants.filters.is_active_true' | transloco }}</option>
+        <option value="false">{{ 'superadmin.tenants.filters.is_active_false' | transloco }}</option>
+      </select>
+    </div>
+
+    <div class="tenants-list__filter-field">
+      <label for="tenant-filter-auth-mode">{{ 'superadmin.tenants.filters.auth_mode' | transloco }}</label>
+      <select
+        id="tenant-filter-auth-mode"
+        name="authMode"
+        [ngModel]="filters().authMode"
+        (ngModelChange)="onAuthModeChange($event)"
+        data-testid="tenant-filter-auth-mode"
+      >
+        <option value="">{{ 'superadmin.tenants.filters.auth_mode_all' | transloco }}</option>
+        <option value="SAAS">{{ 'superadmin.tenants.filters.auth_mode_saas' | transloco }}</option>
+        <option value="ENTERPRISE">{{ 'superadmin.tenants.filters.auth_mode_enterprise' | transloco }}</option>
+        <option value="HYBRID">{{ 'superadmin.tenants.filters.auth_mode_hybrid' | transloco }}</option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary" data-testid="tenant-filter-submit">
+      {{ 'superadmin.tenants.filters.submit' | transloco }}
+    </button>
+  </form>
+
+  @if (loading()) {
+    <div class="sr-only" role="status">{{ 'common.loading' | transloco }}</div>
+    <ul class="tenants-list__skeleton" aria-hidden="true" data-testid="tenants-skeleton">
+      @for (i of skeletonPlaceholders; track i) {
+        <li class="tenants-list__skeleton-row"></li>
+      }
+    </ul>
+  } @else if (loadError()) {
+    <div class="tenants-list__error-state" role="alert" data-testid="tenants-error">
+      <p>{{ 'superadmin.tenants.list.error' | transloco }}</p>
+      <button type="button" class="btn btn-secondary" (click)="load(page())" data-testid="tenants-retry">
+        {{ 'superadmin.tenants.list.retry' | transloco }}
+      </button>
+    </div>
+  } @else if (isEmpty()) {
+    <div class="tenants-list__empty-state" data-testid="tenants-empty">
+      <p>{{ 'superadmin.tenants.list.empty' | transloco }}</p>
+    </div>
+  } @else {
+    <div class="tenants-list__table-wrapper">
+      <table class="tenants-list__table" data-testid="tenants-table">
+        <caption class="sr-only">{{ 'superadmin.tenants.list.title' | transloco }}</caption>
+        <thead>
+          <tr>
+            <th scope="col">{{ 'superadmin.tenants.columns.name' | transloco }}</th>
+            <th scope="col">{{ 'superadmin.tenants.columns.slug' | transloco }}</th>
+            <th scope="col">{{ 'superadmin.tenants.columns.plan' | transloco }}</th>
+            <th scope="col">{{ 'superadmin.tenants.columns.auth_mode' | transloco }}</th>
+            <th scope="col">{{ 'superadmin.tenants.columns.is_active' | transloco }}</th>
+            <th scope="col">{{ 'superadmin.tenants.columns.user_count' | transloco }}</th>
+            <th scope="col">{{ 'superadmin.tenants.columns.created_at' | transloco }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (tenant of tenants(); track tenant.id) {
+            <tr [attr.data-testid]="'tenant-row-' + tenant.id">
+              <td>{{ tenant.name }}</td>
+              <td>{{ tenant.slug }}</td>
+              <td>{{ tenant.plan }}</td>
+              <td>{{ tenant.authMode }}</td>
+              <td>
+                <span
+                  class="tenants-list__badge"
+                  [class.tenants-list__badge--active]="tenant.isActive"
+                  [class.tenants-list__badge--inactive]="!tenant.isActive"
+                  [attr.data-testid]="'tenant-status-' + tenant.id"
+                >
+                  {{
+                    (tenant.isActive ? 'superadmin.tenants.status.active' : 'superadmin.tenants.status.inactive')
+                      | transloco
+                  }}
+                </span>
+              </td>
+              <td>{{ tenant.userCount }}</td>
+              <td>{{ tenant.createdAt | date: 'short' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <nav class="tenants-list__pagination" [attr.aria-label]="'superadmin.tenants.pagination.nav_aria' | transloco">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        [disabled]="!hasPrevious()"
+        (click)="previousPage()"
+        data-testid="tenants-page-previous"
+      >
+        {{ 'superadmin.tenants.pagination.previous' | transloco }}
+      </button>
+      <span class="tenants-list__pagination-status" role="status" data-testid="tenants-page-status">
+        {{
+          'superadmin.tenants.pagination.status'
+            | transloco: { page: displayPage(), totalPages: displayTotalPages(), total: totalElements() }
+        }}
+      </span>
+      <button
+        type="button"
+        class="btn btn-secondary"
+        [disabled]="!hasNext()"
+        (click)="nextPage()"
+        data-testid="tenants-page-next"
+      >
+        {{ 'superadmin.tenants.pagination.next' | transloco }}
+      </button>
+    </nav>
+  }
+</main>

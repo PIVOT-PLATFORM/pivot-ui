@@ -37,6 +37,7 @@
   "sidebar": {
     "dashboard": "Dashboard",
     "admin": "Administration",
+    "superadmin_tenants": "Tenants",
     "expand": "Expand",
     "collapse": "Collapse"
   },
@@ -274,6 +275,55 @@
         "roadmap": "Roadmap",
         "survey": "Surveys",
         "quiz": "Quiz"
+      }
+    }
+  },
+  "superadmin": {
+    "tenants": {
+      "list": {
+        "title": "Tenants",
+        "subtitle": "Overview of all tenants on the platform.",
+        "empty": "No tenant matches the current filters",
+        "error": "Unable to load tenants. Please try again.",
+        "retry": "Retry"
+      },
+      "filters": {
+        "form_aria": "Tenant search filters",
+        "name": "Name",
+        "plan": "Plan",
+        "plan_all": "All",
+        "plan_saas": "SaaS",
+        "plan_enterprise": "Enterprise",
+        "plan_trial": "Trial",
+        "is_active": "Status",
+        "is_active_all": "All",
+        "is_active_true": "Active",
+        "is_active_false": "Inactive",
+        "auth_mode": "Auth mode",
+        "auth_mode_all": "All",
+        "auth_mode_saas": "SaaS",
+        "auth_mode_enterprise": "Enterprise",
+        "auth_mode_hybrid": "Hybrid",
+        "submit": "Filter"
+      },
+      "columns": {
+        "name": "Name",
+        "slug": "Slug",
+        "plan": "Plan",
+        "auth_mode": "Auth mode",
+        "is_active": "Status",
+        "user_count": "Users",
+        "created_at": "Created"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "pagination": {
+        "nav_aria": "Tenant pagination",
+        "previous": "← Previous",
+        "next": "Next →",
+        "status": "Page {{ page }} of {{ totalPages }} ({{ total }} tenants)"
       }
     }
   }
