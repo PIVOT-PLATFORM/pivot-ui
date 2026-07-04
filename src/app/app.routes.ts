@@ -76,6 +76,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
       },
       {
+        path: 'account/profile',
+        loadComponent: () => import('./features/account/profile/profile.component').then(m => m.ProfileComponent),
+      },
+      {
         path: 'admin/modules',
         canActivate: [adminGuard],
         loadComponent: () =>
