@@ -1,0 +1,52 @@
+// ProfileComponent styles — tokens only. BEM: .account, .account-layout, .form-field,
+// .avatar-field (mirrors ChangePasswordComponent's page pattern).
+
+.account-page { display: flex; align-items: flex-start; justify-content: center; padding: 40px 24px; background: var(--surface-bg); min-height: 100vh; }
+.account-layout { background: var(--surface-card); border-radius: 16px; padding: 48px; max-width: 560px; width: 100%; box-shadow: var(--shadow-md); @media (max-width: 600px) { padding: 28px 20px; } }
+
+.account__back { display: inline-block; margin-bottom: 24px; color: var(--color-brand-600); font-size: var(--text-sm); font-weight: 500; background: none; border: none; padding: 0; cursor: pointer; &:hover { text-decoration: underline; } &:focus-visible { outline: 2px solid var(--color-brand-500); outline-offset: 2px; border-radius: 2px; } }
+
+.account__header { margin-bottom: 32px; }
+.account__title { font-size: var(--text-2xl); font-weight: 700; color: var(--color-navy-900); margin: 0; }
+.account__subtitle { font-size: var(--text-base); color: var(--color-gray-500); margin: 8px 0 0; }
+.account__loading { font-size: var(--text-sm); color: var(--color-gray-500); }
+
+// ─── Avatar ──────────────────────────────────────────────────────────────────
+.account__avatar-section { margin-bottom: 32px; padding-bottom: 32px; border-bottom: 1px solid var(--color-gray-200); }
+.avatar-field { display: flex; align-items: center; gap: 20px; }
+.avatar-field__image, .avatar-field__initials { width: 72px; height: 72px; border-radius: 50%; flex-shrink: 0; }
+.avatar-field__image { object-fit: cover; }
+.avatar-field__initials { background: var(--color-brand-600); color: #fff; display: flex; align-items: center; justify-content: center; font-size: var(--text-lg); font-weight: 700; letter-spacing: 0.03em; }
+.avatar-field__controls { display: flex; flex-direction: column; gap: 6px; }
+// Color/padding/hover/focus come from the shared `.btn.btn-ghost` classes (styles/components.scss) — only layout here.
+.avatar-field__button { align-self: flex-start; }
+.avatar-field__hint { font-size: var(--text-xs); color: var(--color-gray-500); margin: 0; }
+
+// ─── Form ────────────────────────────────────────────────────────────────────
+.account__form-title { font-size: var(--text-xl); font-weight: 600; color: var(--color-navy-900); margin: 0 0 20px; }
+.account__form { display: flex; flex-direction: column; gap: 20px; }
+.form-field { display: flex; flex-direction: column; gap: 6px; }
+.form-field__label { font-size: var(--text-sm); font-weight: 500; color: var(--color-gray-700); }
+.form-field__input {
+  width: 100%; padding: 10px 14px; font-size: var(--text-sm); font-family: var(--font-sans); color: var(--color-gray-900);
+  background: var(--surface-bg); border: 1px solid var(--color-gray-200); border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast); box-sizing: border-box; outline: none;
+  &:focus { border-color: var(--color-brand-500); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+  &:disabled { color: var(--color-gray-500); cursor: not-allowed; }
+  &--error { border-color: var(--color-error); &:focus { box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15); } }
+}
+.form-field__error, .form-field__hint { font-size: var(--text-xs); margin: 0; }
+.form-field__error { color: var(--color-error); }
+.form-field__hint { color: var(--color-gray-500); }
+
+// ─── Submit + errors ─────────────────────────────────────────────────────────
+// Colors/hover/focus/disabled come from the shared `.btn.btn-primary` / `.alert.alert-error` /
+// `.btn.btn-secondary` classes (styles/components.scss) — only layout overrides here.
+.account__submit { align-self: flex-start; }
+.account__error { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; p { margin: 0; } }
+.account__retry { margin-left: auto; flex-shrink: 0; }
+
+@media (max-width: 640px) {
+  .account__submit { width: 100%; text-align: center; justify-content: center; }
+  .avatar-field { flex-direction: column; align-items: flex-start; }
+}

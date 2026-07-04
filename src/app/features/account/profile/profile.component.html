@@ -1,0 +1,155 @@
+<div class="account-page">
+  <main class="account-layout" [attr.aria-label]="'account.profile.main_aria' | transloco">
+
+    <!-- ─── Back ────────────────────────────────────────────────────────── -->
+    <button class="account__back" type="button" (click)="goBack()">← {{ 'common.back' | transloco }}</button>
+
+    <!-- ─── Header ──────────────────────────────────────────────────────── -->
+    <header class="account__header">
+      <h1 class="account__title">{{ 'account.profile.title' | transloco }}</h1>
+      <p class="account__subtitle">{{ 'account.profile.subtitle' | transloco }}</p>
+    </header>
+
+    @if (loading()) {
+      <p data-testid="profile-loading" class="account__loading">{{ 'account.profile.loading' | transloco }}</p>
+    } @else if (loadError()) {
+      <div data-testid="profile-error" class="account__error alert alert-error" role="alert" aria-live="assertive">
+        <p>{{ 'account.profile.error_load' | transloco }}</p>
+        <button type="button" class="btn btn-secondary account__retry" data-testid="profile-retry" (click)="load()">
+          {{ 'account.profile.retry' | transloco }}
+        </button>
+      </div>
+    } @else {
+      <!-- ─── Avatar section ────────────────────────────────────────────── -->
+      <section class="account__avatar-section" aria-labelledby="profile-avatar-heading">
+        <h2 id="profile-avatar-heading" class="account__form-title">
+          {{ 'account.profile.avatar_section_title' | transloco }}
+        </h2>
+        <div class="avatar-field">
+          @if (profile()?.avatarUrl) {
+            <img
+              data-testid="profile-avatar-image"
+              class="avatar-field__image"
+              [src]="profile()?.avatarUrl"
+              alt=""
+              aria-hidden="true"
+            />
+          } @else {
+            <span data-testid="profile-avatar-initials" class="avatar-field__initials" aria-hidden="true">
+              {{ initials() }}
+            </span>
+          }
+          <div class="avatar-field__controls">
+            <label class="sr-only" for="avatarFile">{{ 'account.profile.avatar_change' | transloco }}</label>
+            <input
+              #avatarInput
+              type="file"
+              id="avatarFile"
+              class="sr-only"
+              accept="image/jpeg,image/png,image/webp"
+              [attr.aria-describedby]="avatarError() ? 'avatar-error' : 'avatar-hint'"
+              (change)="onAvatarSelected($event)"
+            />
+            <button
+              type="button"
+              class="btn btn-ghost avatar-field__button"
+              data-testid="profile-avatar-trigger"
+              [disabled]="avatarUploading()"
+              (click)="triggerAvatarSelect()"
+            >
+              @if (avatarUploading()) { <span class="spinner" aria-hidden="true"></span> }
+              {{ 'account.profile.avatar_change' | transloco }}
+            </button>
+            <p id="avatar-hint" class="avatar-field__hint">{{ 'account.profile.avatar_hint' | transloco }}</p>
+            @if (avatarError()) {
+              <p id="avatar-error" class="form-field__error" role="alert" data-testid="profile-avatar-error">
+                {{ ('account.profile.avatar_error_' + avatarError()) | transloco }}
+              </p>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── Profile form ──────────────────────────────────────────────── -->
+      <section class="account__form-section" aria-labelledby="profile-form-heading">
+        <h2 id="profile-form-heading" class="account__form-title">
+          {{ 'account.profile.form_title' | transloco }}
+        </h2>
+
+        @if (saveError()) {
+          <div class="account__error alert alert-error" role="alert" aria-live="assertive" data-testid="profile-save-error">
+            <p>{{ ('account.profile.error_' + saveError()) | transloco }}</p>
+          </div>
+        }
+
+        <form
+          class="account__form"
+          [formGroup]="form"
+          (ngSubmit)="submit()"
+          novalidate
+          [attr.aria-label]="'account.profile.form_aria' | transloco"
+        >
+          <!-- First name -->
+          <div class="form-field">
+            <label class="form-field__label" for="firstName">{{ 'account.profile.first_name' | transloco }}</label>
+            <input
+              #firstNameInput
+              id="firstName"
+              type="text"
+              formControlName="firstName"
+              class="form-field__input"
+              [class.form-field__input--error]="form.controls.firstName.invalid && form.controls.firstName.touched"
+              [attr.aria-invalid]="form.controls.firstName.invalid && form.controls.firstName.touched ? 'true' : null"
+              [attr.aria-describedby]="form.controls.firstName.invalid && form.controls.firstName.touched ? 'first-name-error' : null"
+            />
+            @if (form.controls.firstName.errors?.['required'] && form.controls.firstName.touched) {
+              <p id="first-name-error" class="form-field__error" role="alert">{{ 'common.field_required' | transloco }}</p>
+            } @else if (form.controls.firstName.errors?.['maxlength'] && form.controls.firstName.touched) {
+              <p id="first-name-error" class="form-field__error" role="alert">{{ 'account.profile.error_max_length' | transloco }}</p>
+            }
+          </div>
+
+          <!-- Last name -->
+          <div class="form-field">
+            <label class="form-field__label" for="lastName">{{ 'account.profile.last_name' | transloco }}</label>
+            <input
+              #lastNameInput
+              id="lastName"
+              type="text"
+              formControlName="lastName"
+              class="form-field__input"
+              [class.form-field__input--error]="form.controls.lastName.invalid && form.controls.lastName.touched"
+              [attr.aria-invalid]="form.controls.lastName.invalid && form.controls.lastName.touched ? 'true' : null"
+              [attr.aria-describedby]="form.controls.lastName.invalid && form.controls.lastName.touched ? 'last-name-error' : null"
+            />
+            @if (form.controls.lastName.errors?.['required'] && form.controls.lastName.touched) {
+              <p id="last-name-error" class="form-field__error" role="alert">{{ 'common.field_required' | transloco }}</p>
+            } @else if (form.controls.lastName.errors?.['maxlength'] && form.controls.lastName.touched) {
+              <p id="last-name-error" class="form-field__error" role="alert">{{ 'account.profile.error_max_length' | transloco }}</p>
+            }
+          </div>
+
+          <!-- Email — read-only, edition out of scope (US02.2.2) -->
+          <div class="form-field">
+            <label class="form-field__label" for="email">{{ 'account.profile.email' | transloco }}</label>
+            <input id="email" type="email" class="form-field__input" [value]="profile()?.email" disabled aria-describedby="email-hint" />
+            <p id="email-hint" class="form-field__hint">{{ 'account.profile.email_hint' | transloco }}</p>
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-primary account__submit"
+            data-testid="profile-submit"
+            [disabled]="form.invalid || saving() || !hasChanges()"
+          >
+            @if (saving()) { <span class="spinner" aria-hidden="true"></span> }
+            {{ 'account.profile.submit' | transloco }}
+          </button>
+          <output class="sr-only" aria-live="polite" aria-atomic="true">
+            @if (saving()) { {{ 'common.loading' | transloco }} }
+          </output>
+        </form>
+      </section>
+    }
+  </main>
+</div>
