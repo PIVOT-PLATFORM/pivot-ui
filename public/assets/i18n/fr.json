@@ -231,6 +231,33 @@
     "privacy_title": "Politique de confidentialité",
     "terms_title": "Conditions Générales d'Utilisation"
   },
+  "account": {
+    "profile": {
+      "title": "Mon profil",
+      "subtitle": "Consultez et modifiez vos informations personnelles.",
+      "main_aria": "Profil du compte",
+      "loading": "Chargement du profil…",
+      "error_load": "Impossible de charger votre profil. Réessayez.",
+      "retry": "Réessayer",
+      "avatar_section_title": "Photo de profil",
+      "avatar_change": "Changer la photo",
+      "avatar_hint": "JPEG, PNG ou WEBP, 2 Mo maximum.",
+      "avatar_error_invalid_format": "Format non supporté. Utilisez une image JPEG, PNG ou WEBP.",
+      "avatar_error_too_large": "Image trop volumineuse. Taille maximale : 2 Mo.",
+      "avatar_error_generic": "Impossible d'envoyer l'image. Réessayez.",
+      "form_title": "Informations personnelles",
+      "form_aria": "Formulaire de modification du profil",
+      "first_name": "Prénom",
+      "last_name": "Nom",
+      "email": "Email",
+      "email_hint": "L'adresse email ne peut pas être modifiée ici.",
+      "error_max_length": "100 caractères maximum.",
+      "error_invalid_name": "Prénom ou nom invalide.",
+      "error_save_generic": "Une erreur est survenue lors de l'enregistrement. Réessayez.",
+      "submit": "Enregistrer",
+      "success": "Profil mis à jour avec succès."
+    }
+  },
   "admin": {
     "modules": {
       "list": {
