@@ -201,6 +201,27 @@
       "expired_remember_me": "Your long-lived session has expired, please sign in again."
     }
   },
+  "account": {
+    "security": {
+      "password": {
+        "title": "Change my password",
+        "subtitle": "Choose a new, secure password for your account.",
+        "main_aria": "Account security",
+        "form_title": "Password",
+        "form_aria": "Change password form",
+        "current_password": "Current password",
+        "new_password": "New password",
+        "confirm_password": "Confirm new password",
+        "show_password": "Show password",
+        "hide_password": "Hide password",
+        "submit": "Save",
+        "success": "Password changed successfully.",
+        "error_current_incorrect": "Incorrect current password.",
+        "error_generic": "An error occurred. Please try again.",
+        "mismatch": "Passwords do not match."
+      }
+    }
+  },
   "contact": {
     "title": "Contact",
     "subtitle": "A question? A problem? The PIVOT team will get back to you.",
