@@ -54,6 +54,19 @@ export const routes: Routes = [
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES),
   },
+  // Public confirmation link (US02.2.2) — matched BEFORE the authenticated shell so it
+  // works identically whether or not the visitor has an active session on this device
+  // (the link is opened from an email, most often outside any logged-in browser tab).
+  // Mirrors `/auth/verify-email`'s own-route pattern; this one lives under `/account`
+  // because the backend hardcodes `{PIVOT_APP_URL}/account/email/confirm?token=...`
+  // in the confirmation email (pivot-core PR #131) — the path is not ours to choose.
+  {
+    path: 'account/email/confirm',
+    loadComponent: () =>
+      import('./features/account/security/email-confirm/email-confirm.component').then(
+        m => m.EmailConfirmComponent,
+      ),
+  },
   {
     path: '',
     canMatch: [authMatchGuard],
@@ -86,6 +99,13 @@ export const routes: Routes = [
       {
         path: 'account/profile',
         loadComponent: () => import('./features/account/profile/profile.component').then(m => m.ProfileComponent),
+      },
+      {
+        path: 'account/security/email',
+        loadComponent: () =>
+          import('./features/account/security/change-email/change-email.component').then(
+            m => m.ChangeEmailComponent,
+          ),
       },
       {
         path: 'admin/modules',
