@@ -1,0 +1,36 @@
+.account-settings {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.account-settings__header {
+  margin-bottom: 24px;
+}
+
+.account-settings__title {
+  font-size: var(--text-2xl, 1.5rem);
+  font-weight: 700;
+  color: var(--color-gray-900);
+}
+
+.account-settings__danger-zone {
+  border: 1px solid #FECACA;
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  background: #FEF2F2;
+}
+
+.account-settings__danger-title {
+  margin: 0 0 8px;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: #991B1B;
+}
+
+.account-settings__danger-body {
+  margin: 0 0 16px;
+  font-size: var(--text-sm);
+  color: var(--color-gray-700);
+  line-height: 1.5;
+}

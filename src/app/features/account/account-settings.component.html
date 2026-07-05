@@ -1,0 +1,23 @@
+<main class="account-settings" [attr.aria-label]="'account.deletion.page_title' | transloco">
+  <header class="account-settings__header">
+    <h1 class="account-settings__title">{{ 'account.deletion.page_title' | transloco }}</h1>
+  </header>
+
+  <section class="account-settings__danger-zone" aria-labelledby="danger-zone-heading">
+    <h2 id="danger-zone-heading" class="account-settings__danger-title">
+      {{ 'account.deletion.danger_zone_title' | transloco }}
+    </h2>
+    <p class="account-settings__danger-body">{{ 'account.deletion.danger_zone_body' | transloco }}</p>
+    <button
+      #deleteTriggerBtn
+      type="button"
+      class="btn btn-danger"
+      (click)="openDialog()"
+      data-testid="account-settings-delete-trigger"
+    >
+      {{ 'account.deletion.trigger' | transloco }}
+    </button>
+  </section>
+
+  <piv-account-deletion-dialog [open]="dialogOpen()" (closed)="onDialogClosed()" (deleted)="onDeleted($event)" />
+</main>

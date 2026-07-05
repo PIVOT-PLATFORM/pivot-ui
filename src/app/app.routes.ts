@@ -156,6 +156,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/admin/users/admin-users.component').then(m => m.AdminUsersComponent),
       },
+      {
+        path: 'account',
+        loadComponent: () =>
+          import('./features/account/account-settings.component').then(m => m.AccountSettingsComponent),
+      },
       ...MODULE_CHILDREN,
       { path: 'legal', children: LEGAL_CHILDREN },
       {
@@ -175,6 +180,18 @@ export const routes: Routes = [
   {
     path: 'contact',
     loadComponent: () => import('./features/contact/contact.component').then(m => m.ContactComponent),
+  },
+  // US02.2.4 — emailed "Annuler la suppression" link. Registered here (not under
+  // the shell's authenticated children) because every session is revoked the
+  // instant deletion is requested: by the time this link is clicked there is no
+  // authenticated context left, so it must always render standalone regardless
+  // of the current auth state.
+  {
+    path: 'account/deletion/cancel',
+    loadComponent: () =>
+      import('./features/account/deletion/account-deletion-cancel.component').then(
+        m => m.AccountDeletionCancelComponent
+      ),
   },
   { path: 'legal', children: LEGAL_CHILDREN },
   {
