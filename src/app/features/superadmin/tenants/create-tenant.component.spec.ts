@@ -64,6 +64,26 @@ describe('CreateTenantComponent', () => {
     httpMock.verify();
   });
 
+  describe('plan and auth_mode options (AC: valeurs possibles listées)', () => {
+    it('lists exactly SAAS, ENTERPRISE and TRIAL as selectable plan values', () => {
+      const { fixture, httpMock } = setup();
+      const options = Array.from(
+        fixture.nativeElement.querySelectorAll('#tenant-plan option') as NodeListOf<HTMLOptionElement>
+      ).map(o => o.value);
+      expect(options).toEqual(['SAAS', 'ENTERPRISE', 'TRIAL']);
+      httpMock.verify();
+    });
+
+    it('lists exactly LOCAL, OIDC and GOOGLE as selectable auth_mode values', () => {
+      const { fixture, httpMock } = setup();
+      const options = Array.from(
+        fixture.nativeElement.querySelectorAll('#tenant-auth-mode option') as NodeListOf<HTMLOptionElement>
+      ).map(o => o.value);
+      expect(options).toEqual(['LOCAL', 'OIDC', 'GOOGLE']);
+      httpMock.verify();
+    });
+  });
+
   describe('slug auto-generation', () => {
     it('auto-generates the slug from the name in real time', () => {
       const { component, httpMock } = setup();
