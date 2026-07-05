@@ -2,9 +2,9 @@
  * Profile models — shape returned/consumed by the account profile endpoints
  * (US02.1.1 — "Voir et éditer son profil").
  *
- * Backend contract confirmed against `pivot-core` PR #129 (draft, backend half
+ * Backend contract confirmed against `pivot-core` PR #129 (merged, backend half
  * of this US):
- * - GET   /api/account/profile          → ProfileDto · 403 if unauthenticated.
+ * - GET   /api/account/profile          → ProfileDto · 401 if unauthenticated.
  * - PATCH /api/account/profile          → body `UpdateProfileRequest` (firstName/lastName
  *   ONLY) → 200 ProfileDto · 400 `{ error: 'INVALID_NAME' }` (missing/blank/>100 chars) ·
  *   400 `{ error: 'EMAIL_CHANGE_NOT_ALLOWED' }` if the body contains an `email` key at all —

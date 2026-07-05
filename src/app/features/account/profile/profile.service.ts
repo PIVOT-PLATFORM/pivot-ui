@@ -17,7 +17,7 @@ export class ProfileService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = environment.apiUrl;
 
-  /** GET /api/account/profile — 403 if unauthenticated (surfaced to the caller as an error). */
+  /** GET /api/account/profile — 401 if unauthenticated (surfaced to the caller as an error). */
   getProfile(): Observable<ProfileDto> {
     return this.http.get<ProfileDto>(`${this.apiUrl}/account/profile`);
   }

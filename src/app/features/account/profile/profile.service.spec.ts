@@ -43,15 +43,15 @@ describe('ProfileService', () => {
       expect(result).toEqual(makeDto());
     });
 
-    it('propagates a 403 when unauthenticated', () => {
+    it('propagates a 401 when unauthenticated', () => {
       let status: number | undefined;
       service.getProfile().subscribe({ error: err => (status = err.status) });
 
       httpMock
         .expectOne(`${environment.apiUrl}/account/profile`)
-        .flush('Forbidden', { status: 403, statusText: 'Forbidden' });
+        .flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
 
-      expect(status).toBe(403);
+      expect(status).toBe(401);
     });
   });
 
