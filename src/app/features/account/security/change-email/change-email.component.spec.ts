@@ -99,6 +99,16 @@ describe('ChangeEmailComponent', () => {
     expect(alert?.textContent).toContain('account.security.email.invalid_email');
   });
 
+  it('shows a required error with role="alert" and matching aria-describedby when currentPassword is touched and empty', () => {
+    component.form.controls.currentPassword.markAsTouched();
+    fixture.detectChanges();
+    const alert = fixture.nativeElement.querySelector('#current-password-error[role="alert"]');
+    expect(alert).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('#currentPassword')?.getAttribute('aria-describedby')).toBe(
+      'current-password-error',
+    );
+  });
+
   it('has a main landmark with an aria-label', () => {
     fixture.detectChanges();
     const main = fixture.nativeElement.querySelector('main');
