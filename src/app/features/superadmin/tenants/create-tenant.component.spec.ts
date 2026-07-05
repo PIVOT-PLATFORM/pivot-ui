@@ -277,6 +277,17 @@ describe('CreateTenantComponent', () => {
       expect(component.submitErrorParams()).toEqual({ time: '2m 5s' });
     });
 
+    it('on 429 with a missing/zero/negative retryAfterSeconds, still formats a non-empty delay', () => {
+      const { component, httpMock } = setup();
+      fillValidForm(component);
+      component.submit();
+
+      httpMock.expectOne(API_URL).flush({ code: 'RATE_LIMITED' }, { status: 429, statusText: 'Too Many Requests' });
+
+      expect(component.submitError()).toBe('admin.tenants.create.error_rate_limit');
+      expect(component.submitErrorParams()['time']).toBe('1s');
+    });
+
     it('on 403, sets a forbidden error', () => {
       const { component, httpMock } = setup();
       fillValidForm(component);

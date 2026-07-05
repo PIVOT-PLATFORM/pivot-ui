@@ -236,10 +236,17 @@ export class CreateTenantComponent implements OnDestroy {
     }
   }
 
+  /**
+   * Formats a retry delay for the `error_rate_limit` message. Clamped to a
+   * 1-second floor — a missing, zero, negative or non-finite
+   * `retryAfterSeconds` (all possible depending on backend clock skew or a
+   * malformed body) must never render an empty `{{ time }}` and produce a
+   * grammatically broken "Réessayez dans ." message.
+   */
   private formatRetryAfter(seconds: number): string {
-    if (seconds <= 0) return '';
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
+    const safeSeconds = Number.isFinite(seconds) ? Math.max(1, Math.floor(seconds)) : 1;
+    const m = Math.floor(safeSeconds / 60);
+    const s = safeSeconds % 60;
     if (m > 0 && s > 0) return `${m}m ${s}s`;
     if (m > 0) return `${m}m`;
     return `${s}s`;
