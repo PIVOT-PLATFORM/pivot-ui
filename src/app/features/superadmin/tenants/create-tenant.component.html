@@ -1,0 +1,111 @@
+<main class="create-tenant" [attr.aria-label]="'admin.tenants.create.title' | transloco">
+  <header class="create-tenant__header">
+    <h1 class="create-tenant__title">{{ 'admin.tenants.create.title' | transloco }}</h1>
+    <p class="create-tenant__subtitle">{{ 'admin.tenants.create.subtitle' | transloco }}</p>
+  </header>
+
+  @if (submitError()) {
+    <div class="alert alert-error create-tenant__error" role="alert" data-testid="create-tenant-error">
+      {{ submitError() | transloco: submitErrorParams() }}
+    </div>
+  }
+
+  <form
+    [formGroup]="form"
+    (ngSubmit)="submit()"
+    novalidate
+    class="create-tenant__form"
+    data-testid="create-tenant-form"
+  >
+    <div class="form-group">
+      <label class="form-label" for="tenant-name">{{ 'admin.tenants.create.name_label' | transloco }}</label>
+      <input
+        id="tenant-name"
+        type="text"
+        formControlName="name"
+        class="form-control"
+        aria-required="true"
+        [attr.aria-invalid]="nameErrorKey() !== null"
+        [attr.aria-describedby]="nameErrorKey() ? 'tenant-name-error' : null"
+        [class.is-invalid]="nameErrorKey() !== null"
+        [placeholder]="'admin.tenants.create.name_placeholder' | transloco"
+        data-testid="tenant-name-input"
+      />
+      @if (nameErrorKey(); as key) {
+        <span id="tenant-name-error" class="form-error" role="alert">{{ key | transloco }}</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="tenant-slug">{{ 'admin.tenants.create.slug_label' | transloco }}</label>
+      <input
+        id="tenant-slug"
+        type="text"
+        formControlName="slug"
+        class="form-control"
+        aria-required="true"
+        [attr.aria-invalid]="slugErrorKey() !== null"
+        [attr.aria-describedby]="slugDescribedBy()"
+        [class.is-invalid]="slugErrorKey() !== null"
+        (input)="markSlugEdited()"
+        data-testid="tenant-slug-input"
+      />
+      <p id="tenant-slug-hint" class="form-hint">{{ 'admin.tenants.create.slug_hint' | transloco }}</p>
+      @if (slugChecking()) {
+        <span id="tenant-slug-checking" class="form-hint" role="status" data-testid="tenant-slug-checking">
+          {{ 'admin.tenants.create.slug_checking' | transloco }}
+        </span>
+      } @else if (slugErrorKey(); as key) {
+        <span id="tenant-slug-error" class="form-error" role="alert" data-testid="tenant-slug-error">
+          {{ key | transloco }}
+        </span>
+      } @else if (slugAvailableShown()) {
+        <span id="tenant-slug-available" class="form-success" role="status" data-testid="tenant-slug-available">
+          {{ 'admin.tenants.create.slug_available' | transloco }}
+        </span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="tenant-plan">{{ 'admin.tenants.create.plan_label' | transloco }}</label>
+      <select
+        id="tenant-plan"
+        formControlName="plan"
+        class="form-control"
+        aria-required="true"
+        data-testid="tenant-plan-select"
+      >
+        <option value="SAAS">{{ 'admin.tenants.create.plan_saas' | transloco }}</option>
+        <option value="ENTERPRISE">{{ 'admin.tenants.create.plan_enterprise' | transloco }}</option>
+        <option value="TRIAL">{{ 'admin.tenants.create.plan_trial' | transloco }}</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="tenant-auth-mode">{{ 'admin.tenants.create.auth_mode_label' | transloco }}</label>
+      <select
+        id="tenant-auth-mode"
+        formControlName="authMode"
+        class="form-control"
+        aria-required="true"
+        data-testid="tenant-auth-mode-select"
+      >
+        <option value="LOCAL">{{ 'admin.tenants.create.auth_mode_local' | transloco }}</option>
+        <option value="OIDC">{{ 'admin.tenants.create.auth_mode_oidc' | transloco }}</option>
+        <option value="GOOGLE">{{ 'admin.tenants.create.auth_mode_google' | transloco }}</option>
+      </select>
+    </div>
+
+    <button
+      type="submit"
+      class="btn btn-primary create-tenant__submit"
+      [disabled]="submitting()"
+      data-testid="create-tenant-submit"
+    >
+      @if (submitting()) {
+        <span class="spinner" aria-hidden="true"></span>
+      }
+      {{ 'admin.tenants.create.submit' | transloco }}
+    </button>
+  </form>
+</main>
