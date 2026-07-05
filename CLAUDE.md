@@ -275,7 +275,7 @@ Rapporter ✅ ou stderr complet. Toute erreur ou warning non justifié = **stop,
 **Règles :**
 - Jamais de travail direct sur `main`
 - **Une branche = un item de sprint** (US ou Enabler)
-- **Backlog pivot-docs et PATCH_NOTES.md committés sur la branche de l'US**
+- **Backlog pivot-docs committé sur la branche de l'US**
 - Rebase avant merge → squash WIP
 - `git push --force-with-lease` uniquement sur branches de travail
 
@@ -440,18 +440,6 @@ git push origin --delete feat/{us-id}-{slug}
 
 ---
 
-## Releases — PATCH_NOTES.md
-
-`PATCH_NOTES.md` (situé à la racine de `pivot-ui/`) est mis à jour **dans chaque PR** (embarqué avec le code) :
-- Ajouter les changements notables dans la section `## [Unreleased]` en tête de fichier
-- Rédigé en **français**, pour l'utilisateur final — pas le développeur
-- Langage naturel — pas de référence aux commits ou tickets
-- Après la release SR : le script `.scripts/prepare-patch-notes.sh` renomme `[Unreleased]` automatiquement
-- Fichier maintenu en place, **jamais de fichiers datés**
-- **Exception** : PRs `chore` / `ci` / `docs` sans impact utilisateur visible — pas de mise à jour PATCH_NOTES
-
----
-
 ## Audits
 
 Dans **pivot-docs** — un fichier par catégorie, mis à jour en place. **Jamais de fichiers datés.**
@@ -535,7 +523,7 @@ Charger `skill-pr-reviewer` avant d'écrire le commentaire.
 | Architecture (OnPush, inject(), signals, zéro any, lazy-loading) | /25 | |
 | Traçabilité AC (AC → test Vitest + spec Playwright) | /25 | |
 | Sécurité & A11y (token en mémoire, pas d'innerHTML, WCAG 2.1 AA) | /25 | |
-| Qualité & i18n (ESLint verts, clés i18n complètes, PATCH_NOTES) | /25 | |
+| Qualité & i18n (ESLint verts, clés i18n complètes) | /25 | |
 
 ### Traçabilité AC
 | AC | Implémentation | Test | Statut |
