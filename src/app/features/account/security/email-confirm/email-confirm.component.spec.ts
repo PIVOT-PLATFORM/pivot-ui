@@ -61,16 +61,18 @@ describe('EmailConfirmComponent', () => {
     httpMock.verify();
   });
 
-  it('passe en "invalid" sur 400 EMAIL_CHANGE_TOKEN_INVALID', () => {
+  it('passe en "invalid" sur 400 EMAIL_CHANGE_TOKEN_INVALID, avec la clé i18n statique correspondante', () => {
     const { fixture, component, httpMock } = setup('bad-token');
     httpMock.expectOne(r => r.url === `${environment.apiUrl}/account/email/confirm`)
       .flush({ code: 'EMAIL_CHANGE_TOKEN_INVALID' }, { status: 400, statusText: 'Bad Request' });
     fixture.detectChanges();
     expect(component.state()).toBe('invalid');
+    const title: HTMLElement = fixture.nativeElement.querySelector('.confirm-title');
+    expect(title?.textContent).toContain('account.security.email.confirm.invalid_title');
     httpMock.verify();
   });
 
-  it('passe en "expired" sur 400 EMAIL_CHANGE_TOKEN_EXPIRED, avec le CTA "Refaire la demande"', () => {
+  it('passe en "expired" sur 400 EMAIL_CHANGE_TOKEN_EXPIRED, avec le CTA "Refaire la demande" et la clé i18n statique correspondante', () => {
     const { fixture, component, httpMock } = setup('expired-token');
     httpMock.expectOne(r => r.url === `${environment.apiUrl}/account/email/confirm`)
       .flush({ code: 'EMAIL_CHANGE_TOKEN_EXPIRED' }, { status: 400, statusText: 'Bad Request' });
@@ -79,30 +81,36 @@ describe('EmailConfirmComponent', () => {
     expect(component.showRetryCta()).toBe(true);
     const cta: HTMLAnchorElement = fixture.nativeElement.querySelector('.confirm-cta');
     expect(cta?.getAttribute('href')).toBe('/account/security/email');
+    const title: HTMLElement = fixture.nativeElement.querySelector('.confirm-title');
+    expect(title?.textContent).toContain('account.security.email.confirm.expired_title');
     httpMock.verify();
   });
 
-  it('passe en "already_used" sur 410 Gone', () => {
+  it('passe en "already_used" sur 410 Gone, avec la clé i18n statique correspondante', () => {
     const { fixture, component, httpMock } = setup('used-token');
     httpMock.expectOne(r => r.url === `${environment.apiUrl}/account/email/confirm`)
       .flush({ code: 'EMAIL_CHANGE_TOKEN_ALREADY_USED' }, { status: 410, statusText: 'Gone' });
     fixture.detectChanges();
     expect(component.state()).toBe('already_used');
     expect(component.showRetryCta()).toBe(true);
+    const title: HTMLElement = fixture.nativeElement.querySelector('.confirm-title');
+    expect(title?.textContent).toContain('account.security.email.confirm.already_used_title');
     httpMock.verify();
   });
 
-  it('passe en "target_taken" sur 409 Conflict', () => {
+  it('passe en "target_taken" sur 409 Conflict, avec la clé i18n statique correspondante', () => {
     const { fixture, component, httpMock } = setup('token-race');
     httpMock.expectOne(r => r.url === `${environment.apiUrl}/account/email/confirm`)
       .flush({ code: 'EMAIL_CHANGE_TARGET_TAKEN' }, { status: 409, statusText: 'Conflict' });
     fixture.detectChanges();
     expect(component.state()).toBe('target_taken');
     expect(component.showRetryCta()).toBe(true);
+    const title: HTMLElement = fixture.nativeElement.querySelector('.confirm-title');
+    expect(title?.textContent).toContain('account.security.email.confirm.target_taken_title');
     httpMock.verify();
   });
 
-  it('passe en "rate_limited" sur 429 et ne propose PAS le CTA "Refaire la demande" (relance immédiate inutile)', () => {
+  it('passe en "rate_limited" sur 429 et ne propose PAS le CTA "Refaire la demande" (relance immédiate inutile), avec la clé i18n statique correspondante', () => {
     const { fixture, component, httpMock } = setup('any-token');
     httpMock.expectOne(r => r.url === `${environment.apiUrl}/account/email/confirm`)
       .flush({ code: 'RATE_LIMITED', retryAfterSeconds: 60 }, { status: 429, statusText: 'Too Many Requests' });
@@ -111,15 +119,19 @@ describe('EmailConfirmComponent', () => {
     expect(component.showRetryCta()).toBe(false);
     const cta: HTMLAnchorElement = fixture.nativeElement.querySelector('.confirm-cta');
     expect(cta?.getAttribute('href')).toBe('/home');
+    const title: HTMLElement = fixture.nativeElement.querySelector('.confirm-title');
+    expect(title?.textContent).toContain('account.security.email.confirm.rate_limited_title');
     httpMock.verify();
   });
 
-  it('passe en "error" générique sur une panne réseau/5xx sans corps exploitable', () => {
+  it('passe en "error" générique sur une panne réseau/5xx sans corps exploitable, avec la clé i18n statique correspondante', () => {
     const { fixture, component, httpMock } = setup('any-token');
     httpMock.expectOne(r => r.url === `${environment.apiUrl}/account/email/confirm`)
       .flush('', { status: 500, statusText: 'Server Error' });
     fixture.detectChanges();
     expect(component.state()).toBe('error');
+    const title: HTMLElement = fixture.nativeElement.querySelector('.confirm-title');
+    expect(title?.textContent).toContain('account.security.email.confirm.error_title');
     httpMock.verify();
   });
 

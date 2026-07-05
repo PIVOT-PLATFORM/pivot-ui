@@ -46,6 +46,51 @@ export class EmailConfirmComponent implements OnInit {
     (['invalid', 'expired', 'already_used', 'target_taken'] as EmailConfirmState[]).includes(this.state()),
   );
 
+  /**
+   * Clés i18n (titre + corps) du bloc d'échec affiché par le `@default` du template.
+   * Un `switch` avec des clés littérales par état plutôt qu'une concaténation
+   * dynamique (`'…confirm.' + state() + '_title'`) dans le HTML : chaque clé reste
+   * grep-able telle quelle dans le code (traçabilité vers `fr.json`/`en.json`), et une
+   * clé absente/renommée casse la compilation du `switch` plutôt qu'un rendu silencieux.
+   */
+  readonly errorMessageKeys = computed<{ title: string; body: string }>(() => {
+    switch (this.state()) {
+      case 'expired':
+        return {
+          title: 'account.security.email.confirm.expired_title',
+          body: 'account.security.email.confirm.expired_body',
+        };
+      case 'already_used':
+        return {
+          title: 'account.security.email.confirm.already_used_title',
+          body: 'account.security.email.confirm.already_used_body',
+        };
+      case 'target_taken':
+        return {
+          title: 'account.security.email.confirm.target_taken_title',
+          body: 'account.security.email.confirm.target_taken_body',
+        };
+      case 'rate_limited':
+        return {
+          title: 'account.security.email.confirm.rate_limited_title',
+          body: 'account.security.email.confirm.rate_limited_body',
+        };
+      case 'error':
+        return {
+          title: 'account.security.email.confirm.error_title',
+          body: 'account.security.email.confirm.error_body',
+        };
+      // 'invalid' et le repli par défaut partagent le même message ; 'loading'/'success'
+      // ne passent jamais par ce computed (branches dédiées dans le template).
+      case 'invalid':
+      default:
+        return {
+          title: 'account.security.email.confirm.invalid_title',
+          body: 'account.security.email.confirm.invalid_body',
+        };
+    }
+  });
+
   ngOnInit(): void {
     const token = this.route.snapshot.queryParamMap.get('token');
     if (!token) {
