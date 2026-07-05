@@ -1,0 +1,114 @@
+<main class="sessions-list" [attr.aria-label]="'account.sessions.list.title' | transloco">
+  <header class="sessions-list__header">
+    <h1 class="sessions-list__title">{{ 'account.sessions.list.title' | transloco }}</h1>
+    <p class="sessions-list__subtitle">{{ 'account.sessions.list.subtitle' | transloco }}</p>
+  </header>
+
+  @if (loading()) {
+    <div class="sr-only" role="status">{{ 'common.loading' | transloco }}</div>
+    <ul class="sessions-list__skeleton" aria-hidden="true" data-testid="sessions-skeleton">
+      @for (i of skeletonPlaceholders; track i) {
+        <li class="sessions-list__skeleton-row"></li>
+      }
+    </ul>
+  } @else if (loadError()) {
+    <div class="sessions-list__error-state" role="alert" data-testid="sessions-error">
+      <p>{{ 'account.sessions.list.error' | transloco }}</p>
+      <button type="button" class="btn btn-secondary" (click)="load()" data-testid="sessions-retry">
+        {{ 'account.sessions.list.retry' | transloco }}
+      </button>
+    </div>
+  } @else {
+    @if (otherSessions().length > 0) {
+      <div class="sessions-list__actions-bar">
+        <button
+          type="button"
+          class="btn btn-danger"
+          data-testid="sessions-revoke-all"
+          [disabled]="service.revokingAll()"
+          (click)="onRevokeAllOthers()"
+        >
+          {{ 'account.sessions.list.revoke_all' | transloco }}
+        </button>
+      </div>
+    }
+
+    <div class="sessions-list__table-wrap">
+      <table class="sessions-list__table" data-testid="sessions-table">
+        <thead>
+          <tr>
+            <th scope="col">{{ 'account.sessions.list.column_device' | transloco }}</th>
+            <th scope="col">{{ 'account.sessions.list.column_ip' | transloco }}</th>
+            <th scope="col">{{ 'account.sessions.list.column_created' | transloco }}</th>
+            <th scope="col">{{ 'account.sessions.list.column_expires' | transloco }}</th>
+            <th scope="col">{{ 'account.sessions.list.column_actions' | transloco }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (currentSession(); as current) {
+            <tr class="sessions-list__row sessions-list__row--current" [attr.data-testid]="'session-row-' + current.id">
+              <td class="sessions-list__cell-device" [attr.data-label]="'account.sessions.list.column_device' | transloco">
+                <span class="sessions-list__device">{{ deviceLabel(current) }}</span>
+                <span
+                  class="sessions-list__current-badge"
+                  [attr.data-testid]="'session-current-badge-' + current.id"
+                >
+                  {{ 'account.sessions.list.current_session' | transloco }}
+                </span>
+              </td>
+              <td [attr.data-label]="'account.sessions.list.column_ip' | transloco">{{ current.ip }}</td>
+              <td [attr.data-label]="'account.sessions.list.column_created' | transloco">{{ formatDate(current.createdAt) }}</td>
+              <td [attr.data-label]="'account.sessions.list.column_expires' | transloco">{{ formatDate(current.expiresAt) }}</td>
+              <td [attr.data-label]="'account.sessions.list.column_actions' | transloco">
+                <span class="sessions-list__not-revocable">{{ 'account.sessions.list.not_revocable' | transloco }}</span>
+              </td>
+            </tr>
+          }
+          @for (session of otherSessions(); track session.id) {
+            <tr class="sessions-list__row" [attr.data-testid]="'session-row-' + session.id">
+              <td class="sessions-list__cell-device" [attr.data-label]="'account.sessions.list.column_device' | transloco">
+                <span class="sessions-list__device">{{ deviceLabel(session) }}</span>
+              </td>
+              <td [attr.data-label]="'account.sessions.list.column_ip' | transloco">{{ session.ip }}</td>
+              <td [attr.data-label]="'account.sessions.list.column_created' | transloco">{{ formatDate(session.createdAt) }}</td>
+              <td [attr.data-label]="'account.sessions.list.column_expires' | transloco">{{ formatDate(session.expiresAt) }}</td>
+              <td [attr.data-label]="'account.sessions.list.column_actions' | transloco">
+                <button
+                  type="button"
+                  class="btn btn-secondary sessions-list__revoke"
+                  [attr.aria-label]="revokeAriaLabel(session)"
+                  [disabled]="service.isRevoking(session.id)"
+                  [attr.data-testid]="'session-revoke-' + session.id"
+                  (click)="onRevoke(session)"
+                >
+                  @if (service.isRevoking(session.id)) {
+                    <span class="spinner" aria-hidden="true"></span>
+                  } @else {
+                    {{ 'account.sessions.list.revoke' | transloco }}
+                  }
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (isEmpty()) {
+      <div class="sessions-list__empty-state" data-testid="sessions-empty">
+        <p>{{ 'account.sessions.list.empty' | transloco }}</p>
+      </div>
+    }
+  }
+
+  <piv-confirm-dialog
+    role="dialog"
+    [open]="isConfirmOpen()"
+    [title]="confirmTitleKey() | transloco"
+    [message]="confirmMessageKey() | transloco"
+    [confirmLabel]="'account.sessions.confirm.confirm' | transloco"
+    [cancelLabel]="'account.sessions.confirm.cancel' | transloco"
+    (confirmed)="onConfirm()"
+    (cancelled)="onCancelConfirm()"
+  />
+</main>
