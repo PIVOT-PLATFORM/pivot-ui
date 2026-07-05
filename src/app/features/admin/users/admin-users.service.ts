@@ -19,6 +19,14 @@
  * (keyed by user id) so other rows stay interactive while one row's request
  * is pending.
  *
+ * Also consumes `PATCH /api/admin/users/{id}/status` (US06.1.4 deactivate /
+ * US06.1.5 reactivate backend contract, `{ status: 'ACTIVE' | 'INACTIVE' }` →
+ * `200` updated user — reactivating an already-`ACTIVE` account is idempotent
+ * / `400` invalid status / `403` self-deactivation or revoked token / `404`
+ * cross-tenant). `changeStatus` follows the exact same optimistic convention
+ * as `changeRole` above — one endpoint, one status field, shared by both
+ * user stories — with its own independent per-row in-flight/error tracking.
+ *
  * No `tenantId` is ever read from or sent by this service — the tenant scope
  * is resolved entirely server-side from the bearer token, per the platform
  * rule that tenant-filtering logic must never live client-side.
@@ -35,6 +43,8 @@ import {
   type AdminUserPage,
   type AdminUserRole,
   type AdminUserRoleChangeErrorKind,
+  type AdminUserStatusChangeErrorKind,
+  type AdminUserToggleableStatus,
 } from './admin-user.model';
 
 @Injectable({ providedIn: 'root' })
@@ -51,6 +61,8 @@ export class AdminUsersService {
   private readonly _totalElements = signal(0);
   private readonly _roleChangeInFlight = signal<Record<number, boolean>>({});
   private readonly _roleChangeErrors = signal<Record<number, AdminUserRoleChangeErrorKind>>({});
+  private readonly _statusChangeInFlight = signal<Record<number, boolean>>({});
+  private readonly _statusChangeErrors = signal<Record<number, AdminUserStatusChangeErrorKind>>({});
 
   /** Current page content. */
   readonly users = this._users.asReadonly();
@@ -177,6 +189,84 @@ export class AdminUsersService {
 
   private clearRoleChangeError(id: number): void {
     this._roleChangeErrors.update(map => {
+      if (!(id in map)) {
+        return map;
+      }
+      const next = { ...map };
+      delete next[id];
+      return next;
+    });
+  }
+
+  /** True while a `PATCH /api/admin/users/{id}/status` call for this user id is pending. */
+  isStatusChangeInFlight(id: number): boolean {
+    return this._statusChangeInFlight()[id] ?? false;
+  }
+
+  /** Classified error for the last failed status change on this user id, if any (cleared on the next attempt). */
+  statusChangeError(id: number): AdminUserStatusChangeErrorKind | null {
+    return this._statusChangeErrors()[id] ?? null;
+  }
+
+  /**
+   * Deactivates or reactivates a user optimistically — the single shared code
+   * path behind both US06.1.4 (Désactiver) and US06.1.5 (Réactiver): one
+   * endpoint, one `status` field, only the target value differs. Flips
+   * `status` in the local row immediately, then reconciles with the
+   * backend's response (`200` returns the updated user — its `status` is
+   * applied verbatim rather than assuming the request echoed back). Rolls
+   * back to the previous status and records a classified error on failure.
+   */
+  changeStatus(user: AdminUserDto, status: AdminUserToggleableStatus): Observable<void> {
+    const { id } = user;
+    const previousStatus = user.status;
+
+    this.setStatusChangeInFlight(id, true);
+    this.clearStatusChangeError(id);
+    this.applyStatus(id, status);
+
+    return this.http.patch<AdminUserDto>(`${this.apiUrl}/admin/users/${id}/status`, { status }).pipe(
+      tap(updated => {
+        this.applyStatus(id, updated.status);
+        this.setStatusChangeInFlight(id, false);
+      }),
+      map(() => undefined),
+      catchError((err: HttpErrorResponse) => {
+        this.applyStatus(id, previousStatus);
+        this.setStatusChangeInFlight(id, false);
+        this.setStatusChangeError(id, this.classifyStatusChangeError(err));
+        return throwError(() => err);
+      })
+    );
+  }
+
+  private classifyStatusChangeError(err: HttpErrorResponse): AdminUserStatusChangeErrorKind {
+    switch (err.status) {
+      case 400:
+        return 'invalid-status';
+      case 403:
+        return 'self-deactivation';
+      case 404:
+        return 'not-found';
+      default:
+        return 'generic';
+    }
+  }
+
+  private applyStatus(id: number, status: AdminUserDto['status']): void {
+    this._users.update(list => list.map(u => (u.id === id ? { ...u, status } : u)));
+  }
+
+  private setStatusChangeInFlight(id: number, value: boolean): void {
+    this._statusChangeInFlight.update(map => ({ ...map, [id]: value }));
+  }
+
+  private setStatusChangeError(id: number, kind: AdminUserStatusChangeErrorKind): void {
+    this._statusChangeErrors.update(map => ({ ...map, [id]: kind }));
+  }
+
+  private clearStatusChangeError(id: number): void {
+    this._statusChangeErrors.update(map => {
       if (!(id in map)) {
         return map;
       }
