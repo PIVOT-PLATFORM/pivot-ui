@@ -158,7 +158,7 @@ Toute contribution mobilise les experts concernés — les mentionner explicitem
 | Parent | clé du parent (ex. `E01`, `F01.1`) |
 | Stage | Backlog / Ready / In progress / Review / Done |
 | Priority | Critical / High / Medium / Low |
-| Module | core / auth / admin / oidc / whiteboard / session / roadmap / survey / quiz (extensible) |
+| Module | core / auth / admin / oidc / pilotage / agilite / collaboratif (extensible par domaine) |
 | Phase | MVP / v1-enterprise / phase-3 |
 | Sprint | Sprint 1…N |
 | Size | XS / S / M / L / XL |
@@ -205,14 +205,14 @@ Travail organisé par sprint. Référence : **`pivot-docs/docs/backlog/SPRINTS.m
 Après implémentation sur `feat/{us-id}-{slug}` :
 
 1. Ouvrir une PR (draft) vers `main`
-2. **Autoloop** (10 itérations max) :
+2. **Autoloop** (20 itérations max) :
    - **En parallèle :**
      - **Review neutre** — Expert PR Review : architecture, AC, sécurité, dette, a11y, i18n
      - **CI** — `npx tsc --noEmit` + `npm run lint` + `npm run test:ci` + build prod = 0 erreur/warning
    - **Corrections** — tous les findings résolus, commit `fix({scope}): ...`
    - **Convergence** — Gate 4 ≥ 85 ET CI verte → sortir
 3. Gate 4 vert → `Stage: Review` dans frontmatter US + SPRINTS.md + signal mainteneur
-4. Blocage 10 boucles → Breaking Point 2
+4. Blocage 20 boucles → Breaking Point 2
 
 ## Workflow — Ordre d'exécution par US (dans un sprint)
 
@@ -258,7 +258,8 @@ Rapporter ✅ ou stderr complet. Toute erreur ou warning non justifié = **stop,
 
 | Préfixe | Usage | Exemple |
 |---------|-------|---------|
-| `feat/{us-id}-{slug}` | Implémentation d'une US / Enabler | `feat/us03-1-2-admin-desactive-module` |
+| `feat/{us-id}-{slug}` | Implémentation d'une US | `feat/us03-1-2-admin-desactive-module` |
+| `feat/{en-id}-{slug}` | Implémentation d'un Enabler | `feat/en03-1-module-interface` |
 | `fix/{id}-{slug}` | Correction bug hors sprint | `fix/67-auth-redirect-loop` |
 | `refactor/{id}-{slug}` | Refactoring hors sprint | `refactor/89-signals-migration` |
 | `chore/{slug}` | CI, deps, config | `chore/eslint-config` |
@@ -349,6 +350,40 @@ dossier `gates/`). Le statut vit dans le champ **Stage** du frontmatter US (pivo
 | **QA Agent** | Rédige specs Playwright, valide coverage Vitest, challenge A11y |
 | **PR Review Agent** | Exécute Gate 3 + Gate 4, merge ou escalade selon score |
 
+### Format des AC
+
+```markdown
+- [ ] Given [contexte], when [action], then [résultat observable]
+- [ ] Error case: given [input invalide], system retourne [erreur / status code]
+- [ ] Security: [propriété de sécurité qui doit tenir]
+```
+
+Chaque AC mappe à au moins un test. AC sans test = non implémenté, peu importe le code présent.
+AC ambigu à l'implémentation → **stopper et demander au PO Agent** — jamais d'interprétation unilatérale.
+
+### Labels PR
+
+| Label | Signification |
+|-------|--------------|
+| `feat` | Nouvelle fonctionnalité |
+| `fix` | Correction de bug |
+| `security` | Impact sécurité — hard block Gate 4, review humaine |
+| `breaking-change` | Changement de contrat — hard block Gate 4, review humaine |
+| `module-contract` | Changement contrat de module — hard block Gate 4 |
+| `needs-human-review` | Gate 4 < 60 ou hard block — décision humaine requise |
+| `auto-approved` | Gate 4 ≥ 85 — mergé automatiquement |
+| `chore` | Maintenance, CI, dépendances |
+| `docs` | Documentation uniquement |
+
+### Post-merge
+
+```bash
+# 1. Mainteneur : passe Stage → Done dans le frontmatter US (recette humaine — jamais Claude)
+# 2. Débloquer les US dépendantes
+# 3. Nettoyer la branche
+git push origin --delete feat/{us-id}-{slug}
+```
+
 ---
 
 ## Standards de code
@@ -421,6 +456,7 @@ Dans **pivot-docs** — un fichier par catégorie, mis à jour en place. **Jamai
 | Interdit | Raison |
 |----------|--------|
 | `--no-verify` | Contourne les hooks qualité |
+| `git push origin main` (push direct) | Jamais — tout code passe par PR + review |
 | `git push --force` sur `main` | Jamais — le mainteneur uniquement si nécessaire |
 | `git add .` en bloc | Risque d'inclure `.env`, clés, tokens |
 | Merger avec label `security` sans revue humaine | Hard block Gate 4 |
@@ -448,6 +484,22 @@ Dans **pivot-docs** — un fichier par catégorie, mis à jour en place. **Jamai
 
 ## Boucles de problèmes — règle d'escalade
 
+### Limite 10 commandes en échec successif
+
+Si **10 commandes consécutives échouent** (toute combinaison : build, test, lint, push, CI) sur une tâche :
+1. **Stopper la tâche courante** — ne pas impacter les agents parallèles sur d'autres US
+2. **Poster un commentaire de gate** avec `decision: ESCALATED`, liste des 10 échecs, contexte
+3. **Label `needs-human-review`** + signal mainteneur
+4. **Proposer une alternative** (approche différente, découpage)
+
+Le compteur se remet à zéro dès qu'une commande réussit.
+
+### Limite 20 push — autoloop PR Review
+
+Voir section **Workflow — Autoloop PR par US** — au-delà de 20 push correctifs → Breaking Point 2 automatique.
+
+### Règle 2 tentatives (stratégie identique)
+
 Après **2 tentatives** (même stratégie ou variantes proches) :
 1. **Stopper** — ne pas continuer à boucler
 2. **Poster un commentaire de gate sur la PR** avec `decision: ESCALATED`, contexte complet, tentatives effectuées — **jamais committer un fichier de gate**
@@ -455,6 +507,54 @@ Après **2 tentatives** (même stratégie ou variantes proches) :
 4. **Proposer** une alternative : approche différente, outil différent, contournement
 
 Ne jamais enchaîner plus de 2 tentatives sans informer le mainteneur.
+
+---
+
+## Template Review PR uniforme
+
+Toutes les reviews de PR (Gate 4) postées en commentaire GitHub suivent ce template exact.
+Charger `skill-pr-reviewer` avant d'écrire le commentaire.
+
+```markdown
+## PR Review — Gate 4
+
+**US :** {us-id} — {titre}
+**Score : {score}/100**
+**Décision : MERGE_AUTONOMOUS | MERGE_DOCUMENTED | NEEDS_HUMAN_REVIEW**
+
+### Breakdown
+| Dimension | Score | Détail |
+|-----------|-------|--------|
+| Architecture (OnPush, inject(), signals, zéro any, lazy-loading) | /25 | |
+| Traçabilité AC (AC → test Vitest + spec Playwright) | /25 | |
+| Sécurité & A11y (token en mémoire, pas d'innerHTML, WCAG 2.1 AA) | /25 | |
+| Qualité & i18n (ESLint verts, clés i18n complètes, PATCH_NOTES) | /25 | |
+
+### Traçabilité AC
+| AC | Implémentation | Test | Statut |
+|----|----------------|------|--------|
+| AC-{id}-01 | ... | ... | ✅/⬜ |
+
+### Gate 3 — hard blocks
+- [ ] Gitleaks clean
+- [ ] CI 0 erreur / 0 warning
+- [ ] Pas de secret committé
+- [ ] Pas de `breaking-change` non documenté
+- [ ] Pas de modification contrat module/OIDC sans coordination pivot-core
+
+### Findings
+| # | Sévérité | Fichier | Description | Correction |
+|---|----------|---------|--------------|------------|
+
+### Notes
+{notes libres}
+```
+
+**Règles d'application :**
+- Posté uniquement en **commentaire PR** — jamais de fichier committé
+- Score calculé dimension par dimension (0–25 chacune) — voir `gate_scoring` dans `skill-pr-reviewer.yaml`
+- Findings classés : 🔴 Bloquant · 🟡 Mineur · 🔵 Cohérent
+- Un finding 🔴 = itération obligatoire, même si score ≥ 85
 
 ---
 
