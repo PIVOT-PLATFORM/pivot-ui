@@ -1,0 +1,106 @@
+// EmailConfirmComponent styles — tokens only.
+// BEM: .confirm-* (mirrors VerifyEmailComponent's `.verify-*` card pattern, duplicated
+// intentionally rather than shared — see profileInitials() comment for the codebase
+// convention on tiny cross-feature styles).
+
+:host { display: contents; }
+
+// `<output>` wraps the status/alert block without introducing a styling boundary —
+// its children (icon, title, body) lay out exactly as if they were direct children
+// of `.confirm-card` (see Web:S6819 — `<output>` preferred over role="status").
+output { display: contents; }
+
+.confirm-page {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  background: var(--surface-bg);
+}
+
+.confirm-card {
+  max-width: 400px;
+  width: 100%;
+  padding: 36px 40px 40px;
+  background: var(--surface-card);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+}
+
+.confirm-brand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+.confirm-brand-icon {
+  height: 56px;
+  width: 56px;
+  object-fit: contain;
+}
+
+.confirm-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.confirm-icon--success {
+  background: color-mix(in srgb, var(--color-success) 18%, transparent);
+  color: var(--color-success-400, var(--color-success));
+  border: 1.5px solid color-mix(in srgb, var(--color-success) 35%, transparent);
+}
+
+.confirm-icon--error {
+  background: color-mix(in srgb, var(--color-error) 15%, transparent);
+  color: var(--color-error-400, var(--color-error));
+  border: 1.5px solid color-mix(in srgb, var(--color-error) 30%, transparent);
+}
+
+.confirm-title {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-navy-900);
+  margin-bottom: 10px;
+  letter-spacing: -0.02em;
+}
+
+.confirm-body {
+  font-size: var(--text-sm);
+  color: var(--color-gray-500);
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+.confirm-hint {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--color-gray-500);
+  margin-top: 12px;
+}
+
+.confirm-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--color-gray-200);
+  border-top-color: var(--color-brand-600);
+  border-radius: 50%;
+  animation: confirm-spin 0.7s linear infinite;
+  margin: 8px auto;
+}
+
+.confirm-cta { width: 100%; }
+
+@keyframes confirm-spin {
+  to { transform: rotate(360deg); }
+}
