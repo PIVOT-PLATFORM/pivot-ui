@@ -158,6 +158,10 @@ describe('TenantsListComponent', () => {
     expect(row1.textContent).toContain('ENTERPRISE');
     expect(row1.textContent).toContain('SAAS');
     expect(row1.textContent).toContain('12');
+    // createdAt (2026-01-01T00:00:00Z) rendered via DatePipe 'short' — assert on the
+    // shape (locale-formatted date, e.g. "1/1/26, 1:00 AM") rather than an exact
+    // string, since the DatePipe output is locale/timezone-dependent.
+    expect(row1.textContent).toMatch(/\d{1,2}\/\d{1,2}\/\d{2,4}/);
     expect(fixture.nativeElement.querySelector('[data-testid="tenant-status-1"]').textContent.trim()).toBe('Actif');
 
     const row2 = fixture.nativeElement.querySelector('[data-testid="tenant-row-2"]');
@@ -241,6 +245,27 @@ describe('TenantsListComponent', () => {
 
     expect(fixture.nativeElement.querySelector('[data-testid="tenants-page-next"]').disabled).toBe(true);
     expect(fixture.nativeElement.querySelector('[data-testid="tenants-page-previous"]').disabled).toBe(false);
+  });
+
+  it('clicking previous when enabled re-queries the adjacent lower page', () => {
+    // Land on page 1 first (previous becomes enabled), then exercise the actual
+    // previousPage() -> load(page - 1) call — the bounds test above only ever
+    // clicks next, so this path was otherwise never executed.
+    flushList(makePage([makeDto(1)], { number: 0, totalPages: 2, totalElements: 2 }));
+    fixture.nativeElement.querySelector('[data-testid="tenants-page-next"]').click();
+    fixture.detectChanges();
+    expectListRequest().flush(makePage([makeDto(2)], { number: 1, totalPages: 2, totalElements: 2 }));
+    fixture.detectChanges();
+
+    const prevBtn = fixture.nativeElement.querySelector('[data-testid="tenants-page-previous"]');
+    expect(prevBtn.disabled).toBe(false);
+
+    prevBtn.click();
+    fixture.detectChanges();
+
+    const req = expectListRequest();
+    expect(req.request.params.get('page')).toBe('0');
+    req.flush(makePage([makeDto(1)], { number: 0, totalPages: 2, totalElements: 2 }));
   });
 
   it('shows the pagination status with 1-indexed page numbers for display', () => {
