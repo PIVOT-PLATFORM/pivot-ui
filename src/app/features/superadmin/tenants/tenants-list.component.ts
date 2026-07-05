@@ -19,6 +19,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { TenantsService } from './tenants.service';
 import {
@@ -33,7 +34,7 @@ import {
   selector: 'piv-tenants-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, FormsModule, TranslocoPipe],
+  imports: [DatePipe, FormsModule, RouterLink, TranslocoPipe],
   templateUrl: './tenants-list.component.html',
   styleUrl: './tenants-list.component.scss',
 })

@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { ComponentFixture } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { TenantsListComponent } from './tenants-list.component';
 import type { TenantDto, TenantPage } from './tenant.model';
@@ -9,6 +10,7 @@ import { environment } from '../../../../environments/environment';
 
 const frTranslations = {
   common: { loading: 'Chargement en cours…' },
+  admin: { tenants: { create: { list_cta: '+ Nouveau tenant' } } },
   superadmin: {
     tenants: {
       list: {
@@ -99,7 +101,7 @@ describe('TenantsListComponent', () => {
           translocoConfig: { defaultLang: 'fr', availableLangs: ['fr', 'en'] },
         }),
       ],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TenantsListComponent);
