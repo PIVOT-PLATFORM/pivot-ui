@@ -99,14 +99,14 @@ describe('ExportComponent', () => {
   describe('initial load', () => {
     beforeEach(async () => setup());
 
-    it('shows a loading state before the first status response', () => {
+    it('AC-06 — shows a loading state before the first status response', () => {
       const el: HTMLElement = fixture.nativeElement;
       expect(el.querySelector('[data-testid="export-loading"]')).toBeTruthy();
       // Drain the request the constructor issued so afterEach's httpMock.verify() is clean.
       httpMock.expectOne(statusUrl).flush(NONE_STATUS);
     });
 
-    it('enables the submit button when status is NONE with no rate limit', () => {
+    it('AC-06 — enables the submit button when status is NONE with no rate limit', () => {
       httpMock.expectOne(statusUrl).flush(NONE_STATUS);
       fixture.detectChanges();
 
@@ -140,7 +140,7 @@ describe('ExportComponent', () => {
   describe('rate limited (AC: disabled button + aria-describedby reason)', () => {
     beforeEach(async () => setup());
 
-    it('sets aria-disabled and a describedby reason, but keeps the button natively focusable', () => {
+    it('AC-16 — sets aria-disabled and a describedby reason, but keeps the button natively focusable', () => {
       const future = new Date(Date.now() + 3_600_000).toISOString();
       httpMock.expectOne(statusUrl).flush({ ...NONE_STATUS, status: 'READY', nextAvailableAt: future });
       fixture.detectChanges();
@@ -153,7 +153,7 @@ describe('ExportComponent', () => {
       expect(fixture.nativeElement.querySelector('[data-testid="export-rate-limit-reason"]')).toBeTruthy();
     });
 
-    it('does not submit when clicked while rate-limited', () => {
+    it('AC-16 — does not submit when clicked while rate-limited', () => {
       const future = new Date(Date.now() + 3_600_000).toISOString();
       httpMock.expectOne(statusUrl).flush({ ...NONE_STATUS, nextAvailableAt: future });
       fixture.detectChanges();
@@ -162,7 +162,7 @@ describe('ExportComponent', () => {
       httpMock.expectNone(postUrl);
     });
 
-    it('treats a past nextAvailableAt as no longer rate-limited', () => {
+    it('AC-16 — treats a past nextAvailableAt as no longer rate-limited', () => {
       const past = new Date(Date.now() - 1000).toISOString();
       httpMock.expectOne(statusUrl).flush({ ...NONE_STATUS, nextAvailableAt: past });
       fixture.detectChanges();
@@ -191,7 +191,7 @@ describe('ExportComponent', () => {
   describe('pending / processing (AC: "Demande reçue" persistent state)', () => {
     beforeEach(async () => setup());
 
-    it('shows the received panel instead of the button when already PENDING on load', () => {
+    it('AC-13 — shows the received panel instead of the button when already PENDING on load', () => {
       vi.useFakeTimers();
       httpMock.expectOne(statusUrl).flush({ ...NONE_STATUS, status: 'PENDING' });
       fixture.detectChanges();
@@ -223,7 +223,7 @@ describe('ExportComponent', () => {
   describe('requestExport() — happy path', () => {
     beforeEach(async () => setup());
 
-    it('disables the button and shows a spinner while the POST is in flight', () => {
+    it('AC-15 — disables the button and shows a spinner while the POST is in flight', () => {
       httpMock.expectOne(statusUrl).flush(NONE_STATUS);
       fixture.detectChanges();
 
@@ -239,7 +239,7 @@ describe('ExportComponent', () => {
       );
     });
 
-    it('shows the "Demande reçue" panel immediately after a 202, and starts polling', () => {
+    it('AC-13 — shows the "Demande reçue" panel immediately after a 202, and starts polling', () => {
       vi.useFakeTimers();
       httpMock.expectOne(statusUrl).flush(NONE_STATUS);
       fixture.detectChanges();
@@ -278,7 +278,7 @@ describe('ExportComponent', () => {
   describe('requestExport() — error handling', () => {
     beforeEach(async () => setup());
 
-    it('shows an error toast and re-enables the button on a generic (500) failure', () => {
+    it('AC-14 — shows an error toast and re-enables the button on a generic (500) failure', () => {
       httpMock.expectOne(statusUrl).flush(NONE_STATUS);
       fixture.detectChanges();
       const showSpy = vi.spyOn(toast, 'show');
@@ -292,7 +292,7 @@ describe('ExportComponent', () => {
       expect(component.canRequest()).toBe(true);
     });
 
-    it('on 409 (already pending), resyncs status instead of re-enabling blindly', () => {
+    it('AC-14 — on 409 (already pending), resyncs status instead of re-enabling blindly', () => {
       httpMock.expectOne(statusUrl).flush(NONE_STATUS);
       fixture.detectChanges();
       const showSpy = vi.spyOn(toast, 'show');
@@ -306,7 +306,7 @@ describe('ExportComponent', () => {
       expect(component.isPending()).toBe(true);
     });
 
-    it('on 429 (rate limited), resyncs status to reflect the authoritative nextAvailableAt', () => {
+    it('AC-16 — on 429 (rate limited), resyncs status to reflect the authoritative nextAvailableAt', () => {
       httpMock.expectOne(statusUrl).flush(NONE_STATUS);
       fixture.detectChanges();
       const showSpy = vi.spyOn(toast, 'show');
@@ -325,7 +325,7 @@ describe('ExportComponent', () => {
       expect(component.rateLimitedUntil()).not.toBeNull();
     });
 
-    it('requestExport() is a no-op while already submitting (no duplicate POST)', () => {
+    it('AC-15 — requestExport() is a no-op while already submitting (no duplicate POST)', () => {
       httpMock.expectOne(statusUrl).flush(NONE_STATUS);
       fixture.detectChanges();
 
@@ -341,7 +341,7 @@ describe('ExportComponent', () => {
   describe('accessibility', () => {
     beforeEach(async () => setup());
 
-    it('exposes a polite, atomic live region reflecting the current state', () => {
+    it('AC-17 — exposes a polite, atomic live region reflecting the current state', () => {
       httpMock.expectOne(statusUrl).flush(NONE_STATUS);
       fixture.detectChanges();
 
@@ -351,7 +351,7 @@ describe('ExportComponent', () => {
       expect(component.liveKey()).toBe('account.rgpd.export.live.idle');
     });
 
-    it('switches the live-region key to "submitting" while the POST is in flight', () => {
+    it('AC-17 — switches the live-region key to "submitting" while the POST is in flight', () => {
       httpMock.expectOne(statusUrl).flush(NONE_STATUS);
       fixture.detectChanges();
 

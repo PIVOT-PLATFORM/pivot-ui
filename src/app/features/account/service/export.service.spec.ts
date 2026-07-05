@@ -34,7 +34,7 @@ describe('ExportService', () => {
   });
 
   describe('getStatus()', () => {
-    it('issues a GET to /account/export/status and returns the body', () => {
+    it('AC-06 — issues a GET to /account/export/status and returns the body', () => {
       const body: ExportStatusResponse = {
         status: 'NONE',
         requestedAt: null,
@@ -69,7 +69,7 @@ describe('ExportService', () => {
   });
 
   describe('download()', () => {
-    it('issues a GET to /account/export/download/{token} as a blob, observing the full response', () => {
+    it('AC-09 — issues a GET to /account/export/download/{token} as a blob, observing the full response', () => {
       const blob = new Blob(['zip-content'], { type: 'application/octet-stream' });
       let result: import('@angular/common/http').HttpResponse<Blob> | undefined;
       service.download('raw-token-123').subscribe(res => (result = res));
@@ -87,7 +87,7 @@ describe('ExportService', () => {
       expect(result?.headers.get('Content-Disposition')).toContain('pivot-export-42.zip');
     });
 
-    it('URL-encodes the export token', () => {
+    it('AC-09 — URL-encodes the export token', () => {
       service.download('a token/with-special+chars').subscribe();
       const req = httpMock.expectOne(`${baseUrl}/download/${encodeURIComponent('a token/with-special+chars')}`);
       req.flush(new Blob());

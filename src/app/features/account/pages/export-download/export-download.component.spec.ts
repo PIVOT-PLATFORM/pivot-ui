@@ -86,7 +86,7 @@ describe('ExportDownloadComponent', () => {
     httpMock.expectNone(() => true);
   });
 
-  it('downloads the blob and shows the success state', async () => {
+  it('AC-09 — downloads the blob and shows the success state', async () => {
     ({ fixture, httpMock } = await setup('tok-abc'));
     const component = fixture.componentInstance;
 
@@ -133,6 +133,8 @@ describe('ExportDownloadComponent', () => {
     createElementSpy.mockRestore();
   });
 
+  // 403 case is AC-08 (download link enforces requester === export owner, cross-user → 403);
+  // 404/410/500 are defensive mappings beyond the literal AC text.
   it.each([
     [403, 'account.rgpd.export.download.error_forbidden'],
     [404, 'account.rgpd.export.download.error_not_found'],
