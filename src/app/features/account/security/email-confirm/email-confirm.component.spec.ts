@@ -123,6 +123,18 @@ describe('EmailConfirmComponent', () => {
     httpMock.verify();
   });
 
+  it('le spinner de chargement est purement décoratif (aria-hidden) — le texte est porté par le <output> compagnon', () => {
+    const { fixture, httpMock } = setup('some-token');
+    const spinner: HTMLElement = fixture.nativeElement.querySelector('.confirm-spinner');
+    expect(spinner?.getAttribute('aria-hidden')).toBe('true');
+    expect(spinner?.hasAttribute('aria-label')).toBe(false);
+    const hint: HTMLElement = fixture.nativeElement.querySelector('.confirm-hint');
+    expect(hint?.tagName.toLowerCase()).toBe('output');
+    expect(hint?.textContent).toContain('account.security.email.confirm.loading');
+    httpMock.expectOne(r => r.url === `${environment.apiUrl}/account/email/confirm`).flush(null);
+    httpMock.verify();
+  });
+
   it('affiche la carte marque PIVOT quel que soit l\'état (page publique, cohérente avec /auth/verify-email)', () => {
     const { fixture, httpMock } = setup('valid-token');
     httpMock.expectOne(r => r.url === `${environment.apiUrl}/account/email/confirm`).flush(null);

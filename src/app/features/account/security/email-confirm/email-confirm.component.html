@@ -9,7 +9,7 @@
 
     @switch (state()) {
       @case ('loading') {
-        <div class="confirm-spinner" [attr.aria-label]="'account.security.email.confirm.loading' | transloco"></div>
+        <div class="confirm-spinner" aria-hidden="true"></div>
         <output class="confirm-hint">{{ 'account.security.email.confirm.loading' | transloco }}</output>
       }
       @case ('success') {
