@@ -6,6 +6,7 @@ import { provideHttpClientTesting, HttpTestingController } from '@angular/common
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { AdminUsersComponent } from './admin-users.component';
 import type { AdminUserDto, AdminUserPage } from './admin-user.model';
+import { ToastService } from '../../../shared/toast/toast.service';
 import { environment } from '../../../../environments/environment';
 
 const frTranslations = {
@@ -51,6 +52,22 @@ const frTranslations = {
           status: 'Utilisateurs {{ start }}-{{ end }} sur {{ total }}',
         },
       },
+      role: {
+        select_aria: 'Rôle de {{ name }}',
+        confirm: {
+          title: 'Changer le rôle de {{ name }} de {{ from }} vers {{ to }} ?',
+          message: 'Cette modification prend effet immédiatement.',
+          confirm: 'Confirmer',
+          cancel: 'Annuler',
+        },
+        toast: {
+          updated: 'Rôle mis à jour',
+          error: 'Impossible de modifier le rôle de {{ name }}. Réessayez.',
+          self_demotion: 'Vous ne pouvez pas modifier votre propre rôle.',
+          invalid_role: "Le rôle sélectionné n'est pas valide.",
+          not_found: 'Utilisateur introuvable.',
+        },
+      },
     },
   },
 };
@@ -78,6 +95,7 @@ const makePage = (content: AdminUserDto[], overrides: Partial<AdminUserPage> = {
 describe('AdminUsersComponent', () => {
   let fixture: ComponentFixture<AdminUsersComponent>;
   let httpMock: HttpTestingController;
+  let toastService: ToastService;
 
   const expectListRequest = () =>
     httpMock.expectOne(r => r.url === `${environment.apiUrl}/admin/users` && r.method === 'GET');
@@ -101,6 +119,7 @@ describe('AdminUsersComponent', () => {
 
     fixture = TestBed.createComponent(AdminUsersComponent);
     httpMock = TestBed.inject(HttpTestingController);
+    toastService = TestBed.inject(ToastService);
     fixture.detectChanges();
   });
 
@@ -321,5 +340,171 @@ describe('AdminUsersComponent', () => {
     fixture.detectChanges();
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
     expect(fixture.nativeElement.querySelector('[data-testid="user-expanded-1"]')).toBeNull();
+  });
+
+  describe('role change (US06.1.3)', () => {
+    const roleSelect = (id: number): HTMLSelectElement =>
+      fixture.nativeElement.querySelector(`[data-testid="user-role-select-${id}"]`);
+
+    const changeRoleViaSelect = (id: number, newRole: string): HTMLSelectElement => {
+      const select = roleSelect(id);
+      select.value = newRole;
+      select.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+      return select;
+    };
+
+    it('renders a role select per row with a unique aria-label naming the user', () => {
+      flushList(
+        makePage([
+          makeDto(1, { firstName: 'Alice', lastName: 'Martin', role: 'ROLE_USER' }),
+          makeDto(2, { firstName: 'Bob', lastName: 'Durand', role: 'ROLE_ADMIN' }),
+        ])
+      );
+
+      const select1 = roleSelect(1);
+      const select2 = roleSelect(2);
+      expect(select1.getAttribute('aria-label')).toBe('Rôle de Alice Martin');
+      expect(select2.getAttribute('aria-label')).toBe('Rôle de Bob Durand');
+      expect(select1.getAttribute('aria-label')).not.toBe(select2.getAttribute('aria-label'));
+      expect(select1.value).toBe('ROLE_USER');
+      expect(select2.value).toBe('ROLE_ADMIN');
+    });
+
+    it('re-selecting the current role does not open the confirmation dialog nor call the API', () => {
+      flushList(makePage([makeDto(1, { role: 'ROLE_USER' })]));
+      changeRoleViaSelect(1, 'ROLE_USER');
+
+      expect(fixture.nativeElement.querySelector('[data-testid="confirm-dialog"]')).toBeNull();
+      httpMock.expectNone(`${environment.apiUrl}/admin/users/1/role`);
+    });
+
+    it('opens a role="dialog" confirmation with aria-labelledby before calling the API', () => {
+      flushList(makePage([makeDto(1, { firstName: 'Alice', lastName: 'Martin', role: 'ROLE_USER' })]));
+      changeRoleViaSelect(1, 'ROLE_ADMIN');
+
+      const dialog = fixture.nativeElement.querySelector('[data-testid="confirm-dialog"]');
+      expect(dialog).not.toBeNull();
+      expect(dialog.getAttribute('role')).toBe('dialog');
+      expect(dialog.getAttribute('aria-labelledby')).toBeTruthy();
+      expect(dialog.textContent).toContain('Changer le rôle de Alice Martin de Utilisateur vers Administrateur ?');
+
+      httpMock.expectNone(`${environment.apiUrl}/admin/users/1/role`);
+    });
+
+    it('cancelling the confirmation reverts the select to the previous role and sends no API call', () => {
+      flushList(makePage([makeDto(1, { role: 'ROLE_USER' })]));
+      const select = changeRoleViaSelect(1, 'ROLE_ADMIN');
+      expect(select.value).toBe('ROLE_ADMIN'); // native DOM already flipped by the browser on pick
+
+      fixture.nativeElement.querySelector('[data-testid="confirm-dialog-cancel"]').click();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('[data-testid="confirm-dialog"]')).toBeNull();
+      expect(select.value).toBe('ROLE_USER');
+      expect(fixture.nativeElement.querySelector('[data-testid="user-role-1"]').textContent.trim()).toBe(
+        'Utilisateur'
+      );
+      httpMock.expectNone(`${environment.apiUrl}/admin/users/1/role`);
+    });
+
+    it('confirms the change: calls PATCH, disables the select while in flight, updates the badge, and toasts success', () => {
+      flushList(makePage([makeDto(1, { role: 'ROLE_USER' })]));
+      const select = changeRoleViaSelect(1, 'ROLE_ADMIN');
+
+      fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]').click();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('[data-testid="confirm-dialog"]')).toBeNull();
+      expect(select.disabled).toBe(true);
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/admin/users/1/role`);
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual({ role: 'ROLE_ADMIN' });
+
+      req.flush(makeDto(1, { role: 'ROLE_ADMIN' }));
+      fixture.detectChanges();
+
+      expect(select.disabled).toBe(false);
+      expect(fixture.nativeElement.querySelector('[data-testid="user-role-1"]').textContent.trim()).toBe(
+        'Administrateur'
+      );
+      expect(
+        toastService.toasts().some(t => t.type === 'info' && t.messageKey === 'admin.users.role.toast.updated')
+      ).toBe(true);
+    });
+
+    it('rolls back to the previous role and shows the generic error toast when the PATCH fails with a 500', () => {
+      flushList(makePage([makeDto(1, { firstName: 'Alice', lastName: 'Martin', role: 'ROLE_USER' })]));
+      const select = changeRoleViaSelect(1, 'ROLE_ADMIN');
+      fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]').click();
+      fixture.detectChanges();
+
+      httpMock
+        .expectOne(`${environment.apiUrl}/admin/users/1/role`)
+        .flush('Server error', { status: 500, statusText: 'Internal Server Error' });
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('[data-testid="user-role-1"]').textContent.trim()).toBe(
+        'Utilisateur'
+      );
+      expect(select.disabled).toBe(false);
+      expect(
+        toastService
+          .toasts()
+          .some(
+            t =>
+              t.type === 'error' &&
+              t.messageKey === 'admin.users.role.toast.error' &&
+              t.params?.['name'] === 'Alice Martin'
+          )
+      ).toBe(true);
+    });
+
+    it('shows the self-demotion toast and rolls back on a 403', () => {
+      flushList(makePage([makeDto(1, { role: 'ROLE_ADMIN' })]));
+      changeRoleViaSelect(1, 'ROLE_USER');
+      fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]').click();
+      fixture.detectChanges();
+
+      httpMock
+        .expectOne(`${environment.apiUrl}/admin/users/1/role`)
+        .flush({ error: 'SELF_DEMOTION' }, { status: 403, statusText: 'Forbidden' });
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('[data-testid="user-role-1"]').textContent.trim()).toBe(
+        'Administrateur'
+      );
+      expect(
+        toastService.toasts().some(t => t.type === 'error' && t.messageKey === 'admin.users.role.toast.self_demotion')
+      ).toBe(true);
+    });
+
+    it('shows the not-found toast on a 404 (cross-tenant)', () => {
+      flushList(makePage([makeDto(1, { role: 'ROLE_USER' })]));
+      changeRoleViaSelect(1, 'ROLE_ADMIN');
+      fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]').click();
+      fixture.detectChanges();
+
+      httpMock
+        .expectOne(`${environment.apiUrl}/admin/users/1/role`)
+        .flush({ error: 'NOT_FOUND' }, { status: 404, statusText: 'Not Found' });
+      fixture.detectChanges();
+
+      expect(
+        toastService.toasts().some(t => t.type === 'error' && t.messageKey === 'admin.users.role.toast.not_found')
+      ).toBe(true);
+    });
+
+    it('confirmRoleChange() is a no-op if called with no pending confirmation', () => {
+      flushList(makePage([makeDto(1)]));
+      expect(() => fixture.componentInstance.confirmRoleChange()).not.toThrow();
+      httpMock.expectNone(r => r.url.includes('/role'));
+    });
+
+    it('cancelRoleChange() is a no-op if called with no pending confirmation', () => {
+      flushList(makePage([makeDto(1)]));
+      expect(() => fixture.componentInstance.cancelRoleChange()).not.toThrow();
+    });
   });
 });
