@@ -249,4 +249,30 @@ describe('TenantsListComponent', () => {
     expect(status.textContent).toContain('Page 1 sur 3');
     expect(status.textContent).toContain('45 tenants');
   });
+
+  it('disables the filter fieldset while a request is in flight, and re-enables it once settled', () => {
+    // The 4 filter controls + submit button live inside a single native
+    // <fieldset [disabled]="loading()"> (not individual per-control [disabled]
+    // bindings — Angular's NgModel/ControlValueAccessor owns the disabled state of
+    // any element it's attached to and silently overrides a co-located [disabled]
+    // binding on the same element). The browser natively cascades the fieldset's
+    // disabled state to every descendant control; jsdom does not implement that
+    // cascade (a known jsdom gap — real browsers do), so this test asserts on the
+    // fieldset's own binding, which is what our template actually controls.
+    const fieldset = fixture.nativeElement.querySelector('[data-testid="tenants-filter-fieldset"]');
+
+    // Initial mount: the very first GET is already pending from beforeEach's fixture.detectChanges().
+    expect(fieldset.disabled).toBe(true);
+
+    flushList(makePage([makeDto(1)]));
+    expect(fieldset.disabled).toBe(false);
+
+    fixture.nativeElement.querySelector('[data-testid="tenant-filter-submit"]').click();
+    fixture.detectChanges();
+    expect(fieldset.disabled).toBe(true);
+
+    expectListRequest().flush(makePage([]));
+    fixture.detectChanges();
+    expect(fieldset.disabled).toBe(false);
+  });
 });

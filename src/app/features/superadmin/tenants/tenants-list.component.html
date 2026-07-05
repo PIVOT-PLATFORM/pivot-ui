@@ -9,68 +9,83 @@
     [attr.aria-label]="'superadmin.tenants.filters.form_aria' | transloco"
     (ngSubmit)="onFilterSubmit()"
   >
-    <div class="tenants-list__filter-field">
-      <label for="tenant-filter-name">{{ 'superadmin.tenants.filters.name' | transloco }}</label>
-      <input
-        id="tenant-filter-name"
-        name="name"
-        type="search"
-        [ngModel]="filters().name"
-        (ngModelChange)="onNameInput($event)"
-        data-testid="tenant-filter-name"
-      />
-    </div>
+    <!--
+      Native <fieldset [disabled]> — not per-control [disabled] bindings — because
+      Angular's NgModel/ControlValueAccessor machinery owns the disabled state of any
+      element it's attached to and silently overrides a co-located [disabled] binding
+      on the same element (confirmed empirically: the control never re-enables). The
+      fieldset is the framework-recommended way to disable a group of ngModel-bound
+      controls without fighting that machinery — the browser natively cascades
+      disabled to every descendant control, submit button included.
+    -->
+    <fieldset
+      class="tenants-list__filter-fieldset"
+      [disabled]="loading()"
+      data-testid="tenants-filter-fieldset"
+    >
+      <div class="tenants-list__filter-field">
+        <label for="tenant-filter-name">{{ 'superadmin.tenants.filters.name' | transloco }}</label>
+        <input
+          id="tenant-filter-name"
+          name="name"
+          type="search"
+          [ngModel]="filters().name"
+          (ngModelChange)="onNameInput($event)"
+          data-testid="tenant-filter-name"
+        />
+      </div>
 
-    <div class="tenants-list__filter-field">
-      <label for="tenant-filter-plan">{{ 'superadmin.tenants.filters.plan' | transloco }}</label>
-      <select
-        id="tenant-filter-plan"
-        name="plan"
-        [ngModel]="filters().plan"
-        (ngModelChange)="onPlanChange($event)"
-        data-testid="tenant-filter-plan"
-      >
-        <option value="">{{ 'superadmin.tenants.filters.plan_all' | transloco }}</option>
-        <option value="SAAS">{{ 'superadmin.tenants.filters.plan_saas' | transloco }}</option>
-        <option value="ENTERPRISE">{{ 'superadmin.tenants.filters.plan_enterprise' | transloco }}</option>
-        <option value="TRIAL">{{ 'superadmin.tenants.filters.plan_trial' | transloco }}</option>
-      </select>
-    </div>
+      <div class="tenants-list__filter-field">
+        <label for="tenant-filter-plan">{{ 'superadmin.tenants.filters.plan' | transloco }}</label>
+        <select
+          id="tenant-filter-plan"
+          name="plan"
+          [ngModel]="filters().plan"
+          (ngModelChange)="onPlanChange($event)"
+          data-testid="tenant-filter-plan"
+        >
+          <option value="">{{ 'superadmin.tenants.filters.plan_all' | transloco }}</option>
+          <option value="SAAS">{{ 'superadmin.tenants.filters.plan_saas' | transloco }}</option>
+          <option value="ENTERPRISE">{{ 'superadmin.tenants.filters.plan_enterprise' | transloco }}</option>
+          <option value="TRIAL">{{ 'superadmin.tenants.filters.plan_trial' | transloco }}</option>
+        </select>
+      </div>
 
-    <div class="tenants-list__filter-field">
-      <label for="tenant-filter-active">{{ 'superadmin.tenants.filters.is_active' | transloco }}</label>
-      <select
-        id="tenant-filter-active"
-        name="isActive"
-        [ngModel]="filters().isActive"
-        (ngModelChange)="onIsActiveChange($event)"
-        data-testid="tenant-filter-active"
-      >
-        <option value="">{{ 'superadmin.tenants.filters.is_active_all' | transloco }}</option>
-        <option value="true">{{ 'superadmin.tenants.filters.is_active_true' | transloco }}</option>
-        <option value="false">{{ 'superadmin.tenants.filters.is_active_false' | transloco }}</option>
-      </select>
-    </div>
+      <div class="tenants-list__filter-field">
+        <label for="tenant-filter-active">{{ 'superadmin.tenants.filters.is_active' | transloco }}</label>
+        <select
+          id="tenant-filter-active"
+          name="isActive"
+          [ngModel]="filters().isActive"
+          (ngModelChange)="onIsActiveChange($event)"
+          data-testid="tenant-filter-active"
+        >
+          <option value="">{{ 'superadmin.tenants.filters.is_active_all' | transloco }}</option>
+          <option value="true">{{ 'superadmin.tenants.filters.is_active_true' | transloco }}</option>
+          <option value="false">{{ 'superadmin.tenants.filters.is_active_false' | transloco }}</option>
+        </select>
+      </div>
 
-    <div class="tenants-list__filter-field">
-      <label for="tenant-filter-auth-mode">{{ 'superadmin.tenants.filters.auth_mode' | transloco }}</label>
-      <select
-        id="tenant-filter-auth-mode"
-        name="authMode"
-        [ngModel]="filters().authMode"
-        (ngModelChange)="onAuthModeChange($event)"
-        data-testid="tenant-filter-auth-mode"
-      >
-        <option value="">{{ 'superadmin.tenants.filters.auth_mode_all' | transloco }}</option>
-        <option value="SAAS">{{ 'superadmin.tenants.filters.auth_mode_saas' | transloco }}</option>
-        <option value="ENTERPRISE">{{ 'superadmin.tenants.filters.auth_mode_enterprise' | transloco }}</option>
-        <option value="HYBRID">{{ 'superadmin.tenants.filters.auth_mode_hybrid' | transloco }}</option>
-      </select>
-    </div>
+      <div class="tenants-list__filter-field">
+        <label for="tenant-filter-auth-mode">{{ 'superadmin.tenants.filters.auth_mode' | transloco }}</label>
+        <select
+          id="tenant-filter-auth-mode"
+          name="authMode"
+          [ngModel]="filters().authMode"
+          (ngModelChange)="onAuthModeChange($event)"
+          data-testid="tenant-filter-auth-mode"
+        >
+          <option value="">{{ 'superadmin.tenants.filters.auth_mode_all' | transloco }}</option>
+          <option value="SAAS">{{ 'superadmin.tenants.filters.auth_mode_saas' | transloco }}</option>
+          <option value="ENTERPRISE">{{ 'superadmin.tenants.filters.auth_mode_enterprise' | transloco }}</option>
+          <option value="HYBRID">{{ 'superadmin.tenants.filters.auth_mode_hybrid' | transloco }}</option>
+        </select>
+      </div>
 
-    <button type="submit" class="btn btn-primary" data-testid="tenant-filter-submit">
-      {{ 'superadmin.tenants.filters.submit' | transloco }}
-    </button>
+      <button type="submit" class="btn btn-primary" data-testid="tenant-filter-submit">
+        {{ 'superadmin.tenants.filters.submit' | transloco }}
+      </button>
+    </fieldset>
   </form>
 
   @if (loading()) {
