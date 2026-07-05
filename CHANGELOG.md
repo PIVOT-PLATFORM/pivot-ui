@@ -1,3 +1,10 @@
+## [0.10.1](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.10.0...v0.10.1) (2026-07-05)
+
+
+### Bug Fixes
+
+* **claude:** clarifie que pivot-design-system n'est pas encore créé ([#79](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/79)) ([8688a9a](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/8688a9a1c28b7f1e714e2a25d0b4dc2a1c628d2a))
+
 # [0.10.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.9.0...v0.10.0) (2026-07-03)
 
 
