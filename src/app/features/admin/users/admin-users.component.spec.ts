@@ -179,6 +179,22 @@ describe('AdminUsersComponent', () => {
     expect(row.textContent).toContain('user3@tenant.test');
   });
 
+  it('renders the "Inactif" status badge for the INACTIVE status', () => {
+    flushList(makePage([makeDto(5, { status: 'INACTIVE' })]));
+    expect(fixture.nativeElement.querySelector('[data-testid="user-status-5"]').textContent.trim()).toBe('Inactif');
+  });
+
+  it('falls back to a generic "Autre" role badge for an unexpected backend role value', () => {
+    flushList(makePage([makeDto(4, { role: 'ROLE_SUPER_ADMIN' })]));
+    expect(fixture.nativeElement.querySelector('[data-testid="user-role-4"]').textContent.trim()).toBe('Autre');
+  });
+
+  it('previousPage() is a no-op on the first page (no HTTP request sent)', () => {
+    flushList(makePage([makeDto(1)], { number: 0, totalPages: 2, totalElements: 21 }));
+    fixture.componentInstance.previousPage();
+    httpMock.expectNone(r => r.url === `${environment.apiUrl}/admin/users`);
+  });
+
   it('announces the total match count via the aria-live region after a successful load', () => {
     flushList(makePage([makeDto(1)], { totalElements: 47 }));
     const live = fixture.nativeElement.querySelector('[data-testid="admin-users-live-region"]');
