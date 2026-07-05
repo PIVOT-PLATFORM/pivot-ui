@@ -16,8 +16,9 @@
  *   network round-trip) + the same backend 400 codes handled defensively. No avatar →
  *   initials fallback (`profileInitials`).
  * - On invalid submit, focus moves to the first invalid field (firstName before lastName).
- * - Network/5xx error on PATCH → toast (AC), not inline — mirrors the existing
- *   `error_generic` vs. inline-field-error split used by `ChangePasswordComponent`.
+ * - Network/5xx error on PATCH → toast (AC), not inline: only the domain-specific
+ *   `INVALID_NAME` case is shown inline next to the fields it concerns, everything else
+ *   (network failure, unexpected 5xx) surfaces as a generic toast.
  */
 import { ChangeDetectionStrategy, Component, ElementRef, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { Location } from '@angular/common';

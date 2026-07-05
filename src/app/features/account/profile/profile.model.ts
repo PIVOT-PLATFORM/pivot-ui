@@ -63,8 +63,8 @@ export type AvatarErrorKind = 'invalid_format' | 'too_large' | 'generic';
  * Initials fallback shown when `avatarUrl` is `null` (AC: "Avatar non défini → retourne null ;
  * frontend utilise l'avatar initiales"). Mirrors `NavbarComponent.initials()` — duplicated
  * intentionally rather than shared, per this codebase's convention for tiny pure functions
- * (see `passwordsMatch` in `change-password.component.ts`): a cross-feature dependency for a
- * 4-line pure function is not worth the coupling.
+ * (see `passwordsMatch` in `register.component.ts`): a cross-feature dependency for a 4-line
+ * pure function is not worth the coupling.
  */
 export function profileInitials(firstName: string | null | undefined, lastName: string | null | undefined, email: string): string {
   const first = firstName?.[0] ?? '';
