@@ -35,6 +35,14 @@ export interface ExportRequestResponse {
   requestedAt: string;
 }
 
+/**
+ * Statuses for which a request is still in flight server-side (AC-13 —
+ * "Demande reçue" persists while PENDING/PROCESSING). Shared between
+ * {@link ExportService} (polling cutoff) and its consumers (button state),
+ * so both sides always agree on what counts as "still running".
+ */
+export const IN_FLIGHT_EXPORT_STATUSES: ReadonlySet<ExportRequestStatus> = new Set(['PENDING', 'PROCESSING']);
+
 /** Body of a `429 Too Many Requests` response from `POST /api/account/export`. */
 export interface ExportRateLimitedError {
   code: 'RATE_LIMITED';

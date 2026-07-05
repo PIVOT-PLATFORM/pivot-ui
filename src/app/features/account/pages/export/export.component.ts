@@ -6,7 +6,7 @@
  * - `loadError` → status fetch failed, retry affordance shown.
  * - `submitting` → `POST /account/export` in flight (button disabled + spinner).
  * - `status().status === 'PENDING' | 'PROCESSING'` → "Demande reçue" panel,
- *   polled every {@link POLL_INTERVAL_MS} until it settles to READY/FAILED.
+ *   polled via {@link ExportService.pollStatus} until it settles to READY/FAILED.
  * - `rateLimitedUntil()` non-null → button kept accessible (`aria-disabled`,
  *   not natively `disabled`) so keyboard/AT users can still discover the
  *   "Prochain export disponible à HH:MM" reason via `aria-describedby`
@@ -22,18 +22,11 @@ import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signa
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Location } from '@angular/common';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { interval, switchMap, takeWhile, tap } from 'rxjs';
+import { tap } from 'rxjs';
 import { ToastService } from '../../../../shared/toast/toast.service';
 import { ExportService } from '../../service/export.service';
+import { IN_FLIGHT_EXPORT_STATUSES } from '../../service/export.model';
 import type { ExportStatusResponse } from '../../service/export.model';
-
-/** Poll interval while a request is PENDING/PROCESSING (ms). */
-const POLL_INTERVAL_MS = 5000;
-/** Safety cap on poll attempts (5 min at the default interval) — avoids indefinite
- *  polling if the backend `@Async` job never settles. */
-const MAX_POLL_ATTEMPTS = 60;
-
-const IN_FLIGHT_STATUSES: ReadonlySet<ExportStatusResponse['status']> = new Set(['PENDING', 'PROCESSING']);
 
 @Component({
   selector: 'piv-export',
@@ -60,7 +53,7 @@ export class ExportComponent {
 
   readonly isPending = computed(() => {
     const s = this.status()?.status;
-    return s !== undefined && IN_FLIGHT_STATUSES.has(s);
+    return s !== undefined && IN_FLIGHT_EXPORT_STATUSES.has(s);
   });
 
   /** Non-null (and strictly in the future) while a new request is rate-limited. */
@@ -160,7 +153,7 @@ export class ExportComponent {
       next: res => {
         this.status.set(res);
         this.initialLoading.set(false);
-        if (IN_FLIGHT_STATUSES.has(res.status)) this.pollUntilSettled();
+        if (IN_FLIGHT_EXPORT_STATUSES.has(res.status)) this.pollUntilSettled();
       },
       error: () => {
         this.initialLoading.set(false);
@@ -173,13 +166,17 @@ export class ExportComponent {
     this.exportService.getStatus().subscribe({ next: res => this.status.set(res) });
   }
 
-  /** Polls `GET /status` until the request leaves PENDING/PROCESSING, or the attempt cap is reached. */
+  /**
+   * Starts (or resumes) polling until the request leaves PENDING/PROCESSING.
+   * The polling mechanics (interval, cutoff, attempt cap) live in
+   * {@link ExportService.pollStatus} — this only wires the result into local
+   * state and ties the subscription to this component's lifetime.
+   */
   private pollUntilSettled(): void {
-    interval(POLL_INTERVAL_MS)
+    this.exportService
+      .pollStatus()
       .pipe(
-        switchMap(() => this.exportService.getStatus()),
         tap(res => this.status.set(res)),
-        takeWhile((res, index) => IN_FLIGHT_STATUSES.has(res.status) && index < MAX_POLL_ATTEMPTS - 1, true),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe();

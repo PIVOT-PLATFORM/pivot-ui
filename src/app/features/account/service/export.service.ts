@@ -1,8 +1,15 @@
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, interval, switchMap, takeWhile } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { IN_FLIGHT_EXPORT_STATUSES } from './export.model';
 import type { ExportRequestResponse, ExportStatusResponse } from './export.model';
+
+/** Poll interval while a request is PENDING/PROCESSING (ms). */
+const POLL_INTERVAL_MS = 5000;
+/** Safety cap on poll attempts (5 min at the default interval) — avoids indefinite
+ *  polling if the backend `@Async` job never settles. */
+const MAX_POLL_ATTEMPTS = 60;
 
 /**
  * ExportService — RGPD Art. 20 data portability (US02.3.1).
@@ -27,6 +34,23 @@ export class ExportService {
    */
   getStatus(): Observable<ExportStatusResponse> {
     return this.http.get<ExportStatusResponse>(`${this.baseUrl}/status`);
+  }
+
+  /**
+   * Polls {@link getStatus} on a fixed interval (AC-13) until the request
+   * leaves PENDING/PROCESSING — emitting the settling value too — or the
+   * attempt cap is reached. Encapsulates *how* the status is polled; the
+   * caller (component) still owns *when* to stop listening, e.g. via
+   * `takeUntilDestroyed`.
+   */
+  pollStatus(): Observable<ExportStatusResponse> {
+    return interval(POLL_INTERVAL_MS).pipe(
+      switchMap(() => this.getStatus()),
+      takeWhile(
+        (res, index) => IN_FLIGHT_EXPORT_STATUSES.has(res.status) && index < MAX_POLL_ATTEMPTS - 1,
+        true,
+      ),
+    );
   }
 
   /**

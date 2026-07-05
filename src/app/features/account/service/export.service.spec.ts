@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
@@ -5,10 +6,19 @@ import { environment } from '../../../../environments/environment';
 import { ExportService } from './export.service';
 import type { ExportRequestResponse, ExportStatusResponse } from './export.model';
 
+const NONE_STATUS: ExportStatusResponse = {
+  status: 'NONE',
+  requestedAt: null,
+  completedAt: null,
+  expiresAt: null,
+  nextAvailableAt: null,
+};
+
 describe('ExportService', () => {
   let service: ExportService;
   let httpMock: HttpTestingController;
   const baseUrl = `${environment.apiUrl}/account/export`;
+  const statusUrl = `${baseUrl}/status`;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -18,7 +28,10 @@ describe('ExportService', () => {
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  afterEach(() => httpMock.verify());
+  afterEach(() => {
+    httpMock.verify();
+    vi.useRealTimers();
+  });
 
   describe('getStatus()', () => {
     it('issues a GET to /account/export/status and returns the body', () => {
@@ -78,6 +91,45 @@ describe('ExportService', () => {
       service.download('a token/with-special+chars').subscribe();
       const req = httpMock.expectOne(`${baseUrl}/download/${encodeURIComponent('a token/with-special+chars')}`);
       req.flush(new Blob());
+    });
+  });
+
+  describe('pollStatus() — AC-13 persistent "Demande reçue" until settled', () => {
+    it('polls on a fixed interval and stops as soon as a settled status is emitted', () => {
+      vi.useFakeTimers();
+      const emitted: ExportStatusResponse[] = [];
+      service.pollStatus().subscribe(res => emitted.push(res));
+
+      vi.advanceTimersByTime(5000);
+      httpMock.expectOne(statusUrl).flush({ ...NONE_STATUS, status: 'PENDING' });
+      expect(emitted).toEqual([{ ...NONE_STATUS, status: 'PENDING' }]);
+
+      vi.advanceTimersByTime(5000);
+      httpMock.expectOne(statusUrl).flush({ ...NONE_STATUS, status: 'PROCESSING' });
+      expect(emitted).toHaveLength(2);
+
+      vi.advanceTimersByTime(5000);
+      httpMock.expectOne(statusUrl).flush({ ...NONE_STATUS, status: 'READY' });
+      expect(emitted).toHaveLength(3);
+
+      // Settled — no further ticks issue a request.
+      vi.advanceTimersByTime(20000);
+      httpMock.expectNone(statusUrl);
+    });
+
+    it('stops polling once the attempt cap is reached even if still PENDING/PROCESSING', () => {
+      vi.useFakeTimers();
+      let completed = false;
+      service.pollStatus().subscribe({ complete: () => (completed = true) });
+
+      for (let i = 0; i < 60; i++) {
+        vi.advanceTimersByTime(5000);
+        httpMock.expectOne(statusUrl).flush({ ...NONE_STATUS, status: 'PROCESSING' });
+      }
+
+      expect(completed).toBe(true);
+      vi.advanceTimersByTime(5000);
+      httpMock.expectNone(statusUrl);
     });
   });
 });
