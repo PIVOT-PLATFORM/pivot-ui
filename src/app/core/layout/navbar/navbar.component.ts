@@ -14,6 +14,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '../../auth/service/auth.service';
 import { ThemeService } from '../../theme/theme.service';
+import { LanguagePreferenceService } from '../../i18n/language-preference.service';
+import { isSupportedLanguage } from '../../i18n/language';
 
 const AVATAR_COLORS = [
   '#8B5CF6', '#F59E0B', '#10B981', '#EF4444',
@@ -152,6 +154,7 @@ export class NavbarComponent {
   private readonly auth = inject(AuthService);
   private readonly themeService = inject(ThemeService);
   private readonly transloco = inject(TranslocoService);
+  private readonly languagePreference = inject(LanguagePreferenceService);
   readonly lang = toSignal(this.transloco.langChanges$, { initialValue: this.transloco.getActiveLang() });
 
   readonly bugReportUrl = computed<string>(() => {
@@ -219,9 +222,22 @@ export class NavbarComponent {
   }
 
   toggleTheme(): void { this.themeService.toggleTheme(); }
+
+  /**
+   * US02.1.2 — AC "sélecteur de langue navbar (si connecté) met à jour localStorage ET
+   * appelle PATCH /account/profile". Delegates to `LanguagePreferenceService` for the actual
+   * switch (+ optimistic revert/toast on failure) — see that service's TSDoc for why the
+   * PATCH lives there rather than here or in `AuthService`. Persisting server-side is
+   * conditioned on being authenticated: an anonymous visit to a page that happens to render
+   * this navbar must never call an `/account/*` endpoint.
+   */
   setLang(lang: string): void {
-    this.transloco.setActiveLang(lang);
-    localStorage.setItem('pivot_lang', lang);
+    if (!isSupportedLanguage(lang)) return;
+    if (this.auth.isAuthenticated()) {
+      this.languagePreference.saveAndApply(lang);
+    } else {
+      this.languagePreference.apply(lang);
+    }
   }
   logout(): void { this.auth.logout().subscribe(); }
 }
