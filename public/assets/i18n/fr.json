@@ -319,6 +319,46 @@
         "revoked_all": "Toutes les autres sessions ont été révoquées",
         "revoke_all_error": "Impossible de révoquer les autres sessions. Réessayez."
       }
+    },
+    "rgpd": {
+      "export": {
+        "main_aria": "Export de mes données personnelles",
+        "title": "Exporter mes données",
+        "subtitle": "Téléchargez une archive de vos données personnelles conservées par PIVOT (droit à la portabilité, RGPD art. 20).",
+        "loading_status": "Vérification du statut de votre export…",
+        "load_error": "Impossible de vérifier le statut de votre export. Réessayez.",
+        "retry": "Réessayer",
+        "submit": "Demander mon export",
+        "received_title": "Demande reçue",
+        "received_estimate": "Vous recevrez un email dans quelques minutes avec un lien de téléchargement.",
+        "ready_notice": "Votre dernier export est prêt : vérifiez votre boîte email (lien valable jusqu'à {{ time }}).",
+        "failed_notice": "La génération de votre dernier export a échoué. Vous pouvez faire une nouvelle demande.",
+        "rate_limited_until": "Prochain export disponible à {{ time }}.",
+        "toast": {
+          "error_generic": "Une erreur est survenue lors de la demande d'export. Réessayez.",
+          "already_pending": "Une demande d'export est déjà en cours.",
+          "rate_limited": "Vous avez déjà demandé un export récemment."
+        },
+        "live": {
+          "idle": "Vous pouvez demander un export de vos données.",
+          "submitting": "Envoi de votre demande d'export en cours…",
+          "received": "Demande reçue. Vous recevrez un email dans quelques minutes.",
+          "ready": "Votre export est prêt, vérifiez votre boîte email.",
+          "failed": "La génération de votre export a échoué.",
+          "rate_limited": "Export déjà demandé récemment, nouvelle demande possible plus tard."
+        },
+        "download": {
+          "title": "Téléchargement de votre export",
+          "in_progress": "Préparation de votre téléchargement…",
+          "success": "Votre archive a été téléchargée.",
+          "success_back": "Retour à la page export",
+          "error_missing_token": "Lien de téléchargement invalide.",
+          "error_forbidden": "Ce lien de téléchargement n'est pas associé à votre compte.",
+          "error_not_found": "Lien de téléchargement introuvable ou déjà utilisé.",
+          "error_expired": "Ce lien de téléchargement a expiré.",
+          "error_generic": "Impossible de télécharger votre export. Réessayez plus tard."
+        }
+      }
     }
   },
   "contact": {

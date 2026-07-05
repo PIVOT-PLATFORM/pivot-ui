@@ -319,6 +319,46 @@
         "revoked_all": "All other sessions have been revoked",
         "revoke_all_error": "Couldn't revoke the other sessions. Please try again."
       }
+    },
+    "rgpd": {
+      "export": {
+        "main_aria": "Export my personal data",
+        "title": "Export my data",
+        "subtitle": "Download an archive of your personal data held by PIVOT (right to data portability, GDPR art. 20).",
+        "loading_status": "Checking your export status…",
+        "load_error": "Could not check your export status. Please try again.",
+        "retry": "Retry",
+        "submit": "Request my export",
+        "received_title": "Request received",
+        "received_estimate": "You will receive an email within a few minutes with a download link.",
+        "ready_notice": "Your last export is ready: check your inbox (link valid until {{ time }}).",
+        "failed_notice": "Generating your last export failed. You can request a new one.",
+        "rate_limited_until": "Next export available at {{ time }}.",
+        "toast": {
+          "error_generic": "An error occurred while requesting your export. Please try again.",
+          "already_pending": "An export request is already in progress.",
+          "rate_limited": "You already requested an export recently."
+        },
+        "live": {
+          "idle": "You can request an export of your data.",
+          "submitting": "Sending your export request…",
+          "received": "Request received. You will receive an email within a few minutes.",
+          "ready": "Your export is ready, check your inbox.",
+          "failed": "Generating your export failed.",
+          "rate_limited": "An export was already requested recently; a new one will be possible later."
+        },
+        "download": {
+          "title": "Downloading your export",
+          "in_progress": "Preparing your download…",
+          "success": "Your archive has been downloaded.",
+          "success_back": "Back to the export page",
+          "error_missing_token": "Invalid download link.",
+          "error_forbidden": "This download link is not linked to your account.",
+          "error_not_found": "Download link not found or already used.",
+          "error_expired": "This download link has expired.",
+          "error_generic": "Could not download your export. Please try again later."
+        }
+      }
     }
   },
   "contact": {
