@@ -1,3 +1,5 @@
+import { afterEach } from 'vitest';
+
 /**
  * Test-only in-memory `Storage` polyfill for specs exercising `window.localStorage`
  * (US02.2.4's {@link AccountDeletionStateService} and its consumers).
@@ -13,9 +15,14 @@
  * Call {@link installMemoryLocalStorage} as the very first line of a spec's
  * `beforeEach` — before any code (including the component/service under test)
  * touches `localStorage` — to install a fresh, real, working `Storage` for
- * that test.
+ * that test. The original `window.localStorage` descriptor is captured and
+ * restored automatically via a self-registered `afterEach` — without this,
+ * the replacement leaks into every spec file that runs afterward in the same
+ * Vitest worker (it broke `theme.service.spec.ts` in CI before this fix).
  */
 export function installMemoryLocalStorage(): void {
+  const originalDescriptor = Object.getOwnPropertyDescriptor(window, 'localStorage');
+
   const backing = new Map<string, string>();
   const storage: Storage = {
     getItem: (key: string) => (backing.has(key) ? (backing.get(key) as string) : null),
@@ -37,5 +44,13 @@ export function installMemoryLocalStorage(): void {
     configurable: true,
     writable: true,
     value: storage,
+  });
+
+  afterEach(() => {
+    if (originalDescriptor) {
+      Object.defineProperty(window, 'localStorage', originalDescriptor);
+    } else {
+      delete (window as { localStorage?: Storage }).localStorage;
+    }
   });
 }
