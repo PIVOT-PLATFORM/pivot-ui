@@ -286,6 +286,15 @@
       "submit": "Enregistrer",
       "success": "Profil mis à jour avec succès."
     },
+    "preferences": {
+      "title": "Langue",
+      "language_label": "Langue préférée",
+      "language_fr": "Français",
+      "language_en": "English",
+      "hint": "Cette langue sera utilisée pour l'interface et les emails.",
+      "success": "Langue mise à jour.",
+      "error_save_generic": "Impossible de mettre à jour la langue. Réessayez."
+    },
     "sessions": {
       "list": {
         "title": "Sessions actives",
