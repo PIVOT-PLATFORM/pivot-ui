@@ -169,6 +169,23 @@ describe('ExportComponent', () => {
 
       expect(component.canRequest()).toBe(true);
     });
+
+    it('AC-16 — automatically re-enables once nextAvailableAt elapses, without waiting for a new status fetch', () => {
+      vi.useFakeTimers();
+      const future = new Date(Date.now() + 5000).toISOString();
+      httpMock.expectOne(statusUrl).flush({ ...NONE_STATUS, nextAvailableAt: future });
+      fixture.detectChanges();
+
+      expect(component.canRequest()).toBe(false);
+
+      vi.advanceTimersByTime(5001);
+      fixture.detectChanges();
+
+      expect(component.canRequest()).toBe(true);
+      expect(component.rateLimitedUntil()).toBeNull();
+      // No extra status round-trip — purely a local clock re-evaluation.
+      httpMock.expectNone(statusUrl);
+    });
   });
 
   describe('pending / processing (AC: "Demande reçue" persistent state)', () => {

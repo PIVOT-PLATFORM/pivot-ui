@@ -18,7 +18,7 @@
  * the raw `exportToken`.
  */
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Location } from '@angular/common';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -56,12 +56,20 @@ export class ExportComponent {
     return s !== undefined && IN_FLIGHT_EXPORT_STATUSES.has(s);
   });
 
+  /**
+   * Reactive clock powering {@link rateLimitedUntil}. Bumped exactly once, right
+   * when the current `nextAvailableAt` elapses (see the constructor's `effect`),
+   * so the button re-enables itself as soon as the rate limit is actually over —
+   * not only on the next `status()` change (poll tick / manual reload).
+   */
+  private readonly now = signal(Date.now());
+
   /** Non-null (and strictly in the future) while a new request is rate-limited. */
   readonly rateLimitedUntil = computed<Date | null>(() => {
     const iso = this.status()?.nextAvailableAt;
     if (!iso) return null;
     const date = new Date(iso);
-    return date.getTime() > Date.now() ? date : null;
+    return date.getTime() > this.now() ? date : null;
   });
 
   /** Drives both the native `disabled` state (submit in flight) and the `aria-disabled` reason. */
@@ -101,6 +109,18 @@ export class ExportComponent {
 
   constructor() {
     this.loadStatus();
+    // Schedules a single wake-up for exactly when the current rate limit elapses,
+    // so `rateLimitedUntil()`/`canRequest()` flip without waiting for the next
+    // status poll or a manual reload. Reads `Date.now()` (untracked) rather than
+    // the `now` signal to avoid the effect re-triggering itself.
+    effect(onCleanup => {
+      const iso = this.status()?.nextAvailableAt;
+      if (!iso) return;
+      const delayMs = new Date(iso).getTime() - Date.now();
+      if (delayMs <= 0) return;
+      const timer = setTimeout(() => this.now.set(Date.now()), delayMs);
+      onCleanup(() => clearTimeout(timer));
+    });
   }
 
   goBack(): void {
