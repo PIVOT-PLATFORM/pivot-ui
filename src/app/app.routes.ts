@@ -129,6 +129,21 @@ export const routes: Routes = [
             m => m.SessionsListComponent
           ),
       },
+      {
+        // US02.3.1 — RGPD Art.20 data export request page ("Demander mon export").
+        path: 'account/export',
+        loadComponent: () => import('./features/account/pages/export/export.component').then(m => m.ExportComponent),
+      },
+      {
+        // Landing route for the authenticated download link emailed once the
+        // export is READY — matches the `{appUrl}/account/export/download?token=`
+        // URL pivot-core's EmailService already sends (PR #133).
+        path: 'account/export/download',
+        loadComponent: () =>
+          import('./features/account/pages/export-download/export-download.component').then(
+            m => m.ExportDownloadComponent,
+          ),
+      },
       ...MODULE_CHILDREN,
       { path: 'legal', children: LEGAL_CHILDREN },
       {
