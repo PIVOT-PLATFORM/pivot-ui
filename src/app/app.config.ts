@@ -10,6 +10,7 @@ import { routes } from './app.routes';
 import { tokenInterceptor } from './core/auth/interceptor/token.interceptor';
 import { AuthService } from './core/auth/service/auth.service';
 import { TranslocoHttpLoader } from './core/i18n/transloco.loader';
+import { LanguageSyncService } from './core/i18n/language-sync.service';
 import { catchError, of } from 'rxjs';
 
 function detectInitialLang(): string {
@@ -28,6 +29,16 @@ function initSession(auth: AuthService) {
   return auth.initSession().pipe(catchError(() => of(null)));
 }
 
+/**
+ * Force la construction de `LanguageSyncService` (US02.1.2) dès le bootstrap. Le service est
+ * `providedIn: 'root'` mais n'est instancié que lors d'une première injection — sans cet
+ * appel explicite, rien ne le construirait jamais et son `effect()` (qui applique
+ * `preferredLanguage` à chaque login/restauration de session) ne s'enclencherait jamais.
+ */
+function initLanguageSync(): void {
+  inject(LanguageSyncService);
+}
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
@@ -42,6 +53,9 @@ export const appConfig: ApplicationConfig = {
       },
       loader: TranslocoHttpLoader,
     }),
-    provideAppInitializer(() => initSession(inject(AuthService))),
+    provideAppInitializer(() => {
+      initLanguageSync();
+      return initSession(inject(AuthService));
+    }),
   ]
 };
