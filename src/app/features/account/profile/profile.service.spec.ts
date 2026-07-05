@@ -10,6 +10,7 @@ const makeDto = (overrides: Partial<ProfileDto> = {}): ProfileDto => ({
   lastName: 'Solane',
   email: 'alexandre.solane@example.com',
   avatarUrl: null,
+  preferredLanguage: 'fr',
   ...overrides,
 });
 

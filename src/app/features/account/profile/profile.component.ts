@@ -19,12 +19,17 @@
  * - Network/5xx error on PATCH → toast (AC), not inline: only the domain-specific
  *   `INVALID_NAME` case is shown inline next to the fields it concerns, everything else
  *   (network failure, unexpected 5xx) surfaces as a generic toast.
+ * - Language preference (US02.1.2): a native `<select>` bound to the app-wide active Transloco
+ *   language (not to `profile().preferredLanguage`) — see `activeLang` below for why. Switching
+ *   it delegates entirely to `LanguagePreferenceService.saveAndApply()`, shared with the navbar
+ *   language pill, which owns the PATCH + optimistic-switch + revert-on-failure + toast.
  */
 import { ChangeDetectionStrategy, Component, ElementRef, OnInit, ViewChild, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Location } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { ProfileService } from './profile.service';
 import {
   AVATAR_ACCEPTED_TYPES,
@@ -35,6 +40,8 @@ import {
   profileInitials,
 } from './profile.model';
 import { ToastService } from '../../../shared/toast/toast.service';
+import { LanguagePreferenceService } from '../../../core/i18n/language-preference.service';
+import { isSupportedLanguage } from '../../../core/i18n/language';
 
 const MAX_NAME_LENGTH = 100;
 
@@ -51,6 +58,8 @@ export class ProfileComponent implements OnInit {
   private readonly profileService = inject(ProfileService);
   private readonly toast = inject(ToastService);
   private readonly location = inject(Location);
+  private readonly transloco = inject(TranslocoService);
+  private readonly languagePreference = inject(LanguagePreferenceService);
 
   @ViewChild('firstNameInput') private firstNameInput?: ElementRef<HTMLInputElement>;
   @ViewChild('lastNameInput') private lastNameInput?: ElementRef<HTMLInputElement>;
@@ -77,6 +86,19 @@ export class ProfileComponent implements OnInit {
   readonly avatarUploading = signal(false);
   /** Inline error shown under the avatar field — `null` when none. */
   readonly avatarError = signal<AvatarErrorKind | null>(null);
+
+  /**
+   * Drives the language `<select>`. Bound to the app-wide active Transloco language rather
+   * than `profile().preferredLanguage`: `LanguagePreferenceService` is the single source of
+   * truth for "what language is the UI in right now" (also used by the navbar pill), and it
+   * reverts this same signal on a failed save — binding to it here means the select reverts
+   * for free, with no local state to keep in sync.
+   */
+  readonly activeLang = toSignal(this.transloco.langChanges$, {
+    initialValue: this.languagePreference.getActiveLanguage(),
+  });
+  /** True while a language PATCH is in flight — disables the select to prevent overlapping changes. */
+  readonly languageSaving = this.languagePreference.saving;
 
   ngOnInit(): void {
     this.load();
@@ -149,6 +171,17 @@ export class ProfileComponent implements OnInit {
         }
       },
     });
+  }
+
+  /**
+   * US02.1.2 — language `<select>` change handler. All the actual work (PATCH, optimistic
+   * switch, revert + toast on failure) lives in `LanguagePreferenceService`, shared with the
+   * navbar language pill.
+   */
+  onLanguageChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    if (!isSupportedLanguage(value)) return;
+    this.languagePreference.saveAndApply(value);
   }
 
   onAvatarSelected(event: Event): void {
