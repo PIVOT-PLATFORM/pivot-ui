@@ -1,6 +1,18 @@
 import { TestBed } from '@angular/core/testing';
 import { ComponentFixture } from '@angular/core/testing';
+import { Component } from '@angular/core';
 import { ConfirmDialogComponent } from './confirm-dialog.component';
+
+@Component({
+  standalone: true,
+  imports: [ConfirmDialogComponent],
+  template: `
+    <piv-confirm-dialog [open]="true" title="t" message="m" confirmLabel="c" cancelLabel="a">
+      <p data-testid="projected-body">Corps projeté (US02.2.4 — étape mot de passe/OTP)</p>
+    </piv-confirm-dialog>
+  `,
+})
+class ProjectionHostComponent {}
 
 describe('ConfirmDialogComponent', () => {
   let fixture: ComponentFixture<ConfirmDialogComponent>;
@@ -170,6 +182,21 @@ describe('ConfirmDialogComponent', () => {
     expect(document.activeElement).toBe(confirmBtn);
   });
 
+  it('disables the confirm button when confirmDisabled is true (US02.2.4)', () => {
+    component.open = true;
+    component.confirmDisabled = true;
+    fixture.detectChanges();
+    const confirmBtn = fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]');
+    expect(confirmBtn.disabled).toBe(true);
+  });
+
+  it('enables the confirm button by default (confirmDisabled defaults to false)', () => {
+    component.open = true;
+    fixture.detectChanges();
+    const confirmBtn = fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]');
+    expect(confirmBtn.disabled).toBe(false);
+  });
+
   it('does not move focus on Tab when focus is between the first and last elements', () => {
     fixture.componentRef.setInput('open', true);
     fixture.detectChanges();
@@ -184,5 +211,11 @@ describe('ConfirmDialogComponent', () => {
     dialog.dispatchEvent(event);
 
     expect(document.activeElement).toBe(cancelBtn);
+  });
+
+  it('projects caller content inside the dialog, after the message (US02.2.4)', async () => {
+    const hostFixture = TestBed.createComponent(ProjectionHostComponent);
+    hostFixture.detectChanges();
+    expect(hostFixture.nativeElement.querySelector('[data-testid="projected-body"]')).not.toBeNull();
   });
 });
