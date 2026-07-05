@@ -123,4 +123,96 @@ describe('AdminUsersService', () => {
     expect(service.loadError()).toBe(true);
     expect(service.users()).toEqual([]);
   });
+
+  describe('changeRole (US06.1.3)', () => {
+    const loadOneUser = (overrides: Partial<AdminUserDto> = {}) => {
+      service.load(0, { ...EMPTY_ADMIN_USER_FILTERS }).subscribe();
+      httpMock
+        .expectOne(r => r.url === `${environment.apiUrl}/admin/users`)
+        .flush(makePage([makeDto(1, { role: 'ROLE_USER', ...overrides })]));
+    };
+
+    it('sends PATCH /api/admin/users/{id}/role with the requested role and applies role optimistically', () => {
+      loadOneUser();
+      service.changeRole(service.users()[0], 'ROLE_ADMIN').subscribe();
+
+      // Optimistic: applied before the response arrives.
+      expect(service.users()[0].role).toBe('ROLE_ADMIN');
+      expect(service.isRoleChangeInFlight(1)).toBe(true);
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/admin/users/1/role`);
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual({ role: 'ROLE_ADMIN' });
+
+      req.flush(makeDto(1, { role: 'ROLE_ADMIN' }));
+      expect(service.users()[0].role).toBe('ROLE_ADMIN');
+      expect(service.isRoleChangeInFlight(1)).toBe(false);
+      expect(service.roleChangeError(1)).toBeNull();
+    });
+
+    it('reconciles with the role returned by the backend rather than assuming an echo', () => {
+      loadOneUser();
+      service.changeRole(service.users()[0], 'ROLE_ADMIN').subscribe();
+      httpMock
+        .expectOne(`${environment.apiUrl}/admin/users/1/role`)
+        // Defensive: even if the backend ever returned a different role than requested.
+        .flush(makeDto(1, { role: 'ROLE_USER' }));
+      expect(service.users()[0].role).toBe('ROLE_USER');
+    });
+
+    it('rolls back to the previous role and classifies a 403 as self-demotion', () => {
+      loadOneUser();
+      service.changeRole(service.users()[0], 'ROLE_ADMIN').subscribe({ error: () => undefined });
+
+      httpMock
+        .expectOne(`${environment.apiUrl}/admin/users/1/role`)
+        .flush({ error: 'SELF_DEMOTION' }, { status: 403, statusText: 'Forbidden' });
+
+      expect(service.users()[0].role).toBe('ROLE_USER');
+      expect(service.isRoleChangeInFlight(1)).toBe(false);
+      expect(service.roleChangeError(1)).toBe('self-demotion');
+    });
+
+    it('classifies a 400 as invalid-role and a 404 as not-found', () => {
+      loadOneUser();
+      service.changeRole(service.users()[0], 'ROLE_ADMIN').subscribe({ error: () => undefined });
+      httpMock
+        .expectOne(`${environment.apiUrl}/admin/users/1/role`)
+        .flush({ error: 'INVALID_ROLE' }, { status: 400, statusText: 'Bad Request' });
+      expect(service.roleChangeError(1)).toBe('invalid-role');
+
+      service.changeRole(service.users()[0], 'ROLE_ADMIN').subscribe({ error: () => undefined });
+      httpMock
+        .expectOne(`${environment.apiUrl}/admin/users/1/role`)
+        .flush({ error: 'NOT_FOUND' }, { status: 404, statusText: 'Not Found' });
+      expect(service.roleChangeError(1)).toBe('not-found');
+    });
+
+    it('classifies a 500 as generic and clears a previous row error on a new attempt', () => {
+      loadOneUser();
+      service.changeRole(service.users()[0], 'ROLE_ADMIN').subscribe({ error: () => undefined });
+      httpMock
+        .expectOne(`${environment.apiUrl}/admin/users/1/role`)
+        .flush('Server error', { status: 500, statusText: 'Internal Server Error' });
+      expect(service.roleChangeError(1)).toBe('generic');
+
+      service.changeRole(service.users()[0], 'ROLE_ADMIN').subscribe();
+      // clearRoleChangeError runs synchronously before the request settles.
+      expect(service.roleChangeError(1)).toBeNull();
+      httpMock.expectOne(`${environment.apiUrl}/admin/users/1/role`).flush(makeDto(1, { role: 'ROLE_ADMIN' }));
+    });
+
+    it('tracks in-flight state per user id independently', () => {
+      service.load(0, { ...EMPTY_ADMIN_USER_FILTERS }).subscribe();
+      httpMock
+        .expectOne(r => r.url === `${environment.apiUrl}/admin/users`)
+        .flush(makePage([makeDto(1, { role: 'ROLE_USER' }), makeDto(2, { role: 'ROLE_USER' })]));
+
+      service.changeRole(service.users()[0], 'ROLE_ADMIN').subscribe();
+      expect(service.isRoleChangeInFlight(1)).toBe(true);
+      expect(service.isRoleChangeInFlight(2)).toBe(false);
+
+      httpMock.expectOne(`${environment.apiUrl}/admin/users/1/role`).flush(makeDto(1, { role: 'ROLE_ADMIN' }));
+    });
+  });
 });
