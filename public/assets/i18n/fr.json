@@ -260,6 +260,65 @@
           "back_home": "Retour à l'accueil"
         }
       }
+    },
+    "profile": {
+      "title": "Mon profil",
+      "subtitle": "Consultez et modifiez vos informations personnelles.",
+      "main_aria": "Profil du compte",
+      "loading": "Chargement du profil…",
+      "error_load": "Impossible de charger votre profil. Réessayez.",
+      "retry": "Réessayer",
+      "avatar_section_title": "Photo de profil",
+      "avatar_change": "Changer la photo",
+      "avatar_hint": "JPEG, PNG ou WEBP, 2 Mo maximum.",
+      "avatar_error_invalid_format": "Format non supporté. Utilisez une image JPEG, PNG ou WEBP.",
+      "avatar_error_too_large": "Image trop volumineuse. Taille maximale : 2 Mo.",
+      "avatar_error_generic": "Impossible d'envoyer l'image. Réessayez.",
+      "form_title": "Informations personnelles",
+      "form_aria": "Formulaire de modification du profil",
+      "first_name": "Prénom",
+      "last_name": "Nom",
+      "email": "Email",
+      "email_hint": "L'adresse email ne peut pas être modifiée ici.",
+      "error_max_length": "100 caractères maximum.",
+      "error_invalid_name": "Prénom ou nom invalide.",
+      "error_save_generic": "Une erreur est survenue lors de l'enregistrement. Réessayez.",
+      "submit": "Enregistrer",
+      "success": "Profil mis à jour avec succès."
+    },
+    "sessions": {
+      "list": {
+        "title": "Sessions actives",
+        "subtitle": "Retrouvez les appareils connectés à votre compte et révoquez ceux que vous ne reconnaissez pas.",
+        "empty": "Aucune autre session active",
+        "error": "Impossible de charger vos sessions. Réessayez.",
+        "retry": "Réessayer",
+        "column_device": "Appareil",
+        "column_ip": "Adresse IP",
+        "column_created": "Créée le",
+        "column_expires": "Expire le",
+        "column_actions": "Actions",
+        "unknown_device": "Appareil inconnu",
+        "current_session": "Session actuelle",
+        "not_revocable": "Non révocable",
+        "revoke": "Révoquer",
+        "revoke_aria": "Révoquer la session depuis {{ device }} le {{ date }}",
+        "revoke_all": "Révoquer toutes les autres sessions"
+      },
+      "confirm": {
+        "title_one": "Révoquer cette session ?",
+        "message_one": "Cette session sera immédiatement déconnectée. Continuer ?",
+        "title_all": "Révoquer toutes les autres sessions ?",
+        "message_all": "Toutes vos autres sessions actives seront déconnectées. Cette action est irréversible. Continuer ?",
+        "confirm": "Révoquer",
+        "cancel": "Annuler"
+      },
+      "toast": {
+        "revoked": "Session révoquée",
+        "revoke_error": "Impossible de révoquer cette session. Réessayez.",
+        "revoked_all": "Toutes les autres sessions ont été révoquées",
+        "revoke_all_error": "Impossible de révoquer les autres sessions. Réessayez."
+      }
     }
   },
   "contact": {
@@ -291,33 +350,6 @@
     "mentions_title": "Mentions légales",
     "privacy_title": "Politique de confidentialité",
     "terms_title": "Conditions Générales d'Utilisation"
-  },
-  "account": {
-    "profile": {
-      "title": "Mon profil",
-      "subtitle": "Consultez et modifiez vos informations personnelles.",
-      "main_aria": "Profil du compte",
-      "loading": "Chargement du profil…",
-      "error_load": "Impossible de charger votre profil. Réessayez.",
-      "retry": "Réessayer",
-      "avatar_section_title": "Photo de profil",
-      "avatar_change": "Changer la photo",
-      "avatar_hint": "JPEG, PNG ou WEBP, 2 Mo maximum.",
-      "avatar_error_invalid_format": "Format non supporté. Utilisez une image JPEG, PNG ou WEBP.",
-      "avatar_error_too_large": "Image trop volumineuse. Taille maximale : 2 Mo.",
-      "avatar_error_generic": "Impossible d'envoyer l'image. Réessayez.",
-      "form_title": "Informations personnelles",
-      "form_aria": "Formulaire de modification du profil",
-      "first_name": "Prénom",
-      "last_name": "Nom",
-      "email": "Email",
-      "email_hint": "L'adresse email ne peut pas être modifiée ici.",
-      "error_max_length": "100 caractères maximum.",
-      "error_invalid_name": "Prénom ou nom invalide.",
-      "error_save_generic": "Une erreur est survenue lors de l'enregistrement. Réessayez.",
-      "submit": "Enregistrer",
-      "success": "Profil mis à jour avec succès."
-    }
   },
   "admin": {
     "modules": {
