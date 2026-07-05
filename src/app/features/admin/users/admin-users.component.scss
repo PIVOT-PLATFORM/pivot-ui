@@ -135,6 +135,14 @@
   &:disabled { opacity: 0.6; }
 }
 
+// ---- Status-toggle button (US06.1.4 Désactiver / US06.1.5 Réactiver) —
+// mutually exclusive per row, base look from .btn.btn-danger/.btn-secondary. ----
+.admin-users__status-toggle {
+  margin-right: 8px;
+
+  &:disabled { opacity: 0.6; }
+}
+
 // ---- Mobile-only expand toggle (base button look comes from .btn.btn-secondary) ----
 .admin-users__expand-toggle {
   display: none;

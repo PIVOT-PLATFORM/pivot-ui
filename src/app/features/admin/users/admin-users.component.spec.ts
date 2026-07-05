@@ -68,6 +68,36 @@ const frTranslations = {
           not_found: 'Utilisateur introuvable.',
         },
       },
+      status: {
+        button: {
+          deactivate: 'Désactiver',
+          deactivate_aria: 'Désactiver le compte de {{ name }}',
+          reactivate: 'Réactiver',
+          reactivate_aria: 'Réactiver le compte de {{ name }}',
+        },
+        confirm: {
+          deactivate: {
+            title: 'Désactiver le compte de {{ name }} ?',
+            message: "L'utilisateur sera déconnecté immédiatement de toutes ses sessions.",
+            confirm: 'Désactiver',
+            cancel: 'Annuler',
+          },
+          reactivate: {
+            title: 'Réactiver le compte de {{ name }} ?',
+            message: "L'utilisateur retrouvera l'accès à son compte immédiatement.",
+            confirm: 'Réactiver',
+            cancel: 'Annuler',
+          },
+        },
+        toast: {
+          deactivated: 'Compte désactivé',
+          reactivated: 'Compte réactivé',
+          error: 'Impossible de modifier le statut du compte de {{ name }}. Réessayez.',
+          self_deactivation: 'Vous ne pouvez pas désactiver votre propre compte.',
+          invalid_status: "Le statut sélectionné n'est pas valide.",
+          not_found: 'Utilisateur introuvable.',
+        },
+      },
     },
   },
 };
@@ -505,6 +535,215 @@ describe('AdminUsersComponent', () => {
     it('cancelRoleChange() is a no-op if called with no pending confirmation', () => {
       flushList(makePage([makeDto(1)]));
       expect(() => fixture.componentInstance.cancelRoleChange()).not.toThrow();
+    });
+  });
+
+  describe('status toggle — deactivate/reactivate (US06.1.4/US06.1.5)', () => {
+    const statusToggle = (id: number): HTMLButtonElement =>
+      fixture.nativeElement.querySelector(`[data-testid="user-status-toggle-${id}"]`);
+
+    it('renders a "Désactiver" button with a name-specific aria-label on an ACTIVE row, and no "Réactiver" button', () => {
+      flushList(makePage([makeDto(1, { firstName: 'Alice', lastName: 'Martin', status: 'ACTIVE' })]));
+
+      const button = statusToggle(1);
+      expect(button).not.toBeNull();
+      expect(button.textContent.trim()).toBe('Désactiver');
+      expect(button.getAttribute('aria-label')).toBe('Désactiver le compte de Alice Martin');
+    });
+
+    it('renders a "Réactiver" button with a name-specific aria-label on an INACTIVE row', () => {
+      flushList(makePage([makeDto(2, { firstName: 'Bob', lastName: 'Durand', status: 'INACTIVE' })]));
+
+      const button = statusToggle(2);
+      expect(button).not.toBeNull();
+      expect(button.textContent.trim()).toBe('Réactiver');
+      expect(button.getAttribute('aria-label')).toBe('Réactiver le compte de Bob Durand');
+    });
+
+    it('renders no status-toggle button at all on a BLOCKED row (mutual exclusivity, out of scope)', () => {
+      flushList(makePage([makeDto(3, { status: 'BLOCKED' })]));
+      expect(statusToggle(3)).toBeNull();
+    });
+
+    it('two rows never show the same button — mutually exclusive by status', () => {
+      flushList(
+        makePage([
+          makeDto(1, { firstName: 'Alice', lastName: 'Martin', status: 'ACTIVE' }),
+          makeDto(2, { firstName: 'Bob', lastName: 'Durand', status: 'INACTIVE' }),
+        ])
+      );
+      expect(statusToggle(1).textContent.trim()).toBe('Désactiver');
+      expect(statusToggle(2).textContent.trim()).toBe('Réactiver');
+    });
+
+    it('clicking "Désactiver" opens an alertdialog explicitly mentioning the immediate session logout, before calling the API', () => {
+      flushList(makePage([makeDto(1, { firstName: 'Alice', lastName: 'Martin', status: 'ACTIVE' })]));
+      statusToggle(1).click();
+      fixture.detectChanges();
+
+      const dialog = fixture.nativeElement.querySelector('[data-testid="confirm-dialog"]');
+      expect(dialog).not.toBeNull();
+      expect(dialog.getAttribute('role')).toBe('alertdialog');
+      expect(dialog.getAttribute('aria-modal')).toBe('true');
+      expect(dialog.textContent).toContain('Désactiver le compte de Alice Martin ?');
+      expect(dialog.textContent).toContain("L'utilisateur sera déconnecté immédiatement de toutes ses sessions.");
+
+      httpMock.expectNone(`${environment.apiUrl}/admin/users/1/status`);
+    });
+
+    it('clicking "Réactiver" opens a lighter role="dialog" confirmation, before calling the API', () => {
+      flushList(makePage([makeDto(2, { firstName: 'Bob', lastName: 'Durand', status: 'INACTIVE' })]));
+      statusToggle(2).click();
+      fixture.detectChanges();
+
+      const dialog = fixture.nativeElement.querySelector('[data-testid="confirm-dialog"]');
+      expect(dialog).not.toBeNull();
+      expect(dialog.getAttribute('role')).toBe('dialog');
+      expect(dialog.textContent).toContain('Réactiver le compte de Bob Durand ?');
+
+      httpMock.expectNone(`${environment.apiUrl}/admin/users/2/status`);
+    });
+
+    it('cancelling the deactivate confirmation sends no API call and keeps the status unchanged', () => {
+      flushList(makePage([makeDto(1, { status: 'ACTIVE' })]));
+      statusToggle(1).click();
+      fixture.detectChanges();
+
+      fixture.nativeElement.querySelector('[data-testid="confirm-dialog-cancel"]').click();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('[data-testid="confirm-dialog"]')).toBeNull();
+      expect(fixture.nativeElement.querySelector('[data-testid="user-status-1"]').textContent.trim()).toBe('Actif');
+      httpMock.expectNone(`${environment.apiUrl}/admin/users/1/status`);
+    });
+
+    it('confirms deactivation: calls PATCH with status INACTIVE, disables the button while in flight, updates the badge in real time, and toasts success', () => {
+      flushList(makePage([makeDto(1, { status: 'ACTIVE' })]));
+      const button = statusToggle(1);
+      button.click();
+      fixture.detectChanges();
+
+      fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]').click();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('[data-testid="confirm-dialog"]')).toBeNull();
+      // Optimistic: the badge already reflects INACTIVE before the response arrives.
+      expect(fixture.nativeElement.querySelector('[data-testid="user-status-1"]').textContent.trim()).toBe('Inactif');
+      expect(statusToggle(1).disabled).toBe(true);
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/admin/users/1/status`);
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual({ status: 'INACTIVE' });
+
+      req.flush(makeDto(1, { status: 'INACTIVE' }));
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('[data-testid="user-status-1"]').textContent.trim()).toBe('Inactif');
+      // Mutual exclusivity after the switch: the row now shows "Réactiver".
+      expect(statusToggle(1).textContent.trim()).toBe('Réactiver');
+      expect(statusToggle(1).disabled).toBe(false);
+      expect(
+        toastService.toasts().some(t => t.type === 'info' && t.messageKey === 'admin.users.status.toast.deactivated')
+      ).toBe(true);
+    });
+
+    it('confirms reactivation: calls PATCH with status ACTIVE and toasts the reactivated success message', () => {
+      flushList(makePage([makeDto(2, { status: 'INACTIVE' })]));
+      statusToggle(2).click();
+      fixture.detectChanges();
+      fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]').click();
+      fixture.detectChanges();
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/admin/users/2/status`);
+      expect(req.request.body).toEqual({ status: 'ACTIVE' });
+      req.flush(makeDto(2, { status: 'ACTIVE' }));
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('[data-testid="user-status-2"]').textContent.trim()).toBe('Actif');
+      expect(
+        toastService.toasts().some(t => t.type === 'info' && t.messageKey === 'admin.users.status.toast.reactivated')
+      ).toBe(true);
+    });
+
+    it('rolls back to the previous status and shows the generic error toast when the PATCH fails with a 500', () => {
+      flushList(makePage([makeDto(1, { firstName: 'Alice', lastName: 'Martin', status: 'ACTIVE' })]));
+      statusToggle(1).click();
+      fixture.detectChanges();
+      fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]').click();
+      fixture.detectChanges();
+
+      httpMock
+        .expectOne(`${environment.apiUrl}/admin/users/1/status`)
+        .flush('Server error', { status: 500, statusText: 'Internal Server Error' });
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('[data-testid="user-status-1"]').textContent.trim()).toBe('Actif');
+      expect(statusToggle(1).disabled).toBe(false);
+      expect(
+        toastService
+          .toasts()
+          .some(
+            t =>
+              t.type === 'error' &&
+              t.messageKey === 'admin.users.status.toast.error' &&
+              t.params?.['name'] === 'Alice Martin'
+          )
+      ).toBe(true);
+    });
+
+    it('shows the self-deactivation toast and rolls back on a 403', () => {
+      flushList(makePage([makeDto(1, { status: 'ACTIVE' })]));
+      statusToggle(1).click();
+      fixture.detectChanges();
+      fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]').click();
+      fixture.detectChanges();
+
+      httpMock
+        .expectOne(`${environment.apiUrl}/admin/users/1/status`)
+        .flush({ error: 'SELF_DEACTIVATION' }, { status: 403, statusText: 'Forbidden' });
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('[data-testid="user-status-1"]').textContent.trim()).toBe('Actif');
+      expect(
+        toastService
+          .toasts()
+          .some(t => t.type === 'error' && t.messageKey === 'admin.users.status.toast.self_deactivation')
+      ).toBe(true);
+    });
+
+    it('shows the not-found toast on a 404 (cross-tenant)', () => {
+      flushList(makePage([makeDto(1, { status: 'ACTIVE' })]));
+      statusToggle(1).click();
+      fixture.detectChanges();
+      fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]').click();
+      fixture.detectChanges();
+
+      httpMock
+        .expectOne(`${environment.apiUrl}/admin/users/1/status`)
+        .flush({ error: 'NOT_FOUND' }, { status: 404, statusText: 'Not Found' });
+      fixture.detectChanges();
+
+      expect(
+        toastService.toasts().some(t => t.type === 'error' && t.messageKey === 'admin.users.status.toast.not_found')
+      ).toBe(true);
+    });
+
+    it('confirmStatusChange() is a no-op if called with no pending confirmation', () => {
+      flushList(makePage([makeDto(1)]));
+      expect(() => fixture.componentInstance.confirmStatusChange()).not.toThrow();
+      httpMock.expectNone(r => r.url.includes('/status'));
+    });
+
+    it('cancelStatusChange() is a no-op if called with no pending confirmation', () => {
+      flushList(makePage([makeDto(1)]));
+      expect(() => fixture.componentInstance.cancelStatusChange()).not.toThrow();
+    });
+
+    it('onStatusToggle() on a BLOCKED user is a no-op (defensive — no button renders for this status)', () => {
+      flushList(makePage([makeDto(1, { status: 'BLOCKED' })]));
+      fixture.componentInstance.onStatusToggle(fixture.componentInstance.users()[0]);
+      fixture.detectChanges();
+      expect(fixture.componentInstance.isStatusConfirmOpen()).toBe(false);
     });
   });
 });
