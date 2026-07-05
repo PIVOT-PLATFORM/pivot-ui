@@ -512,6 +512,22 @@
           "next_aria": "Next page",
           "status": "Users {{ start }}-{{ end }} of {{ total }}"
         }
+      },
+      "role": {
+        "select_aria": "Role of {{ name }}",
+        "confirm": {
+          "title": "Change {{ name }}'s role from {{ from }} to {{ to }}?",
+          "message": "This change takes effect immediately.",
+          "confirm": "Confirm",
+          "cancel": "Cancel"
+        },
+        "toast": {
+          "updated": "Role updated",
+          "error": "Unable to change {{ name }}'s role. Please try again.",
+          "self_demotion": "You cannot change your own role.",
+          "invalid_role": "The selected role is not valid.",
+          "not_found": "User not found."
+        }
       }
     }
   },

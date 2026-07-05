@@ -512,6 +512,22 @@
           "next_aria": "Page suivante",
           "status": "Utilisateurs {{ start }}-{{ end }} sur {{ total }}"
         }
+      },
+      "role": {
+        "select_aria": "Rôle de {{ name }}",
+        "confirm": {
+          "title": "Changer le rôle de {{ name }} de {{ from }} vers {{ to }} ?",
+          "message": "Cette modification prend effet immédiatement.",
+          "confirm": "Confirmer",
+          "cancel": "Annuler"
+        },
+        "toast": {
+          "updated": "Rôle mis à jour",
+          "error": "Impossible de modifier le rôle de {{ name }}. Réessayez.",
+          "self_demotion": "Vous ne pouvez pas modifier votre propre rôle.",
+          "invalid_role": "Le rôle sélectionné n'est pas valide.",
+          "not_found": "Utilisateur introuvable."
+        }
       }
     }
   },
