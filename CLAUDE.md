@@ -12,6 +12,10 @@ Design system **prévu** dans **pivot-design-system** (`@pivot/design-system`) �
 créé, pas de dépendance réelle aujourd'hui (vérifié : absent de `package.json` et de `src/`).
 En attendant, styles/composants gérés directement dans `pivot-ui` (`src/styles/`) — migration
 vers `@pivot/design-system` le jour où ce repo existe, pas avant.
+**Le repo est différé, pas le choix technique** : stack actée par `pivot-docs/docs/adr/ADR-007-design-system-angular-cdk.md`
+— Angular CDK (comportement/a11y) + SCSS BEM custom (visuel), **aucune lib visuelle tierce**
+(Material/Taiga/PrimeNG/Tailwind explicitement rejetés). Suivi backlog : Enabler `EN17.2`
+(`Stage: Backlog`, `Phase: phase-3`).
 
 **Vision :** interface réactive, accessible (WCAG 2.1 AA), activable par module — sans lock-in SaaS.
 
