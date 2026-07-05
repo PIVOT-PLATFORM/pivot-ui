@@ -8,7 +8,10 @@
 2. **Librairie npm partagée** : publie `@pivot/ui-core` (GitHub Packages) — consommé par tous les repos `pivot-xxx-ui`.
 
 Partenaire de `pivot-core` (backend Java/Spring Boot + API REST).
-Design system dans **pivot-design-system** (`@pivot/design-system`) — pivot-ui le consomme et le réexporte.
+Design system **prévu** dans **pivot-design-system** (`@pivot/design-system`) — repo pas encore
+créé, pas de dépendance réelle aujourd'hui (vérifié : absent de `package.json` et de `src/`).
+En attendant, styles/composants gérés directement dans `pivot-ui` (`src/styles/`) — migration
+vers `@pivot/design-system` le jour où ce repo existe, pas avant.
 
 **Vision :** interface réactive, accessible (WCAG 2.1 AA), activable par module — sans lock-in SaaS.
 
@@ -20,7 +23,7 @@ Design system dans **pivot-design-system** (`@pivot/design-system`) — pivot-ui
 | `@pivot/ui-core/tenant` | TenantService, TenantContextDirective |
 | `@pivot/ui-core/shell` | HeaderComponent, FooterComponent, NavigationService |
 | `@pivot/ui-core/modules` | ModuleGuard, ModuleStatusService |
-| `@pivot/design-system` | Ré-export complet de `@pivot/design-system` |
+| `@pivot/design-system` | Prévu — ré-export complet une fois `pivot-design-system` créé (pas actif aujourd'hui) |
 
 **Modules fonctionnels** : dans les repos dédiés (`pivot-pilotage-ui`, `pivot-agilite-ui`, `pivot-collaboratif-ui`). pivot-ui ne contient PAS les features métier.
 
@@ -92,7 +95,7 @@ pivot-ui/
 **Features métier (whiteboard, quiz, roadmap…) → repos `pivot-xxx-ui` dédiés, jamais dans pivot-ui.**
 WebSocket STOMP (`@stomp/rx-stomp`) → dans les repos modules qui en ont besoin (pivot-collaboratif-ui, etc.), pas dans pivot-ui.
 
-Backend API → **pivot-core** (repo séparé). Design system → **pivot-design-system** (`@pivot/design-system`).
+Backend API → **pivot-core** (repo séparé). Design system → **pivot-design-system** (`@pivot/design-system`, repo pas encore créé — voir Projet).
 
 ---
 
