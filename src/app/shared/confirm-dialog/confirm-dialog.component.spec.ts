@@ -25,13 +25,21 @@ describe('ConfirmDialogComponent', () => {
     expect(fixture.nativeElement.querySelector('[data-testid="confirm-dialog"]')).toBeNull();
   });
 
-  it('renders the dialog with role="alertdialog" and aria-modal when open', () => {
+  it('renders the dialog with role="alertdialog" (default) and aria-modal when open', () => {
     component.open = true;
     fixture.detectChanges();
     const dialog = fixture.nativeElement.querySelector('[data-testid="confirm-dialog"]');
     expect(dialog).not.toBeNull();
     expect(dialog.getAttribute('role')).toBe('alertdialog');
     expect(dialog.getAttribute('aria-modal')).toBe('true');
+  });
+
+  it('renders role="dialog" when the role input is overridden (US02.2.3 sessions confirmation)', () => {
+    component.role = 'dialog';
+    component.open = true;
+    fixture.detectChanges();
+    const dialog = fixture.nativeElement.querySelector('[data-testid="confirm-dialog"]');
+    expect(dialog.getAttribute('role')).toBe('dialog');
   });
 
   it('displays the title and message', () => {
