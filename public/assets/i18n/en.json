@@ -528,6 +528,36 @@
           "invalid_role": "The selected role is not valid.",
           "not_found": "User not found."
         }
+      },
+      "status": {
+        "button": {
+          "deactivate": "Deactivate",
+          "deactivate_aria": "Deactivate {{ name }}'s account",
+          "reactivate": "Reactivate",
+          "reactivate_aria": "Reactivate {{ name }}'s account"
+        },
+        "confirm": {
+          "deactivate": {
+            "title": "Deactivate {{ name }}'s account?",
+            "message": "The user will be immediately logged out of every session.",
+            "confirm": "Deactivate",
+            "cancel": "Cancel"
+          },
+          "reactivate": {
+            "title": "Reactivate {{ name }}'s account?",
+            "message": "The user will immediately regain access to their account.",
+            "confirm": "Reactivate",
+            "cancel": "Cancel"
+          }
+        },
+        "toast": {
+          "deactivated": "Account deactivated",
+          "reactivated": "Account reactivated",
+          "error": "Unable to change {{ name }}'s account status. Please try again.",
+          "self_deactivation": "You cannot deactivate your own account.",
+          "invalid_status": "The selected status is not valid.",
+          "not_found": "User not found."
+        }
       }
     }
   },
