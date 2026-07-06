@@ -1,3 +1,10 @@
+# [0.19.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.18.0...v0.19.0) (2026-07-06)
+
+
+### Features
+
+* **ui:** US06.1.2 - admin liste les utilisateurs de son tenant ([#82](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/82)) ([2d7a918](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/2d7a918b93fc942c2796a2ff4172c26ddd0237bb)), closes [#127](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/127) [#D97706](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/D97706) [#FEF3C7](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/FEF3C7) [#92400E](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/92400E)
+
 # [0.18.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.17.0...v0.18.0) (2026-07-06)
 
 
