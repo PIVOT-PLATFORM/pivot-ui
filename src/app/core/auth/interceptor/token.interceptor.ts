@@ -5,6 +5,16 @@ import { AuthService } from '../service/auth.service';
 import { SessionExpiryService } from '../service/session-expiry.service';
 
 /**
+ * Endpoints authentifiés dont le 401 est une erreur métier ("mot de passe actuel
+ * incorrect") et non un signal d'expiration de session — au même titre que les
+ * endpoints `/auth/*`. Sans cette exception, {@link tokenInterceptor} purgerait la
+ * session et rediriger vers `/auth/login` dès qu'un utilisateur connecté se trompe
+ * en retapant son mot de passe actuel, ce qui casserait l'AC "401 → message inline
+ * sur le champ, jamais de déconnexion" (US02.2.1 — `POST /account/password`).
+ */
+const CURRENT_PASSWORD_CONFIRMATION_ENDPOINTS = ['/account/password'];
+
+/**
  * HTTP interceptor for opaque session token management (US-AUTH-002, US01.1.5).
  *
  * Responsibilities:
@@ -14,6 +24,9 @@ import { SessionExpiryService } from '../service/session-expiry.service';
  * 3. On 401 from a non-auth endpoint: session expired — delegate to
  *    SessionExpiryService (logout local + toast + BroadcastChannel multi-onglets
  *    + redirection /auth/login avec returnUrl validé).
+ *    Exception : {@link CURRENT_PASSWORD_CONFIRMATION_ENDPOINTS}, dont le 401 est
+ *    une erreur métier gérée par l'appelant (mot de passe actuel incorrect), pas
+ *    une expiration de session.
  *
  * US01.1.5 — pas de silent refresh : le modèle opaque tokens PIVOT n'a pas de
  * refresh token. Le 401 backend est le seul signal d'expiration ; aucun retry
@@ -42,9 +55,13 @@ export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
     }),
     catchError((err: HttpErrorResponse) => {
       // 401 hors endpoints /auth/ = session expirée (seul signal du modèle opaque token).
-      // Les 401 des endpoints /auth/ (login, refresh au boot…) sont des erreurs métier
-      // gérées par leurs appelants — pas une expiration de session.
-      if (err.status === 401 && !req.url.includes('/auth/')) {
+      // Les 401 des endpoints /auth/ (login, refresh au boot…) et des endpoints listés
+      // dans CURRENT_PASSWORD_CONFIRMATION_ENDPOINTS (mot de passe actuel incorrect) sont
+      // des erreurs métier gérées par leurs appelants — pas une expiration de session.
+      const isBusinessAuthError =
+        req.url.includes('/auth/') ||
+        CURRENT_PASSWORD_CONFIRMATION_ENDPOINTS.some(path => req.url.includes(path));
+      if (err.status === 401 && !isBusinessAuthError) {
         sessionExpiry.onSessionExpired();
       }
       return throwError(() => err);

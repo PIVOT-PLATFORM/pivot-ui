@@ -99,11 +99,10 @@ export function avatarColor(name: string): string {
                 {{ 'nav.dropdown.preferences' | transloco }}
                 <span class="navbar__soon" [attr.aria-label]="'nav.dropdown.coming_soon_a11y' | transloco">{{ 'nav.dropdown.coming_soon' | transloco }}</span>
               </button>
-              <button class="navbar__dropdown-item" role="menuitem" type="button" aria-disabled="true">
+              <a class="navbar__dropdown-item" role="menuitem" routerLink="/account/security" (click)="userMenuOpen.set(false)">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                 {{ 'nav.dropdown.security' | transloco }}
-                <span class="navbar__soon" [attr.aria-label]="'nav.dropdown.coming_soon_a11y' | transloco">{{ 'nav.dropdown.coming_soon' | transloco }}</span>
-              </button>
+              </a>
               <button class="navbar__dropdown-item" role="menuitem" type="button" aria-disabled="true">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
                 {{ 'nav.dropdown.my_data' | transloco }}

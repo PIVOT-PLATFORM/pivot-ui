@@ -37,6 +37,7 @@
   "sidebar": {
     "dashboard": "Tableau de bord",
     "admin": "Administration",
+    "superadmin_tenants": "Tenants",
     "expand": "Développer",
     "collapse": "Réduire"
   },
@@ -201,6 +202,27 @@
       "expired_remember_me": "Votre session longue a expiré, veuillez vous reconnecter."
     }
   },
+  "account": {
+    "security": {
+      "password": {
+        "title": "Changer mon mot de passe",
+        "subtitle": "Choisissez un nouveau mot de passe sécurisé pour votre compte.",
+        "main_aria": "Sécurité du compte",
+        "form_title": "Mot de passe",
+        "form_aria": "Formulaire de changement de mot de passe",
+        "current_password": "Mot de passe actuel",
+        "new_password": "Nouveau mot de passe",
+        "confirm_password": "Confirmer le nouveau mot de passe",
+        "show_password": "Afficher le mot de passe",
+        "hide_password": "Masquer le mot de passe",
+        "submit": "Enregistrer",
+        "success": "Mot de passe modifié avec succès.",
+        "error_current_incorrect": "Mot de passe actuel incorrect.",
+        "error_generic": "Une erreur est survenue. Réessayez.",
+        "mismatch": "Les mots de passe ne correspondent pas."
+      }
+    }
+  },
   "contact": {
     "title": "Nous contacter",
     "subtitle": "Une question ? Un problème ? L'équipe PIVOT vous répond.",
@@ -301,6 +323,55 @@
         "roadmap": "Roadmap",
         "survey": "Sondages",
         "quiz": "Quiz"
+      }
+    }
+  },
+  "superadmin": {
+    "tenants": {
+      "list": {
+        "title": "Tenants",
+        "subtitle": "Vue d'ensemble de tous les tenants de la plateforme.",
+        "empty": "Aucun tenant ne correspond aux filtres",
+        "error": "Impossible de charger les tenants. Réessayez.",
+        "retry": "Réessayer"
+      },
+      "filters": {
+        "form_aria": "Filtres de recherche des tenants",
+        "name": "Nom",
+        "plan": "Plan",
+        "plan_all": "Tous",
+        "plan_saas": "SaaS",
+        "plan_enterprise": "Entreprise",
+        "plan_trial": "Essai",
+        "is_active": "Statut",
+        "is_active_all": "Tous",
+        "is_active_true": "Actif",
+        "is_active_false": "Inactif",
+        "auth_mode": "Mode d'authentification",
+        "auth_mode_all": "Tous",
+        "auth_mode_saas": "SaaS",
+        "auth_mode_enterprise": "Entreprise",
+        "auth_mode_hybrid": "Hybride",
+        "submit": "Filtrer"
+      },
+      "columns": {
+        "name": "Nom",
+        "slug": "Slug",
+        "plan": "Plan",
+        "auth_mode": "Mode d'authentification",
+        "is_active": "Statut",
+        "user_count": "Utilisateurs",
+        "created_at": "Créé le"
+      },
+      "status": {
+        "active": "Actif",
+        "inactive": "Inactif"
+      },
+      "pagination": {
+        "nav_aria": "Pagination des tenants",
+        "previous": "← Précédent",
+        "next": "Suivant →",
+        "status": "Page {{ page }} sur {{ totalPages }} ({{ total }} tenants)"
       }
     }
   }

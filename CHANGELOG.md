@@ -1,3 +1,10 @@
+# [0.11.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.10.1...v0.11.0) (2026-07-06)
+
+
+### Features
+
+* **ui:** US06.2.3 - super admin liste tous les tenants ([#69](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/69)) ([8202aa5](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/8202aa5fa09befd1ab7f7ff0beb860312044aa4f)), closes [#2](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/2)
+
 ## [0.10.1](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.10.0...v0.10.1) (2026-07-05)
 
 
