@@ -148,6 +148,15 @@ export const routes: Routes = [
           ),
       },
       {
+        // US01.4.2 — trusted devices self-service screen, same no-extra-guard rationale as
+        // account/security/sessions (US02.2.3): identity always resolved server-side.
+        path: 'account/security/devices',
+        loadComponent: () =>
+          import('./features/account/security/trusted-devices/trusted-devices-list.component').then(
+            m => m.TrustedDevicesListComponent
+          ),
+      },
+      {
         // US02.3.1 — RGPD Art.20 data export request page ("Demander mon export").
         path: 'account/export',
         loadComponent: () => import('./features/account/pages/export/export.component').then(m => m.ExportComponent),
