@@ -430,6 +430,38 @@
         "confirm": "Désactiver",
         "cancel": "Annuler"
       }
+    },
+    "tenants": {
+      "create": {
+        "title": "Créer un tenant",
+        "subtitle": "Créez un nouveau tenant pour onboarder un client ou une organisation.",
+        "list_cta": "+ Nouveau tenant",
+        "name_label": "Nom",
+        "name_placeholder": "Acme Corp",
+        "error_name_required": "Le nom est obligatoire.",
+        "error_name_too_long": "Le nom ne peut pas dépasser 255 caractères.",
+        "slug_label": "Slug",
+        "slug_hint": "Identifiant unique de l'URL (minuscules, chiffres, tirets). Généré automatiquement à partir du nom, modifiable.",
+        "slug_checking": "Vérification de la disponibilité…",
+        "slug_available": "Ce slug est disponible.",
+        "error_slug_required": "Le slug est obligatoire.",
+        "error_slug_format": "Le slug doit contenir entre 3 et 50 caractères : lettres minuscules, chiffres et tirets uniquement.",
+        "error_slug_taken": "Ce slug est déjà utilisé par un autre tenant.",
+        "error_slug_reserved": "Ce slug est réservé et ne peut pas être utilisé.",
+        "plan_label": "Plan",
+        "plan_saas": "SaaS",
+        "plan_enterprise": "Entreprise",
+        "plan_trial": "Essai",
+        "auth_mode_label": "Mode d'authentification",
+        "auth_mode_local": "Local (email + mot de passe)",
+        "auth_mode_oidc": "OIDC (SSO entreprise)",
+        "auth_mode_google": "Google",
+        "submit": "Créer le tenant",
+        "toast_success": "Tenant {{ name }} créé avec succès",
+        "error_rate_limit": "Trop de créations de tenants récemment. Réessayez dans {{ time }}.",
+        "error_forbidden": "Vous n'avez pas les droits nécessaires pour créer un tenant.",
+        "error_validation": "Certains champs sont invalides. Vérifiez le formulaire et réessayez."
+      }
     }
   },
   "modules": {

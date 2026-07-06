@@ -8,6 +8,14 @@
   margin-bottom: 24px;
 }
 
+.tenants-list__header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .tenants-list__title {
   font-size: var(--text-2xl);
   font-weight: 700;

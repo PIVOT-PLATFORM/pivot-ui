@@ -1,7 +1,14 @@
 <main class="tenants-list" [attr.aria-label]="'superadmin.tenants.list.title' | transloco">
   <header class="tenants-list__header">
-    <h1 class="tenants-list__title">{{ 'superadmin.tenants.list.title' | transloco }}</h1>
-    <p class="tenants-list__subtitle">{{ 'superadmin.tenants.list.subtitle' | transloco }}</p>
+    <div class="tenants-list__header-row">
+      <div>
+        <h1 class="tenants-list__title">{{ 'superadmin.tenants.list.title' | transloco }}</h1>
+        <p class="tenants-list__subtitle">{{ 'superadmin.tenants.list.subtitle' | transloco }}</p>
+      </div>
+      <a routerLink="/superadmin/tenants/new" class="btn btn-primary" data-testid="tenants-create-link">
+        {{ 'admin.tenants.create.list_cta' | transloco }}
+      </a>
+    </div>
   </header>
 
   <form

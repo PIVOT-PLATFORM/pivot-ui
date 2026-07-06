@@ -58,6 +58,29 @@
   gap: 4px;
 }
 
+.form-hint {
+  font-size: var(--text-xs);
+  color: var(--color-gray-500);
+  margin: 0;
+}
+
+.form-success {
+  font-size: var(--text-xs);
+  // WCAG 2.1 AA: --color-success (#059669) on white is ~3.8:1, below the 4.5:1
+  // minimum for normal text. --color-success-dark clears >7:1 in light theme;
+  // in dark theme (where --color-success-dark isn't redefined) the override
+  // below switches to --color-success-400, which already clears >9:1 against
+  // the dark surface — see skill-accessibility contrast rule.
+  color: var(--color-success-dark);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+[data-theme="dark"] .form-success {
+  color: var(--color-success-400);
+}
+
 // ---- Buttons ----
 .btn {
   display: inline-flex;

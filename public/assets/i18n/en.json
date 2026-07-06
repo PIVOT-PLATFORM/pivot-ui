@@ -430,6 +430,38 @@
         "confirm": "Deactivate",
         "cancel": "Cancel"
       }
+    },
+    "tenants": {
+      "create": {
+        "title": "Create a tenant",
+        "subtitle": "Create a new tenant to onboard a customer or organisation.",
+        "list_cta": "+ New tenant",
+        "name_label": "Name",
+        "name_placeholder": "Acme Corp",
+        "error_name_required": "Name is required.",
+        "error_name_too_long": "Name cannot exceed 255 characters.",
+        "slug_label": "Slug",
+        "slug_hint": "Unique URL identifier (lowercase letters, digits, hyphens). Auto-generated from the name, editable.",
+        "slug_checking": "Checking availability…",
+        "slug_available": "This slug is available.",
+        "error_slug_required": "Slug is required.",
+        "error_slug_format": "Slug must be 3 to 50 characters: lowercase letters, digits and hyphens only.",
+        "error_slug_taken": "This slug is already used by another tenant.",
+        "error_slug_reserved": "This slug is reserved and cannot be used.",
+        "plan_label": "Plan",
+        "plan_saas": "SaaS",
+        "plan_enterprise": "Enterprise",
+        "plan_trial": "Trial",
+        "auth_mode_label": "Authentication mode",
+        "auth_mode_local": "Local (email + password)",
+        "auth_mode_oidc": "OIDC (enterprise SSO)",
+        "auth_mode_google": "Google",
+        "submit": "Create tenant",
+        "toast_success": "Tenant {{ name }} created successfully",
+        "error_rate_limit": "Too many tenants created recently. Try again in {{ time }}.",
+        "error_forbidden": "You do not have the required rights to create a tenant.",
+        "error_validation": "Some fields are invalid. Check the form and try again."
+      }
     }
   },
   "modules": {

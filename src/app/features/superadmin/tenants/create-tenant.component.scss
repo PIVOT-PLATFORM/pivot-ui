@@ -1,0 +1,36 @@
+.create-tenant {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0 4px;
+}
+
+.create-tenant__header {
+  margin-bottom: 24px;
+}
+
+.create-tenant__title {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--color-navy-900);
+  margin: 0 0 6px;
+}
+
+.create-tenant__subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-gray-500);
+  margin: 0;
+}
+
+.create-tenant__error {
+  margin-bottom: 16px;
+}
+
+.create-tenant__form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.create-tenant__submit {
+  align-self: flex-start;
+}

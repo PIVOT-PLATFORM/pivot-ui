@@ -114,6 +114,12 @@ export const routes: Routes = [
           import('./features/admin/modules/admin-modules.component').then(m => m.AdminModulesComponent),
       },
       {
+        path: 'superadmin/tenants/new',
+        canActivate: [superAdminGuard],
+        loadComponent: () =>
+          import('./features/superadmin/tenants/create-tenant.component').then(m => m.CreateTenantComponent),
+      },
+      {
         path: 'superadmin/tenants',
         canActivate: [superAdminGuard],
         loadComponent: () =>
