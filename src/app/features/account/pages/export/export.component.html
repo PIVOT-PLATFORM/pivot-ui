@@ -1,0 +1,74 @@
+<div class="export-page">
+  <main class="export-layout" [attr.aria-label]="'account.rgpd.export.main_aria' | transloco">
+    <button class="export__back" type="button" (click)="goBack()">← {{ 'common.back' | transloco }}</button>
+
+    <header class="export__header">
+      <h1 class="export__title">{{ 'account.rgpd.export.title' | transloco }}</h1>
+      <p class="export__subtitle">{{ 'account.rgpd.export.subtitle' | transloco }}</p>
+    </header>
+
+    <section class="export__body">
+      @if (initialLoading()) {
+        <div class="export__loading" role="status" data-testid="export-loading">
+          <span class="spinner" aria-hidden="true"></span>
+          <p>{{ 'account.rgpd.export.loading_status' | transloco }}</p>
+        </div>
+      } @else if (loadError()) {
+        <div class="alert alert-error export__load-error" role="alert" data-testid="export-load-error">
+          <p>{{ 'account.rgpd.export.load_error' | transloco }}</p>
+          <button type="button" class="btn btn-secondary" (click)="retryLoad()">
+            {{ 'account.rgpd.export.retry' | transloco }}
+          </button>
+        </div>
+      } @else {
+        @if (!isPending() && status()?.status === 'READY') {
+          <div class="alert alert-info" data-testid="export-ready-notice">
+            {{ 'account.rgpd.export.ready_notice' | transloco: { time: readyExpiresAt() } }}
+          </div>
+        }
+        @if (!isPending() && status()?.status === 'FAILED') {
+          <div class="alert alert-error" data-testid="export-failed-notice">
+            {{ 'account.rgpd.export.failed_notice' | transloco }}
+          </div>
+        }
+
+        @if (isPending()) {
+          <div class="export__received" role="status" data-testid="export-received">
+            <div class="export__received-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2 4 12 13 22 4"/>
+              </svg>
+            </div>
+            <h2 class="export__received-title">{{ 'account.rgpd.export.received_title' | transloco }}</h2>
+            <p class="export__received-body">{{ 'account.rgpd.export.received_estimate' | transloco }}</p>
+          </div>
+        } @else {
+          <button
+            type="button"
+            class="btn btn-primary btn-lg export__submit"
+            data-testid="export-submit"
+            (click)="requestExport()"
+            [disabled]="submitting()"
+            [attr.aria-disabled]="!canRequest()"
+            [attr.aria-describedby]="rateLimitedUntil() ? 'export-rate-limit-reason' : null"
+          >
+            @if (submitting()) { <span class="spinner" aria-hidden="true"></span> }
+            {{ 'account.rgpd.export.submit' | transloco }}
+          </button>
+
+          @if (rateLimitedUntil()) {
+            <p id="export-rate-limit-reason" class="export__hint" data-testid="export-rate-limit-reason">
+              {{ 'account.rgpd.export.rate_limited_until' | transloco: { time: rateLimitedAt() } }}
+            </p>
+          }
+        }
+      }
+    </section>
+
+    <!-- WCAG: every page-state transition above is echoed here so screen-reader
+         users are notified even when the visual change happens outside their focus. -->
+    <div class="sr-only" role="status" aria-live="polite" aria-atomic="true" data-testid="export-live-region">
+      {{ liveKey() | transloco }}
+    </div>
+  </main>
+</div>
