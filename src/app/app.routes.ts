@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { authMatchGuard } from './core/auth/guard/auth.guard';
 import { AuthService } from './core/auth/service/auth.service';
 import { adminGuard } from './core/auth/guard/admin.guard';
+import { superAdminGuard } from './core/auth/guard/super-admin.guard';
 import { moduleGuard } from './core/modules/module.guard';
 
 /**
@@ -80,6 +81,12 @@ export const routes: Routes = [
         canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/admin/modules/admin-modules.component').then(m => m.AdminModulesComponent),
+      },
+      {
+        path: 'superadmin/tenants',
+        canActivate: [superAdminGuard],
+        loadComponent: () =>
+          import('./features/superadmin/tenants/tenants-list.component').then(m => m.TenantsListComponent),
       },
       ...MODULE_CHILDREN,
       { path: 'legal', children: LEGAL_CHILDREN },
