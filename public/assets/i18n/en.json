@@ -486,7 +486,8 @@
         "action_deactivate": "Deactivate",
         "toggle_activate": "Activate {{ name }}",
         "toggle_deactivate": "Deactivate {{ name }}",
-        "not_in_plan": "This module is not included in your plan"
+        "not_in_plan": "This module is not included in your plan",
+        "override_badge": "Enabled by the platform administrator"
       },
       "toast": {
         "activated": "Module {{ name }} activated",

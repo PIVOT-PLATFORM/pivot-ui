@@ -96,6 +96,19 @@
     background: var(--color-gray-100);
     color: var(--color-gray-600);
   }
+
+  // US03.3.3 — module made visible outside the tenant's plan by an active
+  // SUPER_ADMIN override. Distinct from --active/--inactive: this badge is a
+  // direct child of .admin-modules__card (not nested in the header's own flex
+  // row), so it needs its own align-self — .admin-modules__card is a column
+  // flex container with the default align-items: stretch, which would
+  // otherwise stretch this span to the card's full width (same reason
+  // .admin-modules__toggle below sets align-self: flex-start).
+  &--override {
+    align-self: flex-start;
+    background: var(--color-info-light);
+    color: var(--color-info-dark);
+  }
 }
 
 .admin-modules__card-description {

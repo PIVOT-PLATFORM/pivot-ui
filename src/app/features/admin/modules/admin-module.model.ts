@@ -4,6 +4,19 @@
  * Backend mirror: `fr.pivot.modules.api.AdminModuleDto` (pivot-core).
  */
 
+/**
+ * Visibility source of a module for the current tenant (US03.3.3).
+ *
+ * - `'plan'` — the module is included in the tenant's billing plan, or the
+ *   tenant has no plan assigned yet (no restriction applies in that case —
+ *   see the backend `AdminModuleListService` Javadoc for the full rationale).
+ * - `'override'` — the module is **not** in the tenant's plan but is made
+ *   visible solely by an active SUPER_ADMIN override. The UI must render a
+ *   distinct visual indicator for this case ("Activé par l'administrateur
+ *   plateforme").
+ */
+export type AdminModuleSource = 'plan' | 'override';
+
 /** Raw DTO returned by GET /api/admin/modules. */
 export interface AdminModuleDto {
   /** Stable identifier, e.g. "whiteboard". */
@@ -18,6 +31,8 @@ export interface AdminModuleDto {
    * (documented backend limitation) — the UI must tolerate this gracefully.
    */
   description: string;
+  /** Why this module is visible for this tenant — see {@link AdminModuleSource}. */
+  source: AdminModuleSource;
 }
 
 /** Error body returned by POST/DELETE .../activate when the module is not in the tenant's plan. */
