@@ -12,7 +12,7 @@ import {
   platformBrowserTesting,
 } from '@angular/platform-browser/testing';
 
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(globalThis, 'matchMedia', {
   writable: true,
   value: (query: string) => ({
     matches: false,

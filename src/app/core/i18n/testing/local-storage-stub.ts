@@ -19,7 +19,7 @@
  * `vitest.stryker.config.ts`'s jsdom-with-globals setup).
  */
 export function ensureLocalStorageStub(): void {
-  if (typeof globalThis.localStorage !== 'undefined') return;
+  if (globalThis.localStorage !== undefined) return;
 
   const store = new Map<string, string>();
   const stub: Storage = {

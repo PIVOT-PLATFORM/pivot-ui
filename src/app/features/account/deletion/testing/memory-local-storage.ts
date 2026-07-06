@@ -38,7 +38,7 @@ let installedInCurrentFile = false;
 
 export function installMemoryLocalStorage(): void {
   if (!installedInCurrentFile) {
-    originalDescriptor = Object.getOwnPropertyDescriptor(window, 'localStorage');
+    originalDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
     installedInCurrentFile = true;
   }
 
@@ -59,7 +59,7 @@ export function installMemoryLocalStorage(): void {
       return backing.size;
     },
   };
-  Object.defineProperty(window, 'localStorage', {
+  Object.defineProperty(globalThis, 'localStorage', {
     configurable: true,
     writable: true,
     value: storage,
@@ -71,8 +71,8 @@ afterEach(() => {
     return;
   }
   if (originalDescriptor) {
-    Object.defineProperty(window, 'localStorage', originalDescriptor);
+    Object.defineProperty(globalThis, 'localStorage', originalDescriptor);
   } else {
-    delete (window as { localStorage?: Storage }).localStorage;
+    delete (globalThis as { localStorage?: Storage }).localStorage;
   }
 });

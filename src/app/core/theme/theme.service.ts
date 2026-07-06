@@ -27,9 +27,9 @@ export class ThemeService {
     effect(() => {
       const t = this._theme();
       if (t === 'light') {
-        document.documentElement.removeAttribute('data-theme');
+        delete document.documentElement.dataset['theme'];
       } else {
-        document.documentElement.setAttribute('data-theme', t);
+        document.documentElement.dataset['theme'] = t;
       }
       localStorage.setItem(STORAGE_KEY, t);
     });
@@ -48,6 +48,6 @@ export class ThemeService {
     if (stored && (VALID_THEMES as string[]).includes(stored)) {
       return stored;
     }
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return globalThis.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
 }
