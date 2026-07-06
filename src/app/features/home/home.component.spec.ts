@@ -6,7 +6,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { signal, computed, Component } from '@angular/core';
 import { of, throwError } from 'rxjs';
-import { TranslocoTestingModule } from '@jsverse/transloco';
+import { TranslocoService, TranslocoTestingModule } from '@jsverse/transloco';
 import { HomeComponent } from './home.component';
 import type { UserInfo } from '../../core/auth/service/auth.service';
 import { ModuleRegistryService } from '../../core/modules/module-registry.service';
@@ -30,6 +30,24 @@ const FR = {
     coming_soon_title: 'Modules à venir',
     coming_soon_aria: '{{ name }} — bientôt disponible',
     coming_soon_badge: 'À VENIR',
+  },
+};
+
+const EN = {
+  home: {
+    aria_label: 'Home',
+    greeting: 'Hello, {{ name }} 👋',
+    fallback_name: 'you',
+    subtitle: 'Your collaborative tools, all in one place.',
+    loading_aria: 'Loading modules…',
+    modules_title: 'Your modules',
+    open_module_aria: 'Open {{ name }}',
+    open_cta: 'Open →',
+    empty_no_active: 'No module activated yet. The administrator can activate modules from the admin panel.',
+    empty_no_modules: 'No module available yet. Contact your administrator.',
+    coming_soon_title: 'Coming soon',
+    coming_soon_aria: '{{ name }} — coming soon',
+    coming_soon_badge: 'COMING SOON',
   },
 };
 
@@ -90,8 +108,8 @@ describe('HomeComponent', () => {
         { provide: ModuleRegistryService, useValue: mockRegistryService },
         importProvidersFrom(
           TranslocoTestingModule.forRoot({
-            langs: { fr: FR, en: FR },
-            translocoConfig: { defaultLang: 'fr', availableLangs: ['fr', 'en'] },
+            langs: { fr: FR, en: EN },
+            translocoConfig: { defaultLang: 'fr', availableLangs: ['fr', 'en'], reRenderOnLangChange: true },
             preloadLangs: true,
           }),
         ),
@@ -204,5 +222,24 @@ describe('HomeComponent', () => {
   it('hexToRgba converts #7C3AED with alpha 0.1 correctly', () => {
     const result = component.hexToRgba('#7C3AED', 0.1);
     expect(result).toBe('rgba(124, 58, 237, 0.1)');
+  });
+
+  it('translates all page text when switching the active language from fr to en', async () => {
+    comingSoonSignal.set([makeModule({ comingSoon: true, id: 'quiz', name: 'Quiz' })]);
+    activeModulesSignal.set([]);
+    component.loading.set(false);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('main').getAttribute('aria-label')).toBe('Accueil');
+    expect(fixture.nativeElement.querySelector('.home__greeting-sub').textContent).toContain(FR.home.subtitle);
+    expect(fixture.nativeElement.querySelector('.module-card__badge').textContent.trim()).toBe('À VENIR');
+
+    TestBed.inject(TranslocoService).setActiveLang('en');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('main').getAttribute('aria-label')).toBe('Home');
+    expect(fixture.nativeElement.querySelector('.home__greeting-sub').textContent).toContain(EN.home.subtitle);
+    expect(fixture.nativeElement.querySelector('.module-card__badge').textContent.trim()).toBe('COMING SOON');
   });
 });
