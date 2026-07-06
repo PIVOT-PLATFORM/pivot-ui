@@ -1,0 +1,21 @@
+.account-deletion__data-list {
+  margin: 0 0 4px;
+  padding-left: 20px;
+  font-size: var(--text-sm);
+  color: var(--color-gray-700);
+  line-height: 1.6;
+}
+
+.account-deletion__form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.account-deletion__otp-status {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-gray-500);
+  min-height: 1em;
+}

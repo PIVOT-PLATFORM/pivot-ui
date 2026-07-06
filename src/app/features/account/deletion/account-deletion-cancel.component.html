@@ -1,0 +1,58 @@
+<main class="cancel-page">
+  <div class="card cancel-card">
+    <h1 class="cancel-title">{{ 'account.deletion.cancel_page_title' | transloco }}</h1>
+
+    @switch (pageState()) {
+      @case ('missing-token') {
+        <p class="cancel-body">{{ 'account.deletion.cancel_page_missing_token' | transloco }}</p>
+        <a routerLink="/auth/login" class="btn btn-secondary btn-full" data-testid="account-deletion-cancel-login-link">
+          {{ 'account.deletion.cancel_page_login_cta' | transloco }}
+        </a>
+      }
+      @case ('success') {
+        <p class="cancel-body" role="status" data-testid="account-deletion-cancel-success">
+          {{ 'account.deletion.cancel_page_success_body' | transloco }}
+        </p>
+        <a routerLink="/auth/login" class="btn btn-primary btn-full" data-testid="account-deletion-cancel-login-link">
+          {{ 'account.deletion.cancel_page_login_cta' | transloco }}
+        </a>
+      }
+      @case ('error-expired') {
+        <div class="alert alert-error" role="alert" data-testid="account-deletion-cancel-error">
+          {{ 'account.deletion.cancel_page_error_expired' | transloco }}
+        </div>
+        <a routerLink="/auth/login" class="btn btn-secondary btn-full" data-testid="account-deletion-cancel-login-link">
+          {{ 'account.deletion.cancel_page_login_cta' | transloco }}
+        </a>
+      }
+      @case ('error-invalid') {
+        <div class="alert alert-error" role="alert" data-testid="account-deletion-cancel-error">
+          {{ 'account.deletion.cancel_page_error_invalid' | transloco }}
+        </div>
+        <a routerLink="/auth/login" class="btn btn-secondary btn-full" data-testid="account-deletion-cancel-login-link">
+          {{ 'account.deletion.cancel_page_login_cta' | transloco }}
+        </a>
+      }
+      @default {
+        <p class="cancel-body">{{ 'account.deletion.cancel_page_intro' | transloco }}</p>
+        <!--
+          Deliberately requires this explicit click — POST /account/deletion/cancel
+          is never fired automatically on page load (US02.2.4 AC: avoid an
+          email-scanning bot triggering cancellation by prefetching the link).
+        -->
+        <button
+          type="button"
+          class="btn btn-primary btn-full btn-lg"
+          [disabled]="pageState() === 'loading'"
+          (click)="confirmCancel()"
+          data-testid="account-deletion-cancel-confirm"
+        >
+          @if (pageState() === 'loading') {
+            <span class="spinner" aria-hidden="true"></span>
+          }
+          {{ 'account.deletion.cancel_page_button' | transloco }}
+        </button>
+      }
+    }
+  </div>
+</main>

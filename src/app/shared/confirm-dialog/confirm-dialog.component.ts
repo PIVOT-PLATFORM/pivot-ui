@@ -16,6 +16,14 @@
  *
  * Kept in `shared/` since confirmation-before-destructive-action is a pattern
  * other features will likely need (not specific to module administration).
+ *
+ * US02.2.4 (account deletion) additions — both backward-compatible (defaults
+ * preserve the original admin-modules usage untouched):
+ * - `confirmDisabled` input: lets a multi-step caller (e.g. a password/OTP
+ *   form) keep the destructive action disabled until its own input is valid.
+ * - projected content (`<ng-content>`): lets a caller render step-specific
+ *   body content (a data list, a form) inside the same accessible dialog
+ *   shell instead of the single plain-text `message`.
  */
 import {
   ChangeDetectionStrategy,
@@ -49,6 +57,7 @@ import {
         >
           <h2 [id]="titleId" class="confirm-dialog__title">{{ title }}</h2>
           <p [id]="messageId" class="confirm-dialog__message">{{ message }}</p>
+          <ng-content></ng-content>
           <div class="confirm-dialog__actions">
             <button
               #cancelBtn
@@ -63,6 +72,7 @@ import {
               type="button"
               class="btn btn-danger"
               data-testid="confirm-dialog-confirm"
+              [disabled]="confirmDisabled"
               (click)="confirm()"
             >
               {{ confirmLabel }}
@@ -84,6 +94,8 @@ export class ConfirmDialogComponent implements OnChanges {
   @Input() message = '';
   @Input() confirmLabel = '';
   @Input() cancelLabel = '';
+  /** Disables the confirm button (e.g. an in-dialog form is invalid or a request is in flight). */
+  @Input() confirmDisabled = false;
 
   @Output() readonly confirmed = new EventEmitter<void>();
   @Output() readonly cancelled = new EventEmitter<void>();
