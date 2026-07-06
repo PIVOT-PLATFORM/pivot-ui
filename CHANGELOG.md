@@ -1,3 +1,10 @@
+# [0.16.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.15.0...v0.16.0) (2026-07-06)
+
+
+### Features
+
+* **ui:** US02.3.1 — Export de ses données personnelles (RGPD Art.20) ([#75](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/75)) ([2734cea](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/2734cea88c1e69079891a94b35ed14fb25ee6094)), closes [#133](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/133) [#133](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/133)
+
 # [0.15.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.14.0...v0.15.0) (2026-07-06)
 
 
