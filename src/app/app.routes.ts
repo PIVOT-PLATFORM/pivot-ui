@@ -73,6 +73,13 @@ export const routes: Routes = [
         loadComponent: () => import('./features/contact/contact.component').then(m => m.ContactComponent),
       },
       {
+        path: 'account/security',
+        loadComponent: () =>
+          import('./features/account/security/change-password/change-password.component').then(
+            m => m.ChangePasswordComponent,
+          ),
+      },
+      {
         path: 'teams',
         loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
       },

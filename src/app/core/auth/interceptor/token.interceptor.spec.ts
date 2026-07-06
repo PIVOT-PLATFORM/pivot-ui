@@ -161,5 +161,22 @@ describe('tokenInterceptor', () => {
 
       expect(expirySpy).not.toHaveBeenCalled();
     });
+
+    it('does NOT trigger session expiry on 401 from POST /account/password (US02.2.1 — wrong current password is a business error, not a session expiry)', () => {
+      const sessionExpiry = TestBed.inject(SessionExpiryService);
+      const expirySpy = vi.spyOn(sessionExpiry, 'onSessionExpired').mockImplementation(() => {});
+      const changePasswordUrl = 'http://localhost:8080/api/account/password';
+
+      let receivedStatus = 0;
+      httpClient.post(changePasswordUrl, {}).subscribe({
+        error: (err: HttpErrorResponse) => { receivedStatus = err.status; },
+      });
+      httpMock.expectOne(changePasswordUrl).flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+
+      // The user stays logged in — no forced logout/redirect on a mistyped current password —
+      // and the 401 is still propagated so ChangePasswordComponent can show its inline error.
+      expect(expirySpy).not.toHaveBeenCalled();
+      expect(receivedStatus).toBe(401);
+    });
   });
 });

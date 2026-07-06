@@ -187,6 +187,21 @@ export class AuthService {
     return this.http.post<{ message: string }>(`${this.apiUrl}/auth/reset-password`, { token, newPassword });
   }
 
+  /**
+   * Changes the password of the currently authenticated user (US02.2.1).
+   *
+   * The backend revokes every existing session token — including the one used to
+   * authenticate this very request — and issues a brand-new one in the same response,
+   * exactly like `/auth/login`. `storeAuth()` immediately replaces the in-memory token
+   * with the new value so the current browsing session keeps working uninterrupted
+   * (the user is never logged out by this call, even though the token itself changed).
+   */
+  changePassword(currentPassword: string, newPassword: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/account/password`, {
+      currentPassword, newPassword
+    }).pipe(tap(res => this.storeAuth(res)));
+  }
+
   /** Called on app init to restore session via httpOnly session cookie. */
   initSession(): Observable<AuthResponse> {
     return this.refresh();

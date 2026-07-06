@@ -202,6 +202,27 @@
       "expired_remember_me": "Votre session longue a expiré, veuillez vous reconnecter."
     }
   },
+  "account": {
+    "security": {
+      "password": {
+        "title": "Changer mon mot de passe",
+        "subtitle": "Choisissez un nouveau mot de passe sécurisé pour votre compte.",
+        "main_aria": "Sécurité du compte",
+        "form_title": "Mot de passe",
+        "form_aria": "Formulaire de changement de mot de passe",
+        "current_password": "Mot de passe actuel",
+        "new_password": "Nouveau mot de passe",
+        "confirm_password": "Confirmer le nouveau mot de passe",
+        "show_password": "Afficher le mot de passe",
+        "hide_password": "Masquer le mot de passe",
+        "submit": "Enregistrer",
+        "success": "Mot de passe modifié avec succès.",
+        "error_current_incorrect": "Mot de passe actuel incorrect.",
+        "error_generic": "Une erreur est survenue. Réessayez.",
+        "mismatch": "Les mots de passe ne correspondent pas."
+      }
+    }
+  },
   "contact": {
     "title": "Nous contacter",
     "subtitle": "Une question ? Un problème ? L'équipe PIVOT vous répond.",
