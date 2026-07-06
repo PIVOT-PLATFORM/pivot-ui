@@ -1,3 +1,10 @@
+# [0.21.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.20.0...v0.21.0) (2026-07-06)
+
+
+### Features
+
+* **ui:** US06.1.4/US06.1.5 - admin désactive/réactive un compte utilisateur ([#85](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/85)) ([7fc919b](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/7fc919b55cb834bb5ccd3d06dd5a8a7480b03f6d)), closes [#142](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/142)
+
 # [0.20.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.19.0...v0.20.0) (2026-07-06)
 
 
