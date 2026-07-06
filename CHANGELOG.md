@@ -1,3 +1,10 @@
+# [0.25.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.24.0...v0.25.0) (2026-07-06)
+
+
+### Features
+
+* **ui:** badge de notifications non lues dans la navbar (US16.1.3) ([#103](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/103)) ([1c08093](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/1c08093786403d6f99309f58ab888fa07a5216b6)), closes [#160](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/160) [#160](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/160)
+
 # [0.24.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.23.0...v0.24.0) (2026-07-06)
 
 
