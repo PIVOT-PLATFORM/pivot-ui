@@ -1,3 +1,10 @@
+# [0.20.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.19.0...v0.20.0) (2026-07-06)
+
+
+### Features
+
+* **ui:** US06.1.3 - admin modifie le rôle d'un utilisateur ([#84](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/84)) ([ceba5ff](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/ceba5ffe9aca6b9135eb42c30a4b07274b365c7b))
+
 # [0.19.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.18.0...v0.19.0) (2026-07-06)
 
 
