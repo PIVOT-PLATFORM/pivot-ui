@@ -1,3 +1,10 @@
+# [0.18.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.17.0...v0.18.0) (2026-07-06)
+
+
+### Features
+
+* **ui:** US06.2.1 - super admin crée un tenant ([#76](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/76)) ([bdd0b72](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/bdd0b7240bd4801dca4a11507cfaeb5b7d8b8ba8)), closes [#134](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/134) [#059669](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/059669)
+
 # [0.17.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.16.0...v0.17.0) (2026-07-06)
 
 
