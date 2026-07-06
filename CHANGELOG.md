@@ -1,3 +1,10 @@
+## [0.27.1](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.27.0...v0.27.1) (2026-07-06)
+
+
+### Bug Fixes
+
+* **ui:** toast succès rôle/statut omet le nom de l'utilisateur (dédup incorrecte) ([#98](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/98)) ([556600a](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/556600a82a9fd16c65cc4c92204d927e1ead7984)), closes [#84](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/84)
+
 # [0.27.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.26.0...v0.27.0) (2026-07-06)
 
 
