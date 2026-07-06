@@ -5,7 +5,7 @@
   </header>
 
   @if (loading()) {
-    <div class="sr-only" role="status">{{ 'common.loading' | transloco }}</div>
+    <output class="sr-only">{{ 'common.loading' | transloco }}</output>
     <ul class="sessions-list__skeleton" aria-hidden="true" data-testid="sessions-skeleton">
       @for (i of skeletonPlaceholders; track i) {
         <li class="sessions-list__skeleton-row"></li>

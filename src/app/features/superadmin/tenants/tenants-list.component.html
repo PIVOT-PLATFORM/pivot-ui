@@ -96,7 +96,7 @@
   </form>
 
   @if (loading()) {
-    <div class="sr-only" role="status">{{ 'common.loading' | transloco }}</div>
+    <output class="sr-only">{{ 'common.loading' | transloco }}</output>
     <ul class="tenants-list__skeleton" aria-hidden="true" data-testid="tenants-skeleton">
       @for (i of skeletonPlaceholders; track i) {
         <li class="tenants-list__skeleton-row"></li>
@@ -166,12 +166,12 @@
       >
         {{ 'superadmin.tenants.pagination.previous' | transloco }}
       </button>
-      <span class="tenants-list__pagination-status" role="status" data-testid="tenants-page-status">
+      <output class="tenants-list__pagination-status" data-testid="tenants-page-status">
         {{
           'superadmin.tenants.pagination.status'
             | transloco: { page: displayPage(), totalPages: displayTotalPages(), total: totalElements() }
         }}
-      </span>
+      </output>
       <button
         type="button"
         class="btn btn-secondary"

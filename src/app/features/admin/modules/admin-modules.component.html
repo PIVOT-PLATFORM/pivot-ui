@@ -5,7 +5,7 @@
   </header>
 
   @if (loading()) {
-    <div class="sr-only" role="status">{{ 'common.loading' | transloco }}</div>
+    <output class="sr-only">{{ 'common.loading' | transloco }}</output>
     <ul class="admin-modules__grid" aria-hidden="true" data-testid="admin-modules-skeleton">
       @for (i of skeletonPlaceholders; track i) {
         <li class="admin-modules__card admin-modules__card--skeleton"></li>
