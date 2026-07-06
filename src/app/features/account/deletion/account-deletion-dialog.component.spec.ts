@@ -141,6 +141,19 @@ describe('AccountDeletionDialogComponent', () => {
       expect(fixture.nativeElement.querySelector('[data-testid="account-deletion-delete-error"]')).not.toBeNull();
     });
 
+    it('links the password input to the error message via aria-describedby on 403', () => {
+      const input = fixture.nativeElement.querySelector('#account-deletion-password');
+      input.value = 'wrong';
+      input.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+
+      fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]').click();
+      httpMock.expectOne(DELETE_URL).flush('Forbidden', { status: 403, statusText: 'Forbidden' });
+      fixture.detectChanges();
+
+      expect(input.getAttribute('aria-describedby')).toBe('account-deletion-delete-error');
+    });
+
     it('shows a conflict error on 409 (deletion already in progress)', () => {
       const input = fixture.nativeElement.querySelector('#account-deletion-password');
       input.value = 'whatever';
@@ -153,6 +166,21 @@ describe('AccountDeletionDialogComponent', () => {
 
       expect(fixture.nativeElement.querySelector('[data-testid="account-deletion-delete-error"]')).not.toBeNull();
     });
+
+    it('shows the generic error on an unexpected DELETE /account status (e.g. 500)', () => {
+      const input = fixture.nativeElement.querySelector('#account-deletion-password');
+      input.value = 'whatever';
+      input.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+
+      fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]').click();
+      httpMock.expectOne(DELETE_URL).flush('Server Error', { status: 500, statusText: 'Internal Server Error' });
+      fixture.detectChanges();
+
+      const errorEl = fixture.nativeElement.querySelector('[data-testid="account-deletion-delete-error"]');
+      expect(errorEl).not.toBeNull();
+      expect(errorEl.textContent).toContain('account.deletion.error_generic');
+    });
   });
 
   describe('OTP confirmation method', () => {
@@ -162,6 +190,15 @@ describe('AccountDeletionDialogComponent', () => {
       fixture.detectChanges();
       fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]').click();
       fixture.detectChanges();
+    });
+
+    it('shows the generic error on an unexpected status when requesting the OTP (e.g. 500)', () => {
+      httpMock.expectOne(OTP_URL).flush('Server Error', { status: 500, statusText: 'Internal Server Error' });
+      fixture.detectChanges();
+
+      const errorEl = fixture.nativeElement.querySelector('[data-testid="account-deletion-otp-error"]');
+      expect(errorEl).not.toBeNull();
+      expect(errorEl.textContent).toContain('account.deletion.error_generic');
     });
 
     it('automatically requests the OTP email when entering step 2', () => {
@@ -216,6 +253,14 @@ describe('AccountDeletionDialogComponent', () => {
       httpMock.expectOne(OTP_URL).flush(null, { status: 202, statusText: 'Accepted' });
     });
 
+    it('links the otp input to the error message via aria-describedby on 429', () => {
+      httpMock.expectOne(OTP_URL).flush('Too Many Requests', { status: 429, statusText: 'Too Many Requests' });
+      fixture.detectChanges();
+
+      const input = fixture.nativeElement.querySelector('#account-deletion-otp');
+      expect(input.getAttribute('aria-describedby')).toBe('account-deletion-otp-error');
+    });
+
     it('shows a wrong-otp error on 403 from DELETE /account', () => {
       httpMock.expectOne(OTP_URL).flush(null, { status: 202, statusText: 'Accepted' });
       fixture.detectChanges();
@@ -230,6 +275,7 @@ describe('AccountDeletionDialogComponent', () => {
       fixture.detectChanges();
 
       expect(fixture.nativeElement.querySelector('[data-testid="account-deletion-delete-error"]')).not.toBeNull();
+      expect(input.getAttribute('aria-describedby')).toBe('account-deletion-delete-error');
     });
   });
 

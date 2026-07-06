@@ -50,6 +50,7 @@
             autocomplete="one-time-code"
             maxlength="6"
             [placeholder]="'account.deletion.otp_placeholder' | transloco"
+            [attr.aria-describedby]="otpError() ? 'account-deletion-otp-error' : (deleteError() ? 'account-deletion-delete-error' : null)"
           />
         </div>
         <button
@@ -62,7 +63,7 @@
           {{ 'account.deletion.otp_resend' | transloco }}
         </button>
         @if (otpError()) {
-          <div class="alert alert-error" role="alert" data-testid="account-deletion-otp-error">{{ otpError() | transloco }}</div>
+          <div id="account-deletion-otp-error" class="alert alert-error" role="alert" data-testid="account-deletion-otp-error">{{ otpError() | transloco }}</div>
         }
       } @else if (confirmationMethod() === 'PASSWORD') {
         <div class="form-group">
@@ -74,11 +75,12 @@
             class="form-control"
             autocomplete="current-password"
             [placeholder]="'account.deletion.password_placeholder' | transloco"
+            [attr.aria-describedby]="deleteError() ? 'account-deletion-delete-error' : null"
           />
         </div>
       }
       @if (deleteError()) {
-        <div class="alert alert-error" role="alert" data-testid="account-deletion-delete-error">{{ deleteError() | transloco }}</div>
+        <div id="account-deletion-delete-error" class="alert alert-error" role="alert" data-testid="account-deletion-delete-error">{{ deleteError() | transloco }}</div>
       }
       <span class="sr-only" role="status" aria-live="polite">
         @if (deleteLoading()) { {{ 'common.loading' | transloco }} }
