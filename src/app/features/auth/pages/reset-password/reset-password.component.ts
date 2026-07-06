@@ -15,10 +15,7 @@ import { PasswordStrengthComponent } from '../../../../shared/components/passwor
     <div class="auth-page">
       <div class="card auth-card">
         <div class="auth-brand">
-          <picture>
-            <source srcset="assets/brand/pivot-icon.webp?v=4" type="image/webp" />
-            <img src="assets/brand/pivot-icon.png?v=4" alt="PIVOT" class="auth-brand-icon" />
-          </picture>
+          <img src="assets/brand/pivot-mark-gradient.svg?v=5" alt="PIVOT" class="auth-brand-icon" />
         </div>
 
         @switch (tokenState()) {

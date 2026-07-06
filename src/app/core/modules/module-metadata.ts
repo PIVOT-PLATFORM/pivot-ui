@@ -18,7 +18,7 @@ export function defaultMeta(id: string): ModuleUiMeta {
     description: id,
     route: `/${id}`,
     comingSoon: true,
-    color: '#6B7280',
+    color: '#8A7EA8',
   };
 }
 

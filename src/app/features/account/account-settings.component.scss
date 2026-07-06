@@ -15,17 +15,17 @@
 }
 
 .account-settings__danger-zone {
-  border: 1px solid #FECACA;
+  border: 1px solid #F5B8BE;
   border-radius: var(--radius-lg);
   padding: 20px 24px;
-  background: #FEF2F2;
+  background: var(--color-error-light);
 }
 
 .account-settings__danger-title {
   margin: 0 0 8px;
   font-size: var(--text-lg);
   font-weight: 600;
-  color: #991B1B;
+  color: var(--color-error-dark);
 }
 
 .account-settings__danger-body {

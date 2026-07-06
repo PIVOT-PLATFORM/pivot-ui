@@ -13,10 +13,7 @@ import { AuthService } from '../../../../core/auth/service/auth.service';
     <div class="verify-page">
       <div class="verify-card">
         <div class="verify-brand">
-          <picture>
-            <source srcset="assets/brand/pivot-icon.webp?v=4" type="image/webp" />
-            <img src="assets/brand/pivot-icon.png?v=4" alt="PIVOT" class="verify-brand-icon" />
-          </picture>
+          <img src="assets/brand/pivot-mark-gradient.svg?v=5" alt="PIVOT" class="verify-brand-icon" />
         </div>
 
         @switch (state()) {

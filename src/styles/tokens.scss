@@ -1,66 +1,62 @@
-// Design tokens — enterprise palette (switchable per theme)
+// Design tokens — charte graphique v3 (violet/magenta duotone, cf. pivot-docs charte graphique)
 :root {
-  // Brand
-  --color-brand-50:  #EFF6FF;
-  --color-brand-100: #DBEAFE;
-  --color-brand-200: #BFDBFE;
-  --color-brand-500: #3B82F6;
-  --color-brand-600: #2563EB;
-  --color-brand-700: #1D4ED8;
-  --color-brand-900: #1E3A5F;
+  // Brand — violet primaire (ramp charte v3)
+  --color-brand-50:  #F5F0FE;
+  --color-brand-100: #EDE4FD;
+  --color-brand-200: #DCC9FB;
+  --color-brand-500: #8B57E8;
+  --color-brand-600: #6D28D9;
+  --color-brand-700: #5B1FB4;
+  --color-brand-900: #431680;
 
-  // Navy (primary UI)
-  --color-navy-900: #1B2A4A;
-  --color-navy-800: #243657;
-  --color-navy-700: #2D4266;
+  // Accent — magenta (soulignement, nouveauté ; jamais en fond de grande surface)
+  --color-accent: #DB2777;
 
-  // Neutrals
-  --color-gray-50:  #F9FAFB;
-  --color-gray-100: #F3F4F6;
-  --color-gray-200: #E5E7EB;
-  --color-gray-300: #D1D5DB;
-  --color-gray-400: #9CA3AF;
-  --color-gray-500: #6B7280;
-  --color-gray-600: #4B5563;
-  --color-gray-700: #374151;
-  --color-gray-900: #111827;
+  // Navy → encre (texte fort / panneau sombre) — même rôle sémantique, valeurs charte v3
+  --color-navy-900: #1A1230;
+  --color-navy-800: #2E2154;
+  --color-navy-700: #3D3163;
+
+  // Neutrals — gris teintés violet
+  --color-gray-50:  #F6F3FD;
+  --color-gray-100: #F3EEFC;
+  --color-gray-200: #E9E1F7;
+  --color-gray-300: #D0BFF0;
+  --color-gray-400: #A99BC7;
+  --color-gray-500: #8A7EA8;
+  --color-gray-600: #6B5D8F;
+  --color-gray-700: #564A76;
+  --color-gray-900: #1A1230;
 
   // Semantic
-  --color-success:       #059669;
+  --color-success:       #0E9F6E;
   --color-success-400:   #34D399;  /* bright — lisible sur fond sombre */
-  --color-success-light: #D1FAE5;
-  --color-success-dark:  #065F46;
-  --color-warning:       #D97706;
-  --color-warning-light: #FEF3C7;
-  --color-warning-dark:  #92400E;  /* text-on-warning-light — 6.4:1, same pattern as success-dark/error-dark */
-  --color-error:         #DC2626;
+  --color-success-light: #E3F6EE;
+  --color-success-dark:  #076B4C;
+  --color-warning:       #F59E0B;
+  --color-warning-light: #FDEFC4;
+  --color-warning-dark:  #92400E;  /* text-on-warning-light — reste lisible avec la nouvelle teinte */
+  --color-error:         #DC2626;  /* = --pv-danger charte, inchangé */
   --color-error-400:     #F87171;  /* bright — lisible sur fond sombre */
-  --color-error-light:   #FEE2E2;
-  --color-error-dark:    #B91C1C;
-  --color-info:          #0284C7;
+  --color-error-light:   #FDE4E6;
+  --color-error-dark:    #A91E1E;
+  --color-info:          #0284C7;  /* pas de token "info" dans la charte — bleu conservé, distinct du violet primaire */
   --color-info-light:    #E0F2FE;
-  --color-info-dark:     #075985;  /* text-on-info-light — 6.5:1, same pattern as success-dark/error-dark */
+  --color-info-dark:     #075985;
 
   // Surfaces
-  --surface-bg:      #F4F5F7;
+  --surface-bg:      #F6F3FD;
   --surface-card:    #FFFFFF;
   --surface-sidebar: var(--color-navy-900);
   --surface-navbar:  var(--auth-gradient);
 
-  // Auth pages — indigo accent (distinct du brand bleu, cohérent avec auth-gradient)
-  --color-auth-accent: #4338ca;
+  // Auth pages — accent magenta (soulignement, distinct du violet primaire)
+  --color-auth-accent: #DB2777;
 
-  // Auth pages gradient — dark indigo → violet (brand identity)
-  --auth-gradient: linear-gradient(
-    135deg,
-    #1e1b4b 0%,
-    #312e81 20%,
-    #4338ca 45%,
-    #6d28d9 70%,
-    #7c3aed 100%
-  );
+  // Dégradé de marque — réservé aux moments forts (logo, app-icon, navbar, pages d'accueil/auth)
+  --auth-gradient: linear-gradient(135deg, #1A1230 0%, #6D28D9 55%, #C026D3 100%);
 
-  // Navbar tokens — light theme (gradient dark bg → textes blancs)
+  // Navbar tokens — light theme (dégradé de marque en fond → textes blancs)
   --navbar-border-color:      transparent;
   --navbar-logo-color:        #ffffff;
   --navbar-text:              rgba(255,255,255,0.82);
@@ -74,8 +70,9 @@
   --navbar-pill-active-color: #ffffff;
   --navbar-pill-sep:          rgba(255,255,255,0.3);
 
-  // Typography
-  --font-sans: 'Inter', 'Segoe UI', Arial, sans-serif;
+  // Typography — Fira Sans (UI) / Fira Mono (données, libellés), auto-hébergées
+  --font-sans: 'Fira Sans', 'Segoe UI', Arial, sans-serif;
+  --font-mono: 'Fira Mono', 'SFMono-Regular', Consolas, monospace;
   --text-xs:   0.75rem;
   --text-sm:   0.875rem;
   --text-base: 1rem;
@@ -83,11 +80,11 @@
   --text-xl:   1.25rem;
   --text-2xl:  1.5rem;
 
-  // Spacing
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
+  // Rayons — angles quasi droits (charte "net et carré")
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 3px;
+  --radius-xl: 3px;
 
   // Shadows
   --shadow-sm:    0 1px 2px rgba(0,0,0,.05);
@@ -96,11 +93,11 @@
   --shadow-xl:    0 20px 40px rgba(0,0,0,.18);
 
   // Button shadows (keyed to brand/semantic colors for easy palette swap)
-  --btn-primary-shadow:       0 1px 3px rgba(37, 99, 235, .25);
-  --btn-primary-shadow-hover: 0 4px 12px rgba(37, 99, 235, .35);
+  --btn-primary-shadow:       0 1px 3px rgba(109, 40, 217, .25);
+  --btn-primary-shadow-hover: 0 4px 12px rgba(109, 40, 217, .35);
   --btn-secondary-shadow:     0 1px 2px rgba(0, 0, 0, .05);
   --btn-secondary-shadow-hover: 0 3px 8px rgba(0, 0, 0, .1);
-  --btn-ghost-shadow-hover:   0 2px 6px rgba(37, 99, 235, .12);
+  --btn-ghost-shadow-hover:   0 2px 6px rgba(109, 40, 217, .12);
   --btn-danger-shadow:        0 1px 3px rgba(220, 38, 38, .25);
   --btn-danger-shadow-hover:  0 4px 12px rgba(220, 38, 38, .35);
 
@@ -116,26 +113,29 @@
 
 // ─── Dark theme ──────────────────────────────────────────────────────────────
 [data-theme="dark"] {
-  --color-brand-50:  #1e3a5f;
-  --color-brand-100: #1e40af;
-  --color-brand-500: #60a5fa;
-  --color-brand-600: #3b82f6;
-  --color-navy-900:  #f8fafc;
-  --color-gray-50:   #0f172a;
-  --color-gray-100:  #1e293b;
-  --color-gray-200:  #334155;
-  --color-gray-300:  #475569;
-  --color-gray-400:  #64748b;
-  --color-gray-500:  #94a3b8;
-  --color-gray-600:  #cbd5e1;
-  --color-gray-700:  #e2e8f0;
-  --color-gray-900:  #f8fafc;
-  --surface-bg:      #09090b;
-  --surface-card:    #111113;
-  --surface-sidebar: #050506;
+  --color-brand-50:  #241843;
+  --color-brand-100: #40316E;
+  --color-brand-500: #A78BFA;
+  --color-brand-600: #A78BFA;
+  --color-brand-700: #C4B5FD;  /* hover plus clair qu'en light — convention dark mode de la charte */
+  --color-accent:    #F472B6;
+  --color-navy-900:  #EEE9F8;
+  --color-gray-50:   #130D28;
+  --color-gray-100:  #221643;
+  --color-gray-200:  #2E2154;
+  --color-gray-300:  #40316E;
+  --color-gray-400:  #6E5F91;
+  --color-gray-500:  #8579A6;
+  --color-gray-600:  #A79BC4;
+  --color-gray-700:  #B7ABD6;
+  --color-gray-900:  #EEE9F8;
+  --surface-bg:      #0E0A1E;
+  --surface-card:    #191131;
+  --surface-sidebar: #0E0A1E;
   --surface-navbar:  linear-gradient(135deg, #07060e 0%, #0c0a1c 25%, #12103a 55%, #1a1248 80%, #1e1450 100%);
-  --color-error:     #f87171;
-  --color-success:   #34d399;
+  --color-error:     #FF5D62;
+  --color-success:   #34D399;
+  --color-warning:   #FBBF24;
   // Navbar tokens — gradient noir premium teinté violet (même pattern que light)
   --navbar-border-color:      transparent;
   --navbar-logo-color:        #ffffff;
@@ -150,4 +150,3 @@
   --navbar-pill-active-color: #ffffff;
   --navbar-pill-sep:          rgba(255,255,255,0.2);
 }
-
