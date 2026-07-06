@@ -1,3 +1,10 @@
+# [0.15.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.14.0...v0.15.0) (2026-07-06)
+
+
+### Features
+
+* **account:** sessions actives — voir et révoquer (US02.2.3) ([#74](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/74)) ([7a639ae](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/7a639ae6c46641b2070435c1aeab43c43dd3310f))
+
 # [0.14.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.13.0...v0.14.0) (2026-07-06)
 
 
