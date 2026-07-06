@@ -45,6 +45,12 @@ describe('AccountDeletionDialogComponent', () => {
   it('fetches the confirmation method as soon as it opens', () => {
     open();
     httpMock.expectOne(CONFIRMATION_METHOD_URL).flush({ method: 'PASSWORD' });
+    fixture.detectChanges();
+
+    // methodLoading flips false and methodError stays false on a successful fetch,
+    // which unblocks confirmDisabled() — observable via the continue button re-enabling.
+    const confirmBtn: HTMLButtonElement = fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]');
+    expect(confirmBtn.disabled).toBe(false);
   });
 
   it('renders the alertdialog with the irreversibility data list on step 1', () => {
@@ -55,7 +61,7 @@ describe('AccountDeletionDialogComponent', () => {
     const dialog = fixture.nativeElement.querySelector('[data-testid="confirm-dialog"]');
     expect(dialog.getAttribute('role')).toBe('alertdialog');
     const list = fixture.nativeElement.querySelector('[data-testid="account-deletion-data-list"]');
-    expect(list.querySelectorAll('li').length).toBe(4);
+    expect(list.querySelectorAll('li')).toHaveLength(4);
   });
 
   it('disables the continue button while the confirmation method is loading', () => {

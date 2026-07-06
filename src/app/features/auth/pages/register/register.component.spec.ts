@@ -197,6 +197,7 @@ describe('RegisterComponent', () => {
       component.form.setValue({ ...validForm(), confirmPassword: 'Different123!' });
       component.submit();
       httpMock.expectNone(`${environment.apiUrl}/auth/register`);
+      expect(component.loading()).toBe(false);
     });
   });
 });

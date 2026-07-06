@@ -377,7 +377,7 @@ describe('ProfileComponent', () => {
       expect(component.avatarUploading()).toBe(true);
       const req = httpMock.expectOne(`${environment.apiUrl}/account/profile/avatar`);
       expect(req.request.method).toBe('POST');
-      expect(req.request.body instanceof FormData).toBe(true);
+      expect(req.request.body).toBeInstanceOf(FormData);
       expect((req.request.body as FormData).get('file')).toBe(file);
 
       req.flush(makeDto({ avatarUrl: 'http://localhost:8080/api/avatars/1/new.png' }));
@@ -519,8 +519,10 @@ describe('ProfileComponent', () => {
 
     it('ignores an unsupported select value defensively', () => {
       flushProfile();
+      const transloco = TestBed.inject(TranslocoService);
       component.onLanguageChange({ target: { value: 'de' } } as unknown as Event);
       httpMock.expectNone(`${environment.apiUrl}/account/profile`);
+      expect(transloco.getActiveLang()).toBe('fr');
     });
   });
 

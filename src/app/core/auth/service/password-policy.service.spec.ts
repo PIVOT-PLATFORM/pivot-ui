@@ -48,6 +48,8 @@ describe('PasswordPolicyService', () => {
       httpMock
         .expectOne(`${environment.apiUrl}/auth/password-policy`)
         .flush(DEFAULT_PASSWORD_POLICY);
+
+      expect(service.policy()).toEqual(DEFAULT_PASSWORD_POLICY);
     });
 
     it('falls back silently to defaults on network error — backend remains the source of truth', () => {

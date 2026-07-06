@@ -40,7 +40,7 @@ describe('ModuleRegistryService', () => {
       const comingSoon = service.comingSoonModules();
       const metaKeys = Object.keys(MODULE_METADATA);
 
-      expect(comingSoon.length).toBe(metaKeys.length);
+      expect(comingSoon).toHaveLength(metaKeys.length);
       metaKeys.forEach(id => {
         expect(comingSoon.some(m => m.id === id)).toBe(true);
       });
@@ -119,7 +119,7 @@ describe('ModuleRegistryService', () => {
     });
 
     it('updates the modules signal after response', () => {
-      expect(service.modules().length).toBe(0);
+      expect(service.modules()).toHaveLength(0);
 
       service.loadModules().subscribe();
       httpMock.expectOne(`${environment.apiUrl}/modules`).flush([
@@ -127,7 +127,7 @@ describe('ModuleRegistryService', () => {
         makeDto('session'),
       ]);
 
-      expect(service.modules().length).toBe(2);
+      expect(service.modules()).toHaveLength(2);
       expect(service.modules()[0].id).toBe('whiteboard');
     });
 
@@ -165,7 +165,7 @@ describe('ModuleRegistryService', () => {
 
       expect(errored).toBe(false);
       expect(completed).toBe(true);
-      expect(service.modules().length).toBe(0);
+      expect(service.modules()).toHaveLength(0);
     });
 
     it('resets signal to [] and completes without error on network failure', () => {
@@ -183,21 +183,21 @@ describe('ModuleRegistryService', () => {
 
       expect(errored).toBe(false);
       expect(completed).toBe(true);
-      expect(service.modules().length).toBe(0);
+      expect(service.modules()).toHaveLength(0);
     });
 
     it('updates computed signals reactively on second loadModules() call', () => {
       service.loadModules().subscribe();
       httpMock.expectOne(`${environment.apiUrl}/modules`).flush([makeDto('whiteboard')]);
-      expect(service.modules().length).toBe(1);
+      expect(service.modules()).toHaveLength(1);
 
       service.loadModules().subscribe();
       httpMock
         .expectOne(`${environment.apiUrl}/modules`)
         .flush([makeDto('whiteboard'), makeDto('session')]);
 
-      expect(service.modules().length).toBe(2);
-      expect(service.enrichedModules().length).toBe(2);
+      expect(service.modules()).toHaveLength(2);
+      expect(service.enrichedModules()).toHaveLength(2);
     });
   });
 });

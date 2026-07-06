@@ -158,6 +158,7 @@ describe('LanguagePreferenceService', () => {
       transloco.setActiveLang('fr');
       service.saveAndApply('fr');
       httpMock.expectNone(`${environment.apiUrl}/account/profile`);
+      expect(service.saving()).toBe(false);
     });
 
     it('is a no-op when a save is already in flight', () => {
