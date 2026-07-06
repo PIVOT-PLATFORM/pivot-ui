@@ -147,7 +147,7 @@ describe('ModuleRegistryService', () => {
 
       const enriched = service.enrichedModules();
       expect(enriched[0].route).toBe('/unknown-module');
-      expect(enriched[0].color).toBe('#8A7EA8');
+      expect(enriched[0].color).toBe('#756693');
     });
 
     it('resets signal to [] and completes without error on HTTP 500', () => {
