@@ -29,6 +29,11 @@
  */
 export type AdminUserRole = 'ROLE_ADMIN' | 'ROLE_USER';
 
+/** Narrows a raw string (e.g. a native `<select>` value) to `AdminUserRole`. */
+export function isAdminUserRole(value: string): value is AdminUserRole {
+  return value === 'ROLE_ADMIN' || value === 'ROLE_USER';
+}
+
 /**
  * Synthetic 3-value status derived server-side from the `is_active`/`is_blocked`
  * columns (`BLOCKED` takes priority) — never expose separate booleans, only
@@ -69,6 +74,20 @@ export interface AdminUserFilters {
   role: AdminUserRoleFilter;
   status: AdminUserStatusFilter;
 }
+
+/**
+ * Classification of a `PATCH /api/admin/users/{id}/role` failure (US06.1.3
+ * backend contract), used to show a more useful toast than a single generic
+ * error message:
+ * - `invalid-role` — `400`, only `ROLE_ADMIN`/`ROLE_USER` accepted (structurally
+ *   unreachable from this UI's closed `<select>`, kept for contract drift).
+ * - `self-demotion` — `403`, an admin cannot change their own role.
+ * - `not-found` — `404`, the target user does not belong to the caller's tenant
+ *   (cross-tenant access is a 404, never a 403, per the platform's tenant
+ *   isolation rule).
+ * - `generic` — anything else (network/5xx).
+ */
+export type AdminUserRoleChangeErrorKind = 'invalid-role' | 'self-demotion' | 'not-found' | 'generic';
 
 /** Fixed page size for this US — mirrors the backend default, sent explicitly on every request. */
 export const DEFAULT_ADMIN_USERS_PAGE_SIZE = 20;

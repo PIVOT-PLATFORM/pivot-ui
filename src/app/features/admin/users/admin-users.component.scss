@@ -126,6 +126,15 @@
   &--status-blocked { background: var(--color-error-light); color: var(--color-error-dark); }
 }
 
+// ---- Role-change select (US06.1.3) — reuses the global .form-control look,
+// sits inline with the mobile expand toggle in the actions cell. ----
+.admin-users__role-select {
+  min-width: 140px;
+  margin-right: 8px;
+
+  &:disabled { opacity: 0.6; }
+}
+
 // ---- Mobile-only expand toggle (base button look comes from .btn.btn-secondary) ----
 .admin-users__expand-toggle {
   display: none;

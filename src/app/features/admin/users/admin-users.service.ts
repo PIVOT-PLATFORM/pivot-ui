@@ -1,5 +1,6 @@
 /**
- * AdminUsersService — tenant-admin, paginated user listing (US06.1.2).
+ * AdminUsersService — tenant-admin, paginated user listing (US06.1.2) and
+ * per-user role change (US06.1.3).
  *
  * Consumes `GET /api/admin/users` (`ROLE_ADMIN` only, US06.1.1 contract — see
  * `admin-user.model.ts` for the full contract notes). Pagination is 0-indexed;
@@ -9,19 +10,31 @@
  * omitted entirely rather than sent as an empty string, so the backend's own
  * "no filter" semantics apply.
  *
+ * Also consumes `PATCH /api/admin/users/{id}/role` (US06.1.3 backend contract,
+ * `{ role: 'ROLE_ADMIN' | 'ROLE_USER' }` → `200` updated user / `400` invalid
+ * role / `403` self-demotion / `404` cross-tenant). Like `AdminModuleService`'s
+ * activate/deactivate, `changeRole` is optimistic: the row's `role` flips in
+ * the local `_users` signal immediately, and rolls back to the previous value
+ * on any error. Per-row in-flight and error state are tracked independently
+ * (keyed by user id) so other rows stay interactive while one row's request
+ * is pending.
+ *
  * No `tenantId` is ever read from or sent by this service — the tenant scope
  * is resolved entirely server-side from the bearer token, per the platform
  * rule that tenant-filtering logic must never live client-side.
  */
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, catchError, of, tap } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { Observable, catchError, map, of, tap, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
   DEFAULT_ADMIN_USERS_PAGE_SIZE,
   EMPTY_ADMIN_USER_PAGE,
+  type AdminUserDto,
   type AdminUserFilters,
   type AdminUserPage,
+  type AdminUserRole,
+  type AdminUserRoleChangeErrorKind,
 } from './admin-user.model';
 
 @Injectable({ providedIn: 'root' })
@@ -36,6 +49,8 @@ export class AdminUsersService {
   private readonly _size = signal(DEFAULT_ADMIN_USERS_PAGE_SIZE);
   private readonly _totalPages = signal(0);
   private readonly _totalElements = signal(0);
+  private readonly _roleChangeInFlight = signal<Record<number, boolean>>({});
+  private readonly _roleChangeErrors = signal<Record<number, AdminUserRoleChangeErrorKind>>({});
 
   /** Current page content. */
   readonly users = this._users.asReadonly();
@@ -93,5 +108,81 @@ export class AdminUsersService {
         return of(EMPTY_ADMIN_USER_PAGE);
       })
     );
+  }
+
+  /** True while a `PATCH /api/admin/users/{id}/role` call for this user id is pending. */
+  isRoleChangeInFlight(id: number): boolean {
+    return this._roleChangeInFlight()[id] ?? false;
+  }
+
+  /** Classified error for the last failed role change on this user id, if any (cleared on the next attempt). */
+  roleChangeError(id: number): AdminUserRoleChangeErrorKind | null {
+    return this._roleChangeErrors()[id] ?? null;
+  }
+
+  /**
+   * Changes a user's role optimistically. Flips `role` in the local row
+   * immediately, then reconciles with the backend's response (`200` returns
+   * the updated user — its `role` is applied verbatim rather than assuming
+   * the request echoed back). Rolls back to the previous role and records a
+   * classified error on failure.
+   */
+  changeRole(user: AdminUserDto, role: AdminUserRole): Observable<void> {
+    const { id } = user;
+    const previousRole = user.role;
+
+    this.setRoleChangeInFlight(id, true);
+    this.clearRoleChangeError(id);
+    this.applyRole(id, role);
+
+    return this.http.patch<AdminUserDto>(`${this.apiUrl}/admin/users/${id}/role`, { role }).pipe(
+      tap(updated => {
+        this.applyRole(id, updated.role);
+        this.setRoleChangeInFlight(id, false);
+      }),
+      map(() => undefined),
+      catchError((err: HttpErrorResponse) => {
+        this.applyRole(id, previousRole);
+        this.setRoleChangeInFlight(id, false);
+        this.setRoleChangeError(id, this.classifyRoleChangeError(err));
+        return throwError(() => err);
+      })
+    );
+  }
+
+  private classifyRoleChangeError(err: HttpErrorResponse): AdminUserRoleChangeErrorKind {
+    switch (err.status) {
+      case 400:
+        return 'invalid-role';
+      case 403:
+        return 'self-demotion';
+      case 404:
+        return 'not-found';
+      default:
+        return 'generic';
+    }
+  }
+
+  private applyRole(id: number, role: string): void {
+    this._users.update(list => list.map(u => (u.id === id ? { ...u, role } : u)));
+  }
+
+  private setRoleChangeInFlight(id: number, value: boolean): void {
+    this._roleChangeInFlight.update(map => ({ ...map, [id]: value }));
+  }
+
+  private setRoleChangeError(id: number, kind: AdminUserRoleChangeErrorKind): void {
+    this._roleChangeErrors.update(map => ({ ...map, [id]: kind }));
+  }
+
+  private clearRoleChangeError(id: number): void {
+    this._roleChangeErrors.update(map => {
+      if (!(id in map)) {
+        return map;
+      }
+      const next = { ...map };
+      delete next[id];
+      return next;
+    });
   }
 }
