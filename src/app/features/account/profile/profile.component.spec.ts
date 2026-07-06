@@ -4,11 +4,14 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { Component } from '@angular/core';
-import { TranslocoTestingModule } from '@jsverse/transloco';
+import { TranslocoTestingModule, TranslocoService } from '@jsverse/transloco';
 import { ProfileComponent } from './profile.component';
 import { ToastService } from '../../../shared/toast/toast.service';
 import type { ProfileDto } from './profile.model';
 import { environment } from '../../../../environments/environment';
+import { ensureLocalStorageStub } from '../../../core/i18n/testing/local-storage-stub';
+
+ensureLocalStorageStub();
 
 @Component({ template: '', standalone: true })
 class StubComponent {}
@@ -16,6 +19,15 @@ class StubComponent {}
 const frTranslations = {
   common: { back: 'Retour', field_required: 'Ce champ est obligatoire.', loading: 'Chargement en cours…' },
   account: {
+    preferences: {
+      title: 'Langue',
+      language_label: 'Langue préférée',
+      language_fr: 'Français',
+      language_en: 'English',
+      hint: "Cette langue sera utilisée pour l'interface et les emails transactionnels.",
+      success: 'Langue mise à jour.',
+      error_save_generic: 'Impossible de mettre à jour la langue. Réessayez.',
+    },
     profile: {
       title: 'Mon profil',
       subtitle: 'Consultez et modifiez vos informations personnelles.',
@@ -50,6 +62,7 @@ const makeDto = (overrides: Partial<ProfileDto> = {}): ProfileDto => ({
   lastName: 'Solane',
   email: 'alexandre.solane@example.com',
   avatarUrl: null,
+  preferredLanguage: 'fr',
   ...overrides,
 });
 
@@ -67,6 +80,7 @@ describe('ProfileComponent', () => {
   const mockFileInput = (file: File | null) => ({ files: file ? [file] : null, value: '' }) as unknown as HTMLInputElement;
 
   beforeEach(async () => {
+    localStorage.clear();
     await TestBed.configureTestingModule({
       imports: [
         ProfileComponent,
@@ -85,7 +99,10 @@ describe('ProfileComponent', () => {
     fixture.detectChanges();
   });
 
-  afterEach(() => httpMock.verify());
+  afterEach(() => {
+    httpMock.verify();
+    localStorage.clear();
+  });
 
   it('creates the component and triggers the initial GET /api/account/profile', () => {
     expect(component).toBeTruthy();
@@ -424,6 +441,86 @@ describe('ProfileComponent', () => {
       component.onAvatarSelected({ target: mockFileInput(good) } as unknown as Event);
       expect(component.avatarError()).toBeNull();
       httpMock.expectOne(`${environment.apiUrl}/account/profile/avatar`).flush(makeDto());
+    });
+  });
+
+  describe('language preference (US02.1.2)', () => {
+    const selectEl = (): HTMLSelectElement => fixture.nativeElement.querySelector('[data-testid="profile-language-select"]');
+
+    it('renders a native select with aria-label "Langue préférée" and the current language aria-selected', () => {
+      flushProfile();
+      const select = selectEl();
+      expect(select.tagName).toBe('SELECT');
+      expect(select.getAttribute('aria-label')).toBe('Langue préférée');
+
+      const frOption = select.querySelector('option[value="fr"]') as HTMLOptionElement;
+      const enOption = select.querySelector('option[value="en"]') as HTMLOptionElement;
+      expect(frOption.getAttribute('aria-selected')).toBe('true');
+      expect(enOption.getAttribute('aria-selected')).toBeNull();
+    });
+
+    it('switches the active Transloco language instantly on change, before the PATCH resolves', () => {
+      flushProfile();
+      const transloco = TestBed.inject(TranslocoService);
+
+      selectEl().value = 'en';
+      selectEl().dispatchEvent(new Event('change'));
+
+      expect(transloco.getActiveLang()).toBe('en');
+
+      httpMock.expectOne(`${environment.apiUrl}/account/profile`).flush({ preferredLanguage: 'en' });
+    });
+
+    it('PATCHes /account/profile with exactly { preferredLanguage }', () => {
+      flushProfile();
+      selectEl().value = 'en';
+      selectEl().dispatchEvent(new Event('change'));
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/account/profile`);
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual({ preferredLanguage: 'en' });
+      req.flush({ preferredLanguage: 'en' });
+    });
+
+    it('disables the select while the save is in flight', () => {
+      flushProfile();
+      selectEl().value = 'en';
+      selectEl().dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+
+      expect(selectEl().disabled).toBe(true);
+      httpMock.expectOne(`${environment.apiUrl}/account/profile`).flush({ preferredLanguage: 'en' });
+    });
+
+    it('shows a confirmation toast on success', () => {
+      flushProfile();
+      selectEl().value = 'en';
+      selectEl().dispatchEvent(new Event('change'));
+      httpMock.expectOne(`${environment.apiUrl}/account/profile`).flush({ preferredLanguage: 'en' });
+
+      expect(toastService.toasts().some(t => t.messageKey === 'account.preferences.success' && t.type === 'info')).toBe(true);
+    });
+
+    it('reverts to the previous language and shows an error toast on a network failure', () => {
+      flushProfile();
+      const transloco = TestBed.inject(TranslocoService);
+
+      selectEl().value = 'en';
+      selectEl().dispatchEvent(new Event('change'));
+      httpMock
+        .expectOne(`${environment.apiUrl}/account/profile`)
+        .flush('Network error', { status: 0, statusText: 'Unknown Error' });
+
+      expect(transloco.getActiveLang()).toBe('fr');
+      expect(
+        toastService.toasts().some(t => t.messageKey === 'account.preferences.error_save_generic' && t.type === 'error')
+      ).toBe(true);
+    });
+
+    it('ignores an unsupported select value defensively', () => {
+      flushProfile();
+      component.onLanguageChange({ target: { value: 'de' } } as unknown as Event);
+      httpMock.expectNone(`${environment.apiUrl}/account/profile`);
     });
   });
 

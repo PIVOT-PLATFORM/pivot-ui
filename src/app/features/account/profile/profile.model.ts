@@ -1,20 +1,23 @@
 /**
  * Profile models — shape returned/consumed by the account profile endpoints
- * (US02.1.1 — "Voir et éditer son profil").
+ * (US02.1.1 — "Voir et éditer son profil", extended by US02.1.2 — "Préférence de langue").
  *
- * Backend contract confirmed against `pivot-core` PR #129 (merged, backend half
- * of this US):
+ * Backend contract confirmed against `pivot-core` PR #129 (US02.1.1, merged) and PR #130
+ * (US02.1.2):
  * - GET   /api/account/profile          → ProfileDto · 401 if unauthenticated.
  * - PATCH /api/account/profile          → body `UpdateProfileRequest` (firstName/lastName
  *   ONLY) → 200 ProfileDto · 400 `{ error: 'INVALID_NAME' }` (missing/blank/>100 chars) ·
  *   400 `{ error: 'EMAIL_CHANGE_NOT_ALLOWED' }` if the body contains an `email` key at all —
  *   the frontend must therefore NEVER include `email` in the PATCH payload (email edition is
- *   out of scope, see US02.2.2).
+ *   out of scope, see US02.2.2). The same endpoint also accepts an optional `preferredLanguage`
+ *   field — see `LanguagePreferenceService` in `core/i18n`, which owns that PATCH call directly
+ *   (never mixed with a firstName/lastName save; the two flows stay independent).
  * - POST  /api/account/profile/avatar   → multipart field name `file` (JPEG/PNG/WEBP, ≤ 2 Mo)
  *   → 200 ProfileDto · 400 `{ error: 'AVATAR_INVALID_FORMAT' }` · 400 `{ error: 'AVATAR_TOO_LARGE' }`.
  * - Avatars are served unauthenticated at GET /api/avatars/{tenantId}/{uuid}.{ext} — `avatarUrl`
  *   is already the full, directly-usable URL for a plain `<img src>` (no auth header needed).
  */
+import type { SupportedLanguage } from '../../../core/i18n/language';
 
 /** DTO returned by GET/PATCH /api/account/profile and POST .../avatar. */
 export interface ProfileDto {
@@ -23,6 +26,8 @@ export interface ProfileDto {
   email: string;
   /** Full, unauthenticated, directly-usable URL — `null` when no avatar has been uploaded. */
   avatarUrl: string | null;
+  /** Mirrors `users.locale` — always present, never `null` (backend contract, PR #130). */
+  preferredLanguage: SupportedLanguage;
 }
 
 /**
@@ -37,7 +42,7 @@ export interface UpdateProfileRequest {
 
 /** Error body shape returned by PATCH /api/account/profile on a 400. */
 export interface ProfileErrorBody {
-  error: 'INVALID_NAME' | 'EMAIL_CHANGE_NOT_ALLOWED';
+  error: 'INVALID_NAME' | 'EMAIL_CHANGE_NOT_ALLOWED' | 'INVALID_PREFERRED_LANGUAGE';
   message?: string;
 }
 

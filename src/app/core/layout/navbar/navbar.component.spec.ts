@@ -10,6 +10,9 @@ import { NavbarComponent, avatarColor } from './navbar.component';
 import { AuthService } from '../../auth/service/auth.service';
 import { ThemeService } from '../../theme/theme.service';
 import { environment } from '../../../../environments/environment';
+import { ensureLocalStorageStub } from '../../i18n/testing/local-storage-stub';
+
+ensureLocalStorageStub();
 
 const TRANSLOCO_FR = {
   nav: {
@@ -179,14 +182,46 @@ describe('NavbarComponent', () => {
   });
 
   describe('setLang()', () => {
-    it('persists en to localStorage', () => {
+    it('persists en to localStorage when not authenticated (no PATCH fired)', () => {
       component.setLang('en');
       expect(localStorage.getItem('pivot_lang')).toBe('en');
+      httpMock.expectNone(`${environment.apiUrl}/account/profile`);
     });
 
-    it('persists fr to localStorage', () => {
+    it('persists fr to localStorage when not authenticated (no PATCH fired)', () => {
       component.setLang('fr');
       expect(localStorage.getItem('pivot_lang')).toBe('fr');
+    });
+
+    it('ignores an unsupported value', () => {
+      component.setLang('de');
+      expect(localStorage.getItem('pivot_lang')).toBeNull();
+    });
+
+    describe('when authenticated (US02.1.2)', () => {
+      beforeEach(() => {
+        authService.login({ email: 'a@b.com', password: 'pw' }).subscribe();
+        httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush(mockAuthResponse);
+      });
+
+      it('switches instantly AND calls PATCH /account/profile', () => {
+        component.setLang('en');
+        expect(localStorage.getItem('pivot_lang')).toBe('en');
+
+        const req = httpMock.expectOne(`${environment.apiUrl}/account/profile`);
+        expect(req.request.method).toBe('PATCH');
+        expect(req.request.body).toEqual({ preferredLanguage: 'en' });
+        req.flush({ preferredLanguage: 'en' });
+      });
+
+      it('reverts to the previous language on a save failure', () => {
+        component.setLang('en');
+        httpMock
+          .expectOne(`${environment.apiUrl}/account/profile`)
+          .flush('Network error', { status: 0, statusText: 'Unknown Error' });
+
+        expect(localStorage.getItem('pivot_lang')).toBe('fr');
+      });
     });
   });
 

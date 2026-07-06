@@ -3,6 +3,7 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, catchError, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import type { SupportedLanguage } from '../../i18n/language';
 
 export interface UserInfo {
   id: number;
@@ -13,6 +14,14 @@ export interface UserInfo {
   emailVerified: boolean;
   tenantId: number;
   tenantSlug: string;
+  /**
+   * US02.1.2 — mirrors `users.locale`, exposed by the backend on every `AuthResponse` (login,
+   * Google, OIDC, device-OTP, restore-session) since `pivot-core` PR #130. Optional here (not
+   * on `ProfileDto`, where the backend guarantees it) purely defensively — an older cached
+   * response or a test fixture predating this field must not become a type error; consumers
+   * (`LanguageSyncService`) already treat a missing/invalid value as a no-op.
+   */
+  preferredLanguage?: SupportedLanguage;
 }
 
 export interface AuthResponse {

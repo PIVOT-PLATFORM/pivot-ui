@@ -286,6 +286,15 @@
       "submit": "Save",
       "success": "Profile updated successfully."
     },
+    "preferences": {
+      "title": "Language",
+      "language_label": "Preferred language",
+      "language_fr": "Français",
+      "language_en": "English",
+      "hint": "This language will be used for the interface and emails.",
+      "success": "Language updated.",
+      "error_save_generic": "Could not update the language. Please try again."
+    },
     "sessions": {
       "list": {
         "title": "Active sessions",

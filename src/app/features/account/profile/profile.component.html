@@ -70,6 +70,35 @@
         </div>
       </section>
 
+      <!-- ─── Language preference (US02.1.2) ────────────────────────────── -->
+      <section class="account__form-section" aria-labelledby="profile-language-heading">
+        <h2 id="profile-language-heading" class="account__form-title">
+          {{ 'account.preferences.title' | transloco }}
+        </h2>
+        <div class="form-field">
+          <label class="form-field__label" for="preferredLanguage">
+            {{ 'account.preferences.language_label' | transloco }}
+          </label>
+          <select
+            id="preferredLanguage"
+            class="form-field__input"
+            data-testid="profile-language-select"
+            [attr.aria-label]="'account.preferences.language_label' | transloco"
+            [disabled]="languageSaving()"
+            [value]="activeLang()"
+            (change)="onLanguageChange($event)"
+          >
+            <option value="fr" [attr.aria-selected]="activeLang() === 'fr' ? 'true' : null">
+              {{ 'account.preferences.language_fr' | transloco }}
+            </option>
+            <option value="en" [attr.aria-selected]="activeLang() === 'en' ? 'true' : null">
+              {{ 'account.preferences.language_en' | transloco }}
+            </option>
+          </select>
+          <p class="form-field__hint">{{ 'account.preferences.hint' | transloco }}</p>
+        </div>
+      </section>
+
       <!-- ─── Profile form ──────────────────────────────────────────────── -->
       <section class="account__form-section" aria-labelledby="profile-form-heading">
         <h2 id="profile-form-heading" class="account__form-title">
