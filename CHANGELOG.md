@@ -1,3 +1,10 @@
+# [0.22.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.21.0...v0.22.0) (2026-07-06)
+
+
+### Features
+
+* **ui:** US02.2.4 — Suppression de compte (RGPD Art.17), frontend ([#83](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/83)) ([010c724](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/010c72451a80858e0b0f5be3b78e7d311a58f0be)), closes [#140](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/140)
+
 # [0.21.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.20.0...v0.21.0) (2026-07-06)
 
 
