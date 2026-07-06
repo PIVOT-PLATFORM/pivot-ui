@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ComponentFixture } from '@angular/core/testing';
 import { importProvidersFrom } from '@angular/core';
@@ -9,6 +10,7 @@ import { TranslocoTestingModule } from '@jsverse/transloco';
 import { NavbarComponent, avatarColor } from './navbar.component';
 import { AuthService } from '../../auth/service/auth.service';
 import { ThemeService } from '../../theme/theme.service';
+import { NotificationService } from '../../notifications/notification.service';
 import { environment } from '../../../../environments/environment';
 import { ensureLocalStorageStub } from '../../i18n/testing/local-storage-stub';
 
@@ -18,7 +20,7 @@ const TRANSLOCO_FR = {
   nav: {
     home: 'Accueil', modules: 'Modules', teams: 'Mes équipes',
     lang_aria: 'Langue', notifications: 'Notifications',
-    notif_count: '{{ count }} notifications', user_menu: 'Menu de {{ name }}',
+    notif_count: '{{ count }} notifications non lues', user_menu: 'Menu de {{ name }}',
     sign_out: 'Se déconnecter',
     theme_to_dark: 'Passer en mode sombre', theme_to_light: 'Passer en mode clair',
     dropdown: {
@@ -28,6 +30,9 @@ const TRANSLOCO_FR = {
     },
   },
 };
+
+/** URL du contrat EN-NOTIF consommé par {@link NotificationService} (US16.1.3). */
+const notifUrl = `${environment.apiUrl}/notifications/unread-count`;
 
 @Component({ template: '', standalone: true })
 class StubComponent {}
@@ -53,6 +58,7 @@ describe('NavbarComponent', () => {
   let httpMock: HttpTestingController;
   let authService: AuthService;
   let themeService: ThemeService;
+  let notifications: NotificationService;
 
   beforeEach(async () => {
     localStorage.clear();
@@ -89,10 +95,15 @@ describe('NavbarComponent', () => {
     httpMock = TestBed.inject(HttpTestingController);
     authService = TestBed.inject(AuthService);
     themeService = TestBed.inject(ThemeService);
+    notifications = TestBed.inject(NotificationService);
     fixture.detectChanges();
+
+    // US16.1.3 — the constructor fires one immediate `fetchUnreadCount()` call; drain it
+    // here so every test starts from a clean, matched request (count 0 — badge hidden).
+    httpMock.expectOne(notifUrl).flush({ count: 0 });
   });
 
-  afterEach(() => { httpMock.verify(); localStorage.clear(); });
+  afterEach(() => { httpMock.verify(); localStorage.clear(); vi.useRealTimers(); });
 
   it('creates the component', () => { expect(component).toBeTruthy(); });
   it('userMenuOpen starts as false', () => { expect(component.userMenuOpen()).toBe(false); });
@@ -270,18 +281,138 @@ describe('NavbarComponent', () => {
     });
   });
 
-  describe('notification badge', () => {
+  describe('notification badge (US16.1.3)', () => {
     it('renders badge when notifCount > 0', () => {
-      component.notifCount.set(3);
+      notifications.fetchUnreadCount().subscribe();
+      httpMock.expectOne(notifUrl).flush({ count: 3 });
       fixture.detectChanges();
+
       const el: HTMLElement = fixture.nativeElement;
-      expect(el.querySelector('.navbar__badge')).toBeTruthy();
+      const badge = el.querySelector('.navbar__badge');
+      expect(badge).toBeTruthy();
+      expect(badge?.textContent).toBe('3');
     });
 
     it('hides badge when notifCount is 0', () => {
       fixture.detectChanges();
       const el: HTMLElement = fixture.nativeElement;
       expect(el.querySelector('.navbar__badge')).toBeNull();
+    });
+
+    it('shows "99+" when the count exceeds 99, while the aria-label keeps the exact count', () => {
+      notifications.fetchUnreadCount().subscribe();
+      httpMock.expectOne(notifUrl).flush({ count: 127 });
+      fixture.detectChanges();
+
+      const el: HTMLElement = fixture.nativeElement;
+      const badge = el.querySelector('.navbar__badge');
+      expect(badge?.textContent).toBe('99+');
+
+      const bellButton = el.querySelector('.navbar__icon-btn[aria-disabled="true"]');
+      expect(bellButton?.getAttribute('aria-label')).toBe('127 notifications non lues');
+    });
+
+    it('shows the exact count as-is when it does not exceed 99', () => {
+      notifications.fetchUnreadCount().subscribe();
+      httpMock.expectOne(notifUrl).flush({ count: 99 });
+      fixture.detectChanges();
+
+      const el: HTMLElement = fixture.nativeElement;
+      expect(el.querySelector('.navbar__badge')?.textContent).toBe('99');
+    });
+
+    it('badge is aria-hidden — never carries its own aria-live (announced via the dedicated region instead)', () => {
+      notifications.fetchUnreadCount().subscribe();
+      httpMock.expectOne(notifUrl).flush({ count: 3 });
+      fixture.detectChanges();
+
+      const el: HTMLElement = fixture.nativeElement;
+      const badge = el.querySelector('.navbar__badge');
+      expect(badge?.getAttribute('aria-hidden')).toBe('true');
+      expect(badge?.hasAttribute('aria-live')).toBe(false);
+    });
+
+    it('announces the exact count via a dedicated aria-live="polite" region', () => {
+      notifications.fetchUnreadCount().subscribe();
+      httpMock.expectOne(notifUrl).flush({ count: 3 });
+      fixture.detectChanges();
+
+      const el: HTMLElement = fixture.nativeElement;
+      const liveRegion = el.querySelector('output[aria-live="polite"]');
+      expect(liveRegion).toBeTruthy();
+      expect(liveRegion?.textContent).toBe('3 notifications non lues');
+    });
+
+    it('falls back to the generic "Notifications" label when the count is 0', () => {
+      fixture.detectChanges();
+      const el: HTMLElement = fixture.nativeElement;
+      const bellButton = el.querySelector('.navbar__icon-btn[aria-disabled="true"]');
+      expect(bellButton?.getAttribute('aria-label')).toBe('Notifications');
+    });
+
+    it('hides the badge if the unread-count fetch fails after all retries (AC error)', () => {
+      vi.useFakeTimers();
+      notifications.fetchUnreadCount().subscribe();
+
+      httpMock.expectOne(notifUrl).flush('error', { status: 500, statusText: 'Internal Server Error' });
+      vi.advanceTimersByTime(1000);
+      httpMock.expectOne(notifUrl).flush('error', { status: 500, statusText: 'Internal Server Error' });
+      vi.advanceTimersByTime(2000);
+      httpMock.expectOne(notifUrl).flush('error', { status: 500, statusText: 'Internal Server Error' });
+
+      fixture.detectChanges();
+      const el: HTMLElement = fixture.nativeElement;
+      expect(el.querySelector('.navbar__badge')).toBeNull();
+    });
+
+    it('shows the badge again once a later fetch recovers from a previous error', () => {
+      vi.useFakeTimers();
+      notifications.fetchUnreadCount().subscribe();
+      httpMock.expectOne(notifUrl).flush('error', { status: 500, statusText: 'Internal Server Error' });
+      vi.advanceTimersByTime(1000);
+      httpMock.expectOne(notifUrl).flush('error', { status: 500, statusText: 'Internal Server Error' });
+      vi.advanceTimersByTime(2000);
+      httpMock.expectOne(notifUrl).flush('error', { status: 500, statusText: 'Internal Server Error' });
+      fixture.detectChanges();
+      expect((fixture.nativeElement as HTMLElement).querySelector('.navbar__badge')).toBeNull();
+
+      notifications.fetchUnreadCount().subscribe();
+      httpMock.expectOne(notifUrl).flush({ count: 6 });
+      fixture.detectChanges();
+      expect((fixture.nativeElement as HTMLElement).querySelector('.navbar__badge')?.textContent).toBe('6');
+    });
+  });
+
+  describe('notification polling (US16.1.3)', () => {
+    // A fresh, local fixture is created *after* vi.useFakeTimers() so the RxJS
+    // interval() backing NotificationService.poll() is itself scheduled under the fake
+    // clock from the start — the shared `fixture` from the outer beforeEach was already
+    // constructed under real timers (before this test could switch them), so its own
+    // polling interval cannot be advanced by vi.advanceTimersByTime() here.
+
+    it('polls every 30s and keeps the badge in sync', () => {
+      vi.useFakeTimers();
+      const localFixture = TestBed.createComponent(NavbarComponent);
+      localFixture.detectChanges();
+      httpMock.expectOne(notifUrl).flush({ count: 0 });
+
+      vi.advanceTimersByTime(30_000);
+      httpMock.expectOne(notifUrl).flush({ count: 2 });
+      localFixture.detectChanges();
+      expect((localFixture.nativeElement as HTMLElement).querySelector('.navbar__badge')?.textContent).toBe('2');
+
+      localFixture.destroy();
+    });
+
+    it('stops polling once the navbar is destroyed (takeUntilDestroyed)', () => {
+      vi.useFakeTimers();
+      const localFixture = TestBed.createComponent(NavbarComponent);
+      localFixture.detectChanges();
+      httpMock.expectOne(notifUrl).flush({ count: 0 });
+
+      localFixture.destroy();
+      vi.advanceTimersByTime(30_000);
+      httpMock.expectNone(notifUrl);
     });
   });
 });
