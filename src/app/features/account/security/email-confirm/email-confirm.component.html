@@ -1,0 +1,45 @@
+<div class="confirm-page">
+  <div class="confirm-card">
+    <div class="confirm-brand">
+      <picture>
+        <source srcset="assets/brand/pivot-icon.webp?v=4" type="image/webp" />
+        <img src="assets/brand/pivot-icon.png?v=4" alt="PIVOT" class="confirm-brand-icon" />
+      </picture>
+    </div>
+
+    @switch (state()) {
+      @case ('loading') {
+        <div class="confirm-spinner" aria-hidden="true"></div>
+        <output class="confirm-hint">{{ 'account.security.email.confirm.loading' | transloco }}</output>
+      }
+      @case ('success') {
+        <output>
+          <div class="confirm-icon confirm-icon--success" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h2 class="confirm-title">{{ 'account.security.email.confirm.success_title' | transloco }}</h2>
+          <p class="confirm-body">{{ 'account.security.email.confirm.success_body' | transloco }}</p>
+        </output>
+        <a routerLink="/home" class="btn btn-primary btn-lg confirm-cta">{{ 'account.security.email.confirm.success_cta' | transloco }}</a>
+      }
+      @default {
+        <div role="alert" aria-live="assertive">
+          <div class="confirm-icon confirm-icon--error" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </div>
+          <h2 class="confirm-title">{{ errorMessageKeys().title | transloco }}</h2>
+          <p class="confirm-body">{{ errorMessageKeys().body | transloco }}</p>
+        </div>
+        @if (showRetryCta()) {
+          <a routerLink="/account/security/email" class="btn btn-primary confirm-cta">
+            {{ 'account.security.email.confirm.retry_cta' | transloco }}
+          </a>
+        } @else {
+          <a routerLink="/home" class="btn btn-primary confirm-cta">
+            {{ 'account.security.email.confirm.back_home' | transloco }}
+          </a>
+        }
+      }
+    }
+  </div>
+</div>
