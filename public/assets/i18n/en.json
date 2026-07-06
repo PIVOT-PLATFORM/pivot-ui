@@ -663,6 +663,49 @@
         "next": "Next →",
         "status": "Page {{ page }} of {{ totalPages }} ({{ total }} tenants)"
       }
+    },
+    "plans": {
+      "list": {
+        "title": "Plans",
+        "subtitle": "Configure which modules are available for each pricing plan.",
+        "empty": "No plan exists yet",
+        "error": "Unable to load plans. Please try again.",
+        "retry": "Retry",
+        "detail_link": "View"
+      },
+      "columns": {
+        "name": "Name",
+        "module_count": "Modules",
+        "created_at": "Created",
+        "actions": "Actions"
+      },
+      "create": {
+        "title": "Create a plan",
+        "name_label": "Name",
+        "name_placeholder": "Gold",
+        "submit": "Create plan",
+        "error_name_required": "Name is required.",
+        "error_name_too_long": "Name cannot exceed 100 characters.",
+        "error_name_taken": "This plan name is already taken.",
+        "error_validation": "Some fields are invalid. Check the form and try again.",
+        "error_forbidden": "You do not have permission to create a plan."
+      },
+      "detail": {
+        "title": "Plan detail",
+        "subtitle": "{{ count }} module(s) included",
+        "not_found": "This plan does not exist.",
+        "error": "Unable to load the plan. Please try again.",
+        "retry": "Retry",
+        "empty_modules": "No module in this plan",
+        "modules_list_aria": "Plan modules",
+        "remove_module_aria": "Remove {{ moduleId }}",
+        "add_module_label": "Add a module",
+        "add_module_placeholder": "whiteboard",
+        "add_module_submit": "Add",
+        "error_unknown_module": "Module {{ moduleId }} does not exist.",
+        "error_plan_not_found": "This plan no longer exists.",
+        "error_remove": "Unable to remove this module. Please try again."
+      }
     }
   }
 }
