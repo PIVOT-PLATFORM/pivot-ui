@@ -1,3 +1,10 @@
+# [0.26.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.25.0...v0.26.0) (2026-07-06)
+
+
+### Features
+
+* **US03.3.3:** badge distinct pour modules activés par override SUPER_ADMIN ([#102](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/102)) ([3225f1f](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/3225f1fb46527bc54b32ddb6699845ed6902f8be))
+
 # [0.25.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.24.0...v0.25.0) (2026-07-06)
 
 
