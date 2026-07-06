@@ -37,7 +37,7 @@ describe('AdminModuleService', () => {
       expect(req.request.method).toBe('GET');
       req.flush([makeDto('whiteboard', true), makeDto('quiz', false)]);
 
-      expect(service.modules().length).toBe(2);
+      expect(service.modules()).toHaveLength(2);
       expect(service.loading()).toBe(false);
       expect(service.loadError()).toBe(false);
     });

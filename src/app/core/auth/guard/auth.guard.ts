@@ -30,7 +30,7 @@ export const authGuard: CanActivateFn = (_route, state) => {
 export const authMatchGuard: CanMatchFn = () => {
   const auth = inject(AuthService);
   if (auth.isAuthenticated()) return true;
-  const attempted = inject(Router).getCurrentNavigation()?.extractedUrl.toString();
+  const attempted = inject(Router).currentNavigation()?.extractedUrl.toString();
   if (attempted && attempted !== '/') {
     inject(PostLoginRedirectService).remember(attempted);
   }

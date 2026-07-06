@@ -40,7 +40,7 @@ describe('SessionsService', () => {
       expect(req.request.method).toBe('GET');
       req.flush([makeDto(1, { isCurrent: true }), makeDto(2)]);
 
-      expect(service.sessions().length).toBe(2);
+      expect(service.sessions()).toHaveLength(2);
       expect(service.loading()).toBe(false);
       expect(service.loadError()).toBe(false);
     });
@@ -111,7 +111,7 @@ describe('SessionsService', () => {
       httpMock.expectOne(`${environment.apiUrl}/account/sessions`).flush([makeDto(1, { isCurrent: true }), makeDto(2)]);
       req.flush('Not Found', { status: 404, statusText: 'Not Found' });
 
-      expect(service.sessions().filter(s => s.id === 2).length).toBe(1);
+      expect(service.sessions().filter(s => s.id === 2)).toHaveLength(1);
     });
   });
 
@@ -122,7 +122,7 @@ describe('SessionsService', () => {
 
       service.revokeAllOthers().subscribe();
       httpMock.expectNone(`${environment.apiUrl}/account/sessions`);
-      expect(service.sessions().length).toBe(1);
+      expect(service.sessions()).toHaveLength(1);
     });
 
     it('clears every non-current session optimistically and calls DELETE (bulk)', () => {
@@ -157,7 +157,7 @@ describe('SessionsService', () => {
 
       expect(error).toBeTruthy();
       expect(service.revokingAll()).toBe(false);
-      expect(service.sessions().length).toBe(3);
+      expect(service.sessions()).toHaveLength(3);
     });
   });
 });

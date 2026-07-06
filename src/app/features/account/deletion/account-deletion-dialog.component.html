@@ -32,13 +32,13 @@
       data-testid="account-deletion-confirm-form"
     >
       @if (confirmationMethod() === 'OTP') {
-        <p class="account-deletion__otp-status" role="status" aria-live="polite" data-testid="account-deletion-otp-status">
+        <output class="account-deletion__otp-status" aria-live="polite" data-testid="account-deletion-otp-status">
           @if (otpSending()) {
             {{ 'account.deletion.otp_sending' | transloco }}
           } @else if (otpSent()) {
             {{ 'account.deletion.otp_sent' | transloco }}
           }
-        </p>
+        </output>
         <div class="form-group">
           <label class="form-label" for="account-deletion-otp">{{ 'account.deletion.otp_label' | transloco }}</label>
           <input
@@ -82,9 +82,9 @@
       @if (deleteError()) {
         <div id="account-deletion-delete-error" class="alert alert-error" role="alert" data-testid="account-deletion-delete-error">{{ deleteError() | transloco }}</div>
       }
-      <span class="sr-only" role="status" aria-live="polite">
+      <output class="sr-only" aria-live="polite">
         @if (deleteLoading()) { {{ 'common.loading' | transloco }} }
-      </span>
+      </output>
     </form>
   }
 </piv-confirm-dialog>

@@ -10,11 +10,11 @@
     that update the table below — a region that gets added/removed on every
     state switch is not dependably announced by all screen readers.
   -->
-  <div class="sr-only" role="status" aria-live="polite" data-testid="admin-users-live-region">
+  <output class="sr-only" aria-live="polite" data-testid="admin-users-live-region">
     @if (!loading() && !loadError()) {
       {{ 'admin.users.list.live_count' | transloco: { count: totalElements() } }}
     }
-  </div>
+  </output>
 
   <div
     class="admin-users__filters"
@@ -80,7 +80,7 @@
   </div>
 
   @if (loading()) {
-    <div class="sr-only" role="status">{{ 'common.loading' | transloco }}</div>
+    <output class="sr-only">{{ 'common.loading' | transloco }}</output>
     <ul class="admin-users__skeleton" aria-hidden="true" data-testid="admin-users-skeleton">
       @for (i of skeletonPlaceholders; track i) {
         <li class="admin-users__skeleton-row"></li>

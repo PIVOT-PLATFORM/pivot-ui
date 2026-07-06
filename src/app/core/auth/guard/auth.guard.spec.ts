@@ -91,7 +91,7 @@ describe('authMatchGuard', () => {
   });
 
   function mockCurrentNavigation(url: string): void {
-    vi.spyOn(router, 'getCurrentNavigation').mockReturnValue({
+    vi.spyOn(router, 'currentNavigation').mockReturnValue({
       extractedUrl: router.parseUrl(url),
     } as unknown as Navigation);
   }

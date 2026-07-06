@@ -132,14 +132,14 @@ describe('PasswordStrengthComponent', () => {
       expect(levelEl.textContent?.trim().length).toBeGreaterThan(0);
     });
 
-    it('renders each criterion as role="listitem" with an SR-only met/unmet label', () => {
+    it('renders each criterion as a native <li> with an SR-only met/unmet label', () => {
       fixture.componentRef.setInput('password', 'Abcdefghi1!x');
       fixture.detectChanges();
       flushDefaultPolicy();
       fixture.detectChanges();
 
-      const items = fixture.debugElement.queryAll(By.css('[role="listitem"]'));
-      expect(items.length).toBe(4);
+      const items = fixture.debugElement.queryAll(By.css('li.password-strength__criterion'));
+      expect(items).toHaveLength(4);
       for (const item of items) {
         const srOnly: HTMLElement = item.nativeElement.querySelector('.sr-only');
         expect(srOnly).not.toBeNull();
@@ -147,14 +147,14 @@ describe('PasswordStrengthComponent', () => {
       }
     });
 
-    it('wraps the criteria list in a ul[role="list"] referencing criteriaId', () => {
+    it('wraps the criteria list in a native <ul> referencing criteriaId', () => {
       fixture.componentRef.setInput('password', 'Abcdefghi1!x');
       fixture.detectChanges();
       flushDefaultPolicy();
       fixture.detectChanges();
 
       const list: HTMLElement = fixture.nativeElement.querySelector('ul.password-strength__criteria');
-      expect(list.getAttribute('role')).toBe('list');
+      expect(list).not.toBeNull();
       expect(list.id).toBe(component.criteriaId());
     });
   });

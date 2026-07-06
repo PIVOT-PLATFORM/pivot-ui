@@ -52,17 +52,17 @@
       />
       <p id="tenant-slug-hint" class="form-hint">{{ 'admin.tenants.create.slug_hint' | transloco }}</p>
       @if (slugChecking()) {
-        <span id="tenant-slug-checking" class="form-hint" role="status" data-testid="tenant-slug-checking">
+        <output id="tenant-slug-checking" class="form-hint" data-testid="tenant-slug-checking">
           {{ 'admin.tenants.create.slug_checking' | transloco }}
-        </span>
+        </output>
       } @else if (slugErrorKey(); as key) {
         <span id="tenant-slug-error" class="form-error" role="alert" data-testid="tenant-slug-error">
           {{ key | transloco }}
         </span>
       } @else if (slugAvailableShown()) {
-        <span id="tenant-slug-available" class="form-success" role="status" data-testid="tenant-slug-available">
+        <output id="tenant-slug-available" class="form-success" data-testid="tenant-slug-available">
           {{ 'admin.tenants.create.slug_available' | transloco }}
-        </span>
+        </output>
       }
     </div>
 

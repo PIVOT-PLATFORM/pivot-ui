@@ -61,7 +61,7 @@ describe('TenantsService', () => {
 
       req.flush(makePage([makeDto(1), makeDto(2)], { totalElements: 2, totalPages: 1 }));
 
-      expect(service.tenants().length).toBe(2);
+      expect(service.tenants()).toHaveLength(2);
       expect(service.loading()).toBe(false);
       expect(service.loadError()).toBe(false);
       expect(service.page()).toBe(0);

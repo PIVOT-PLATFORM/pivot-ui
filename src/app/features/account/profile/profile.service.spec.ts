@@ -114,7 +114,7 @@ describe('ProfileService', () => {
 
       const req = httpMock.expectOne(`${environment.apiUrl}/account/profile/avatar`);
       expect(req.request.method).toBe('POST');
-      expect(req.request.body instanceof FormData).toBe(true);
+      expect(req.request.body).toBeInstanceOf(FormData);
       const body = req.request.body as FormData;
       expect(body.get('file')).toBe(file);
 

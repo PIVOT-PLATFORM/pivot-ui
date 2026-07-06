@@ -10,9 +10,9 @@
         </a>
       }
       @case ('success') {
-        <p class="cancel-body" role="status" data-testid="account-deletion-cancel-success">
+        <output class="cancel-body" data-testid="account-deletion-cancel-success">
           {{ 'account.deletion.cancel_page_success_body' | transloco }}
-        </p>
+        </output>
         <a routerLink="/auth/login" class="btn btn-primary btn-full" data-testid="account-deletion-cancel-login-link">
           {{ 'account.deletion.cancel_page_login_cta' | transloco }}
         </a>

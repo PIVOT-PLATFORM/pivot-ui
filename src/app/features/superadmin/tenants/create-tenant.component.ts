@@ -203,7 +203,7 @@ export class CreateTenantComponent implements OnDestroy {
 
   /** Current slug control errors, minus the custom keys this component itself sets. */
   private slugErrorsWithoutServerKeys(): ValidationErrors {
-    const errors = { ...(this.form.controls.slug.errors ?? {}) };
+    const errors = { ...this.form.controls.slug.errors };
     for (const key of SERVER_SLUG_ERROR_KEYS) {
       delete errors[key];
     }

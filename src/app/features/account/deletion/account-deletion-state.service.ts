@@ -54,17 +54,17 @@ export class AccountDeletionStateService {
   record(effectiveDeletionDate: string): void {
     const value: PendingAccountDeletion = { effectiveDeletionDate };
     this._pending.set(value);
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
+    globalThis.localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
   }
 
   /** Clears the reminder — called once cancellation succeeds (or on manual recovery). */
   clear(): void {
     this._pending.set(null);
-    window.localStorage.removeItem(STORAGE_KEY);
+    globalThis.localStorage.removeItem(STORAGE_KEY);
   }
 
   private readFromStorage(): PendingAccountDeletion | null {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = globalThis.localStorage.getItem(STORAGE_KEY);
     if (!raw) {
       return null;
     }

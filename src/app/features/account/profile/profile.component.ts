@@ -61,9 +61,9 @@ export class ProfileComponent implements OnInit {
   private readonly transloco = inject(TranslocoService);
   private readonly languagePreference = inject(LanguagePreferenceService);
 
-  @ViewChild('firstNameInput') private firstNameInput?: ElementRef<HTMLInputElement>;
-  @ViewChild('lastNameInput') private lastNameInput?: ElementRef<HTMLInputElement>;
-  @ViewChild('avatarInput') private avatarInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('firstNameInput') private readonly firstNameInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('lastNameInput') private readonly lastNameInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('avatarInput') private readonly avatarInput?: ElementRef<HTMLInputElement>;
 
   form = this.fb.group({
     firstName: ['', [Validators.required, Validators.maxLength(MAX_NAME_LENGTH)]],

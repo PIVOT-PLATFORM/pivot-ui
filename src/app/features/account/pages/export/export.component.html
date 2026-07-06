@@ -9,7 +9,7 @@
 
     <section class="export__body">
       @if (initialLoading()) {
-        <div class="export__loading" role="status" data-testid="export-loading">
+        <div class="export__loading" data-testid="export-loading">
           <span class="spinner" aria-hidden="true"></span>
           <p>{{ 'account.rgpd.export.loading_status' | transloco }}</p>
         </div>
@@ -33,7 +33,7 @@
         }
 
         @if (isPending()) {
-          <div class="export__received" role="status" data-testid="export-received">
+          <div class="export__received" data-testid="export-received">
             <div class="export__received-icon" aria-hidden="true">
               <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2 4 12 13 22 4"/>
@@ -67,8 +67,8 @@
 
     <!-- WCAG: every page-state transition above is echoed here so screen-reader
          users are notified even when the visual change happens outside their focus. -->
-    <div class="sr-only" role="status" aria-live="polite" aria-atomic="true" data-testid="export-live-region">
+    <output class="sr-only" aria-live="polite" aria-atomic="true" data-testid="export-live-region">
       {{ liveKey() | transloco }}
-    </div>
+    </output>
   </main>
 </div>

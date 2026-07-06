@@ -160,6 +160,7 @@ describe('ExportComponent', () => {
 
       component.requestExport();
       httpMock.expectNone(postUrl);
+      expect(component.submitting()).toBe(false);
     });
 
     it('AC-16 — treats a past nextAvailableAt as no longer rate-limited', () => {
@@ -335,6 +336,9 @@ describe('ExportComponent', () => {
         { requestId: 1, status: 'PENDING', requestedAt: new Date().toISOString() },
         { status: 202, statusText: 'Accepted' },
       );
+      fixture.detectChanges();
+
+      expect(component.isPending()).toBe(true);
     });
   });
 

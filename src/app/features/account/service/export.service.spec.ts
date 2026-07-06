@@ -89,7 +89,9 @@ describe('ExportService', () => {
 
     it('AC-09 — URL-encodes the export token', () => {
       service.download('a token/with-special+chars').subscribe();
-      const req = httpMock.expectOne(`${baseUrl}/download/${encodeURIComponent('a token/with-special+chars')}`);
+      const encoded = encodeURIComponent('a token/with-special+chars');
+      const req = httpMock.expectOne(`${baseUrl}/download/${encoded}`);
+      expect(req.request.url).toBe(`${baseUrl}/download/${encoded}`);
       req.flush(new Blob());
     });
   });
