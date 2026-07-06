@@ -126,6 +126,18 @@ export const routes: Routes = [
           import('./features/superadmin/tenants/tenants-list.component').then(m => m.TenantsListComponent),
       },
       {
+        path: 'superadmin/plans',
+        canActivate: [superAdminGuard],
+        loadComponent: () =>
+          import('./features/superadmin/plans/plans-list.component').then(m => m.PlansListComponent),
+      },
+      {
+        path: 'superadmin/plans/:planId',
+        canActivate: [superAdminGuard],
+        loadComponent: () =>
+          import('./features/superadmin/plans/plan-detail.component').then(m => m.PlanDetailComponent),
+      },
+      {
         // US02.2.3 — no extra guard beyond authMatchGuard on the parent shell route:
         // every authenticated user manages only their own sessions, resolved
         // server-side from the bearer token (never a client-supplied id).

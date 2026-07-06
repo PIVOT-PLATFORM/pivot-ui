@@ -1,0 +1,127 @@
+.plans-list {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 4px;
+}
+
+.plans-list__header {
+  margin-bottom: 24px;
+}
+
+.plans-list__title {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--color-navy-900);
+  margin: 0 0 6px;
+}
+
+.plans-list__subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-gray-500);
+  margin: 0;
+}
+
+.plans-list__create {
+  margin-bottom: 32px;
+  padding: 16px;
+  background: var(--surface-card);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+}
+
+.plans-list__create-title {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--color-navy-900);
+  margin: 0 0 12px;
+}
+
+.plans-list__create-error {
+  margin-bottom: 16px;
+}
+
+.plans-list__create-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.plans-list__create-submit {
+  align-self: flex-end;
+}
+
+.plans-list__skeleton {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plans-list__skeleton-row {
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(90deg, var(--color-gray-100) 25%, var(--color-gray-200) 37%, var(--color-gray-100) 63%);
+  background-size: 400% 100%;
+  animation: plans-list-skeleton-pulse 1.4s ease infinite;
+}
+
+@keyframes plans-list-skeleton-pulse {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+.plans-list__table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+}
+
+.plans-list__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+
+  th,
+  td {
+    text-align: left;
+    padding: 12px 16px;
+    white-space: nowrap;
+  }
+
+  thead th {
+    background: var(--color-gray-50);
+    color: var(--color-gray-600);
+    font-weight: 600;
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    border-bottom: 1px solid var(--color-gray-200);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--color-gray-100);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  tbody td {
+    color: var(--color-navy-900);
+  }
+}
+
+.plans-list__error-state,
+.plans-list__empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--color-gray-500);
+  font-size: var(--text-sm);
+
+  p {
+    margin: 0 0 16px;
+  }
+}

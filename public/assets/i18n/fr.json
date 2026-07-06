@@ -663,6 +663,49 @@
         "next": "Suivant →",
         "status": "Page {{ page }} sur {{ totalPages }} ({{ total }} tenants)"
       }
+    },
+    "plans": {
+      "list": {
+        "title": "Plans",
+        "subtitle": "Configurez les modules disponibles pour chaque plan tarifaire.",
+        "empty": "Aucun plan n'existe encore",
+        "error": "Impossible de charger les plans. Réessayez.",
+        "retry": "Réessayer",
+        "detail_link": "Voir"
+      },
+      "columns": {
+        "name": "Nom",
+        "module_count": "Modules",
+        "created_at": "Créé le",
+        "actions": "Actions"
+      },
+      "create": {
+        "title": "Créer un plan",
+        "name_label": "Nom",
+        "name_placeholder": "Gold",
+        "submit": "Créer le plan",
+        "error_name_required": "Le nom est obligatoire.",
+        "error_name_too_long": "Le nom ne peut pas dépasser 100 caractères.",
+        "error_name_taken": "Ce nom de plan est déjà utilisé.",
+        "error_validation": "Certains champs sont invalides. Vérifiez le formulaire et réessayez.",
+        "error_forbidden": "Vous n'avez pas les droits nécessaires pour créer un plan."
+      },
+      "detail": {
+        "title": "Détail du plan",
+        "subtitle": "{{ count }} module(s) inclus",
+        "not_found": "Ce plan n'existe pas.",
+        "error": "Impossible de charger le plan. Réessayez.",
+        "retry": "Réessayer",
+        "empty_modules": "Aucun module dans ce plan",
+        "modules_list_aria": "Modules du plan",
+        "remove_module_aria": "Retirer {{ moduleId }}",
+        "add_module_label": "Ajouter un module",
+        "add_module_placeholder": "whiteboard",
+        "add_module_submit": "Ajouter",
+        "error_unknown_module": "Le module {{ moduleId }} n'existe pas.",
+        "error_plan_not_found": "Ce plan n'existe plus.",
+        "error_remove": "Impossible de retirer ce module. Réessayez."
+      }
     }
   }
 }

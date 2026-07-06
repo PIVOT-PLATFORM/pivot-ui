@@ -1,0 +1,114 @@
+<main class="plan-detail" [attr.aria-label]="'superadmin.plans.detail.title' | transloco">
+  <a routerLink="/superadmin/plans" class="plan-detail__back" data-testid="plan-detail-back">
+    {{ 'common.back' | transloco }}
+  </a>
+
+  @if (detailLoading()) {
+    <output class="sr-only">{{ 'common.loading' | transloco }}</output>
+    <div class="plan-detail__skeleton" aria-hidden="true" data-testid="plan-detail-skeleton"></div>
+  } @else if (detailNotFound()) {
+    <div class="plan-detail__error-state" role="alert" data-testid="plan-detail-not-found">
+      <p>{{ 'superadmin.plans.detail.not_found' | transloco }}</p>
+    </div>
+  } @else if (detailError()) {
+    <div class="plan-detail__error-state" role="alert" data-testid="plan-detail-error">
+      <p>{{ 'superadmin.plans.detail.error' | transloco }}</p>
+      <button type="button" class="btn btn-secondary" (click)="load()" data-testid="plan-detail-retry">
+        {{ 'superadmin.plans.detail.retry' | transloco }}
+      </button>
+    </div>
+  } @else if (currentPlan(); as plan) {
+    <header class="plan-detail__header">
+      <h1 class="plan-detail__title">{{ plan.name }}</h1>
+      <p class="plan-detail__subtitle">
+        {{ 'superadmin.plans.detail.subtitle' | transloco: { count: plan.moduleIds.length } }}
+      </p>
+    </header>
+
+    @if (removeError()) {
+      <div class="alert alert-error plan-detail__remove-error" role="alert" data-testid="plan-detail-remove-error">
+        {{ removeError() | transloco }}
+      </div>
+    }
+
+    @if (isEmptyModules()) {
+      <p class="plan-detail__empty-modules" data-testid="plan-modules-empty">
+        {{ 'superadmin.plans.detail.empty_modules' | transloco }}
+      </p>
+    } @else {
+      <ul
+        class="plan-detail__modules"
+        data-testid="plan-modules-list"
+        [attr.aria-label]="'superadmin.plans.detail.modules_list_aria' | transloco"
+      >
+        @for (moduleId of plan.moduleIds; track moduleId) {
+          <li class="plan-detail__module-chip" [attr.data-testid]="'plan-module-' + moduleId">
+            <span>{{ moduleId }}</span>
+            <button
+              type="button"
+              class="plan-detail__module-remove"
+              [attr.aria-label]="'superadmin.plans.detail.remove_module_aria' | transloco: { moduleId }"
+              [disabled]="removingModuleId() === moduleId"
+              (click)="removeModule(moduleId)"
+              [attr.data-testid]="'plan-module-remove-' + moduleId"
+            >
+              @if (removingModuleId() === moduleId) {
+                <span class="spinner" aria-hidden="true"></span>
+              } @else {
+                <span aria-hidden="true">×</span>
+              }
+            </button>
+          </li>
+        }
+      </ul>
+    }
+
+    <form
+      class="plan-detail__add-form"
+      (ngSubmit)="addModule()"
+      novalidate
+      data-testid="plan-add-module-form"
+    >
+      <div class="form-group">
+        <label class="form-label" for="plan-add-module-input">
+          {{ 'superadmin.plans.detail.add_module_label' | transloco }}
+        </label>
+        <input
+          id="plan-add-module-input"
+          type="text"
+          name="moduleId"
+          [ngModel]="moduleIdInput()"
+          (ngModelChange)="onModuleIdInput($event)"
+          class="form-control"
+          [attr.aria-invalid]="addModuleError() !== null"
+          [attr.aria-describedby]="addModuleError() ? 'plan-add-module-error' : null"
+          [class.is-invalid]="addModuleError() !== null"
+          [placeholder]="'superadmin.plans.detail.add_module_placeholder' | transloco"
+          data-testid="plan-add-module-input"
+        />
+        @if (addModuleError(); as key) {
+          <span
+            id="plan-add-module-error"
+            class="form-error"
+            role="alert"
+            data-testid="plan-add-module-error"
+          >
+            {{ key | transloco: addModuleErrorParams() }}
+          </span>
+        }
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="!canAddModule()"
+        data-testid="plan-add-module-submit"
+      >
+        @if (addingModule()) {
+          <span class="spinner" aria-hidden="true"></span>
+        }
+        {{ 'superadmin.plans.detail.add_module_submit' | transloco }}
+      </button>
+    </form>
+  }
+</main>
