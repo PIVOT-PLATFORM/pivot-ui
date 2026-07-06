@@ -1,3 +1,10 @@
+# [0.14.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.13.0...v0.14.0) (2026-07-06)
+
+
+### Features
+
+* **ui:** US02.2.2 - Changer son e-mail ([#73](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/73)) ([b98ce3b](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/b98ce3b2599f7e7a15c54958e7860d6d0032ffa3)), closes [#70](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/70) [#70](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/70) [#131](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/131) [#1](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/1)
+
 # [0.13.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.12.0...v0.13.0) (2026-07-06)
 
 
