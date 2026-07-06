@@ -1,3 +1,10 @@
+# [0.24.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.23.0...v0.24.0) (2026-07-06)
+
+
+### Features
+
+* **ui:** gestion des appareils de confiance (US01.4.2) ([#100](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/100)) ([e57bc7b](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/e57bc7b30c12819f85528f2c424427c7eb079d30)), closes [#152](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/152)
+
 # [0.23.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.22.1...v0.23.0) (2026-07-06)
 
 
