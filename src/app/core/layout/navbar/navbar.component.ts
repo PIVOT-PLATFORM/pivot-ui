@@ -92,7 +92,7 @@ export function avatarColor(name: string): string {
           le DOM que lorsque notifAriaLabel() change réellement, donc le lecteur d'écran
           n'annonce que les vraies mises à jour.
         -->
-        <output class="sr-only" aria-live="polite">{{ notifAriaLabel() }}</output>
+        <output class="sr-only" aria-live="polite" aria-atomic="true">{{ notifAriaLabel() }}</output>
         <div class="navbar__user">
           <button class="navbar__user-btn" (click)="toggleUserMenu($event)" [attr.aria-expanded]="userMenuOpen()" aria-haspopup="menu" type="button" [attr.aria-label]="'nav.user_menu' | transloco: { name: displayName() }">
             <span class="navbar__avatar" [style.background]="userAvatarColor()" aria-hidden="true">{{ initials() }}</span>
