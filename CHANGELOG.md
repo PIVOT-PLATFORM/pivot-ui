@@ -1,3 +1,10 @@
+# [0.23.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.22.1...v0.23.0) (2026-07-06)
+
+
+### Features
+
+* **ui:** superadmin plan/module configuration screen (US03.3.1) ([#101](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/101)) ([1359e3d](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/1359e3d5239bccf9bf94da633adec232d1f81739))
+
 ## [0.22.1](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.22.0...v0.22.1) (2026-07-06)
 
 
