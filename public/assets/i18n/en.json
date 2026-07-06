@@ -58,8 +58,19 @@
     "sitemap": "Sitemap"
   },
   "home": {
-    "title": "Home",
-    "subtitle": "Page under construction."
+    "aria_label": "Home",
+    "greeting": "Hello, {{ name }} 👋",
+    "fallback_name": "you",
+    "subtitle": "Your collaborative tools, all in one place.",
+    "loading_aria": "Loading modules…",
+    "modules_title": "Your modules",
+    "open_module_aria": "Open {{ name }}",
+    "open_cta": "Open →",
+    "empty_no_active": "No module activated yet. The administrator can activate modules from the admin panel.",
+    "empty_no_modules": "No module available yet. Contact your administrator.",
+    "coming_soon_title": "Coming soon",
+    "coming_soon_aria": "{{ name }} — coming soon",
+    "coming_soon_badge": "COMING SOON"
   },
   "coming_soon": {
     "title": "Page under construction",

@@ -15,6 +15,7 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { AuthService } from '../../core/auth/service/auth.service';
 import { ModuleRegistryService } from '../../core/modules/module-registry.service';
 
@@ -22,17 +23,17 @@ import { ModuleRegistryService } from '../../core/modules/module-registry.servic
   selector: 'piv-home',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  imports: [RouterLink, TranslocoPipe],
   template: `
-    <main class="home" aria-label="Accueil">
+    <main class="home" [attr.aria-label]="'home.aria_label' | transloco">
 
       <!-- ─── Greeting ─── -->
       <section class="home__greeting" aria-labelledby="greeting-heading">
         <h1 id="greeting-heading" class="home__greeting-title">
-          Bonjour, {{ user()?.firstName ?? user()?.email ?? 'vous' }}&nbsp;👋
+          {{ 'home.greeting' | transloco: { name: user()?.firstName ?? user()?.email ?? ('home.fallback_name' | transloco) } }}
         </h1>
         <p class="home__greeting-sub">
-          Vos outils collaboratifs, au même endroit.
+          {{ 'home.subtitle' | transloco }}
         </p>
       </section>
 
@@ -41,9 +42,9 @@ import { ModuleRegistryService } from '../../core/modules/module-registry.servic
         <section
           class="modules-section"
           aria-busy="true"
-          aria-label="Chargement des modules en cours"
+          [attr.aria-label]="'home.loading_aria' | transloco"
         >
-          <h2 class="modules-section__title">Vos modules</h2>
+          <h2 class="modules-section__title">{{ 'home.modules_title' | transloco }}</h2>
           <div class="modules-grid" role="list">
             @for (i of skeletonItems; track i) {
               <div class="module-card module-card--skeleton" role="listitem" aria-hidden="true">
@@ -62,14 +63,14 @@ import { ModuleRegistryService } from '../../core/modules/module-registry.servic
         <!-- ─── Active modules ─── -->
         @if (activeModules().length > 0) {
           <section class="modules-section" aria-labelledby="active-modules-heading">
-            <h2 id="active-modules-heading" class="modules-section__title">Vos modules</h2>
+            <h2 id="active-modules-heading" class="modules-section__title">{{ 'home.modules_title' | transloco }}</h2>
             <div class="modules-grid" role="list">
               @for (mod of activeModules(); track mod.id) {
                 <a
                   [routerLink]="mod.route"
                   class="module-card module-card--active"
                   role="listitem"
-                  [attr.aria-label]="'Ouvrir ' + mod.name"
+                  [attr.aria-label]="'home.open_module_aria' | transloco: { name: mod.name }"
                 >
                   <div
                     class="module-card__icon"
@@ -82,7 +83,7 @@ import { ModuleRegistryService } from '../../core/modules/module-registry.servic
                     <p class="module-card__name">{{ mod.name }}</p>
                     <p class="module-card__desc">{{ mod.description }}</p>
                   </div>
-                  <span class="module-card__cta" aria-hidden="true">Ouvrir →</span>
+                  <span class="module-card__cta" aria-hidden="true">{{ 'home.open_cta' | transloco }}</span>
                 </a>
               }
             </div>
@@ -97,8 +98,7 @@ import { ModuleRegistryService } from '../../core/modules/module-registry.servic
               <path d="M9 9h.01M15 9h.01M9 15h6"/>
             </svg>
             <p class="home__empty-text">
-              Aucun module activé pour l'instant.
-              L'administrateur peut activer des modules depuis le panneau d'administration.
+              {{ 'home.empty_no_active' | transloco }}
             </p>
           </div>
         }
@@ -111,8 +111,7 @@ import { ModuleRegistryService } from '../../core/modules/module-registry.servic
               <path d="M9 9h.01M15 9h.01M9 15h6"/>
             </svg>
             <p class="home__empty-text">
-              Aucun module disponible pour l'instant.
-              Contactez votre administrateur.
+              {{ 'home.empty_no_modules' | transloco }}
             </p>
           </div>
         }
@@ -120,13 +119,13 @@ import { ModuleRegistryService } from '../../core/modules/module-registry.servic
         <!-- ─── Coming-soon modules ─── -->
         @if (comingSoonModules().length > 0) {
           <section class="modules-section" aria-labelledby="coming-soon-heading">
-            <h2 id="coming-soon-heading" class="modules-section__title">Modules à venir</h2>
+            <h2 id="coming-soon-heading" class="modules-section__title">{{ 'home.coming_soon_title' | transloco }}</h2>
             <div class="modules-grid" role="list">
               @for (mod of comingSoonModules(); track mod.id) {
                 <div
                   class="module-card module-card--coming-soon"
                   role="listitem"
-                  [attr.aria-label]="mod.name + ' — bientôt disponible'"
+                  [attr.aria-label]="'home.coming_soon_aria' | transloco: { name: mod.name }"
                   aria-disabled="true"
                 >
                   <div
@@ -138,7 +137,7 @@ import { ModuleRegistryService } from '../../core/modules/module-registry.servic
                     <p class="module-card__name">{{ mod.name }}</p>
                     <p class="module-card__desc">{{ mod.description }}</p>
                   </div>
-                  <span class="module-card__badge">À VENIR</span>
+                  <span class="module-card__badge">{{ 'home.coming_soon_badge' | transloco }}</span>
                 </div>
               }
             </div>

@@ -1,10 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { ComponentFixture } from '@angular/core/testing';
+import { importProvidersFrom } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { signal, computed, Component } from '@angular/core';
 import { of, throwError } from 'rxjs';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 import { HomeComponent } from './home.component';
 import type { UserInfo } from '../../core/auth/service/auth.service';
 import { ModuleRegistryService } from '../../core/modules/module-registry.service';
@@ -12,6 +14,24 @@ import type { PivotModuleUi } from '../../core/modules/module.model';
 
 @Component({ template: '', standalone: true })
 class StubComponent {}
+
+const FR = {
+  home: {
+    aria_label: 'Accueil',
+    greeting: 'Bonjour, {{ name }} 👋',
+    fallback_name: 'vous',
+    subtitle: 'Vos outils collaboratifs, au même endroit.',
+    loading_aria: 'Chargement des modules en cours',
+    modules_title: 'Vos modules',
+    open_module_aria: 'Ouvrir {{ name }}',
+    open_cta: 'Ouvrir →',
+    empty_no_active: "Aucun module activé pour l'instant. L'administrateur peut activer des modules depuis le panneau d'administration.",
+    empty_no_modules: "Aucun module disponible pour l'instant. Contactez votre administrateur.",
+    coming_soon_title: 'Modules à venir',
+    coming_soon_aria: '{{ name }} — bientôt disponible',
+    coming_soon_badge: 'À VENIR',
+  },
+};
 
 function makeUser(partial: Partial<UserInfo> = {}): UserInfo {
   return {
@@ -68,6 +88,13 @@ describe('HomeComponent', () => {
         provideHttpClientTesting(),
         provideRouter([{ path: '**', component: StubComponent }]),
         { provide: ModuleRegistryService, useValue: mockRegistryService },
+        importProvidersFrom(
+          TranslocoTestingModule.forRoot({
+            langs: { fr: FR, en: FR },
+            translocoConfig: { defaultLang: 'fr', availableLangs: ['fr', 'en'] },
+            preloadLangs: true,
+          }),
+        ),
       ],
     }).compileComponents();
 
