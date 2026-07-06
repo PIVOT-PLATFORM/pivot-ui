@@ -283,7 +283,14 @@ export class AdminUsersComponent implements OnInit {
     const { user, newRole } = pending;
     const name = this.displayName(user);
     this.service.changeRole(user, newRole).subscribe({
-      next: () => this.toast.show('admin.users.role.toast.updated', 'info'),
+      // `{ name }` is passed even though the translated string itself doesn't interpolate
+      // it — ToastService.show() deduplicates on (messageKey, params) together (see its
+      // TSDoc). Without a per-user param here, confirming a role change for two different
+      // users within the 8s auto-dismiss window would collapse into a single toast and
+      // silently swallow the second admin action's success feedback. Mirrors the `{ name }`
+      // already passed on the error branch below and on AdminModulesComponent's
+      // activate/deactivate toasts (the convention this component otherwise follows).
+      next: () => this.toast.show('admin.users.role.toast.updated', 'info', { name }),
       error: () => this.toast.show(this.roleErrorToastKey(user.id), 'error', { name }),
     });
   }
@@ -371,7 +378,10 @@ export class AdminUsersComponent implements OnInit {
     const successKey =
       newStatus === 'INACTIVE' ? 'admin.users.status.toast.deactivated' : 'admin.users.status.toast.reactivated';
     this.service.changeStatus(user, newStatus).subscribe({
-      next: () => this.toast.show(successKey, 'info'),
+      // Same ToastService dedup pitfall as confirmRoleChange() above — `{ name }` is
+      // required so that two different users' status changes within the 8s auto-dismiss
+      // window each get their own toast instead of the second one being silently dropped.
+      next: () => this.toast.show(successKey, 'info', { name }),
       error: () => this.toast.show(this.statusErrorToastKey(user.id), 'error', { name }),
     });
   }

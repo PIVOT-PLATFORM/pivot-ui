@@ -195,6 +195,34 @@ describe('SessionsListComponent', () => {
     expect(fixture.nativeElement.querySelector('[data-testid="sessions-empty"]')).not.toBeNull();
   });
 
+  it('shows a distinct success toast per session — two revocations confirmed for two different sessions are not deduplicated', () => {
+    // Regression: ToastService.show() deduplicates on (messageKey, params) together.
+    // The success toast previously carried no params, so revoking two different
+    // sessions in the same 8s auto-dismiss window collapsed into a single toast —
+    // the second revocation's confirmation was silently dropped (same pitfall as
+    // AdminUsersComponent's role/status success toasts).
+    flushList([makeDto(1, { isCurrent: true }), makeDto(2), makeDto(3)]);
+
+    fixture.nativeElement.querySelector('[data-testid="session-revoke-2"]').click();
+    fixture.detectChanges();
+    fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]').click();
+    fixture.detectChanges();
+    httpMock.expectOne(`${environment.apiUrl}/account/sessions/2`).flush(null, { status: 204, statusText: 'No Content' });
+    fixture.detectChanges();
+
+    fixture.nativeElement.querySelector('[data-testid="session-revoke-3"]').click();
+    fixture.detectChanges();
+    fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]').click();
+    fixture.detectChanges();
+    httpMock.expectOne(`${environment.apiUrl}/account/sessions/3`).flush(null, { status: 204, statusText: 'No Content' });
+    fixture.detectChanges();
+
+    const revokedToasts = toastService
+      .toasts()
+      .filter(t => t.type === 'info' && t.messageKey === 'account.sessions.toast.revoked');
+    expect(revokedToasts).toHaveLength(2);
+  });
+
   it('keeps the session in the list and shows an error toast when revocation fails', () => {
     flushList();
     fixture.nativeElement.querySelector('[data-testid="session-revoke-2"]').click();
@@ -211,6 +239,39 @@ describe('SessionsListComponent', () => {
     expect(toastService.toasts().some(t => t.type === 'error' && t.messageKey === 'account.sessions.toast.revoke_error')).toBe(
       true
     );
+  });
+
+  it('shows a distinct error toast per session — two failed revocations for two different sessions are not deduplicated', () => {
+    // Regression, error branch: `runRevoke()`'s error handler had the same
+    // ToastService (messageKey, params) dedup gap as the success branch above —
+    // fixed in the same commit by passing `{ id: session.id }` on both branches
+    // for consistency. Two distinct sessions failing to revoke within the 8s
+    // auto-dismiss window must each surface their own error toast, not collapse
+    // into one (which would silently hide the second failure from the user).
+    flushList([makeDto(1, { isCurrent: true }), makeDto(2), makeDto(3)]);
+
+    fixture.nativeElement.querySelector('[data-testid="session-revoke-2"]').click();
+    fixture.detectChanges();
+    fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]').click();
+    fixture.detectChanges();
+    httpMock
+      .expectOne(`${environment.apiUrl}/account/sessions/2`)
+      .flush('Not Found', { status: 404, statusText: 'Not Found' });
+    fixture.detectChanges();
+
+    fixture.nativeElement.querySelector('[data-testid="session-revoke-3"]').click();
+    fixture.detectChanges();
+    fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]').click();
+    fixture.detectChanges();
+    httpMock
+      .expectOne(`${environment.apiUrl}/account/sessions/3`)
+      .flush('Not Found', { status: 404, statusText: 'Not Found' });
+    fixture.detectChanges();
+
+    const errorToasts = toastService
+      .toasts()
+      .filter(t => t.type === 'error' && t.messageKey === 'account.sessions.toast.revoke_error');
+    expect(errorToasts).toHaveLength(2);
   });
 
   it('shows a "revoke all others" button only when other sessions exist, with its own confirmation', () => {

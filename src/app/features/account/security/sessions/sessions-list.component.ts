@@ -142,9 +142,15 @@ export class SessionsListComponent implements OnInit {
   }
 
   private runRevoke(session: SessionDto): void {
+    // `{ id }` is passed even though the translated string doesn't interpolate it —
+    // ToastService.show() deduplicates on (messageKey, params) together (see its
+    // TSDoc). Without a per-session param here, revoking two different sessions
+    // within the 8s auto-dismiss window would collapse into a single toast and
+    // silently swallow the second revocation's success feedback (same pitfall as
+    // AdminUsersComponent's role/status success toasts).
     this.service.revoke(session).subscribe({
-      next: () => this.toast.show('account.sessions.toast.revoked', 'info'),
-      error: () => this.toast.show('account.sessions.toast.revoke_error', 'error'),
+      next: () => this.toast.show('account.sessions.toast.revoked', 'info', { id: session.id }),
+      error: () => this.toast.show('account.sessions.toast.revoke_error', 'error', { id: session.id }),
     });
   }
 

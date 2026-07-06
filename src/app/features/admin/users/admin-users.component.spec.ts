@@ -526,6 +526,36 @@ describe('AdminUsersComponent', () => {
       ).toBe(true);
     });
 
+    it('shows a distinct success toast per user — two role changes confirmed for two different users are not deduplicated', () => {
+      // Regression: ToastService.show() deduplicates on (messageKey, params) together. The
+      // success toast previously carried no params, so two different users' role changes
+      // confirmed in the same session collapsed into a single toast — the second admin
+      // action's confirmation was silently dropped.
+      flushList(
+        makePage([
+          makeDto(1, { firstName: 'Alice', lastName: 'Martin', role: 'ROLE_USER' }),
+          makeDto(2, { firstName: 'Bob', lastName: 'Durand', role: 'ROLE_USER' }),
+        ])
+      );
+
+      changeRoleViaSelect(1, 'ROLE_ADMIN');
+      fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]').click();
+      fixture.detectChanges();
+      httpMock.expectOne(`${environment.apiUrl}/admin/users/1/role`).flush(makeDto(1, { role: 'ROLE_ADMIN' }));
+      fixture.detectChanges();
+
+      changeRoleViaSelect(2, 'ROLE_ADMIN');
+      fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]').click();
+      fixture.detectChanges();
+      httpMock.expectOne(`${environment.apiUrl}/admin/users/2/role`).flush(makeDto(2, { role: 'ROLE_ADMIN' }));
+      fixture.detectChanges();
+
+      const updatedToasts = toastService
+        .toasts()
+        .filter(t => t.type === 'info' && t.messageKey === 'admin.users.role.toast.updated');
+      expect(updatedToasts).toHaveLength(2);
+    });
+
     it('confirmRoleChange() is a no-op if called with no pending confirmation', () => {
       flushList(makePage([makeDto(1)]));
       expect(() => fixture.componentInstance.confirmRoleChange()).not.toThrow();
@@ -726,6 +756,36 @@ describe('AdminUsersComponent', () => {
       expect(
         toastService.toasts().some(t => t.type === 'error' && t.messageKey === 'admin.users.status.toast.not_found')
       ).toBe(true);
+    });
+
+    it('shows a distinct success toast per user — two status changes confirmed for two different users are not deduplicated', () => {
+      // Regression: same ToastService (messageKey, params) dedup pitfall as the role-change
+      // success toast — see the equivalent test in the 'role change' describe block above.
+      flushList(
+        makePage([
+          makeDto(1, { firstName: 'Alice', lastName: 'Martin', status: 'ACTIVE' }),
+          makeDto(2, { firstName: 'Bob', lastName: 'Durand', status: 'ACTIVE' }),
+        ])
+      );
+
+      statusToggle(1).click();
+      fixture.detectChanges();
+      fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]').click();
+      fixture.detectChanges();
+      httpMock.expectOne(`${environment.apiUrl}/admin/users/1/status`).flush(makeDto(1, { status: 'INACTIVE' }));
+      fixture.detectChanges();
+
+      statusToggle(2).click();
+      fixture.detectChanges();
+      fixture.nativeElement.querySelector('[data-testid="confirm-dialog-confirm"]').click();
+      fixture.detectChanges();
+      httpMock.expectOne(`${environment.apiUrl}/admin/users/2/status`).flush(makeDto(2, { status: 'INACTIVE' }));
+      fixture.detectChanges();
+
+      const deactivatedToasts = toastService
+        .toasts()
+        .filter(t => t.type === 'info' && t.messageKey === 'admin.users.status.toast.deactivated');
+      expect(deactivatedToasts).toHaveLength(2);
     });
 
     it('confirmStatusChange() is a no-op if called with no pending confirmation', () => {
