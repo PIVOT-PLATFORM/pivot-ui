@@ -12,6 +12,13 @@
  * inline error message when activation fails because the module is not in
  * the tenant's plan (403 MODULE_NOT_IN_PLAN).
  *
+ * The list itself is already filtered by the tenant's plan + SUPER_ADMIN
+ * overrides server-side (US03.3.3) — a module outside the plan is simply
+ * absent, never a 403 the UI would need to handle. A module whose only
+ * reason for being visible is an active SUPER_ADMIN override
+ * (`module.source === 'override'`) additionally shows a distinct badge
+ * ("Activé par l'administrateur plateforme").
+ *
  * Deactivating a module requires confirmation first (`ConfirmDialogComponent`)
  * — the API is only called after the admin confirms.
  */

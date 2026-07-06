@@ -42,6 +42,15 @@
             </span>
           </div>
 
+          @if (module.source === 'override') {
+            <span
+              class="admin-modules__badge admin-modules__badge--override"
+              [attr.data-testid]="'module-source-' + module.id"
+            >
+              {{ 'admin.modules.card.override_badge' | transloco }}
+            </span>
+          }
+
           @if (module.description) {
             <p class="admin-modules__card-description">{{ module.description }}</p>
           }

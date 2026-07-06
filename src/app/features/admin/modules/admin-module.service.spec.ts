@@ -5,11 +5,12 @@ import { AdminModuleService } from './admin-module.service';
 import type { AdminModuleDto } from './admin-module.model';
 import { environment } from '../../../../environments/environment';
 
-const makeDto = (id: string, enabled = false): AdminModuleDto => ({
+const makeDto = (id: string, enabled = false, source: AdminModuleDto['source'] = 'plan'): AdminModuleDto => ({
   id,
   name: id,
   enabled,
   description: `${id} description`,
+  source,
 });
 
 describe('AdminModuleService', () => {

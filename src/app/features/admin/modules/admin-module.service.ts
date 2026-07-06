@@ -4,9 +4,12 @@
  * Consumes (per US03.1.1 / US03.1.2 / US03.2.1 backend contract, confirmed
  * against `AdminModuleController` on the `pivot-core` branch built in
  * parallel):
- * - GET    /api/admin/modules               → AdminModuleDto[] (`description` is
- *   currently always `""` — `PivotModule` has no description field yet, see
- *   `AdminModuleDto.java` on the backend for the documented limitation)
+ * - GET    /api/admin/modules               → AdminModuleDto[], filtered by the
+ *   tenant's billing plan + SUPER_ADMIN overrides (US03.3.3) — a module outside
+ *   the tenant's plan is simply absent from the list, never a 403. Each module
+ *   carries a `source: 'plan' | 'override'` (`description` is currently always
+ *   `""` — `PivotModule` has no description field yet, see `AdminModuleDto.java`
+ *   on the backend for the documented limitation)
  * - POST   /api/admin/modules/{id}/activate → { id, enabled: true } · 409 if
  *   already active · 403 `{ error: 'MODULE_NOT_IN_PLAN', message }` if the
  *   module is not registered for the tenant's plan

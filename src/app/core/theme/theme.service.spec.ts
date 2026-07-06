@@ -25,6 +25,16 @@ describe('ThemeService', () => {
     TestBed.flushEffects();
   });
 
+  afterEach(() => {
+    // 'persists the theme to localStorage' spies on Storage.prototype.setItem — a truly
+    // global, shared-across-files prototype (unlike DI-scoped spies elsewhere in this repo,
+    // discarded when TestBed resets). Left un-restored, it can leak into whichever spec file
+    // Vitest schedules next in the same worker, causing order-dependent CI flakiness (observed:
+    // green locally, red in CI depending on worker/file scheduling) without ever touching this
+    // file's own assertions.
+    vi.restoreAllMocks();
+  });
+
   it('creates the service', () => {
     expect(service).toBeTruthy();
   });

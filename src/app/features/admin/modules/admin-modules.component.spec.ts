@@ -4,6 +4,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { AdminModulesComponent } from './admin-modules.component';
+import type { AdminModuleDto } from './admin-module.model';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { environment } from '../../../../environments/environment';
 
@@ -26,6 +27,7 @@ const frTranslations = {
         toggle_activate: 'Activer {{ name }}',
         toggle_deactivate: 'Désactiver {{ name }}',
         not_in_plan: "Ce module n'est pas inclus dans votre plan",
+        override_badge: "Activé par l'administrateur plateforme",
       },
       toast: {
         activated: 'Module {{ name }} activé',
@@ -49,9 +51,9 @@ describe('AdminModulesComponent', () => {
   let toastService: ToastService;
 
   const flushList = (
-    modules: { id: string; name: string; enabled: boolean; description: string }[] = [
-      { id: 'whiteboard', name: 'Whiteboard', enabled: false, description: 'Tableau collaboratif' },
-      { id: 'quiz', name: 'Quiz', enabled: true, description: '' },
+    modules: AdminModuleDto[] = [
+      { id: 'whiteboard', name: 'Whiteboard', enabled: false, description: 'Tableau collaboratif', source: 'plan' },
+      { id: 'quiz', name: 'Quiz', enabled: true, description: '', source: 'plan' },
     ]
   ) => {
     httpMock.expectOne(`${environment.apiUrl}/admin/modules`).flush(modules);
@@ -119,6 +121,18 @@ describe('AdminModulesComponent', () => {
     expect(fixture.nativeElement.querySelector('[data-testid="module-status-quiz"]').textContent.trim()).toBe(
       'Actif'
     );
+  });
+
+  it('shows the "enabled by platform administrator" badge only for modules with source "override"', () => {
+    flushList([
+      { id: 'whiteboard', name: 'Whiteboard', enabled: false, description: '', source: 'plan' },
+      { id: 'quiz', name: 'Quiz', enabled: true, description: '', source: 'override' },
+    ]);
+
+    expect(fixture.nativeElement.querySelector('[data-testid="module-source-whiteboard"]')).toBeNull();
+    const overrideBadge = fixture.nativeElement.querySelector('[data-testid="module-source-quiz"]');
+    expect(overrideBadge).not.toBeNull();
+    expect(overrideBadge.textContent.trim()).toBe("Activé par l'administrateur plateforme");
   });
 
   it('omits the description line gracefully when description is empty', () => {
