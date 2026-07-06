@@ -14,7 +14,7 @@
     "lang_current": "FR",
     "lang_aria": "Langue",
     "notifications": "Notifications",
-    "notif_count": "{{ count }} notifications",
+    "notif_count": "{{ count }} notifications non lues",
     "user_menu": "Menu de {{ name }}",
     "help": "Aide",
     "bug_report": "Remonter un bug",

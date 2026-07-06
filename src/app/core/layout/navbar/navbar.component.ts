@@ -1,21 +1,30 @@
 /**
  * NavbarComponent — top navigation bar for the authenticated shell.
+ *
+ * Badge de notifications (US16.1.3) : le compteur, le polling 30s et le contrat HTTP
+ * (`GET /api/notifications/unread-count`) vivent dans {@link NotificationService} — voir
+ * sa TSDoc pour le choix polling vs WebSocket STOMP et le point de coordination EN-NOTIF
+ * (pivot-core PR #160, non fusionnée au moment de cette implémentation). Ce composant se
+ * contente d'afficher `notifCount()`/`notifBadgeText()` et d'annoncer les mises à jour via
+ * une région `aria-live` dédiée (`notifAriaLabel()`), jamais sur le badge lui-même.
  */
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   HostListener,
   computed,
   inject,
   signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '../../auth/service/auth.service';
 import { ThemeService } from '../../theme/theme.service';
 import { LanguagePreferenceService } from '../../i18n/language-preference.service';
 import { isSupportedLanguage } from '../../i18n/language';
+import { NotificationService, MAX_DISPLAY_COUNT } from '../../notifications/notification.service';
 
 const AVATAR_COLORS = [
   '#8B5CF6', '#F59E0B', '#10B981', '#EF4444',
@@ -70,12 +79,20 @@ export function avatarColor(name: string): string {
           <button class="navbar__lang-opt" [class.navbar__lang-opt--active]="lang() === 'fr'" (click)="setLang('fr')" type="button" [attr.aria-pressed]="lang() === 'fr'">FR</button>
           <button class="navbar__lang-opt" [class.navbar__lang-opt--active]="lang() === 'en'" (click)="setLang('en')" type="button" [attr.aria-pressed]="lang() === 'en'">EN</button>
         </div>
-        <button class="navbar__icon-btn" [attr.aria-label]="'nav.notifications' | transloco" type="button" aria-disabled="true" [title]="'nav.dropdown.coming_soon_a11y' | transloco">
+        <button class="navbar__icon-btn" [attr.aria-label]="notifAriaLabel()" type="button" aria-disabled="true" [title]="'nav.dropdown.coming_soon_a11y' | transloco">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
           @if (notifCount() > 0) {
-            <span class="navbar__badge" [attr.aria-label]="'nav.notif_count' | transloco: { count: notifCount() }">{{ notifCount() }}</span>
+            <span class="navbar__badge" aria-hidden="true">{{ notifBadgeText() }}</span>
           }
         </button>
+        <!--
+          Région hors-écran dédiée à l'annonce des mises à jour du badge (US16.1.3 AC) —
+          jamais aria-live sur le badge lui-même (répéterait l'annonce à chaque cycle de
+          détection de changement même sans changement de valeur). Le texte ne change dans
+          le DOM que lorsque notifAriaLabel() change réellement, donc le lecteur d'écran
+          n'annonce que les vraies mises à jour.
+        -->
+        <output class="sr-only" aria-live="polite" aria-atomic="true">{{ notifAriaLabel() }}</output>
         <div class="navbar__user">
           <button class="navbar__user-btn" (click)="toggleUserMenu($event)" [attr.aria-expanded]="userMenuOpen()" aria-haspopup="menu" type="button" [attr.aria-label]="'nav.user_menu' | transloco: { name: displayName() }">
             <span class="navbar__avatar" [style.background]="userAvatarColor()" aria-hidden="true">{{ initials() }}</span>
@@ -155,6 +172,8 @@ export class NavbarComponent {
   private readonly themeService = inject(ThemeService);
   private readonly transloco = inject(TranslocoService);
   private readonly languagePreference = inject(LanguagePreferenceService);
+  private readonly notifications = inject(NotificationService);
+  private readonly destroyRef = inject(DestroyRef);
   readonly lang = toSignal(this.transloco.langChanges$, { initialValue: this.transloco.getActiveLang() });
 
   readonly bugReportUrl = computed<string>(() => {
@@ -181,8 +200,35 @@ export class NavbarComponent {
   readonly user = this.auth.currentUser;
   readonly userMenuOpen = signal(false);
   readonly notifOpen = signal(false);
-  readonly notifCount = signal(0);
   readonly theme = this.themeService.theme;
+
+  /**
+   * Nombre de notifications non lues à afficher — `0` (badge masqué, AC) tant que
+   * {@link NotificationService.hasError} est vrai, même si un dernier compteur positif
+   * était connu avant l'échec (AC "si le GET échoue, le badge n'est pas affiché").
+   */
+  readonly notifCount = computed<number>(() =>
+    this.notifications.hasError() ? 0 : this.notifications.unreadCount()
+  );
+
+  /** Texte affiché dans le badge — plafonné à "99+" au-delà de {@link MAX_DISPLAY_COUNT} (AC). */
+  readonly notifBadgeText = computed<string>(() =>
+    this.notifCount() > MAX_DISPLAY_COUNT ? '99+' : String(this.notifCount())
+  );
+
+  /**
+   * aria-label du bouton cloche ET texte de la région `aria-live` dédiée (voir template) —
+   * annonce toujours le nombre exact, même au-delà de 99+ (AC "aria-label indique le nombre
+   * exact"). Recalculé sur changement de langue via la lecture de `this.lang()` (même
+   * pattern que {@link themeLabel}).
+   */
+  readonly notifAriaLabel = computed<string>(() => {
+    this.lang();
+    const count = this.notifCount();
+    return count > 0
+      ? this.transloco.translate('nav.notif_count', { count })
+      : this.transloco.translate('nav.notifications');
+  });
 
   readonly displayName = computed<string>(() => {
     const u = this.user();
@@ -207,6 +253,20 @@ export class NavbarComponent {
       this.theme() === 'light' ? 'nav.theme_to_dark' : 'nav.theme_to_light'
     );
   });
+
+  /**
+   * Charge le compteur initial puis démarre le polling 30s (US16.1.3) — voir
+   * {@link NotificationService.fetchUnreadCount}/{@link NotificationService.poll}. La
+   * souscription au polling est liée au cycle de vie de ce composant via
+   * `takeUntilDestroyed` : elle ne survit pas à la destruction de la navbar.
+   */
+  constructor() {
+    this.notifications.fetchUnreadCount().subscribe();
+    this.notifications
+      .poll()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
+  }
 
   @HostListener('document:click')
   onDocumentClick(): void {
