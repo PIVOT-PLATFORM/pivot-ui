@@ -1,3 +1,10 @@
+# [0.27.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.26.0...v0.27.0) (2026-07-06)
+
+
+### Features
+
+* **ui:** EN04.4 — nginx upstream passive health check ([#104](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/104)) ([423ea14](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/423ea149016e4c082fc7e9c11ec7de66feaffb3c))
+
 # [0.26.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.25.0...v0.26.0) (2026-07-06)
 
 
