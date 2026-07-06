@@ -528,6 +528,36 @@
           "invalid_role": "Le rôle sélectionné n'est pas valide.",
           "not_found": "Utilisateur introuvable."
         }
+      },
+      "status": {
+        "button": {
+          "deactivate": "Désactiver",
+          "deactivate_aria": "Désactiver le compte de {{ name }}",
+          "reactivate": "Réactiver",
+          "reactivate_aria": "Réactiver le compte de {{ name }}"
+        },
+        "confirm": {
+          "deactivate": {
+            "title": "Désactiver le compte de {{ name }} ?",
+            "message": "L'utilisateur sera déconnecté immédiatement de toutes ses sessions.",
+            "confirm": "Désactiver",
+            "cancel": "Annuler"
+          },
+          "reactivate": {
+            "title": "Réactiver le compte de {{ name }} ?",
+            "message": "L'utilisateur retrouvera l'accès à son compte immédiatement.",
+            "confirm": "Réactiver",
+            "cancel": "Annuler"
+          }
+        },
+        "toast": {
+          "deactivated": "Compte désactivé",
+          "reactivated": "Compte réactivé",
+          "error": "Impossible de modifier le statut du compte de {{ name }}. Réessayez.",
+          "self_deactivation": "Vous ne pouvez pas désactiver votre propre compte.",
+          "invalid_status": "Le statut sélectionné n'est pas valide.",
+          "not_found": "Utilisateur introuvable."
+        }
       }
     }
   },

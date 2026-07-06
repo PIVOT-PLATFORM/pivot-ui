@@ -27,9 +27,17 @@
  *   dialog (`ConfirmDialogComponent`, `role="dialog"` per this US's AC, vs.
  *   the `alertdialog` used by the module deactivate flow) before any API
  *   call — `AdminUsersService.changeRole()` is only invoked on confirm.
- * - US06.1.4 / US06.1.5 (activate/deactivate): slot buttons into the same
- *   `.admin-users__cell--actions` cell, next to the mobile expand toggle
- *   and the role select already living there.
+ * - US06.1.4 / US06.1.5 (deactivate/reactivate, implemented here): a single
+ *   status-toggle `<button>` in the actions cell — "Désactiver" on `ACTIVE`
+ *   rows, "Réactiver" on `INACTIVE` rows, mutually exclusive by construction
+ *   (no button at all on `BLOCKED` rows, out of scope for this pair of US).
+ *   Both directions share one code path: one endpoint
+ *   (`PATCH /api/admin/users/{id}/status`), one `status` field,
+ *   `AdminUsersService.changeStatus()` only. Like the role select, clicking
+ *   the button never mutates state directly — it opens a confirmation dialog
+ *   first (`role="alertdialog"` for deactivation — destructive, logs the
+ *   user out immediately — vs. the lighter `role="dialog"` for reactivation)
+ *   and the API call only happens on confirm.
  *
  * The role `<select>` uses a plain `[value]`/`(change)` binding rather than
  * `[ngModel]` — combining `[disabled]` with `ngModel` on the same element is
@@ -53,6 +61,7 @@ import {
   type AdminUserRole,
   type AdminUserRoleFilter,
   type AdminUserStatusFilter,
+  type AdminUserToggleableStatus,
 } from './admin-user.model';
 
 /** Debounce delay for the free-text search filter, in milliseconds. */
@@ -88,6 +97,11 @@ export class AdminUsersComponent implements OnInit {
    * write (Angular only writes on a dirty check against the last value).
    */
   private pendingRoleSelectEl: HTMLSelectElement | null = null;
+
+  /** Row awaiting status-change (deactivate/reactivate) confirmation, or null when the dialog is closed. */
+  private readonly pendingStatusChange = signal<{ user: AdminUserDto; newStatus: AdminUserToggleableStatus } | null>(
+    null
+  );
 
   /** Reactive current UI language — re-evaluates confirm-dialog copy on language switch (see NavbarComponent.themeLabel). */
   private readonly lang = toSignal(this.transloco.langChanges$, { initialValue: this.transloco.getActiveLang() });
@@ -296,5 +310,116 @@ export class AdminUsersComponent implements OnInit {
       default:
         return 'admin.users.role.toast.error';
     }
+  }
+
+  /** True while the status-change (deactivate/reactivate) confirmation dialog should be shown. */
+  isStatusConfirmOpen(): boolean {
+    return this.pendingStatusChange() !== null;
+  }
+
+  /**
+   * ARIA role of the status-change confirmation dialog — `alertdialog`
+   * (destructive: the user is logged out of every session immediately) for
+   * deactivation, the lighter `dialog` for reactivation, per this US's AC.
+   */
+  statusConfirmRole(): 'dialog' | 'alertdialog' {
+    return this.pendingStatusChange()?.newStatus === 'INACTIVE' ? 'alertdialog' : 'dialog';
+  }
+
+  statusConfirmTitle(): string {
+    const pending = this.pendingStatusChange();
+    return pending ? this.statusConfirmText('title', { name: this.displayName(pending.user) }) : '';
+  }
+
+  statusConfirmMessage(): string {
+    return this.statusConfirmText('message');
+  }
+
+  statusConfirmConfirmLabel(): string {
+    return this.statusConfirmText('confirm');
+  }
+
+  statusConfirmCancelLabel(): string {
+    return this.statusConfirmText('cancel');
+  }
+
+  /**
+   * Handles the row status-toggle button's click. The target status is
+   * derived from the user's current one (`ACTIVE` → `INACTIVE`, `INACTIVE` →
+   * `ACTIVE` — mutually exclusive by construction, only one button ever
+   * renders per row, see the template). Never mutates state directly — only
+   * opens the confirmation dialog; the actual API call is deferred to
+   * {@link confirmStatusChange}.
+   */
+  onStatusToggle(user: AdminUserDto): void {
+    const newStatus = this.toggleTargetStatus(user.status);
+    if (!newStatus) {
+      return;
+    }
+    this.pendingStatusChange.set({ user, newStatus });
+  }
+
+  /** Applies the pending status change — only called after the admin confirms the dialog. */
+  confirmStatusChange(): void {
+    const pending = this.pendingStatusChange();
+    this.pendingStatusChange.set(null);
+    if (!pending) {
+      return;
+    }
+    const { user, newStatus } = pending;
+    const name = this.displayName(user);
+    const successKey =
+      newStatus === 'INACTIVE' ? 'admin.users.status.toast.deactivated' : 'admin.users.status.toast.reactivated';
+    this.service.changeStatus(user, newStatus).subscribe({
+      next: () => this.toast.show(successKey, 'info'),
+      error: () => this.toast.show(this.statusErrorToastKey(user.id), 'error', { name }),
+    });
+  }
+
+  /**
+   * Cancels the pending status change. Unlike {@link cancelRoleChange}, no
+   * DOM revert is needed — the status button's label/text is derived
+   * entirely from `user.status`, not from a bound `<select>` the browser
+   * may have mutated ahead of Angular.
+   */
+  cancelStatusChange(): void {
+    this.pendingStatusChange.set(null);
+  }
+
+  /** i18n key for the status-change error toast, classified from the failed request (see `AdminUserStatusChangeErrorKind`). */
+  private statusErrorToastKey(id: number): string {
+    switch (this.service.statusChangeError(id)) {
+      case 'self-deactivation':
+        return 'admin.users.status.toast.self_deactivation';
+      case 'invalid-status':
+        return 'admin.users.status.toast.invalid_status';
+      case 'not-found':
+        return 'admin.users.status.toast.not_found';
+      default:
+        return 'admin.users.status.toast.error';
+    }
+  }
+
+  /** `ACTIVE` → `INACTIVE`, `INACTIVE` → `ACTIVE`; `BLOCKED` (out of scope) → `null`. */
+  private toggleTargetStatus(status: AdminUserDto['status']): AdminUserToggleableStatus | null {
+    switch (status) {
+      case 'ACTIVE':
+        return 'INACTIVE';
+      case 'INACTIVE':
+        return 'ACTIVE';
+      default:
+        return null;
+    }
+  }
+
+  /** Translates a status-confirm-dialog key for the pending action ('' when no confirmation is pending). */
+  private statusConfirmText(suffix: 'title' | 'message' | 'confirm' | 'cancel', params?: Record<string, string>): string {
+    this.lang();
+    const pending = this.pendingStatusChange();
+    if (!pending) {
+      return '';
+    }
+    const prefix = pending.newStatus === 'INACTIVE' ? 'deactivate' : 'reactivate';
+    return this.transloco.translate(`admin.users.status.confirm.${prefix}.${suffix}`, params);
   }
 }

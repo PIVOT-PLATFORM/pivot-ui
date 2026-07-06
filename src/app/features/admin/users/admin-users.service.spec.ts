@@ -215,4 +215,111 @@ describe('AdminUsersService', () => {
       httpMock.expectOne(`${environment.apiUrl}/admin/users/1/role`).flush(makeDto(1, { role: 'ROLE_ADMIN' }));
     });
   });
+
+  describe('changeStatus (US06.1.4 deactivate / US06.1.5 reactivate)', () => {
+    const loadOneUser = (overrides: Partial<AdminUserDto> = {}) => {
+      service.load(0, { ...EMPTY_ADMIN_USER_FILTERS }).subscribe();
+      httpMock
+        .expectOne(r => r.url === `${environment.apiUrl}/admin/users`)
+        .flush(makePage([makeDto(1, { status: 'ACTIVE', ...overrides })]));
+    };
+
+    it('sends PATCH /api/admin/users/{id}/status with the requested status and applies it optimistically', () => {
+      loadOneUser();
+      service.changeStatus(service.users()[0], 'INACTIVE').subscribe();
+
+      // Optimistic: applied before the response arrives.
+      expect(service.users()[0].status).toBe('INACTIVE');
+      expect(service.isStatusChangeInFlight(1)).toBe(true);
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/admin/users/1/status`);
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual({ status: 'INACTIVE' });
+
+      req.flush(makeDto(1, { status: 'INACTIVE' }));
+      expect(service.users()[0].status).toBe('INACTIVE');
+      expect(service.isStatusChangeInFlight(1)).toBe(false);
+      expect(service.statusChangeError(1)).toBeNull();
+    });
+
+    it('shares the same endpoint for reactivation (status: ACTIVE)', () => {
+      loadOneUser({ status: 'INACTIVE' });
+      service.changeStatus(service.users()[0], 'ACTIVE').subscribe();
+
+      expect(service.users()[0].status).toBe('ACTIVE');
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/admin/users/1/status`);
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual({ status: 'ACTIVE' });
+      req.flush(makeDto(1, { status: 'ACTIVE' }));
+      expect(service.users()[0].status).toBe('ACTIVE');
+    });
+
+    it('reconciles with the status returned by the backend rather than assuming an echo', () => {
+      loadOneUser();
+      service.changeStatus(service.users()[0], 'INACTIVE').subscribe();
+      httpMock
+        .expectOne(`${environment.apiUrl}/admin/users/1/status`)
+        // Defensive: even if the backend ever returned a different status than requested
+        // (e.g. the documented idempotent 200 on reactivating an already-ACTIVE account).
+        .flush(makeDto(1, { status: 'ACTIVE' }));
+      expect(service.users()[0].status).toBe('ACTIVE');
+    });
+
+    it('rolls back to the previous status and classifies a 403 as self-deactivation', () => {
+      loadOneUser();
+      service.changeStatus(service.users()[0], 'INACTIVE').subscribe({ error: () => undefined });
+
+      httpMock
+        .expectOne(`${environment.apiUrl}/admin/users/1/status`)
+        .flush({ error: 'SELF_DEACTIVATION' }, { status: 403, statusText: 'Forbidden' });
+
+      expect(service.users()[0].status).toBe('ACTIVE');
+      expect(service.isStatusChangeInFlight(1)).toBe(false);
+      expect(service.statusChangeError(1)).toBe('self-deactivation');
+    });
+
+    it('classifies a 400 as invalid-status and a 404 as not-found', () => {
+      loadOneUser();
+      service.changeStatus(service.users()[0], 'INACTIVE').subscribe({ error: () => undefined });
+      httpMock
+        .expectOne(`${environment.apiUrl}/admin/users/1/status`)
+        .flush({ error: 'INVALID_STATUS' }, { status: 400, statusText: 'Bad Request' });
+      expect(service.statusChangeError(1)).toBe('invalid-status');
+
+      service.changeStatus(service.users()[0], 'INACTIVE').subscribe({ error: () => undefined });
+      httpMock
+        .expectOne(`${environment.apiUrl}/admin/users/1/status`)
+        .flush({ error: 'NOT_FOUND' }, { status: 404, statusText: 'Not Found' });
+      expect(service.statusChangeError(1)).toBe('not-found');
+    });
+
+    it('classifies a 500 as generic and clears a previous row error on a new attempt', () => {
+      loadOneUser();
+      service.changeStatus(service.users()[0], 'INACTIVE').subscribe({ error: () => undefined });
+      httpMock
+        .expectOne(`${environment.apiUrl}/admin/users/1/status`)
+        .flush('Server error', { status: 500, statusText: 'Internal Server Error' });
+      expect(service.statusChangeError(1)).toBe('generic');
+
+      service.changeStatus(service.users()[0], 'INACTIVE').subscribe();
+      // clearStatusChangeError runs synchronously before the request settles.
+      expect(service.statusChangeError(1)).toBeNull();
+      httpMock.expectOne(`${environment.apiUrl}/admin/users/1/status`).flush(makeDto(1, { status: 'INACTIVE' }));
+    });
+
+    it('tracks in-flight state per user id independently from role-change and other rows', () => {
+      service.load(0, { ...EMPTY_ADMIN_USER_FILTERS }).subscribe();
+      httpMock
+        .expectOne(r => r.url === `${environment.apiUrl}/admin/users`)
+        .flush(makePage([makeDto(1, { status: 'ACTIVE' }), makeDto(2, { status: 'ACTIVE' })]));
+
+      service.changeStatus(service.users()[0], 'INACTIVE').subscribe();
+      expect(service.isStatusChangeInFlight(1)).toBe(true);
+      expect(service.isStatusChangeInFlight(2)).toBe(false);
+      expect(service.isRoleChangeInFlight(1)).toBe(false);
+
+      httpMock.expectOne(`${environment.apiUrl}/admin/users/1/status`).flush(makeDto(1, { status: 'INACTIVE' }));
+    });
+  });
 });

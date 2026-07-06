@@ -165,10 +165,40 @@
                 </select>
 
                 <!--
+                  US06.1.4/US06.1.5 status-toggle button — mutually exclusive by
+                  the row's current status: "Désactiver" on ACTIVE, "Réactiver"
+                  on INACTIVE, no button at all on BLOCKED (out of scope for this
+                  pair of US, see admin-user.model.ts AdminUserToggleableStatus).
+                  Never mutates state directly — opens the confirmation dialog
+                  below; the API call only happens on confirm.
+                -->
+                @if (user.status === 'ACTIVE') {
+                  <button
+                    type="button"
+                    class="btn btn-danger admin-users__status-toggle"
+                    [disabled]="service.isStatusChangeInFlight(user.id)"
+                    [attr.aria-label]="'admin.users.status.button.deactivate_aria' | transloco: { name: displayName(user) }"
+                    (click)="onStatusToggle(user)"
+                    [attr.data-testid]="'user-status-toggle-' + user.id"
+                  >
+                    {{ 'admin.users.status.button.deactivate' | transloco }}
+                  </button>
+                } @else if (user.status === 'INACTIVE') {
+                  <button
+                    type="button"
+                    class="btn btn-secondary admin-users__status-toggle"
+                    [disabled]="service.isStatusChangeInFlight(user.id)"
+                    [attr.aria-label]="'admin.users.status.button.reactivate_aria' | transloco: { name: displayName(user) }"
+                    (click)="onStatusToggle(user)"
+                    [attr.data-testid]="'user-status-toggle-' + user.id"
+                  >
+                    {{ 'admin.users.status.button.reactivate' | transloco }}
+                  </button>
+                }
+
+                <!--
                   Mobile-only expand toggle (hidden ≥768px via SCSS) revealing the
-                  secondary columns below. Future sibling US (US06.1.4/US06.1.5
-                  activate/deactivate buttons) slot their controls into this same
-                  cell, next to the role select and this toggle.
+                  secondary columns below.
                 -->
                 <button
                   type="button"
@@ -254,5 +284,23 @@
     [cancelLabel]="'admin.users.role.confirm.cancel' | transloco"
     (confirmed)="confirmRoleChange()"
     (cancelled)="cancelRoleChange()"
+  />
+
+  <!--
+    US06.1.4/US06.1.5 status-change confirmation — shares one dialog for both
+    directions: role="alertdialog" (destructive) for deactivation, the
+    lighter role="dialog" for reactivation, per each US's AC. Title/message/
+    button labels are all resolved dynamically from the pending action in
+    the component (statusConfirm*()).
+  -->
+  <piv-confirm-dialog
+    [open]="isStatusConfirmOpen()"
+    [role]="statusConfirmRole()"
+    [title]="statusConfirmTitle()"
+    [message]="statusConfirmMessage()"
+    [confirmLabel]="statusConfirmConfirmLabel()"
+    [cancelLabel]="statusConfirmCancelLabel()"
+    (confirmed)="confirmStatusChange()"
+    (cancelled)="cancelStatusChange()"
   />
 </main>

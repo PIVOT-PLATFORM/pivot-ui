@@ -89,6 +89,30 @@ export interface AdminUserFilters {
  */
 export type AdminUserRoleChangeErrorKind = 'invalid-role' | 'self-demotion' | 'not-found' | 'generic';
 
+/**
+ * Target values accepted by `PATCH /api/admin/users/{userId}/status` (US06.1.4
+ * deactivate / US06.1.5 reactivate backend contract) — a strict subset of
+ * {@link AdminUserStatus}. `BLOCKED` is never a valid target of this endpoint
+ * (it is a separate, backend-driven state — e.g. failed-login lockout — not
+ * something an admin toggles here), so rows with that status render neither
+ * the "Désactiver" nor the "Réactiver" button (see `AdminUsersComponent`).
+ */
+export type AdminUserToggleableStatus = 'ACTIVE' | 'INACTIVE';
+
+/**
+ * Classification of a `PATCH /api/admin/users/{id}/status` failure (US06.1.4/
+ * US06.1.5 backend contract), used to show a more useful toast than a single
+ * generic error message:
+ * - `invalid-status` — `400`, only `ACTIVE`/`INACTIVE` accepted (structurally
+ *   unreachable from this UI's button, kept for contract drift).
+ * - `self-deactivation` — `403`, an admin cannot deactivate their own account.
+ * - `not-found` — `404`, the target user does not belong to the caller's tenant
+ *   (cross-tenant access is a 404, never a 403, per the platform's tenant
+ *   isolation rule).
+ * - `generic` — anything else (network/5xx).
+ */
+export type AdminUserStatusChangeErrorKind = 'invalid-status' | 'self-deactivation' | 'not-found' | 'generic';
+
 /** Fixed page size for this US — mirrors the backend default, sent explicitly on every request. */
 export const DEFAULT_ADMIN_USERS_PAGE_SIZE = 20;
 
