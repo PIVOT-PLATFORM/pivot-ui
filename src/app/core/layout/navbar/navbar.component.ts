@@ -49,9 +49,9 @@ export function avatarColor(name: string): string {
     <header class="navbar" role="banner">
       <div class="navbar__left">
         <a routerLink="/" class="navbar__logo" aria-label="PIVOT — accueil">
-          <svg class="navbar__logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-            <rect width="32" height="32" rx="8" fill="var(--color-brand-600)"/>
-            <path d="M10 8h7a5 5 0 010 10h-4v6h-3V8z" fill="white"/>
+          <svg class="navbar__logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+            <rect x="5" y="5" width="38" height="38" fill="none" stroke="var(--navbar-logo-color)" stroke-width="4.5"/>
+            <polygon points="24,13.5 34.5,24 24,34.5 13.5,24" fill="var(--navbar-logo-color)"/>
           </svg>
           <span class="navbar__logo-text">PIVOT</span>
         </a>

@@ -15,10 +15,7 @@ import { PasswordStrengthComponent } from '../../../../shared/components/passwor
     <div class="auth-page">
       <div class="card auth-card">
         <div class="auth-brand">
-          <picture>
-            <source srcset="assets/brand/pivot-icon.webp?v=4" type="image/webp" />
-            <img src="assets/brand/pivot-icon.png?v=4" alt="PIVOT" class="auth-brand-icon" />
-          </picture>
+          <img src="assets/brand/pivot-mark-gradient.svg?v=5" alt="PIVOT" class="auth-brand-icon" />
         </div>
 
         @switch (tokenState()) {
@@ -31,7 +28,7 @@ import { PasswordStrengthComponent } from '../../../../shared/components/passwor
           @case ('invalid') {
             <div style="text-align:center;padding:8px 0">
               <div style="margin-bottom:16px;display:flex;justify-content:center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-error)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
               </div>
               <h2 class="auth-title">{{ 'auth.reset_password.expired_title' | transloco }}</h2>
               <p class="auth-subtitle">{{ 'auth.reset_password.expired_body' | transloco }}</p>
@@ -43,7 +40,7 @@ import { PasswordStrengthComponent } from '../../../../shared/components/passwor
           @case ('success') {
             <div style="text-align:center;padding:8px 0">
               <div style="margin-bottom:12px;display:flex;justify-content:center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
               </div>
               <h2 class="auth-title">{{ 'auth.reset_password.success_title' | transloco }}</h2>
               <p style="font-size:var(--text-sm);color:var(--color-gray-500);margin:8px 0 20px">

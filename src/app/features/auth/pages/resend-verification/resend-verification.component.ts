@@ -14,16 +14,13 @@ import { HttpErrorResponse } from '@angular/common/http';
     <div class="auth-page">
       <div class="card auth-card">
         <div class="auth-brand">
-          <picture>
-            <source srcset="assets/brand/pivot-icon.webp?v=4" type="image/webp" />
-            <img src="assets/brand/pivot-icon.png?v=4" alt="PIVOT" class="auth-brand-icon" />
-          </picture>
+          <img src="assets/brand/pivot-mark-gradient.svg?v=5" alt="PIVOT" class="auth-brand-icon" />
         </div>
 
         @if (sent()) {
           <div class="success-block">
             <div style="margin-bottom:16px;display:flex;justify-content:center" aria-hidden="true">
-              <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2 4 12 13 22 4"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand-600)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2 4 12 13 22 4"/></svg>
             </div>
             <h1 class="auth-title">{{ 'auth.resend.sent_title' | transloco }}</h1>
             <p class="auth-subtitle">{{ 'auth.resend.sent_body' | transloco }}</p>

@@ -146,7 +146,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
     }
     .legal-lang-notice {
       font-size: 0.875rem;
-      color: var(--color-warning, #b45309);
+      color: var(--color-warning, #F59E0B);
       background: rgba(251, 191, 36, 0.1);
       border-radius: 6px;
       padding: 10px 14px;
@@ -154,7 +154,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
     }
     h1 { font-size: 1.75rem; font-weight: 700; color: var(--color-navy-900); margin-bottom: 4px; }
     .updated { font-size: 0.8rem; color: var(--color-gray-500); margin-bottom: 32px; }
-    h2 { font-size: 1.1rem; font-weight: 600; color: var(--color-brand-700, #312e81); margin: 28px 0 10px; }
+    h2 { font-size: 1.1rem; font-weight: 600; color: var(--color-brand-700, #5B1FB4); margin: 28px 0 10px; }
     p, li { font-size: 0.9375rem; color: var(--color-gray-700); line-height: 1.7; }
     ul { padding-left: 20px; }
     code { background: var(--surface-bg); padding: 1px 5px; border-radius: 3px; font-size: 0.85em; }
