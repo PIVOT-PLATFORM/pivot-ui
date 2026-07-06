@@ -116,6 +116,12 @@ export class SidebarComponent {
   private readonly allItems: NavItem[] = [
     { labelKey: 'sidebar.dashboard', icon: '▦', route: '/dashboard' },
     { labelKey: 'sidebar.admin', icon: '⚙', route: '/admin', roles: ['ROLE_ADMIN', 'ROLE_SUPER_ADMIN'] },
+    {
+      labelKey: 'sidebar.superadmin_tenants',
+      icon: '🏢',
+      route: '/superadmin/tenants',
+      roles: ['ROLE_SUPER_ADMIN'],
+    },
   ];
 
   visibleItems(): NavItem[] {

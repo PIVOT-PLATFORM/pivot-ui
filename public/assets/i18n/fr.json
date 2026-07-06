@@ -37,6 +37,7 @@
   "sidebar": {
     "dashboard": "Tableau de bord",
     "admin": "Administration",
+    "superadmin_tenants": "Tenants",
     "expand": "Développer",
     "collapse": "Réduire"
   },
@@ -295,6 +296,55 @@
         "roadmap": "Roadmap",
         "survey": "Sondages",
         "quiz": "Quiz"
+      }
+    }
+  },
+  "superadmin": {
+    "tenants": {
+      "list": {
+        "title": "Tenants",
+        "subtitle": "Vue d'ensemble de tous les tenants de la plateforme.",
+        "empty": "Aucun tenant ne correspond aux filtres",
+        "error": "Impossible de charger les tenants. Réessayez.",
+        "retry": "Réessayer"
+      },
+      "filters": {
+        "form_aria": "Filtres de recherche des tenants",
+        "name": "Nom",
+        "plan": "Plan",
+        "plan_all": "Tous",
+        "plan_saas": "SaaS",
+        "plan_enterprise": "Entreprise",
+        "plan_trial": "Essai",
+        "is_active": "Statut",
+        "is_active_all": "Tous",
+        "is_active_true": "Actif",
+        "is_active_false": "Inactif",
+        "auth_mode": "Mode d'authentification",
+        "auth_mode_all": "Tous",
+        "auth_mode_saas": "SaaS",
+        "auth_mode_enterprise": "Entreprise",
+        "auth_mode_hybrid": "Hybride",
+        "submit": "Filtrer"
+      },
+      "columns": {
+        "name": "Nom",
+        "slug": "Slug",
+        "plan": "Plan",
+        "auth_mode": "Mode d'authentification",
+        "is_active": "Statut",
+        "user_count": "Utilisateurs",
+        "created_at": "Créé le"
+      },
+      "status": {
+        "active": "Actif",
+        "inactive": "Inactif"
+      },
+      "pagination": {
+        "nav_aria": "Pagination des tenants",
+        "previous": "← Précédent",
+        "next": "Suivant →",
+        "status": "Page {{ page }} sur {{ totalPages }} ({{ total }} tenants)"
       }
     }
   }
