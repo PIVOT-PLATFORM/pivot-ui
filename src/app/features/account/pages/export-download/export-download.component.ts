@@ -50,7 +50,7 @@ const DEFAULT_FILENAME = 'pivot-export.zip';
           }
           @case ('success') {
             <div class="export-dl__status" role="status" aria-live="polite" aria-atomic="true" data-testid="download-success">
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
               <p>{{ 'account.rgpd.export.download.success' | transloco }}</p>
               <a routerLink="/account/export" class="btn btn-secondary">{{ 'account.rgpd.export.download.success_back' | transloco }}</a>
             </div>

@@ -29,20 +29,24 @@
   --color-gray-900: #1A1230;
 
   // Semantic
-  --color-success:       #0E9F6E;
-  --color-success-400:   #34D399;  /* bright — lisible sur fond sombre */
-  --color-success-light: #E3F6EE;
-  --color-success-dark:  #076B4C;
-  --color-warning:       #F59E0B;
-  --color-warning-light: #FDEFC4;
-  --color-warning-dark:  #92400E;  /* text-on-warning-light — reste lisible avec la nouvelle teinte */
-  --color-error:         #DC2626;  /* = --pv-danger charte, inchangé */
-  --color-error-400:     #F87171;  /* bright — lisible sur fond sombre */
-  --color-error-light:   #FDE4E6;
-  --color-error-dark:    #A91E1E;
-  --color-info:          #0284C7;  /* pas de token "info" dans la charte — bleu conservé, distinct du violet primaire */
-  --color-info-light:    #E0F2FE;
-  --color-info-dark:     #075985;
+  --color-success:        #0E9F6E;
+  --color-success-400:    #34D399;  /* bright — lisible sur fond sombre */
+  --color-success-light:  #E3F6EE;
+  --color-success-border: #A9E6CD;
+  --color-success-dark:   #076B4C;
+  --color-warning:        #F59E0B;
+  --color-warning-light:  #FDEFC4;
+  --color-warning-border: #F9DA8B;
+  --color-warning-dark:   #92400E;  /* text-on-warning-light — reste lisible avec la nouvelle teinte */
+  --color-error:          #DC2626;  /* = --pv-danger charte, inchangé */
+  --color-error-400:      #F87171;  /* bright — lisible sur fond sombre */
+  --color-error-light:    #FDE4E6;
+  --color-error-border:   #F5B8BE;
+  --color-error-dark:     #A91E1E;
+  --color-info:           #0284C7;  /* pas de token "info" dans la charte — bleu conservé, distinct du violet primaire */
+  --color-info-light:     #E0F2FE;
+  --color-info-border:    #BAE0F5;
+  --color-info-dark:      #075985;
 
   // Surfaces
   --surface-bg:      #F6F3FD;

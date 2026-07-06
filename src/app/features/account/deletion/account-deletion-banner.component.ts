@@ -61,9 +61,9 @@ import { AccountDeletionStateService } from './account-deletion-state.service';
       justify-content: center;
       gap: 12px;
       padding: 10px 16px;
-      background: #FFFBEB;
-      color: #92400E;
-      border-bottom: 1px solid #FDE68A;
+      background: var(--color-warning-light);
+      color: var(--color-warning-dark);
+      border-bottom: 1px solid var(--color-warning-border);
       font-size: var(--text-sm);
       text-align: center;
     }

@@ -161,7 +161,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
     }
     .legal-lang-notice {
       font-size: 0.875rem;
-      color: var(--color-warning, #b45309);
+      color: var(--color-warning, #F59E0B);
       background: rgba(251, 191, 36, 0.1);
       border-radius: 6px;
       padding: 10px 14px;
