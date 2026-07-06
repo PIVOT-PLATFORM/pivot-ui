@@ -253,6 +253,33 @@
     "privacy_title": "Privacy Policy",
     "terms_title": "Terms of Service"
   },
+  "account": {
+    "profile": {
+      "title": "My profile",
+      "subtitle": "View and edit your personal information.",
+      "main_aria": "Account profile",
+      "loading": "Loading profile…",
+      "error_load": "Unable to load your profile. Please try again.",
+      "retry": "Retry",
+      "avatar_section_title": "Profile picture",
+      "avatar_change": "Change picture",
+      "avatar_hint": "JPEG, PNG or WEBP, 2 MB maximum.",
+      "avatar_error_invalid_format": "Unsupported format. Use a JPEG, PNG or WEBP image.",
+      "avatar_error_too_large": "Image too large. Maximum size: 2 MB.",
+      "avatar_error_generic": "Could not upload the image. Please try again.",
+      "form_title": "Personal information",
+      "form_aria": "Profile edit form",
+      "first_name": "First name",
+      "last_name": "Last name",
+      "email": "Email",
+      "email_hint": "The email address cannot be changed here.",
+      "error_max_length": "100 characters maximum.",
+      "error_invalid_name": "Invalid first or last name.",
+      "error_save_generic": "An error occurred while saving. Please try again.",
+      "submit": "Save",
+      "success": "Profile updated successfully."
+    }
+  },
   "admin": {
     "modules": {
       "list": {
