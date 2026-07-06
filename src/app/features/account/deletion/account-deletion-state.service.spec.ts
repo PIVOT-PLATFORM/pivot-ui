@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { vi } from 'vitest';
 import { AccountDeletionStateService } from './account-deletion-state.service';
 import { installMemoryLocalStorage } from './testing/memory-local-storage';
 
@@ -69,5 +70,63 @@ describe('AccountDeletionStateService', () => {
     const service = TestBed.inject(AccountDeletionStateService);
 
     expect(service.pending()).toBeNull();
+  });
+
+  describe('live auto-expiry (no record()/clear() call in between)', () => {
+    afterEach(() => vi.useRealTimers());
+
+    it('flips pending() to null on its own once the grace period elapses in a long-lived tab', () => {
+      vi.useFakeTimers();
+      const service = TestBed.inject(AccountDeletionStateService);
+      service.record(new Date(Date.now() + 5000).toISOString());
+      TestBed.flushEffects();
+
+      expect(service.pending()).not.toBeNull();
+
+      // Nothing calls record()/clear() here — this is the exact "banner left
+      // open across the deadline" scenario. `computed()` alone (without the
+      // `now` signal + scheduled wake-up) would keep returning the stale,
+      // already-expired value forever: https://github.com/PIVOT-PLATFORM/pivot-ui/pull/83.
+      vi.advanceTimersByTime(5001);
+
+      expect(service.pending()).toBeNull();
+    });
+
+    it('correctly schedules across a grace period longer than the ~24.8-day max JS timer delay', () => {
+      vi.useFakeTimers();
+      const service = TestBed.inject(AccountDeletionStateService);
+      const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+      service.record(new Date(Date.now() + THIRTY_DAYS_MS).toISOString());
+      TestBed.flushEffects();
+
+      expect(service.pending()).not.toBeNull();
+
+      // A single setTimeout(..., THIRTY_DAYS_MS) would silently overflow (32-bit
+      // signed ms) and fire near-instantly instead of waiting — assert it does NOT.
+      vi.advanceTimersByTime(THIRTY_DAYS_MS - 1000);
+      expect(service.pending()).not.toBeNull();
+
+      vi.advanceTimersByTime(2000);
+      expect(service.pending()).toBeNull();
+    });
+
+    it('cancels the previous wake-up timer when a new deletion is recorded before the first elapses', () => {
+      vi.useFakeTimers();
+      const service = TestBed.inject(AccountDeletionStateService);
+      service.record(new Date(Date.now() + 5000).toISOString());
+      TestBed.flushEffects();
+
+      const laterDate = new Date(Date.now() + 20_000).toISOString();
+      service.record(laterDate);
+      TestBed.flushEffects();
+
+      // Old timer (which would have fired at +5000ms) must not have been left
+      // running and incorrectly expiring the newly-recorded, still-pending value.
+      vi.advanceTimersByTime(5001);
+      expect(service.pending()).toEqual({ effectiveDeletionDate: laterDate });
+
+      vi.advanceTimersByTime(20_000);
+      expect(service.pending()).toBeNull();
+    });
   });
 });
