@@ -329,6 +329,35 @@
         "revoke_all_error": "Couldn't revoke the other sessions. Please try again."
       }
     },
+    "devices": {
+      "list": {
+        "title": "Trusted devices",
+        "subtitle": "Trust a device so you no longer need to confirm your identity with a code every time you sign in from it.",
+        "empty": "No other trusted devices",
+        "error": "Couldn't load your trusted devices. Please try again.",
+        "retry": "Retry",
+        "column_device": "Device",
+        "column_ip": "IP address",
+        "column_trusted_since": "Trusted since",
+        "column_last_seen": "Last seen",
+        "column_actions": "Actions",
+        "unknown_device": "Unknown device",
+        "current_device": "Current device",
+        "not_revocable": "Not revocable",
+        "revoke": "Revoke",
+        "revoke_aria": "Revoke trust for {{ device }} since {{ date }}"
+      },
+      "confirm": {
+        "title": "Revoke this trusted device?",
+        "message": "This device will no longer be recognized as trusted: the next sign-in from it will require a verification code again. Continue?",
+        "confirm": "Revoke",
+        "cancel": "Cancel"
+      },
+      "toast": {
+        "revoked": "Trusted device revoked",
+        "revoke_error": "Couldn't revoke this device. Please try again."
+      }
+    },
     "rgpd": {
       "export": {
         "main_aria": "Export my personal data",

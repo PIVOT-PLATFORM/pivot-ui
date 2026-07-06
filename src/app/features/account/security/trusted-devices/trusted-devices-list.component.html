@@ -1,0 +1,100 @@
+<main class="trusted-devices-list" [attr.aria-label]="'account.devices.list.title' | transloco">
+  <header class="trusted-devices-list__header">
+    <h1 class="trusted-devices-list__title">{{ 'account.devices.list.title' | transloco }}</h1>
+    <p class="trusted-devices-list__subtitle">{{ 'account.devices.list.subtitle' | transloco }}</p>
+  </header>
+
+  @if (loading()) {
+    <output class="sr-only">{{ 'common.loading' | transloco }}</output>
+    <ul class="trusted-devices-list__skeleton" aria-hidden="true" data-testid="trusted-devices-skeleton">
+      @for (i of skeletonPlaceholders; track i) {
+        <li class="trusted-devices-list__skeleton-row"></li>
+      }
+    </ul>
+  } @else if (loadError()) {
+    <div class="trusted-devices-list__error-state" role="alert" data-testid="trusted-devices-error">
+      <p>{{ 'account.devices.list.error' | transloco }}</p>
+      <button type="button" class="btn btn-secondary" (click)="load()" data-testid="trusted-devices-retry">
+        {{ 'account.devices.list.retry' | transloco }}
+      </button>
+    </div>
+  } @else {
+    <div class="trusted-devices-list__table-wrap">
+      <table class="trusted-devices-list__table" data-testid="trusted-devices-table">
+        <thead>
+          <tr>
+            <th scope="col">{{ 'account.devices.list.column_device' | transloco }}</th>
+            <th scope="col">{{ 'account.devices.list.column_ip' | transloco }}</th>
+            <th scope="col">{{ 'account.devices.list.column_trusted_since' | transloco }}</th>
+            <th scope="col">{{ 'account.devices.list.column_last_seen' | transloco }}</th>
+            <th scope="col">{{ 'account.devices.list.column_actions' | transloco }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (currentDevice(); as current) {
+            <tr class="trusted-devices-list__row trusted-devices-list__row--current" [attr.data-testid]="'device-row-' + current.id">
+              <td class="trusted-devices-list__cell-device" [attr.data-label]="'account.devices.list.column_device' | transloco">
+                <span class="trusted-devices-list__device">{{ deviceLabel(current) }}</span>
+                <span
+                  class="trusted-devices-list__current-badge"
+                  [attr.data-testid]="'device-current-badge-' + current.id"
+                >
+                  {{ 'account.devices.list.current_device' | transloco }}
+                </span>
+              </td>
+              <td [attr.data-label]="'account.devices.list.column_ip' | transloco">{{ current.ip }}</td>
+              <td [attr.data-label]="'account.devices.list.column_trusted_since' | transloco">{{ formatDate(current.createdAt) }}</td>
+              <td [attr.data-label]="'account.devices.list.column_last_seen' | transloco">{{ formatDate(current.lastSeenAt) }}</td>
+              <td [attr.data-label]="'account.devices.list.column_actions' | transloco">
+                <span class="trusted-devices-list__not-revocable">{{ 'account.devices.list.not_revocable' | transloco }}</span>
+              </td>
+            </tr>
+          }
+          @for (device of otherDevices(); track device.id) {
+            <tr class="trusted-devices-list__row" [attr.data-testid]="'device-row-' + device.id">
+              <td class="trusted-devices-list__cell-device" [attr.data-label]="'account.devices.list.column_device' | transloco">
+                <span class="trusted-devices-list__device">{{ deviceLabel(device) }}</span>
+              </td>
+              <td [attr.data-label]="'account.devices.list.column_ip' | transloco">{{ device.ip }}</td>
+              <td [attr.data-label]="'account.devices.list.column_trusted_since' | transloco">{{ formatDate(device.createdAt) }}</td>
+              <td [attr.data-label]="'account.devices.list.column_last_seen' | transloco">{{ formatDate(device.lastSeenAt) }}</td>
+              <td [attr.data-label]="'account.devices.list.column_actions' | transloco">
+                <button
+                  type="button"
+                  class="btn btn-secondary trusted-devices-list__revoke"
+                  [attr.aria-label]="revokeAriaLabel(device)"
+                  [disabled]="service.isRevoking(device.id)"
+                  [attr.data-testid]="'device-revoke-' + device.id"
+                  (click)="onRevoke(device)"
+                >
+                  @if (service.isRevoking(device.id)) {
+                    <span class="spinner" aria-hidden="true"></span>
+                  } @else {
+                    {{ 'account.devices.list.revoke' | transloco }}
+                  }
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (isEmpty()) {
+      <div class="trusted-devices-list__empty-state" data-testid="trusted-devices-empty">
+        <p>{{ 'account.devices.list.empty' | transloco }}</p>
+      </div>
+    }
+  }
+
+  <piv-confirm-dialog
+    role="dialog"
+    [open]="isConfirmOpen()"
+    [title]="'account.devices.confirm.title' | transloco"
+    [message]="'account.devices.confirm.message' | transloco"
+    [confirmLabel]="'account.devices.confirm.confirm' | transloco"
+    [cancelLabel]="'account.devices.confirm.cancel' | transloco"
+    (confirmed)="onConfirm()"
+    (cancelled)="onCancelConfirm()"
+  />
+</main>

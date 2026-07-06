@@ -329,6 +329,35 @@
         "revoke_all_error": "Impossible de révoquer les autres sessions. Réessayez."
       }
     },
+    "devices": {
+      "list": {
+        "title": "Appareils de confiance",
+        "subtitle": "Faites confiance à un appareil pour ne plus avoir à confirmer votre identité par code à chaque connexion depuis celui-ci.",
+        "empty": "Aucun autre appareil de confiance",
+        "error": "Impossible de charger vos appareils de confiance. Réessayez.",
+        "retry": "Réessayer",
+        "column_device": "Appareil",
+        "column_ip": "Adresse IP",
+        "column_trusted_since": "Approuvé le",
+        "column_last_seen": "Dernière activité",
+        "column_actions": "Actions",
+        "unknown_device": "Appareil inconnu",
+        "current_device": "Appareil actuel",
+        "not_revocable": "Non révocable",
+        "revoke": "Révoquer",
+        "revoke_aria": "Révoquer la confiance accordée à {{ device }} depuis le {{ date }}"
+      },
+      "confirm": {
+        "title": "Révoquer cet appareil de confiance ?",
+        "message": "Cet appareil ne sera plus reconnu comme approuvé : une prochaine connexion depuis celui-ci demandera à nouveau un code de vérification. Continuer ?",
+        "confirm": "Révoquer",
+        "cancel": "Annuler"
+      },
+      "toast": {
+        "revoked": "Appareil de confiance révoqué",
+        "revoke_error": "Impossible de révoquer cet appareil. Réessayez."
+      }
+    },
     "rgpd": {
       "export": {
         "main_aria": "Export de mes données personnelles",
