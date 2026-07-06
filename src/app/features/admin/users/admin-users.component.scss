@@ -119,7 +119,9 @@
 
   &--role-admin { background: var(--color-info-light); color: var(--color-navy-800); }
   &--role-user, &--status-inactive { background: var(--color-gray-100); color: var(--color-gray-600); }
-  &--role-other { background: var(--color-warning-light); color: var(--color-warning); }
+  // --color-warning (2.86:1 on --color-warning-light) fails WCAG AA for normal text —
+  // --color-warning-dark mirrors the --color-success-dark/--color-error-dark pattern above.
+  &--role-other { background: var(--color-warning-light); color: var(--color-warning-dark); }
   &--status-active { background: var(--color-success-light); color: var(--color-success-dark); }
   &--status-blocked { background: var(--color-error-light); color: var(--color-error-dark); }
 }
