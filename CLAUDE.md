@@ -207,9 +207,10 @@ Travail organisé par sprint. Référence : **`pivot-docs/docs/backlog/sprints/`
 - **Agents en parallèle** — un agent par item du sprint, branches séparées
 - **Backlog pivot-docs** — mises a jour `Stage` dans le frontmatter US + `sprints/sprint-{N}.md`, committés sur la branche de l'US
 
-## Workflow — Autoloop PR par US
+## Workflow — Autoloop PR
 
-Après implémentation sur `feat/{us-id}-{slug}` :
+Après toute modification sur une branche de travail — US/Enabler (`feat/{us-id}-{slug}`) ou
+hors sprint (`fix/`, `refactor/`, `chore/`, `docs/`) — **sans exception** :
 
 1. Ouvrir une PR (draft) vers `main`
 2. **Autoloop** (20 itérations max) :
@@ -495,7 +496,7 @@ Le compteur se remet à zéro dès qu'une commande réussit.
 
 ### Limite 20 push — autoloop PR Review
 
-Voir section **Workflow — Autoloop PR par US** — au-delà de 20 push correctifs → Breaking Point 2 automatique.
+Voir section **Workflow — Autoloop PR** — au-delà de 20 push correctifs → Breaking Point 2 automatique.
 
 ### Règle 2 tentatives (stratégie identique)
 
