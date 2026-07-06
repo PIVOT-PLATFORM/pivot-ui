@@ -9,8 +9,10 @@
  * - Focus moves to the cancel button on open, is trapped within the dialog
  *   via Tab/Shift+Tab, and returns to the element that triggered the dialog
  *   on close
- * - `role="alertdialog"` (destructive confirmation) with `aria-modal="true"`,
- *   labelled/described via the title and message
+ * - `role` defaults to `"alertdialog"` (destructive confirmation, e.g. the
+ *   admin module deactivate flow) but is overridable via the `role` input —
+ *   US02.2.3 (sessions revoke confirmation) requires `role="dialog"` per its
+ *   AC — with `aria-modal="true"`, labelled/described via the title and message
  *
  * Kept in `shared/` since confirmation-before-destructive-action is a pattern
  * other features will likely need (not specific to module administration).
@@ -37,7 +39,7 @@ import {
         <div
           #dialogEl
           class="confirm-dialog"
-          role="alertdialog"
+          [attr.role]="role"
           aria-modal="true"
           [attr.aria-labelledby]="titleId"
           [attr.aria-describedby]="messageId"
@@ -76,6 +78,8 @@ export class ConfirmDialogComponent implements OnChanges {
   private static idCounter = 0;
 
   @Input() open = false;
+  /** ARIA role of the dialog element. `alertdialog` (default) for destructive confirmations, `dialog` where the AC mandates it explicitly (e.g. US02.2.3). */
+  @Input() role: 'dialog' | 'alertdialog' = 'alertdialog';
   @Input() title = '';
   @Input() message = '';
   @Input() confirmLabel = '';

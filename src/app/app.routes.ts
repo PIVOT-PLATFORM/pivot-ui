@@ -119,6 +119,16 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/superadmin/tenants/tenants-list.component').then(m => m.TenantsListComponent),
       },
+      {
+        // US02.2.3 — no extra guard beyond authMatchGuard on the parent shell route:
+        // every authenticated user manages only their own sessions, resolved
+        // server-side from the bearer token (never a client-supplied id).
+        path: 'account/security/sessions',
+        loadComponent: () =>
+          import('./features/account/security/sessions/sessions-list.component').then(
+            m => m.SessionsListComponent
+          ),
+      },
       ...MODULE_CHILDREN,
       { path: 'legal', children: LEGAL_CHILDREN },
       {

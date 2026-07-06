@@ -260,6 +260,65 @@
           "back_home": "Back to home"
         }
       }
+    },
+    "profile": {
+      "title": "My profile",
+      "subtitle": "View and edit your personal information.",
+      "main_aria": "Account profile",
+      "loading": "Loading profile…",
+      "error_load": "Unable to load your profile. Please try again.",
+      "retry": "Retry",
+      "avatar_section_title": "Profile picture",
+      "avatar_change": "Change picture",
+      "avatar_hint": "JPEG, PNG or WEBP, 2 MB maximum.",
+      "avatar_error_invalid_format": "Unsupported format. Use a JPEG, PNG or WEBP image.",
+      "avatar_error_too_large": "Image too large. Maximum size: 2 MB.",
+      "avatar_error_generic": "Could not upload the image. Please try again.",
+      "form_title": "Personal information",
+      "form_aria": "Profile edit form",
+      "first_name": "First name",
+      "last_name": "Last name",
+      "email": "Email",
+      "email_hint": "The email address cannot be changed here.",
+      "error_max_length": "100 characters maximum.",
+      "error_invalid_name": "Invalid first or last name.",
+      "error_save_generic": "An error occurred while saving. Please try again.",
+      "submit": "Save",
+      "success": "Profile updated successfully."
+    },
+    "sessions": {
+      "list": {
+        "title": "Active sessions",
+        "subtitle": "Review the devices signed in to your account and revoke any you don't recognize.",
+        "empty": "No other active sessions",
+        "error": "Couldn't load your sessions. Please try again.",
+        "retry": "Retry",
+        "column_device": "Device",
+        "column_ip": "IP address",
+        "column_created": "Created",
+        "column_expires": "Expires",
+        "column_actions": "Actions",
+        "unknown_device": "Unknown device",
+        "current_session": "Current session",
+        "not_revocable": "Not revocable",
+        "revoke": "Revoke",
+        "revoke_aria": "Revoke the session from {{ device }} on {{ date }}",
+        "revoke_all": "Revoke all other sessions"
+      },
+      "confirm": {
+        "title_one": "Revoke this session?",
+        "message_one": "This session will be signed out immediately. Continue?",
+        "title_all": "Revoke all other sessions?",
+        "message_all": "All your other active sessions will be signed out. This action cannot be undone. Continue?",
+        "confirm": "Revoke",
+        "cancel": "Cancel"
+      },
+      "toast": {
+        "revoked": "Session revoked",
+        "revoke_error": "Couldn't revoke this session. Please try again.",
+        "revoked_all": "All other sessions have been revoked",
+        "revoke_all_error": "Couldn't revoke the other sessions. Please try again."
+      }
     }
   },
   "contact": {
@@ -291,33 +350,6 @@
     "mentions_title": "Legal Notice",
     "privacy_title": "Privacy Policy",
     "terms_title": "Terms of Service"
-  },
-  "account": {
-    "profile": {
-      "title": "My profile",
-      "subtitle": "View and edit your personal information.",
-      "main_aria": "Account profile",
-      "loading": "Loading profile…",
-      "error_load": "Unable to load your profile. Please try again.",
-      "retry": "Retry",
-      "avatar_section_title": "Profile picture",
-      "avatar_change": "Change picture",
-      "avatar_hint": "JPEG, PNG or WEBP, 2 MB maximum.",
-      "avatar_error_invalid_format": "Unsupported format. Use a JPEG, PNG or WEBP image.",
-      "avatar_error_too_large": "Image too large. Maximum size: 2 MB.",
-      "avatar_error_generic": "Could not upload the image. Please try again.",
-      "form_title": "Personal information",
-      "form_aria": "Profile edit form",
-      "first_name": "First name",
-      "last_name": "Last name",
-      "email": "Email",
-      "email_hint": "The email address cannot be changed here.",
-      "error_max_length": "100 characters maximum.",
-      "error_invalid_name": "Invalid first or last name.",
-      "error_save_generic": "An error occurred while saving. Please try again.",
-      "submit": "Save",
-      "success": "Profile updated successfully."
-    }
   },
   "admin": {
     "modules": {
