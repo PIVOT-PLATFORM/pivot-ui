@@ -1,3 +1,10 @@
+# [0.17.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.16.0...v0.17.0) (2026-07-06)
+
+
+### Features
+
+* **ui:** US02.1.2 — Préférence de langue ([#72](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/72)) ([c307b2b](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/c307b2b16c3b0fb9db180c0568c67a6d759e1aca)), closes [#130](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/130)
+
 # [0.16.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.15.0...v0.16.0) (2026-07-06)
 
 
