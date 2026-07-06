@@ -1,3 +1,10 @@
+# [0.13.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.12.0...v0.13.0) (2026-07-06)
+
+
+### Features
+
+* **ui:** US02.1.1 — Voir et éditer son profil ([#71](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/71)) ([1605d1d](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/1605d1ddb9bbdc1937a06e57de3e2df11a9ac697)), closes [#129](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/129) [pivot-core#129](https://github.com/pivot-core/issues/129)
+
 # [0.12.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.11.0...v0.12.0) (2026-07-06)
 
 
