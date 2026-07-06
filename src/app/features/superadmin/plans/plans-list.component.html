@@ -1,0 +1,109 @@
+<main class="plans-list" [attr.aria-label]="'superadmin.plans.list.title' | transloco">
+  <header class="plans-list__header">
+    <h1 class="plans-list__title">{{ 'superadmin.plans.list.title' | transloco }}</h1>
+    <p class="plans-list__subtitle">{{ 'superadmin.plans.list.subtitle' | transloco }}</p>
+  </header>
+
+  <section class="plans-list__create" [attr.aria-labelledby]="'plans-create-heading'">
+    <h2 id="plans-create-heading" class="plans-list__create-title">
+      {{ 'superadmin.plans.create.title' | transloco }}
+    </h2>
+
+    @if (createError(); as key) {
+      <div class="alert alert-error plans-list__create-error" role="alert" data-testid="plans-create-error">
+        {{ key | transloco }}
+      </div>
+    }
+
+    <form
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      novalidate
+      class="plans-list__create-form"
+      data-testid="plans-create-form"
+    >
+      <div class="form-group">
+        <label class="form-label" for="plan-name">{{ 'superadmin.plans.create.name_label' | transloco }}</label>
+        <input
+          id="plan-name"
+          type="text"
+          formControlName="name"
+          class="form-control"
+          aria-required="true"
+          [attr.aria-invalid]="nameErrorKey() !== null"
+          [attr.aria-describedby]="nameErrorKey() ? 'plan-name-error' : null"
+          [class.is-invalid]="nameErrorKey() !== null"
+          [placeholder]="'superadmin.plans.create.name_placeholder' | transloco"
+          data-testid="plan-name-input"
+        />
+        @if (nameErrorKey(); as key) {
+          <span id="plan-name-error" class="form-error" role="alert" data-testid="plan-name-error">
+            {{ key | transloco }}
+          </span>
+        }
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary plans-list__create-submit"
+        [disabled]="creating()"
+        data-testid="plans-create-submit"
+      >
+        @if (creating()) {
+          <span class="spinner" aria-hidden="true"></span>
+        }
+        {{ 'superadmin.plans.create.submit' | transloco }}
+      </button>
+    </form>
+  </section>
+
+  @if (loading()) {
+    <output class="sr-only">{{ 'common.loading' | transloco }}</output>
+    <ul class="plans-list__skeleton" aria-hidden="true" data-testid="plans-skeleton">
+      @for (i of skeletonPlaceholders; track i) {
+        <li class="plans-list__skeleton-row"></li>
+      }
+    </ul>
+  } @else if (loadError()) {
+    <div class="plans-list__error-state" role="alert" data-testid="plans-error">
+      <p>{{ 'superadmin.plans.list.error' | transloco }}</p>
+      <button type="button" class="btn btn-secondary" (click)="load()" data-testid="plans-retry">
+        {{ 'superadmin.plans.list.retry' | transloco }}
+      </button>
+    </div>
+  } @else if (isEmpty()) {
+    <div class="plans-list__empty-state" data-testid="plans-empty">
+      <p>{{ 'superadmin.plans.list.empty' | transloco }}</p>
+    </div>
+  } @else {
+    <div class="plans-list__table-wrapper">
+      <table class="plans-list__table" data-testid="plans-table">
+        <caption class="sr-only">{{ 'superadmin.plans.list.title' | transloco }}</caption>
+        <thead>
+          <tr>
+            <th scope="col">{{ 'superadmin.plans.columns.name' | transloco }}</th>
+            <th scope="col">{{ 'superadmin.plans.columns.module_count' | transloco }}</th>
+            <th scope="col">{{ 'superadmin.plans.columns.created_at' | transloco }}</th>
+            <th scope="col">
+              <span class="sr-only">{{ 'superadmin.plans.columns.actions' | transloco }}</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (plan of plans(); track plan.id) {
+            <tr [attr.data-testid]="'plan-row-' + plan.id">
+              <td>{{ plan.name }}</td>
+              <td [attr.data-testid]="'plan-module-count-' + plan.id">{{ plan.moduleIds.length }}</td>
+              <td>{{ plan.createdAt | date: 'short' }}</td>
+              <td>
+                <a [routerLink]="['/superadmin/plans', plan.id]" [attr.data-testid]="'plan-detail-link-' + plan.id">
+                  {{ 'superadmin.plans.list.detail_link' | transloco }}
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</main>
