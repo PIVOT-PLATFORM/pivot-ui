@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ToastComponent } from './shared/toast/toast.component';
 import { RouteLoadingComponent } from './core/layout/route-loading/route-loading.component';
@@ -16,6 +16,7 @@ import { AccountDeletionBannerComponent } from './features/account/deletion/acco
 @Component({
   selector: 'app-root',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterOutlet, RouteLoadingComponent, ToastComponent, AccountDeletionBannerComponent],
   template: '<piv-account-deletion-banner/><piv-route-loading/><router-outlet/><piv-toast-container/>',
   styles: [`:host { display: contents; }`],
