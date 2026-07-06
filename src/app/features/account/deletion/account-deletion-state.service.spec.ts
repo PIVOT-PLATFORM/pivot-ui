@@ -72,10 +72,17 @@ describe('AccountDeletionStateService', () => {
     expect(service.pending()).toBeNull();
   });
 
-  describe('live auto-expiry (no record()/clear() call in between)', () => {
+  // AC-id convention: AC-NN = row N (1-based) of the AC table in
+  // pivot-docs/docs/backlog/EPIC-espace-compte/FEATURES/securite-compte/us-suppression-compte.md
+  // — AC-13 "Bannière persistante pendant le délai de grâce ... auto-expirante"
+  // (row 13, table line 23), AC-05 "Délai de grâce configurable (ex: 30 jours
+  // avant purge effective)" (row 5, table line 15). Same convention as
+  // export.service.spec.ts / export.component.spec.ts (AC-06, AC-09, AC-13...)
+  // and session-expiry.service.spec.ts (AC-01, AC-02...).
+  describe('AC-13 — live auto-expiry (no record()/clear() call in between)', () => {
     afterEach(() => vi.useRealTimers());
 
-    it('flips pending() to null on its own once the grace period elapses in a long-lived tab', () => {
+    it('AC-13 — flips pending() to null on its own once the grace period elapses in a long-lived tab', () => {
       vi.useFakeTimers();
       const service = TestBed.inject(AccountDeletionStateService);
       service.record(new Date(Date.now() + 5000).toISOString());
@@ -92,7 +99,7 @@ describe('AccountDeletionStateService', () => {
       expect(service.pending()).toBeNull();
     });
 
-    it('correctly schedules across a grace period longer than the ~24.8-day max JS timer delay', () => {
+    it('AC-05 — correctly schedules across a grace period longer than the ~24.8-day max JS timer delay', () => {
       vi.useFakeTimers();
       const service = TestBed.inject(AccountDeletionStateService);
       const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
@@ -110,7 +117,7 @@ describe('AccountDeletionStateService', () => {
       expect(service.pending()).toBeNull();
     });
 
-    it('cancels the previous wake-up timer when a new deletion is recorded before the first elapses', () => {
+    it('AC-13 — cancels the previous wake-up timer when a new deletion is recorded before the first elapses', () => {
       vi.useFakeTimers();
       const service = TestBed.inject(AccountDeletionStateService);
       service.record(new Date(Date.now() + 5000).toISOString());
