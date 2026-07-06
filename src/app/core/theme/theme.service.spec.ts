@@ -33,6 +33,13 @@ describe('ThemeService', () => {
     // green locally, red in CI depending on worker/file scheduling) without ever touching this
     // file's own assertions.
     vi.restoreAllMocks();
+    // Still observed failing within THIS file alone ("persists the theme to localStorage",
+    // 0 calls recorded) even with the line above: some tests call
+    // TestBed.resetTestingModule() mid-test to inject a second ThemeService instance
+    // (initial-resolution / effect-side-effects scenarios) — without resetting here too, the
+    // next test's beforeEach can reuse that already-reset (or not-yet-reset) TestBed/injector
+    // state instead of a guaranteed-fresh one, making the outcome depend on execution order.
+    TestBed.resetTestingModule();
   });
 
   it('creates the service', () => {
