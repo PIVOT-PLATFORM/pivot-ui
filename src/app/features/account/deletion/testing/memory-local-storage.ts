@@ -15,13 +15,32 @@ import { afterEach } from 'vitest';
  * Call {@link installMemoryLocalStorage} as the very first line of a spec's
  * `beforeEach` — before any code (including the component/service under test)
  * touches `localStorage` — to install a fresh, real, working `Storage` for
- * that test. The original `window.localStorage` descriptor is captured and
- * restored automatically via a self-registered `afterEach` — without this,
- * the replacement leaks into every spec file that runs afterward in the same
- * Vitest worker (it broke `theme.service.spec.ts` in CI before this fix).
+ * that test. The original `window.localStorage` descriptor is captured on
+ * first use and restored automatically after every test via a module-level
+ * `afterEach` — without this, the replacement leaks into every spec file that
+ * runs afterward in the same Vitest worker (it broke `theme.service.spec.ts`
+ * in CI).
+ *
+ * IMPORTANT: the restore hook is registered here, at module top level
+ * (collection phase), not inside `installMemoryLocalStorage()` itself. Vitest
+ * only honours hooks added during collection — an `afterEach()` call made
+ * from *inside* a running `beforeEach`/`it` (i.e. at runtime) is silently
+ * dropped and never executes. An earlier version of this helper called
+ * `afterEach()` from inside `installMemoryLocalStorage()`, which is invoked
+ * from each spec's own `beforeEach` — that registration never fired, so the
+ * polyfill was never actually restored and kept leaking into subsequent spec
+ * files, surfacing as an intermittent `theme.service.spec.ts` failure
+ * depending on file/worker scheduling. Do not move this back into the
+ * function.
  */
+let originalDescriptor: PropertyDescriptor | undefined;
+let installedInCurrentFile = false;
+
 export function installMemoryLocalStorage(): void {
-  const originalDescriptor = Object.getOwnPropertyDescriptor(window, 'localStorage');
+  if (!installedInCurrentFile) {
+    originalDescriptor = Object.getOwnPropertyDescriptor(window, 'localStorage');
+    installedInCurrentFile = true;
+  }
 
   const backing = new Map<string, string>();
   const storage: Storage = {
@@ -45,12 +64,15 @@ export function installMemoryLocalStorage(): void {
     writable: true,
     value: storage,
   });
-
-  afterEach(() => {
-    if (originalDescriptor) {
-      Object.defineProperty(window, 'localStorage', originalDescriptor);
-    } else {
-      delete (window as { localStorage?: Storage }).localStorage;
-    }
-  });
 }
+
+afterEach(() => {
+  if (!installedInCurrentFile) {
+    return;
+  }
+  if (originalDescriptor) {
+    Object.defineProperty(window, 'localStorage', originalDescriptor);
+  } else {
+    delete (window as { localStorage?: Storage }).localStorage;
+  }
+});
