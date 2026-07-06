@@ -80,6 +80,7 @@ jobs:
           docker run -d --name pivot-core \
             --network ${{ job.services.postgres.network }} \
             -p 8080:8080 \
+            -p 8081:8081 \
             -e SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/pivot_e2e \
             -e SPRING_DATASOURCE_USERNAME=pivot \
             -e SPRING_DATASOURCE_PASSWORD=pivot_e2e \
@@ -89,11 +90,14 @@ jobs:
             -e MANAGEMENT_HEALTH_MAIL_ENABLED=false \
             ${{ env.CORE_IMAGE }}
 
+      # EN04.2 (pivot-core) moved Actuator to its own management port (:8081), never routed
+      # through /api — the runner reaches it directly here (published port, not the isolated
+      # Docker network used in production).
       - name: Wait for pivot-core
         run: |
           curl --retry 40 --retry-delay 3 --retry-connrefused --retry-all-errors \
             --fail --silent --show-error --output /dev/null \
-            http://localhost:8080/api/actuator/health
+            http://localhost:8081/actuator/health
 
       - name: Setup Node.js 24
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
