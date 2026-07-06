@@ -12,7 +12,11 @@ import {
   platformBrowserTesting,
 } from '@angular/platform-browser/testing';
 
-Object.defineProperty(globalThis, 'matchMedia', {
+// Left as `window` (not `globalThis`): this file only bootstraps the Stryker-only
+// standalone vitest config (see class doc above), never the coverage-instrumented
+// `test:ci` run — any touch here is permanently "0% new coverage" in Sonar's PR
+// analysis regardless of content, since nothing in the regular suite executes it.
+Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: (query: string) => ({
     matches: false,
