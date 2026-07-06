@@ -1,0 +1,221 @@
+<main class="admin-users" [attr.aria-label]="'admin.users.list.title' | transloco">
+  <header class="admin-users__header">
+    <h1 class="admin-users__title">{{ 'admin.users.list.title' | transloco }}</h1>
+    <p class="admin-users__subtitle">{{ 'admin.users.list.subtitle' | transloco }}</p>
+  </header>
+
+  <!--
+    Persistent aria-live region (never removed from the DOM, only its text
+    content changes) so screen readers reliably announce filter/page changes
+    that update the table below — a region that gets added/removed on every
+    state switch is not dependably announced by all screen readers.
+  -->
+  <div class="sr-only" role="status" aria-live="polite" data-testid="admin-users-live-region">
+    @if (!loading() && !loadError()) {
+      {{ 'admin.users.list.live_count' | transloco: { count: totalElements() } }}
+    }
+  </div>
+
+  <div
+    class="admin-users__filters"
+    role="search"
+    [attr.aria-label]="'admin.users.list.filters.aria' | transloco"
+  >
+    <!--
+      Native <fieldset [disabled]> — not per-control [disabled] bindings — because
+      Angular's NgModel/ControlValueAccessor machinery owns the disabled state of any
+      element it's attached to and silently overrides a co-located [disabled] binding
+      on the same element (see TenantsListComponent, US06.2.3, same pattern).
+    -->
+    <fieldset class="admin-users__filter-fieldset" [disabled]="loading()" data-testid="admin-users-filter-fieldset">
+      <legend class="sr-only">{{ 'admin.users.list.filters.aria' | transloco }}</legend>
+
+      <div class="admin-users__filter-field">
+        <label for="admin-users-search">{{ 'admin.users.list.filters.search' | transloco }}</label>
+        <input
+          id="admin-users-search"
+          name="search"
+          type="search"
+          class="form-control"
+          [attr.placeholder]="'admin.users.list.filters.search_placeholder' | transloco"
+          [ngModel]="filters().search"
+          (ngModelChange)="onSearchInput($event)"
+          data-testid="admin-users-filter-search"
+        />
+      </div>
+
+      <div class="admin-users__filter-field">
+        <label for="admin-users-role">{{ 'admin.users.list.filters.role' | transloco }}</label>
+        <select
+          id="admin-users-role"
+          name="role"
+          class="form-control"
+          [ngModel]="filters().role"
+          (ngModelChange)="onRoleChange($event)"
+          data-testid="admin-users-filter-role"
+        >
+          <option value="">{{ 'admin.users.list.role.all' | transloco }}</option>
+          <option value="ROLE_ADMIN">{{ 'admin.users.list.role.admin' | transloco }}</option>
+          <option value="ROLE_USER">{{ 'admin.users.list.role.user' | transloco }}</option>
+        </select>
+      </div>
+
+      <div class="admin-users__filter-field">
+        <label for="admin-users-status">{{ 'admin.users.list.filters.status' | transloco }}</label>
+        <select
+          id="admin-users-status"
+          name="status"
+          class="form-control"
+          [ngModel]="filters().status"
+          (ngModelChange)="onStatusChange($event)"
+          data-testid="admin-users-filter-status"
+        >
+          <option value="">{{ 'admin.users.list.status.all' | transloco }}</option>
+          <option value="ACTIVE">{{ 'admin.users.list.status.active' | transloco }}</option>
+          <option value="INACTIVE">{{ 'admin.users.list.status.inactive' | transloco }}</option>
+          <option value="BLOCKED">{{ 'admin.users.list.status.blocked' | transloco }}</option>
+        </select>
+      </div>
+    </fieldset>
+  </div>
+
+  @if (loading()) {
+    <div class="sr-only" role="status">{{ 'common.loading' | transloco }}</div>
+    <ul class="admin-users__skeleton" aria-hidden="true" data-testid="admin-users-skeleton">
+      @for (i of skeletonPlaceholders; track i) {
+        <li class="admin-users__skeleton-row"></li>
+      }
+    </ul>
+  } @else if (loadError()) {
+    <div class="admin-users__error-state" role="alert" data-testid="admin-users-error">
+      <p>{{ 'admin.users.list.error' | transloco }}</p>
+      <button type="button" class="btn btn-secondary" (click)="load(page())" data-testid="admin-users-retry">
+        {{ 'admin.users.list.retry' | transloco }}
+      </button>
+    </div>
+  } @else if (isEmpty()) {
+    <div class="admin-users__empty-state" data-testid="admin-users-empty">
+      <p>{{ 'admin.users.list.empty' | transloco }}</p>
+      <button type="button" class="btn btn-secondary" (click)="resetFilters()" data-testid="admin-users-reset-filters">
+        {{ 'admin.users.list.empty_reset' | transloco }}
+      </button>
+    </div>
+  } @else {
+    <div class="admin-users__table-wrapper">
+      <table class="admin-users__table" [attr.aria-label]="'admin.users.list.table_aria' | transloco" data-testid="admin-users-table">
+        <caption class="sr-only">{{ 'admin.users.list.table_aria' | transloco }}</caption>
+        <thead>
+          <tr>
+            <th scope="col" class="admin-users__col--name">{{ 'admin.users.list.columns.name' | transloco }}</th>
+            <th scope="col" class="admin-users__col--secondary">{{ 'admin.users.list.columns.email' | transloco }}</th>
+            <th scope="col" class="admin-users__col--secondary">{{ 'admin.users.list.columns.role' | transloco }}</th>
+            <th scope="col" class="admin-users__col--status">{{ 'admin.users.list.columns.status' | transloco }}</th>
+            <th scope="col" class="admin-users__col--secondary">{{ 'admin.users.list.columns.created_at' | transloco }}</th>
+            <th scope="col" class="admin-users__col--actions">{{ 'admin.users.list.columns.actions' | transloco }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.id) {
+            <tr [attr.data-testid]="'user-row-' + user.id">
+              <td class="admin-users__col--name">{{ displayName(user) }}</td>
+              <td class="admin-users__col--secondary">{{ user.email }}</td>
+              <td class="admin-users__col--secondary">
+                <span
+                  class="admin-users__badge"
+                  [class.admin-users__badge--role-admin]="roleModifier(user.role) === 'admin'"
+                  [class.admin-users__badge--role-user]="roleModifier(user.role) === 'user'"
+                  [class.admin-users__badge--role-other]="roleModifier(user.role) === 'other'"
+                  [attr.data-testid]="'user-role-' + user.id"
+                >
+                  {{ roleLabelKey(user.role) | transloco }}
+                </span>
+              </td>
+              <td class="admin-users__col--status">
+                <span
+                  class="admin-users__badge"
+                  [class.admin-users__badge--status-active]="user.status === 'ACTIVE'"
+                  [class.admin-users__badge--status-inactive]="user.status === 'INACTIVE'"
+                  [class.admin-users__badge--status-blocked]="user.status === 'BLOCKED'"
+                  [attr.data-testid]="'user-status-' + user.id"
+                >
+                  {{ statusLabelKey(user.status) | transloco }}
+                </span>
+              </td>
+              <td class="admin-users__col--secondary">{{ user.createdAt | date: 'short' }}</td>
+              <td class="admin-users__col--actions" [attr.data-testid]="'user-actions-' + user.id">
+                <!--
+                  Mobile-only expand toggle (hidden ≥768px via SCSS) revealing the
+                  secondary columns below. Future sibling US (US06.1.3 role select,
+                  US06.1.4/US06.1.5 activate/deactivate buttons) slot their controls
+                  into this same cell, next to this toggle.
+                -->
+                <button
+                  type="button"
+                  class="btn btn-secondary admin-users__expand-toggle"
+                  [attr.aria-expanded]="isExpanded(user.id)"
+                  [attr.aria-label]="
+                    (isExpanded(user.id) ? 'admin.users.list.row.collapse' : 'admin.users.list.row.expand')
+                      | transloco: { name: displayName(user) }
+                  "
+                  (click)="toggleExpand(user.id)"
+                  [attr.data-testid]="'user-expand-toggle-' + user.id"
+                >
+                  <span aria-hidden="true">{{ isExpanded(user.id) ? '−' : '+' }}</span>
+                </button>
+              </td>
+            </tr>
+            @if (isExpanded(user.id)) {
+              <tr class="admin-users__expanded-row" [attr.data-testid]="'user-expanded-' + user.id">
+                <td colspan="6">
+                  <dl class="admin-users__expanded-details">
+                    <div>
+                      <dt>{{ 'admin.users.list.columns.email' | transloco }}</dt>
+                      <dd>{{ user.email }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'admin.users.list.columns.role' | transloco }}</dt>
+                      <dd>{{ roleLabelKey(user.role) | transloco }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'admin.users.list.columns.created_at' | transloco }}</dt>
+                      <dd>{{ user.createdAt | date: 'short' }}</dd>
+                    </div>
+                  </dl>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <nav class="admin-users__pagination" [attr.aria-label]="'admin.users.list.pagination.nav_aria' | transloco">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        [disabled]="!hasPrevious()"
+        [attr.aria-label]="'admin.users.list.pagination.previous_aria' | transloco"
+        (click)="previousPage()"
+        data-testid="admin-users-page-previous"
+      >
+        {{ 'admin.users.list.pagination.previous' | transloco }}
+      </button>
+      <span class="admin-users__pagination-status" data-testid="admin-users-page-status">
+        {{
+          'admin.users.list.pagination.status'
+            | transloco: { start: rangeStart(), end: rangeEnd(), total: totalElements() }
+        }}
+      </span>
+      <button
+        type="button"
+        class="btn btn-secondary"
+        [disabled]="!hasNext()"
+        [attr.aria-label]="'admin.users.list.pagination.next_aria' | transloco"
+        (click)="nextPage()"
+        data-testid="admin-users-page-next"
+      >
+        {{ 'admin.users.list.pagination.next' | transloco }}
+      </button>
+    </nav>
+  }
+</main>

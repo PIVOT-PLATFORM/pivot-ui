@@ -150,6 +150,12 @@ export const routes: Routes = [
             m => m.ExportDownloadComponent,
           ),
       },
+      {
+        path: 'admin/users',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/admin/users/admin-users.component').then(m => m.AdminUsersComponent),
+      },
       ...MODULE_CHILDREN,
       { path: 'legal', children: LEGAL_CHILDREN },
       {

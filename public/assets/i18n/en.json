@@ -462,6 +462,57 @@
         "error_forbidden": "You do not have the required rights to create a tenant.",
         "error_validation": "Some fields are invalid. Check the form and try again."
       }
+    },
+    "users": {
+      "list": {
+        "title": "Users",
+        "subtitle": "View the users of your organisation.",
+        "empty": "No user matches your filters",
+        "empty_reset": "Reset filters",
+        "error": "Unable to load users. Please try again.",
+        "retry": "Retry",
+        "table_aria": "List of tenant users",
+        "live_count": "{{ count }} user(s) displayed",
+        "filters": {
+          "aria": "User search filters",
+          "search": "Search",
+          "search_placeholder": "Name or email",
+          "role": "Role",
+          "status": "Status"
+        },
+        "role": {
+          "all": "All",
+          "admin": "Admin",
+          "user": "User",
+          "other": "Other"
+        },
+        "status": {
+          "all": "All",
+          "active": "Active",
+          "inactive": "Inactive",
+          "blocked": "Blocked"
+        },
+        "columns": {
+          "name": "Name",
+          "email": "Email",
+          "role": "Role",
+          "status": "Status",
+          "created_at": "Created on",
+          "actions": "Actions"
+        },
+        "row": {
+          "expand": "Show details for {{ name }}",
+          "collapse": "Hide details for {{ name }}"
+        },
+        "pagination": {
+          "nav_aria": "Pagination",
+          "previous": "Previous",
+          "previous_aria": "Previous page",
+          "next": "Next",
+          "next_aria": "Next page",
+          "status": "Users {{ start }}-{{ end }} of {{ total }}"
+        }
+      }
     }
   },
   "modules": {

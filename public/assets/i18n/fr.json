@@ -462,6 +462,57 @@
         "error_forbidden": "Vous n'avez pas les droits nécessaires pour créer un tenant.",
         "error_validation": "Certains champs sont invalides. Vérifiez le formulaire et réessayez."
       }
+    },
+    "users": {
+      "list": {
+        "title": "Utilisateurs",
+        "subtitle": "Consultez les utilisateurs de votre organisation.",
+        "empty": "Aucun utilisateur correspondant à vos filtres",
+        "empty_reset": "Réinitialiser les filtres",
+        "error": "Impossible de charger les utilisateurs. Réessayez.",
+        "retry": "Réessayer",
+        "table_aria": "Liste des utilisateurs du tenant",
+        "live_count": "{{ count }} utilisateur(s) affiché(s)",
+        "filters": {
+          "aria": "Filtres de recherche des utilisateurs",
+          "search": "Recherche",
+          "search_placeholder": "Nom ou email",
+          "role": "Rôle",
+          "status": "Statut"
+        },
+        "role": {
+          "all": "Tous",
+          "admin": "Administrateur",
+          "user": "Utilisateur",
+          "other": "Autre"
+        },
+        "status": {
+          "all": "Tous",
+          "active": "Actif",
+          "inactive": "Inactif",
+          "blocked": "Bloqué"
+        },
+        "columns": {
+          "name": "Nom",
+          "email": "Email",
+          "role": "Rôle",
+          "status": "Statut",
+          "created_at": "Date de création",
+          "actions": "Actions"
+        },
+        "row": {
+          "expand": "Afficher les détails de {{ name }}",
+          "collapse": "Masquer les détails de {{ name }}"
+        },
+        "pagination": {
+          "nav_aria": "Pagination",
+          "previous": "Précédent",
+          "previous_aria": "Page précédente",
+          "next": "Suivant",
+          "next_aria": "Page suivante",
+          "status": "Utilisateurs {{ start }}-{{ end }} sur {{ total }}"
+        }
+      }
     }
   },
   "modules": {
