@@ -1,4 +1,5 @@
-@use '../../../../../styles/tokens';
+// EN17.8 — import depuis la lib design-system
+@use '../../../../../../projects/design-system/src/scss/tokens';
 
 :host { display: contents; }
 
@@ -16,7 +17,7 @@
   width: 100%;
   max-width: 480px;
   padding: 20px 36px 28px;
-  box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  box-shadow: var(--glass-shadow-strong);
   border-radius: 20px;
   @media (max-width: 480px) { padding: 16px 20px 24px; }
 }
