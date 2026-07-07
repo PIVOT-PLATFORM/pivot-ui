@@ -9,9 +9,7 @@
     "test": "ng test",
     "test:ci": "ng test --watch=false --coverage",
     "test:mutation": "stryker run",
-    "lint": "eslint src/ projects/design-system/src/",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "lint": "eslint src/ projects/design-system/src/"
   },
   "private": true,
   "packageManager": "npm@11.13.0",
@@ -38,8 +36,6 @@
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^7.1.0",
     "@semantic-release/git": "^10.0.1",
-    "@storybook/addon-essentials": "^8.6.14",
-    "@storybook/angular": "^10.4.6",
     "@stryker-mutator/core": "^9.0.0",
     "@stryker-mutator/vitest-runner": "^9.0.0",
     "@vitest/coverage-v8": "^4.0.8",
@@ -48,7 +44,6 @@
     "ng-packagr": "^22.0.0",
     "prettier": "^3.8.1",
     "semantic-release": "^25.0.5",
-    "storybook": "^10.4.6",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.32.0",
     "vitest": "^4.0.8"
