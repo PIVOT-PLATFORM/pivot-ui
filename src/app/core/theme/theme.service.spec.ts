@@ -26,19 +26,12 @@ describe('ThemeService', () => {
   });
 
   afterEach(() => {
-    // 'persists the theme to localStorage' spies on Storage.prototype.setItem — a truly
-    // global, shared-across-files prototype (unlike DI-scoped spies elsewhere in this repo,
-    // discarded when TestBed resets). Left un-restored, it can leak into whichever spec file
-    // Vitest schedules next in the same worker, causing order-dependent CI flakiness (observed:
-    // green locally, red in CI depending on worker/file scheduling) without ever touching this
-    // file's own assertions.
     vi.restoreAllMocks();
-    // Still observed failing within THIS file alone ("persists the theme to localStorage",
-    // 0 calls recorded) even with the line above: some tests call
-    // TestBed.resetTestingModule() mid-test to inject a second ThemeService instance
-    // (initial-resolution / effect-side-effects scenarios) — without resetting here too, the
-    // next test's beforeEach can reuse that already-reset (or not-yet-reset) TestBed/injector
-    // state instead of a guaranteed-fresh one, making the outcome depend on execution order.
+    // Some tests call TestBed.resetTestingModule() mid-test to inject a second ThemeService
+    // instance (initial-resolution / effect-side-effects scenarios) — without resetting here
+    // too, the next test's beforeEach can reuse that already-reset (or not-yet-reset)
+    // TestBed/injector state instead of a guaranteed-fresh one, making the outcome depend on
+    // execution order.
     TestBed.resetTestingModule();
   });
 
@@ -88,10 +81,14 @@ describe('ThemeService', () => {
     });
 
     it('persists the theme to localStorage', () => {
-      const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
+      // Asserts against the actual persisted value rather than spying on
+      // Storage.prototype.setItem: that prototype is shared across spec files within a Vitest
+      // worker, and a spy's call-tracking there proved order-dependent in CI (observed 0 calls
+      // recorded despite the write genuinely happening) depending on file/worker scheduling.
+      // Reading the value back is unaffected by any of that.
       service.setTheme('dark');
       TestBed.flushEffects();
-      expect(setItemSpy).toHaveBeenCalledWith('pivot_theme', 'dark');
+      expect(localStorage.getItem('pivot_theme')).toBe('dark');
     });
   });
 
