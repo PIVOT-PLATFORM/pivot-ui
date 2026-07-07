@@ -9,7 +9,8 @@
     "test": "ng test",
     "test:ci": "ng test --watch=false --coverage",
     "test:mutation": "stryker run",
-    "lint": "eslint src/ projects/design-system/src/"
+    "build:ui-core": "ng build ui-core",
+    "lint": "eslint src/ projects/ui-core/src/ projects/design-system/src/"
   },
   "private": true,
   "packageManager": "npm@11.13.0",
