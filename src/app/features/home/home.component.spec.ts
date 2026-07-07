@@ -1,10 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { ComponentFixture } from '@angular/core/testing';
+import { importProvidersFrom } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { signal, computed, Component } from '@angular/core';
 import { of, throwError } from 'rxjs';
+import { TranslocoService, TranslocoTestingModule } from '@jsverse/transloco';
 import { HomeComponent } from './home.component';
 import type { UserInfo } from '../../core/auth/service/auth.service';
 import { ModuleRegistryService } from '../../core/modules/module-registry.service';
@@ -12,6 +14,42 @@ import type { PivotModuleUi } from '../../core/modules/module.model';
 
 @Component({ template: '', standalone: true })
 class StubComponent {}
+
+const FR = {
+  home: {
+    aria_label: 'Accueil',
+    greeting: 'Bonjour, {{ name }} 👋',
+    fallback_name: 'vous',
+    subtitle: 'Vos outils collaboratifs, au même endroit.',
+    loading_aria: 'Chargement des modules en cours',
+    modules_title: 'Vos modules',
+    open_module_aria: 'Ouvrir {{ name }}',
+    open_cta: 'Ouvrir →',
+    empty_no_active: "Aucun module activé pour l'instant. L'administrateur peut activer des modules depuis le panneau d'administration.",
+    empty_no_modules: "Aucun module disponible pour l'instant. Contactez votre administrateur.",
+    coming_soon_title: 'Modules à venir',
+    coming_soon_aria: '{{ name }} — bientôt disponible',
+    coming_soon_badge: 'À VENIR',
+  },
+};
+
+const EN = {
+  home: {
+    aria_label: 'Home',
+    greeting: 'Hello, {{ name }} 👋',
+    fallback_name: 'you',
+    subtitle: 'Your collaborative tools, all in one place.',
+    loading_aria: 'Loading modules…',
+    modules_title: 'Your modules',
+    open_module_aria: 'Open {{ name }}',
+    open_cta: 'Open →',
+    empty_no_active: 'No module activated yet. The administrator can activate modules from the admin panel.',
+    empty_no_modules: 'No module available yet. Contact your administrator.',
+    coming_soon_title: 'Coming soon',
+    coming_soon_aria: '{{ name }} — coming soon',
+    coming_soon_badge: 'COMING SOON',
+  },
+};
 
 function makeUser(partial: Partial<UserInfo> = {}): UserInfo {
   return {
@@ -68,6 +106,13 @@ describe('HomeComponent', () => {
         provideHttpClientTesting(),
         provideRouter([{ path: '**', component: StubComponent }]),
         { provide: ModuleRegistryService, useValue: mockRegistryService },
+        importProvidersFrom(
+          TranslocoTestingModule.forRoot({
+            langs: { fr: FR, en: EN },
+            translocoConfig: { defaultLang: 'fr', availableLangs: ['fr', 'en'], reRenderOnLangChange: true },
+            preloadLangs: true,
+          }),
+        ),
       ],
     }).compileComponents();
 
@@ -177,5 +222,24 @@ describe('HomeComponent', () => {
   it('hexToRgba converts #7C3AED with alpha 0.1 correctly', () => {
     const result = component.hexToRgba('#7C3AED', 0.1);
     expect(result).toBe('rgba(124, 58, 237, 0.1)');
+  });
+
+  it('translates all page text when switching the active language from fr to en', async () => {
+    comingSoonSignal.set([makeModule({ comingSoon: true, id: 'quiz', name: 'Quiz' })]);
+    activeModulesSignal.set([]);
+    component.loading.set(false);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('main').getAttribute('aria-label')).toBe('Accueil');
+    expect(fixture.nativeElement.querySelector('.home__greeting-sub').textContent).toContain(FR.home.subtitle);
+    expect(fixture.nativeElement.querySelector('.module-card__badge').textContent.trim()).toBe('À VENIR');
+
+    TestBed.inject(TranslocoService).setActiveLang('en');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('main').getAttribute('aria-label')).toBe('Home');
+    expect(fixture.nativeElement.querySelector('.home__greeting-sub').textContent).toContain(EN.home.subtitle);
+    expect(fixture.nativeElement.querySelector('.module-card__badge').textContent.trim()).toBe('COMING SOON');
   });
 });
