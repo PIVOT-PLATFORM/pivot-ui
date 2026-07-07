@@ -22,7 +22,6 @@ describe('moduleGuard', () => {
       ],
     });
     httpMock = TestBed.inject(HttpTestingController);
-    router = TestBed.inject(Router);
   });
 
   afterEach(() => httpMock.verify());

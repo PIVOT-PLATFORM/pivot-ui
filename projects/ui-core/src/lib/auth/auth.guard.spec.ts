@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { Router, provideRouter } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Component } from '@angular/core';
@@ -41,7 +41,7 @@ describe('authGuard', () => {
   it('redirects to /auth/login when not authenticated', () => {
     const result = TestBed.runInInjectionContext(() =>
       authGuard({} as ActivatedRouteSnapshot, makeState('/dashboard'))
-    ) as ReturnType<typeof router.createUrlTree>;
+    ) as import('@angular/router').UrlTree;
     expect(result.toString()).toContain('/auth/login');
   });
 });
@@ -72,7 +72,7 @@ describe('guestGuard', () => {
     auth.updateToken('tok', Date.now() + 3_600_000);
     const result = TestBed.runInInjectionContext(() =>
       guestGuard({} as ActivatedRouteSnapshot, makeState('/auth/login'))
-    ) as ReturnType<typeof Router.prototype.createUrlTree>;
+    ) as import('@angular/router').UrlTree;
     expect(result.toString()).toBe('/dashboard');
   });
 });
