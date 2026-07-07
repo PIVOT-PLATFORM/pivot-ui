@@ -41,7 +41,7 @@ export interface PivotModuleUi extends PivotModuleDto {
   route: string;
   /** True when the module is not yet available (shows "Coming soon" badge). */
   comingSoon: boolean;
-  /** CSS accent color for the module card, e.g. '#3B82F6'. */
+  /** CSS accent color for the module card, e.g. '#6D28D9'. */
   color: string;
 }
 

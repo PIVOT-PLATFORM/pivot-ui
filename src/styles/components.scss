@@ -44,7 +44,7 @@
 
   &.is-invalid {
     border-color: var(--color-error);
-    &:focus { box-shadow: 0 0 0 3px #FEE2E2; }
+    &:focus { box-shadow: 0 0 0 3px var(--color-error-light); }
   }
 
   &::placeholder { color: var(--color-gray-400); }
@@ -66,8 +66,8 @@
 
 .form-success {
   font-size: var(--text-xs);
-  // WCAG 2.1 AA: --color-success (#059669) on white is ~3.8:1, below the 4.5:1
-  // minimum for normal text. --color-success-dark clears >7:1 in light theme;
+  // WCAG 2.1 AA: --color-success (#0E9F6E) on white is ~3.4:1, below the 4.5:1
+  // minimum for normal text. --color-success-dark clears >6.5:1 in light theme;
   // in dark theme (where --color-success-dark isn't redefined) the override
   // below switches to --color-success-400, which already clears >9:1 against
   // the dark surface — see skill-accessibility contrast rule.
@@ -188,10 +188,10 @@
   font-size: var(--text-sm);
   line-height: 1.5;
 
-  &-error   { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
-  &-success { background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0; }
-  &-info    { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
-  &-warning { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
+  &-error   { background: var(--color-error-light); color: var(--color-error-dark); border: 1px solid var(--color-error-border); }
+  &-success { background: var(--color-success-light); color: var(--color-success-dark); border: 1px solid var(--color-success-border); }
+  &-info    { background: var(--color-info-light); color: var(--color-info-dark); border: 1px solid var(--color-info-border); }
+  &-warning { background: var(--color-warning-light); color: var(--color-warning-dark); border: 1px solid var(--color-warning-border); }
 }
 
 // ---- Spinner ----

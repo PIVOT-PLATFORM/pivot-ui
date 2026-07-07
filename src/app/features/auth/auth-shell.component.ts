@@ -38,7 +38,7 @@ import { TranslocoService, TranslocoPipe } from '@jsverse/transloco';
       position: relative;
       min-height: 100dvh;
       background: var(--auth-gradient,
-        linear-gradient(135deg, #1e1b4b 0%, #312e81 25%, #4338ca 50%, #6d28d9 75%, #7c3aed 100%));
+        linear-gradient(135deg, #1A1230 0%, #6D28D9 55%, #C026D3 100%));
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -54,7 +54,7 @@ import { TranslocoService, TranslocoPipe } from '@jsverse/transloco';
     .hex-2 { width: 280px; height: 280px; background: rgba(255,255,255,.04);  top: -70px; right: -60px;  transform: rotate(-15deg); }
     .hex-3 { width: 180px; height: 180px; background: rgba(124,58,237,.28);   top: 30%; right: 6%;       transform: rotate(30deg); }
     .hex-4 { width: 110px; height: 110px; background: rgba(255,255,255,.06);  top: 12%; left: 7%;        transform: rotate(-8deg); }
-    .hex-5 { width: 220px; height: 220px; background: rgba(99,102,241,.2);    bottom: 10%; right: 18%;   transform: rotate(20deg); }
+    .hex-5 { width: 220px; height: 220px; background: rgba(192,38,211,.2);    bottom: 10%; right: 18%;   transform: rotate(20deg); }
 
     /* Lang pill */
     .lang-pill {
@@ -86,7 +86,7 @@ import { TranslocoService, TranslocoPipe } from '@jsverse/transloco';
       &:hover { color: #fff; }
       &.active {
         background: rgba(255,255,255,.9);
-        color: #312e81;
+        color: var(--color-brand-600, #6D28D9);
         box-shadow: 0 1px 4px rgba(0,0,0,.2);
       }
     }

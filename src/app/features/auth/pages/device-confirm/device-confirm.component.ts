@@ -17,10 +17,7 @@ import { HttpErrorResponse } from '@angular/common/http';
     <div class="auth-page">
       <div class="card auth-card">
         <div class="auth-brand">
-          <picture>
-            <source srcset="assets/brand/pivot-icon.webp?v=4" type="image/webp" />
-            <img src="assets/brand/pivot-icon.png?v=4" alt="PIVOT" class="auth-brand-icon" />
-          </picture>
+          <img src="assets/brand/pivot-mark-gradient.svg?v=5" alt="PIVOT" class="auth-brand-icon" />
         </div>
         <h1 class="auth-title">{{ 'auth.device_confirm.title' | transloco }}</h1>
         <p class="auth-subtitle">{{ 'auth.device_confirm.subtitle' | transloco }}</p>
