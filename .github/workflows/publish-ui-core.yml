@@ -41,6 +41,6 @@ jobs:
           npm --prefix dist/ui-core version "$VERSION" --no-git-tag-version
 
       - name: Publish to GitHub Packages
-        run: npm publish dist/ui-core
+        run: npm publish ./dist/ui-core
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
