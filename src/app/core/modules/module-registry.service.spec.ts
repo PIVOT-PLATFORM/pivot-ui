@@ -33,28 +33,35 @@ describe('ModuleRegistryService', () => {
   });
 
   describe('comingSoonModules', () => {
-    it('returns all MODULE_METADATA entries when API returns empty array', () => {
+    it('returns every still-comingSoon MODULE_METADATA entry when API returns empty array', () => {
+      // `whiteboard` is excluded: EN17.9 wired its real shell integration, its static
+      // metadata now has `comingSoon: false` — it no longer belongs in this list (it
+      // simply doesn't appear at all until a tenant enables it, see `activeModules` specs).
       service.loadModules().subscribe();
       httpMock.expectOne(`${environment.apiUrl}/modules`).flush([]);
 
       const comingSoon = service.comingSoonModules();
-      const metaKeys = Object.keys(MODULE_METADATA);
+      const stillComingSoonKeys = Object.entries(MODULE_METADATA)
+        .filter(([, meta]) => meta.comingSoon)
+        .map(([id]) => id);
 
-      expect(comingSoon).toHaveLength(metaKeys.length);
-      metaKeys.forEach(id => {
+      expect(comingSoon).toHaveLength(stillComingSoonKeys.length);
+      stillComingSoonKeys.forEach(id => {
         expect(comingSoon.some(m => m.id === id)).toBe(true);
       });
+      expect(comingSoon.some(m => m.id === 'whiteboard')).toBe(false);
     });
 
     it('keeps a module in comingSoon even once the API returns it, while its static comingSoon flag is true', () => {
       // Regression test: a module can be registered and enabled server-side (backend module
       // registry) before its shell-side integration is wired in — it must stay visible as
-      // "coming soon", never silently disappear from the catalogue entirely.
+      // "coming soon", never silently disappear from the catalogue entirely. `session`: still
+      // `comingSoon: true` in MODULE_METADATA (unlike `whiteboard`, wired since EN17.9).
       service.loadModules().subscribe();
-      httpMock.expectOne(`${environment.apiUrl}/modules`).flush([makeDto('whiteboard', true)]);
+      httpMock.expectOne(`${environment.apiUrl}/modules`).flush([makeDto('session', true)]);
 
       const comingSoon = service.comingSoonModules();
-      expect(comingSoon.some(m => m.id === 'whiteboard')).toBe(true);
+      expect(comingSoon.some(m => m.id === 'session')).toBe(true);
     });
 
     it('marks all comingSoon entries with comingSoon: true', () => {
@@ -91,13 +98,24 @@ describe('ModuleRegistryService', () => {
     });
 
     it('excludes comingSoon modules even when enabled', () => {
-      // All current metadata entries have comingSoon: true
+      // session metadata has comingSoon: true → should not appear in activeModules
       service.loadModules().subscribe();
       httpMock.expectOne(`${environment.apiUrl}/modules`).flush([makeDto('session', true)]);
 
-      // session metadata has comingSoon: true → should not appear in activeModules
       const active = service.activeModules();
       expect(active.some(m => m.id === 'session')).toBe(false);
+    });
+
+    it('includes whiteboard once a tenant has it enabled (EN17.9 — real shell integration, comingSoon: false)', () => {
+      service.loadModules().subscribe();
+      httpMock.expectOne(`${environment.apiUrl}/modules`).flush([makeDto('whiteboard', true)]);
+
+      const active = service.activeModules();
+      const wb = active.find(m => m.id === 'whiteboard');
+      expect(wb).toBeDefined();
+      expect(wb!.enabled).toBe(true);
+      expect(wb!.comingSoon).toBe(false);
+      expect(wb!.route).toBe('/whiteboard');
     });
 
     it('enriches known module id with icon, color and route from MODULE_METADATA', () => {
