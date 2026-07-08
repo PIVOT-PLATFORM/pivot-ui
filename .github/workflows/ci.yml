@@ -39,7 +39,12 @@ jobs:
         uses: ./.github/actions/setup-node
 
       - name: Install dependencies
+        # EN17.9 — @pivot-platform/collaboratif-ui, npm.pkg.github.com : `npm ci` needs
+        # NODE_AUTH_TOKEN for `.npmrc`'s `${NODE_AUTH_TOKEN}` interpolation to resolve (unlike
+        # ui-core/design-system, built from this repo's own source, never fetched remotely).
         run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: TypeScript check
         run: npx tsc --noEmit
@@ -65,7 +70,12 @@ jobs:
         uses: ./.github/actions/setup-node
 
       - name: Install dependencies
+        # EN17.9 — @pivot-platform/collaboratif-ui, npm.pkg.github.com : `npm ci` needs
+        # NODE_AUTH_TOKEN for `.npmrc`'s `${NODE_AUTH_TOKEN}` interpolation to resolve (unlike
+        # ui-core/design-system, built from this repo's own source, never fetched remotely).
         run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run tests with coverage
         run: npm run test:ci
@@ -99,7 +109,12 @@ jobs:
         uses: ./.github/actions/setup-node
 
       - name: Install dependencies
+        # EN17.9 — @pivot-platform/collaboratif-ui, npm.pkg.github.com : `npm ci` needs
+        # NODE_AUTH_TOKEN for `.npmrc`'s `${NODE_AUTH_TOKEN}` interpolation to resolve (unlike
+        # ui-core/design-system, built from this repo's own source, never fetched remotely).
         run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build
         run: npm run build -- --configuration production
@@ -125,7 +140,12 @@ jobs:
         uses: ./.github/actions/setup-node
 
       - name: Install dependencies
+        # EN17.9 — @pivot-platform/collaboratif-ui, npm.pkg.github.com : `npm ci` needs
+        # NODE_AUTH_TOKEN for `.npmrc`'s `${NODE_AUTH_TOKEN}` interpolation to resolve (unlike
+        # ui-core/design-system, built from this repo's own source, never fetched remotely).
         run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download coverage
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4

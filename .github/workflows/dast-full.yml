@@ -97,7 +97,10 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        # EN17.9 — @pivot-platform/collaboratif-ui, npm.pkg.github.com : voir ci.yml.
         run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Angular (CI config — apiUrl http://localhost:8080)
         run: npm run build -- --configuration ci
@@ -234,7 +237,10 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        # EN17.9 — @pivot-platform/collaboratif-ui, npm.pkg.github.com : voir ci.yml.
         run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Angular (CI config — apiUrl http://localhost:8080)
         run: npm run build -- --configuration ci

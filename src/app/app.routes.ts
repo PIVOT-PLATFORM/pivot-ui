@@ -21,14 +21,32 @@ export const notFoundRedirect = (): string =>
  * (ComingSoonComponent): the real module UI ships from the dedicated pivot-xxx-ui
  * repos and is wired in at integration time — this shell only owns the guarded
  * route entry point and its lazy-loading boundary.
+ *
+ * `whiteboard` is the first module actually integrated (EN17.9) — excluded here and
+ * given its own route below, lazy-loading the real `@pivot-platform/collaboratif-ui`
+ * package instead of the placeholder.
  */
-const MODULE_IDS = ['whiteboard', 'session', 'roadmap', 'survey', 'quiz'] as const;
+const MODULE_IDS = ['session', 'roadmap', 'survey', 'quiz'] as const;
 
 const MODULE_CHILDREN: Routes = MODULE_IDS.map(id => ({
   path: id,
   canActivate: [moduleGuard(id)],
   loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
 }));
+
+/**
+ * `whiteboard` — EN17.9. Guarded by the same `moduleGuard('whiteboard')` as every other
+ * module (tenant activation status, unchanged contract) but `loadChildren`s the real
+ * routes published by `@pivot-platform/collaboratif-ui` instead of `ComingSoonComponent`.
+ */
+const WHITEBOARD_ROUTE: Routes = [
+  {
+    path: 'whiteboard',
+    canActivate: [moduleGuard('whiteboard')],
+    loadChildren: () =>
+      import('@pivot-platform/collaboratif-ui').then(m => m.COLLABORATIF_ROUTES),
+  },
+];
 
 const LEGAL_CHILDREN: Routes = [
   {
@@ -182,6 +200,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/account/account-settings.component').then(m => m.AccountSettingsComponent),
       },
+      ...WHITEBOARD_ROUTE,
       ...MODULE_CHILDREN,
       { path: 'legal', children: LEGAL_CHILDREN },
       {

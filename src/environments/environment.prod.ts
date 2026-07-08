@@ -6,6 +6,9 @@
 export const environment = {
   production: true,
   apiUrl: '/api',
+  // EN17.9 — relatif, proxifié par nginx.conf (location /api/collaboratif/) vers
+  // pivot-collaboratif-core, même raisonnement que `apiUrl` ci-dessus.
+  collaboratifApiUrl: '/api/collaboratif',
   googleClientId: '',
   bugReportUrl: 'mailto:bugs@pivot-platform.fr?subject=Bug%20PIVOT',
 };

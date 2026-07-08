@@ -27,7 +27,10 @@ export const MODULE_METADATA: Record<string, ModuleUiMeta> = {
     icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><path d="M7 10 l3 3 5-5"/></svg>`,
     description: 'Tableau blanc collaboratif temps réel',
     route: '/whiteboard',
-    comingSoon: true,
+    // EN17.9 — shell integration réelle (loadChildren depuis @pivot-platform/collaboratif-ui),
+    // plus un placeholder. Reste absent de la grille tant qu'un tenant ne l'a pas activé
+    // (enabled: false côté API) — pas un "coming soon" mais un module désactivé, différent.
+    comingSoon: false,
     color: '#8B5CF6',
   },
   session: {

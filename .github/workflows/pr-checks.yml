@@ -55,12 +55,18 @@ jobs:
 
       # Mirror de la Release : build & load (pas de push) -> Trivy (gate) -> push.
       - name: Build & load preview image (amd64)
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # GHCR exige un nom de dépôt en minuscules ; github.repository contient PIVOT-PLATFORM.
           # Package dédié aux previews (jamais l'image de prod pivot-ui).
           IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}/pivot-ui-preview:pr-${{ github.event.pull_request.number }}"
           echo "PREVIEW_IMAGE=${IMAGE}" >> "$GITHUB_ENV"
-          docker buildx build --platform linux/amd64 --load -t "${IMAGE}" .
+          # EN17.9 — secret BuildKit pour l'auth npm.pkg.github.com dans le Dockerfile
+          # (@pivot-platform/collaboratif-ui), jamais persisté dans un layer de l'image.
+          docker buildx build --platform linux/amd64 --load \
+            --secret id=npm_token,env=NODE_AUTH_TOKEN \
+            -t "${IMAGE}" .
 
       - name: Scan preview image - Trivy (gate avant push)
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
