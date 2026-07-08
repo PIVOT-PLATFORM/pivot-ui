@@ -6,11 +6,13 @@ export const GOOGLE_CLIENT_ID = new InjectionToken<string>('GOOGLE_CLIENT_ID', {
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideTransloco } from '@jsverse/transloco';
+import { provideCollaboratifUi } from '@pivot-platform/collaboratif-ui';
 import { routes } from './app.routes';
 import { tokenInterceptor } from './core/auth/interceptor/token.interceptor';
 import { AuthService } from './core/auth/service/auth.service';
 import { TranslocoHttpLoader } from './core/i18n/transloco.loader';
 import { LanguageSyncService } from './core/i18n/language-sync.service';
+import { environment } from '../environments/environment';
 import { catchError, of } from 'rxjs';
 
 function detectInitialLang(): string {
@@ -44,6 +46,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withInterceptors([tokenInterceptor])),
+    provideCollaboratifUi({ apiUrl: environment.collaboratifApiUrl }),
     provideTransloco({
       config: {
         availableLangs: ['en', 'fr'],
