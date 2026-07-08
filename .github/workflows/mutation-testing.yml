@@ -23,7 +23,11 @@ jobs:
           persist-credentials: false
 
       - name: Setup Node + npm
-        uses: ./.github/actions/setup-node
+        # US05.15.1/US05.15.2 — composite action partagée pivot-core (single source of
+        # truth), résolue cross-repo sans checkout du repo hôte.
+        uses: PIVOT-PLATFORM/pivot-core/.github/actions/setup@main
+        with:
+          node-version: '24'
 
       - name: Install dependencies
         # EN17.9 — @pivot-platform/collaboratif-ui, npm.pkg.github.com : voir ci.yml.
