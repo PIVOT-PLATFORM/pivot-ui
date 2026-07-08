@@ -1,6 +1,10 @@
 name: Security
 
 on:
+  # No paths-ignore here: workflows that upload code-scanning SARIF (CodeQL, Semgrep,
+  # Plumber) must run on every push/PR. Skipping on doc-only changes leaves a configuration
+  # without results, which makes code scanning report "configuration not found" and prevents
+  # it from diffing alerts introduced by a pull request. (Aligned with pivot-core security.yml.)
   push:
     branches: [main, develop]
   pull_request:
@@ -117,6 +121,9 @@ jobs:
   # -----------------------------------------
   # CI/CD CONFORMITE — Plumber
   # -----------------------------------------
+  # Job id MUST stay "plumber": GitHub code scanning derives the analysis configuration
+  # from "<workflow>:<job_id>" (security.yml:plumber). Renaming it breaks the diff against
+  # the baseline on main and triggers "1 configuration not found". (Aligned with pivot-core.)
   plumber:
     name: Plumber - CI/CD Compliance
     runs-on: ubuntu-latest

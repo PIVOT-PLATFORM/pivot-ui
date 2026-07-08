@@ -24,7 +24,11 @@ jobs:
   # -----------------------------------------
   # 1. QUALITE CODE - ANGULAR
   # -----------------------------------------
-  quality:
+  # Job id suffixed "-frontend" to mirror pivot-core's "-backend" convention
+  # (quality-backend/tests-backend) — see CLAUDE.md alignment note (US05.15.2). The `name:`
+  # (status check context) is left untouched: branch protection required checks match on
+  # `name`, not on job id, so this rename doesn't require updating branch protection.
+  quality-frontend:
     name: Code Quality - Angular
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -36,7 +40,13 @@ jobs:
           persist-credentials: false
 
       - name: Setup Node + npm
-        uses: ./.github/actions/setup-node
+        # US05.15.1/US05.15.2 — composite action partagée pivot-core (single source of
+        # truth), résolue cross-repo sans checkout du repo hôte. Pinnée par SHA (commit de
+        # merge de pivot-core#187 sur main) — requis par Plumber
+        # (actionsMustBePinnedByCommitSha) : action interne à l'org, pas d'exemption.
+        uses: PIVOT-PLATFORM/pivot-core/.github/actions/setup@bb282afc1f297095ba8353621ebd53a60818345a # main (US05.15.1)
+        with:
+          node-version: '24'
 
       - name: Install dependencies
         # EN17.9 — @pivot-platform/collaboratif-ui, npm.pkg.github.com : `npm ci` needs
@@ -55,7 +65,8 @@ jobs:
   # -----------------------------------------
   # 2. TESTS (Vitest)
   # -----------------------------------------
-  tests:
+  # Job id suffixed "-frontend" to mirror pivot-core's "tests-backend" — see note above.
+  tests-frontend:
     name: Tests (Vitest)
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -67,7 +78,13 @@ jobs:
           persist-credentials: false
 
       - name: Setup Node + npm
-        uses: ./.github/actions/setup-node
+        # US05.15.1/US05.15.2 — composite action partagée pivot-core (single source of
+        # truth), résolue cross-repo sans checkout du repo hôte. Pinnée par SHA (commit de
+        # merge de pivot-core#187 sur main) — requis par Plumber
+        # (actionsMustBePinnedByCommitSha) : action interne à l'org, pas d'exemption.
+        uses: PIVOT-PLATFORM/pivot-core/.github/actions/setup@bb282afc1f297095ba8353621ebd53a60818345a # main (US05.15.1)
+        with:
+          node-version: '24'
 
       - name: Install dependencies
         # EN17.9 — @pivot-platform/collaboratif-ui, npm.pkg.github.com : `npm ci` needs
@@ -97,7 +114,7 @@ jobs:
     name: Build Angular (production)
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: [quality, tests]
+    needs: [quality-frontend, tests-frontend]
 
     steps:
       - name: Checkout
@@ -106,7 +123,13 @@ jobs:
           persist-credentials: false
 
       - name: Setup Node + npm
-        uses: ./.github/actions/setup-node
+        # US05.15.1/US05.15.2 — composite action partagée pivot-core (single source of
+        # truth), résolue cross-repo sans checkout du repo hôte. Pinnée par SHA (commit de
+        # merge de pivot-core#187 sur main) — requis par Plumber
+        # (actionsMustBePinnedByCommitSha) : action interne à l'org, pas d'exemption.
+        uses: PIVOT-PLATFORM/pivot-core/.github/actions/setup@bb282afc1f297095ba8353621ebd53a60818345a # main (US05.15.1)
+        with:
+          node-version: '24'
 
       - name: Install dependencies
         # EN17.9 — @pivot-platform/collaboratif-ui, npm.pkg.github.com : `npm ci` needs
@@ -125,7 +148,7 @@ jobs:
   sonar:
     name: SonarCloud Analysis
     runs-on: ubuntu-latest
-    needs: [tests]
+    needs: [tests-frontend]
     timeout-minutes: 15
     if: github.actor != 'dependabot[bot]'
 
@@ -137,7 +160,13 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Node + npm
-        uses: ./.github/actions/setup-node
+        # US05.15.1/US05.15.2 — composite action partagée pivot-core (single source of
+        # truth), résolue cross-repo sans checkout du repo hôte. Pinnée par SHA (commit de
+        # merge de pivot-core#187 sur main) — requis par Plumber
+        # (actionsMustBePinnedByCommitSha) : action interne à l'org, pas d'exemption.
+        uses: PIVOT-PLATFORM/pivot-core/.github/actions/setup@bb282afc1f297095ba8353621ebd53a60818345a # main (US05.15.1)
+        with:
+          node-version: '24'
 
       - name: Install dependencies
         # EN17.9 — @pivot-platform/collaboratif-ui, npm.pkg.github.com : `npm ci` needs
@@ -218,7 +247,13 @@ jobs:
           category: trivy-sca-frontend
 
       - name: Setup Node + npm
-        uses: ./.github/actions/setup-node
+        # US05.15.1/US05.15.2 — composite action partagée pivot-core (single source of
+        # truth), résolue cross-repo sans checkout du repo hôte. Pinnée par SHA (commit de
+        # merge de pivot-core#187 sur main) — requis par Plumber
+        # (actionsMustBePinnedByCommitSha) : action interne à l'org, pas d'exemption.
+        uses: PIVOT-PLATFORM/pivot-core/.github/actions/setup@bb282afc1f297095ba8353621ebd53a60818345a # main (US05.15.1)
+        with:
+          node-version: '24'
 
       - name: npm audit (production deps)
         run: npm audit --audit-level=high --omit=dev
