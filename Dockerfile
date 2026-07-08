@@ -2,13 +2,14 @@
 # Dev orchestration: use pivot-platform/compose.yml (includes backend + postgres + redis).
 FROM node:24-alpine AS builder
 WORKDIR /app
+# .npmrc copied alongside package*.json (before `npm ci`, not after) — EN17.10 made
+# @pivot-platform/collaboratif-ui a real dependency on the private GitHub Packages registry,
+# so the registry mapping must already be in place for this RUN step, not just for later COPY . .
 COPY package*.json .npmrc ./
-# EN17.9 — @pivot-platform/collaboratif-ui (npm.pkg.github.com) needs an authenticated `npm
-# ci`, unlike ui-core/design-system (built from this repo's own source, never fetched
-# remotely). BuildKit secret (never persisted in an image layer, unlike --build-arg) — see the
-# calling workflow's `docker buildx build --secret id=npm_token,env=NODE_AUTH_TOKEN`.
-RUN --mount=type=secret,id=npm_token,env=NODE_AUTH_TOKEN \
-    npm ci --ignore-scripts
+# BuildKit secret, never a --build-arg (would leak the token into the image history/cache).
+# Callers: `docker buildx build --secret id=npm_token,env=NODE_AUTH_TOKEN ...` (see
+# pr-checks.yml / release.yml) with NODE_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }} in the job env.
+RUN --mount=type=secret,id=npm_token,env=NODE_AUTH_TOKEN npm ci --ignore-scripts
 COPY . .
 RUN npm run build -- --configuration production
 

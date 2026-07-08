@@ -77,6 +77,12 @@
     "subtitle": "This section will be available soon.",
     "back": "Back to home"
   },
+  "module_load_error": {
+    "title": "Module temporarily unavailable",
+    "subtitle": "An error occurred while loading this module. Please try again in a moment.",
+    "retry": "Retry",
+    "back": "Back to home"
+  },
   "auth": {
     "login": {
       "title": "Sign in",
