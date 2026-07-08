@@ -4,6 +4,20 @@ import { AuthService } from './auth.service';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { sanitizeReturnUrl } from '../util/return-url';
 
+/**
+ * Cibles de retour sans intérêt pour cette US : la racine (rien à retrouver)
+ * et les pages `/auth*` (éviterait sinon une boucle login → login après
+ * reconnexion). Filtrage métier propre à la redirection post-expiration —
+ * distinct de la validation open redirect (sécurité, mutualisée dans
+ * {@link sanitizeReturnUrl}).
+ *
+ * @param url URL déjà validée comme relative interne sûre
+ * @returns `true` si `url` n'apporte aucune valeur comme `returnUrl`
+ */
+function isUselessReturnTarget(url: string): boolean {
+  return url === '/' || url === '/auth' || url.startsWith('/auth/') || url.startsWith('/auth?');
+}
+
 /** Nom du canal inter-onglets pour la propagation du logout (US01.1.5). */
 export const SESSION_CHANNEL_NAME = 'pivot-session';
 
@@ -79,7 +93,8 @@ export class SessionExpiryService implements OnDestroy {
     if (!this.hasLocalSession()) {
       return;
     }
-    const returnUrl = sanitizeReturnUrl(this.router.url);
+    const sanitized = sanitizeReturnUrl(this.router.url);
+    const returnUrl = sanitized && !isUselessReturnTarget(sanitized) ? sanitized : null;
     this.auth.clearSession();
     this.toast.show(
       rememberMe ? 'auth.session.expired_remember_me' : 'auth.session.expired',

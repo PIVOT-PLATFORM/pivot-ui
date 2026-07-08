@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { DEFAULT_POST_LOGIN_URL, sanitizeReturnUrl } from '../return-url';
+import { DEFAULT_POST_LOGIN_URL, sanitizeReturnUrlOrDefault } from '../util/return-url';
 
 /**
  * Gère la redirection post-login (US01.1.4).
@@ -14,7 +14,7 @@ import { DEFAULT_POST_LOGIN_URL, sanitizeReturnUrl } from '../return-url';
  * Non-persistance : la valeur mémorisée est effacée dès qu'elle est consommée
  * (tentative de navigation post-login), qu'elle soit valide ou non.
  *
- * Sécurité open redirect : toute cible passe par {@link sanitizeReturnUrl} —
+ * Sécurité open redirect : toute cible passe par {@link sanitizeReturnUrlOrDefault} —
  * seules les URLs relatives internes sont acceptées, sinon /home.
  */
 @Injectable({ providedIn: 'root' })
@@ -51,7 +51,7 @@ export class PostLoginRedirectService {
   resolveTarget(queryReturnUrl: string | null): string {
     const candidate = queryReturnUrl ?? this.pendingUrl();
     this.clear();
-    return sanitizeReturnUrl(candidate);
+    return sanitizeReturnUrlOrDefault(candidate);
   }
 
   /**
