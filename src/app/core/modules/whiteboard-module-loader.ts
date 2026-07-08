@@ -1,20 +1,19 @@
 import { Routes } from '@angular/router';
 import { environment } from '../../../environments/environment';
+import { ModuleLoadErrorComponent } from '../../features/module-load-error/module-load-error.component';
 
 /**
  * Fallback route tree activated when `@pivot-platform/collaboratif-ui`'s dynamic `import()`
  * rejects (network failure, stale/missing content-hashed chunk after a deployment, GitHub
- * Packages registry unreachable at runtime). Kept as a lazy `loadComponent()` itself — this
- * chunk is tiny and part of the shell's own bundle graph, unaffected by the failure it recovers
- * from.
+ * Packages registry unreachable at runtime). `ModuleLoadErrorComponent` is imported statically
+ * above (not `loadComponent()`) so it's already part of the shell's eagerly-loaded bundle graph
+ * by the time this fallback is needed — a *second* lazy `import()` here would itself be exposed
+ * to the exact same class of failure (chunk fetch error) it exists to recover from.
  */
 const MODULE_LOAD_ERROR_ROUTES: Routes = [
   {
     path: '',
-    loadComponent: () =>
-      import('../../features/module-load-error/module-load-error.component').then(
-        m => m.ModuleLoadErrorComponent,
-      ),
+    component: ModuleLoadErrorComponent,
   },
 ];
 

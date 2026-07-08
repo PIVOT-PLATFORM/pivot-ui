@@ -50,21 +50,9 @@ describe('loadWhiteboardModule', () => {
 
     expect(routes).toHaveLength(1);
     expect(routes[0].path).toBe('');
-    expect(routes[0].loadComponent).toBeDefined();
-
-    const resolvedFallback = await (routes[0].loadComponent as () => Promise<unknown>)();
-    // Class name, not minified away in this build (may be prefixed by the build tooling,
-    // e.g. `_ModuleLoadErrorComponent`) — a reliable structural check without a DOM render.
-    expect((resolvedFallback as { name: string }).name).toContain('ModuleLoadErrorComponent');
-  });
-
-  it('never rejects — a second failure inside the fallback loadComponent() itself is not this function\'s concern', async () => {
-    vi.doMock('@pivot-platform/collaboratif-ui', () => {
-      throw new Error('boom');
-    });
-
-    const { loadWhiteboardModule } = await import('./whiteboard-module-loader');
-
-    await expect(loadWhiteboardModule()).resolves.toBeDefined();
+    // Statically imported (`component`, not `loadComponent`) — deliberately not itself a lazy
+    // chunk, so it can't be exposed to the same class of failure it exists to recover from.
+    expect(routes[0].component?.name).toContain('ModuleLoadErrorComponent');
+    expect(routes[0].loadComponent).toBeUndefined();
   });
 });
