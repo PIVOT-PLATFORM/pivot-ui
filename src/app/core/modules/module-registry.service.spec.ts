@@ -46,12 +46,15 @@ describe('ModuleRegistryService', () => {
       });
     });
 
-    it('excludes modules already returned by the API', () => {
+    it('keeps a module in comingSoon even once the API returns it, while its static comingSoon flag is true', () => {
+      // Regression test: a module can be registered and enabled server-side (backend module
+      // registry) before its shell-side integration is wired in — it must stay visible as
+      // "coming soon", never silently disappear from the catalogue entirely.
       service.loadModules().subscribe();
-      httpMock.expectOne(`${environment.apiUrl}/modules`).flush([makeDto('whiteboard')]);
+      httpMock.expectOne(`${environment.apiUrl}/modules`).flush([makeDto('whiteboard', true)]);
 
       const comingSoon = service.comingSoonModules();
-      expect(comingSoon.some(m => m.id === 'whiteboard')).toBe(false);
+      expect(comingSoon.some(m => m.id === 'whiteboard')).toBe(true);
     });
 
     it('marks all comingSoon entries with comingSoon: true', () => {
@@ -197,7 +200,26 @@ describe('ModuleRegistryService', () => {
         .flush([makeDto('whiteboard'), makeDto('session')]);
 
       expect(service.modules()).toHaveLength(2);
-      expect(service.enrichedModules()).toHaveLength(2);
+      // enrichedModules() is the full catalogue (API-returned + static-only leftovers from
+      // MODULE_METADATA), not just what the API returned — see 'includes' test below.
+      expect(service.enrichedModules().filter(m => m.id === 'whiteboard' || m.id === 'session'))
+        .toHaveLength(2);
+    });
+
+    it('enrichedModules includes both API-returned and static-only modules', () => {
+      service.loadModules().subscribe();
+      httpMock.expectOne(`${environment.apiUrl}/modules`).flush([makeDto('whiteboard', true)]);
+
+      const enriched = service.enrichedModules();
+      const metaKeys = Object.keys(MODULE_METADATA);
+
+      // Every statically known module id is present, whether or not the API returned it.
+      expect(enriched).toHaveLength(metaKeys.length);
+      metaKeys.forEach(id => {
+        expect(enriched.some(m => m.id === id)).toBe(true);
+      });
+      // The API-returned entry keeps its DTO-sourced fields (enabled: true here).
+      expect(enriched.find(m => m.id === 'whiteboard')?.enabled).toBe(true);
     });
   });
 });
