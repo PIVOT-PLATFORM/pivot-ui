@@ -238,5 +238,44 @@ describe('SessionExpiryService (US01.1.5)', () => {
 
       expect(navigateSpy).toHaveBeenCalledWith(['/auth/login'], undefined);
     });
+
+    it('drops the /auth root as returnUrl', () => {
+      loginWith(false);
+      setRouterUrl('/auth');
+
+      service.onSessionExpired();
+
+      expect(navigateSpy).toHaveBeenCalledWith(['/auth/login'], undefined);
+    });
+
+    it('drops an /auth URL with query params as returnUrl', () => {
+      loginWith(false);
+      setRouterUrl('/auth?tab=register');
+
+      service.onSessionExpired();
+
+      expect(navigateSpy).toHaveBeenCalledWith(['/auth/login'], undefined);
+    });
+
+    it('drops the root path as returnUrl (nothing to return to)', () => {
+      loginWith(false);
+      setRouterUrl('/');
+
+      service.onSessionExpired();
+
+      expect(navigateSpy).toHaveBeenCalledWith(['/auth/login'], undefined);
+    });
+
+    it('keeps a path merely starting with the "auth" word segment', () => {
+      loginWith(false);
+      setRouterUrl('/authors');
+
+      service.onSessionExpired();
+
+      expect(navigateSpy).toHaveBeenCalledWith(
+        ['/auth/login'],
+        { queryParams: { returnUrl: '/authors' } },
+      );
+    });
   });
 });

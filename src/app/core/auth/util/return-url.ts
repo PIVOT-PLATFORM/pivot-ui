@@ -1,33 +1,145 @@
 /**
- * Validation locale de `returnUrl` pour la redirection post-expiration de session (US01.1.5).
+ * Validation des URLs de retour (`returnUrl`) — protection open redirect.
  *
- * Protection open redirect : seule une URL **relative interne** est acceptée —
- * elle doit commencer par `/` mais pas par `//` (protocol-relative URL) ni `/\`
- * (variante backslash interprétée comme `//` par certains navigateurs).
+ * Règle de sécurité (Red Team) : un `returnUrl` n'est accepté QUE s'il s'agit
+ * d'une URL relative interne :
+ * - commence par `/` (jamais d'URL absolue, de scheme `javascript:` ou `https:`) ;
+ * - ne commence pas par `//` ni `/\` (URLs protocol-relative → domaine externe) ;
+ * - ne contient aucun backslash (les navigateurs normalisent `\` en `/`) ;
+ * - ne contient aucun caractère de contrôle (tab/CR/LF sont supprimés par les
+ *   navigateurs, ce qui permettrait de contourner les checks précédents) ;
+ * - reste sûre après décodage URL (bloque `%2F%2Fevil.com`, `%5C`, double encodage).
  *
- * NOTE déduplication : l'US01.1.4 (redirection post-login) introduit un validateur
- * returnUrl réutilisable. Cette implémentation locale minimale sera fusionnée avec
- * cet utilitaire au merge des deux US (même contrat : relative interne uniquement).
+ * Utilitaire volontairement pur et sans dépendance Angular : réutilisable par
+ * tout consommateur (guards, intercepteurs, services).
+ *
+ * Deux appelants, deux contrats de retour sur l'absence de valeur sûre :
+ * - {@link sanitizeReturnUrl} — retourne `null` (utilisé par la redirection
+ *   post-expiration de session, US01.1.5, qui ne veut pas de fallback imposé) ;
+ * - {@link sanitizeReturnUrlOrDefault} — retombe sur {@link DEFAULT_POST_LOGIN_URL}
+ *   (utilisé par la redirection post-login, US01.1.4, qui a toujours besoin
+ *   d'une destination).
  */
 
+/** Destination par défaut après login quand aucun `returnUrl` valide n'est fourni. */
+export const DEFAULT_POST_LOGIN_URL = '/home';
+
+/** Nombre maximal de passes de décodage URL (bloque le double encodage `%252F`). */
+const MAX_DECODE_PASSES = 2;
+
 /**
- * Valide et normalise une URL de retour candidate.
+ * Vérifie qu'une valeur candidate (déjà décodée ou non) est une URL relative interne sûre.
  *
- * @param url l'URL courante au moment de l'expiration (ex. `router.url`)
- * @returns l'URL si c'est une URL relative interne sûre et utile, sinon `null`
- *          (`null` = pas de paramètre `returnUrl` ajouté à la redirection /login)
+ * @param value valeur à contrôler
+ * @returns `true` si la valeur est une URL relative interne sûre
  */
-export function sanitizeReturnUrl(url: string | null | undefined): string | null {
-  if (!url) {
-    return null;
+function isSafeCandidate(value: string): boolean {
+  return (
+    value.startsWith('/') &&
+    !value.startsWith('//') &&
+    !value.startsWith('/\\') &&
+    !value.includes('\\') &&
+    !hasControlCharacter(value)
+  );
+}
+
+/** Borne supérieure (incluse) de la plage basse des caractères de contrôle ASCII (unit separator). */
+const CONTROL_RANGE_LOW_MAX = 31;
+
+/** Code du caractère de contrôle DEL. */
+const CONTROL_CHAR_DEL = 127;
+
+/**
+ * Détecte les caractères de contrôle ASCII (codes 0 à {@link CONTROL_RANGE_LOW_MAX}, et DEL).
+ * Les navigateurs suppriment tab/CR/LF des URLs, ce qui permettrait de
+ * transformer `/&#9;/evil.com` en `//evil.com` après nettoyage navigateur.
+ *
+ * Implémenté via `Array.prototype.some` (plutôt qu'une boucle `for` indexée) :
+ * un compteur de boucle manuel est une surface de mutation inutile pour les
+ * outils de mutation testing (un mutateur `i++` → `i--` transforme la boucle
+ * en boucle infinie pour toute chaîne sans caractère de contrôle — observé en
+ * CI : mutant tué uniquement par la limite de garde de Stryker après ~39 000
+ * itérations, alourdissant significativement le temps total du job).
+ *
+ * @param value chaîne à inspecter
+ * @returns `true` si un caractère de contrôle est présent
+ */
+function hasControlCharacter(value: string): boolean {
+  return Array.from(value).some((char) => {
+    const code = char.codePointAt(0) ?? 0;
+    return code <= CONTROL_RANGE_LOW_MAX || code === CONTROL_CHAR_DEL;
+  });
+}
+
+/**
+ * Décode `value` autant de fois que nécessaire (jusqu'à {@link MAX_DECODE_PASSES}
+ * passes) et retourne chaque forme intermédiaire rencontrée — défense en
+ * profondeur contre le double encodage (`%252F` → `%2F` → `/`).
+ *
+ * Bornée par la croissance de la liste retournée plutôt que par un compteur
+ * de boucle manuel (`for (...; pass++)`) : un compteur est une surface de
+ * mutation inutile pour les outils de mutation testing (un mutateur `++` →
+ * `--` peut transformer la condition de sortie en boucle infinie). Ici, la
+ * seule façon de continuer est d'ajouter une valeur à `candidates`, ce qui
+ * fait mécaniquement progresser la condition d'arrêt.
+ *
+ * @param value valeur brute à décoder
+ * @returns `null` si un décodage échoue (encodage malformé) ; sinon la liste
+ *          `[value, ...formes décodées]`
+ */
+function decodeCandidates(value: string): string[] | null {
+  const candidates: string[] = [value];
+  let current = value;
+  while (candidates.length <= MAX_DECODE_PASSES) {
+    let decoded: string;
+    try {
+      decoded = decodeURIComponent(current);
+    } catch {
+      // Encodage malformé (%zz…) → valeur suspecte, rejet.
+      return null;
+    }
+    if (decoded === current) {
+      break;
+    }
+    candidates.push(decoded);
+    current = decoded;
   }
-  // Relative interne uniquement : commence par '/', mais ni '//' ni '/\' (open redirect).
-  if (!url.startsWith('/') || url.startsWith('//') || url.startsWith('/\\')) {
-    return null;
+  return candidates;
+}
+
+/**
+ * Indique si `value` est un `returnUrl` interne sûr (protection open redirect).
+ * La valeur brute ET ses formes décodées (jusqu'à deux passes) doivent toutes
+ * satisfaire les règles — défense en profondeur contre l'encodage URL.
+ *
+ * @param value valeur du `returnUrl` (query param, session Angular, `router.url`…)
+ * @returns `true` uniquement pour une URL relative interne sûre
+ */
+export function isSafeReturnUrl(value: string | null | undefined): boolean {
+  if (typeof value !== 'string' || value.length === 0) {
+    return false;
   }
-  // Inutile de revenir sur la racine ou sur les pages d'auth après reconnexion.
-  if (url === '/' || url === '/auth' || url.startsWith('/auth/') || url.startsWith('/auth?')) {
-    return null;
-  }
-  return url;
+  const candidates = decodeCandidates(value);
+  return candidates !== null && candidates.every(isSafeCandidate);
+}
+
+/**
+ * Retourne `value` si c'est un `returnUrl` interne sûr, sinon `null`.
+ *
+ * @param value valeur du `returnUrl` à assainir
+ * @returns URL interne sûre, ou `null` si absente/invalide/dangereuse
+ */
+export function sanitizeReturnUrl(value: string | null | undefined): string | null {
+  return isSafeReturnUrl(value) ? (value as string) : null;
+}
+
+/**
+ * Retourne `value` si c'est un `returnUrl` interne sûr, sinon la destination
+ * par défaut {@link DEFAULT_POST_LOGIN_URL}.
+ *
+ * @param value valeur du `returnUrl` à assainir
+ * @returns URL interne sûre vers laquelle naviguer après login
+ */
+export function sanitizeReturnUrlOrDefault(value: string | null | undefined): string {
+  return sanitizeReturnUrl(value) ?? DEFAULT_POST_LOGIN_URL;
 }
