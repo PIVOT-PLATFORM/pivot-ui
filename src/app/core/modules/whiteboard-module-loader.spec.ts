@@ -1,0 +1,70 @@
+import { Routes } from '@angular/router';
+import { InjectionToken } from '@angular/core';
+
+const FAKE_COLLABORATIF_ROUTES: Routes = [{ path: '', loadComponent: () => Promise.resolve(class {}) }];
+const FAKE_TOKEN = new InjectionToken<string>('FAKE_COLLABORATIF_API_URL');
+const provideCollaboratifUi = vi.fn((config: { apiUrl: string }) => ({ provide: FAKE_TOKEN, useValue: config.apiUrl }));
+
+describe('loadWhiteboardModule', () => {
+  afterEach(() => {
+    vi.resetModules();
+    vi.doUnmock('@pivot-platform/collaboratif-ui');
+    provideCollaboratifUi.mockClear();
+  });
+
+  it('resolves to a route wrapping COLLABORATIF_ROUTES as children, when the package loads successfully', async () => {
+    vi.doMock('@pivot-platform/collaboratif-ui', () => ({
+      COLLABORATIF_ROUTES: FAKE_COLLABORATIF_ROUTES,
+      provideCollaboratifUi,
+    }));
+
+    const { loadWhiteboardModule } = await import('./whiteboard-module-loader');
+    const routes = await loadWhiteboardModule();
+
+    expect(routes).toHaveLength(1);
+    expect(routes[0].path).toBe('');
+    expect(routes[0].children).toBe(FAKE_COLLABORATIF_ROUTES);
+  });
+
+  it("configures the package via provideCollaboratifUi() through the dynamically-imported namespace only (never a static top-level import)", async () => {
+    vi.doMock('@pivot-platform/collaboratif-ui', () => ({
+      COLLABORATIF_ROUTES: FAKE_COLLABORATIF_ROUTES,
+      provideCollaboratifUi,
+    }));
+
+    const { loadWhiteboardModule } = await import('./whiteboard-module-loader');
+    const routes = await loadWhiteboardModule();
+
+    expect(provideCollaboratifUi).toHaveBeenCalledTimes(1);
+    expect(provideCollaboratifUi).toHaveBeenCalledWith({ apiUrl: expect.any(String) });
+    expect(routes[0].providers).toEqual([{ provide: FAKE_TOKEN, useValue: expect.any(String) }]);
+  });
+
+  it('resolves to the module-load-error fallback route when the dynamic import rejects', async () => {
+    vi.doMock('@pivot-platform/collaboratif-ui', () => {
+      throw new Error('network error — chunk failed to load');
+    });
+
+    const { loadWhiteboardModule } = await import('./whiteboard-module-loader');
+    const routes = await loadWhiteboardModule();
+
+    expect(routes).toHaveLength(1);
+    expect(routes[0].path).toBe('');
+    expect(routes[0].loadComponent).toBeDefined();
+
+    const resolvedFallback = await (routes[0].loadComponent as () => Promise<unknown>)();
+    // Class name, not minified away in this build (may be prefixed by the build tooling,
+    // e.g. `_ModuleLoadErrorComponent`) — a reliable structural check without a DOM render.
+    expect((resolvedFallback as { name: string }).name).toContain('ModuleLoadErrorComponent');
+  });
+
+  it('never rejects — a second failure inside the fallback loadComponent() itself is not this function\'s concern', async () => {
+    vi.doMock('@pivot-platform/collaboratif-ui', () => {
+      throw new Error('boom');
+    });
+
+    const { loadWhiteboardModule } = await import('./whiteboard-module-loader');
+
+    await expect(loadWhiteboardModule()).resolves.toBeDefined();
+  });
+});

@@ -14,7 +14,7 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: write
-      # EN17.9 — job-level permissions replace (not merge with) the top-level `read-all`
+      # EN17.10 — job-level permissions replace (not merge with) the top-level `read-all`
       # default; without this, GITHUB_TOKEN can't read @pivot-platform/collaboratif-ui.
       packages: read
 
@@ -32,6 +32,8 @@ jobs:
 
       - name: Install dependencies (sans scripts)
         run: npm ci --ignore-scripts
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate SBOM - Frontend (npm CycloneDX)
         run: |

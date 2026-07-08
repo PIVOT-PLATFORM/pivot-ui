@@ -5,6 +5,7 @@ import { AuthService } from './core/auth/service/auth.service';
 import { adminGuard } from './core/auth/guard/admin.guard';
 import { superAdminGuard } from './core/auth/guard/super-admin.guard';
 import { moduleGuard } from './core/modules/module.guard';
+import { loadWhiteboardModule } from './core/modules/whiteboard-module-loader';
 
 /**
  * Cible de redirection pour toute route inexistante (US01.1.4) :
@@ -16,15 +17,14 @@ export const notFoundRedirect = (): string =>
   inject(AuthService).isAuthenticated() ? '/home' : '/auth/login';
 
 /**
- * PIVOT module ids exposed as top-level shell routes, each gated by moduleGuard —
- * EN03.2 / US03.2.2. The routed component here is only a placeholder
- * (ComingSoonComponent): the real module UI ships from the dedicated pivot-xxx-ui
- * repos and is wired in at integration time — this shell only owns the guarded
- * route entry point and its lazy-loading boundary.
+ * PIVOT module ids still exposed as a placeholder shell route, each gated by moduleGuard —
+ * EN03.2 / US03.2.2. The routed component here is only a placeholder (ComingSoonComponent):
+ * the real module UI ships from the dedicated pivot-xxx-ui repos and is wired in at
+ * integration time — this shell only owns the guarded route entry point and its
+ * lazy-loading boundary.
  *
- * `whiteboard` is the first module actually integrated (EN17.9) — excluded here and
- * given its own route below, lazy-loading the real `@pivot-platform/collaboratif-ui`
- * package instead of the placeholder.
+ * `whiteboard` is no longer in this list — EN17.10 replaced its placeholder with the real
+ * module, see `WHITEBOARD_ROUTE` below.
  */
 const MODULE_IDS = ['session', 'roadmap', 'survey', 'quiz'] as const;
 
@@ -35,16 +35,25 @@ const MODULE_CHILDREN: Routes = MODULE_IDS.map(id => ({
 }));
 
 /**
- * `whiteboard` — EN17.9. Guarded by the same `moduleGuard('whiteboard')` as every other
- * module (tenant activation status, unchanged contract) but `loadChildren`s the real
- * routes published by `@pivot-platform/collaboratif-ui` instead of `ComingSoonComponent`.
+ * `/whiteboard` — EN17.10. First PIVOT module wired to its real, published implementation
+ * (`@pivot-platform/collaboratif-ui`) instead of the `ComingSoonComponent` placeholder still
+ * used by the other module ids above.
+ *
+ * `moduleGuard('whiteboard')` behavior is unchanged (AC "tenant sans le module whiteboard
+ * activé... moduleGuard bloque l'accès") — it still runs, and still fully denies navigation
+ * (redirect to `/home`, toast) *before* the Router resolves `loadChildren`'s dynamic `import()`,
+ * so a disabled tenant never triggers a request for the module's chunk, exactly as for every
+ * other guarded module route.
+ *
+ * `loadChildren` delegates to `loadWhiteboardModule` (not a bare `import()`) so that a failed
+ * dynamic import (network error, missing/stale content-hashed chunk after a deployment) falls
+ * back to `ModuleLoadErrorComponent` instead of a silent blank page — required error-case AC.
  */
 const WHITEBOARD_ROUTE: Routes = [
   {
     path: 'whiteboard',
     canActivate: [moduleGuard('whiteboard')],
-    loadChildren: () =>
-      import('@pivot-platform/collaboratif-ui').then(m => m.COLLABORATIF_ROUTES),
+    loadChildren: loadWhiteboardModule,
   },
 ];
 

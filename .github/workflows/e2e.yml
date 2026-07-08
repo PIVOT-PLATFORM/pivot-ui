@@ -109,6 +109,8 @@ jobs:
         # EN17.9 — @pivot-platform/collaboratif-ui, npm.pkg.github.com : voir ci.yml.
         run: npm ci
         env:
+          # EN17.10 — @pivot-platform/collaboratif-ui is now a real dependency (private
+          # GitHub Packages registry, see .npmrc); npm ci needs read auth for it too.
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Playwright browsers

@@ -77,6 +77,12 @@
     "subtitle": "Cette section sera disponible prochainement.",
     "back": "Retour à l'accueil"
   },
+  "module_load_error": {
+    "title": "Module momentanément indisponible",
+    "subtitle": "Une erreur est survenue lors du chargement de ce module. Réessayez dans quelques instants.",
+    "retry": "Réessayer",
+    "back": "Retour à l'accueil"
+  },
   "auth": {
     "login": {
       "title": "Connexion",
