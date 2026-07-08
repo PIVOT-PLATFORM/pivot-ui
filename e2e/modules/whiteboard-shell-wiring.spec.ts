@@ -107,15 +107,30 @@ test.describe('EN17.10 — /whiteboard wired to the real @pivot-platform/collabo
     await page.goto(HOME_URL);
     await expect(page).toHaveURL(/\/home/, { timeout: 10_000 });
 
+    // TEMP DEBUG (EN17.10 E2E investigation) — remove once the abort() mechanism is confirmed.
+    page.on('console', (msg) => console.log(`[browser console] ${msg.type()}: ${msg.text()}`));
+    page.on('pageerror', (err) => console.log(`[browser pageerror] ${err.message}`));
+    page.on('requestfailed', (req) =>
+      console.log(`[requestfailed] ${req.url()} — ${req.failure()?.errorText}`)
+    );
+    page.on('response', (res) => {
+      if (res.url().endsWith('.js')) console.log(`[response] ${res.status()} ${res.url()}`);
+    });
+
     // Everything needed for /home is already loaded/cached at this point (see
     // module-guard.spec.ts's navigateInApp rationale) — the only *new* script request an
     // in-app navigation to /whiteboard can still trigger is the module's own dynamic
     // `import()` chunk. Aborting all new script requests from here on deterministically
     // simulates that specific failure (network error / missing chunk) without depending on
     // its content-hashed filename, which isn't predictable from a test.
-    await page.route('**/*.js', (route) => route.abort('failed'));
+    await page.route('**/*.js', (route) => {
+      console.log(`[route intercepted] ${route.request().url()}`);
+      return route.abort('failed');
+    });
 
     await navigateInApp(page, '/whiteboard');
+    await page.waitForTimeout(2000);
+    console.log(`[debug] body html length: ${(await page.locator('main').innerHTML()).length}`);
 
     await expect(page.locator('.module-load-error')).toBeVisible({ timeout: 10_000 });
     await expect(page.getByRole('alert')).toBeVisible();
