@@ -29,10 +29,10 @@ jobs:
           scope: '@pivot-platform'
 
       - name: Install dependencies
+        # @pivot-platform/collaboratif-ui (EN17.10) is a private GitHub Packages dependency now —
+        # npm ci needs read auth for it too, not just the later publish step.
         run: npm ci
         env:
-          # EN17.10 — @pivot-platform/collaboratif-ui is now a real dependency (private
-          # GitHub Packages registry, see .npmrc); npm ci needs read auth for it too.
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build ui-core library
@@ -45,6 +45,12 @@ jobs:
           npm --prefix dist/ui-core version "$VERSION" --no-git-tag-version
 
       - name: Publish to GitHub Packages
+        # Tag pushes only — a regular push to main re-publishing the same unbumped version
+        # fails with "cannot publish over the previously published versions" (real incident,
+        # every non-tag push since the first successful publish). Version bumps happen above,
+        # gated the same way; publish must be gated identically or it runs against whatever
+        # version.json still has checked in from the last tag.
+        if: startsWith(github.ref, 'refs/tags/v')
         run: npm publish ./dist/ui-core
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
