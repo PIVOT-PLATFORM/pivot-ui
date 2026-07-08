@@ -3,11 +3,22 @@
  *
  * Complements `e2e/modules/module-guard.spec.ts` (generic moduleGuard mechanism, still exercised
  * on `/whiteboard` for the disabled-module and interstitial-loading cases — unchanged by this
- * Enabler). This file covers what's specific to EN17.10:
- *  - happy path: the real whiteboard module renders (`.board-list`), not `ComingSoonComponent`
- *    (`.coming-soon`) and not a blank page.
- *  - error case: `loadChildren()`'s dynamic `import()` failing (network/chunk error) falls back
- *    to `ModuleLoadErrorComponent` (`.module-load-error`) instead of a silent blank page.
+ * Enabler). This file covers the happy path specific to EN17.10: the real whiteboard module
+ * renders (`.board-list`), not `ComingSoonComponent` (`.coming-soon`) and not a blank page.
+ *
+ * Error case ("Error case: given @pivot-platform/collaboratif-ui indisponible ou erreur de
+ * chargement dynamique... then un fallback est géré côté shell — pas de page blanche
+ * silencieuse") is covered instead by `src/app/app.routes.spec.ts` (`whiteboard route fallback —
+ * EN17.10 error case`) as a TestBed + RouterTestingHarness integration test, not here: simulating
+ * a failed dynamic `import()` by aborting `**\/*.js` requests turned out unreliable in this
+ * Chromium/Playwright combination — ES module dynamic imports were not consistently surfaced
+ * through `page.route()` interception (confirmed empirically in real CI runs: zero interceptions
+ * logged for the chunk request despite the abort rule, and the module loaded successfully
+ * regardless). The TestBed-based test exercises the exact same
+ * loadChildren -> reject -> .catch() -> real Router activation -> real component render path,
+ * using `vi.doMock` to intercept the dynamic import at the module-registry level instead of the
+ * network level — reliable, and it runs in the regular unit test suite rather than needing a
+ * real browser.
  */
 import { test, expect, type Page } from '@playwright/test';
 
@@ -96,51 +107,5 @@ test.describe('EN17.10 — /whiteboard wired to the real @pivot-platform/collabo
     await expect(page.locator('.coming-soon')).toHaveCount(0);
     // Not the dynamic-import failure fallback either.
     await expect(page.locator('.module-load-error')).toHaveCount(0);
-  });
-
-  test('dynamic import failure (chunk/network error) — falls back to an explicit error page, never a silent blank page', async ({
-    page,
-  }) => {
-    await stubAuthenticatedSession(page);
-    await stubModuleStatus(page, 'whiteboard', true);
-
-    await page.goto(HOME_URL);
-    await expect(page).toHaveURL(/\/home/, { timeout: 10_000 });
-
-    // TEMP DEBUG (EN17.10 E2E investigation) — remove once the abort() mechanism is confirmed.
-    page.on('console', (msg) => console.log(`[browser console] ${msg.type()}: ${msg.text()}`));
-    page.on('pageerror', (err) => console.log(`[browser pageerror] ${err.message}`));
-    page.on('requestfailed', (req) =>
-      console.log(`[requestfailed] ${req.url()} — ${req.failure()?.errorText}`)
-    );
-    page.on('response', (res) => {
-      if (res.url().endsWith('.js')) console.log(`[response] ${res.status()} ${res.url()}`);
-    });
-
-    // Everything needed for /home is already loaded/cached at this point (see
-    // module-guard.spec.ts's navigateInApp rationale) — the only *new* script request an
-    // in-app navigation to /whiteboard can still trigger is the module's own dynamic
-    // `import()` chunk. Aborting all new script requests from here on deterministically
-    // simulates that specific failure (network error / missing chunk) without depending on
-    // its content-hashed filename, which isn't predictable from a test.
-    await page.route('**/*.js', (route) => {
-      console.log(`[route intercepted] ${route.request().url()}`);
-      return route.abort('failed');
-    });
-
-    await navigateInApp(page, '/whiteboard');
-    await page.waitForTimeout(2000);
-    console.log(`[debug] body html length: ${(await page.locator('main').innerHTML()).length}`);
-
-    await expect(page.locator('.module-load-error')).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByRole('alert')).toBeVisible();
-    // Router stays on /whiteboard (the fallback route resolves under it) — not a redirect
-    // masking the failure, and not a blank /whiteboard either.
-    await expect(page).toHaveURL(/\/whiteboard/, { timeout: 10_000 });
-    await expect(page.locator('.board-list')).toHaveCount(0);
-
-    // Explicit recovery affordances, not a dead end.
-    await expect(page.locator('.module-load-error__retry')).toBeVisible();
-    await expect(page.locator('.module-load-error__back')).toBeVisible();
   });
 });
