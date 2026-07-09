@@ -1,16 +1,61 @@
 name: Deploy
 
-# Déploiement production — déclenché UNIQUEMENT à la publication d'une GitHub Release (créée
-# par Semantic Release dans release.yml). Event-based : ne tourne que sur de vraies releases
-# (jamais "skipped") et conserve les garde-fous de l'environnement `production` : approvals,
-# secrets d'environnement, règles de déploiement, historique des deployments.
+# Déploiement production — EN07.5 (pivot-docs/docs/backlog/EPIC-infrastructure/ENABLERS/en-deploy-ci.md).
+# Mirror de pivot-core/.github/workflows/deploy.yml — même structure (déclenchement, résolution
+# de version, SSH, smoke test + rollback, notification), adaptée au service `nginx` (image
+# pivot-ui) de docker-compose.prod.yml au lieu de `pivot-core`.
+#
+# Déclenchement — voir pivot-core/deploy.yml pour le raisonnement complet (déjà validé côté
+# organisation) : `release: published` capture "tag v* ou merge sur main" en réutilisant l'image
+# déjà scannée/publiée par release.yml, `workflow_dispatch` pour rollback/redéploiement manuel.
+#
+# Périmètre : ce workflow ne touche QUE le service `nginx` (image pivot-ui) de
+# `docker-compose.prod.yml`. Le déploiement de pivot-core (service `pivot-core`) est la
+# responsabilité du `deploy.yml` de pivot-core, déclenché par SA propre release — jamais
+# mélangés ici (règle d'isolation par repo, `pivot-platform/CLAUDE.md`).
+#
+# Secrets requis (mêmes noms que pivot-core/deploy.yml — un seul serveur cible, secrets déjà
+# posés sur les deux repos) :
+#   - PROD_SSH_HOST, PROD_SSH_USER, PROD_SSH_KEY   : accès SSH au serveur de production
+#   - PROD_SSH_PORT                                : optionnel, défaut 22
+#   - PROD_DEPLOY_PATH                             : répertoire serveur contenant
+#                                                     docker-compose.prod.yml (synchronisé sur
+#                                                     le serveur hors CI)
+#   - GH_PACKAGES_USERNAME, GH_PACKAGES_TOKEN      : login GHCR sur le serveur avant `docker
+#                                                     compose pull` — packages privés par défaut
+#                                                     (org), confirmé bloquant en déployant une
+#                                                     vraie instance (2026-07-09) : 401/403 sans
+#                                                     ce login. Token = PAT dédié, scope
+#                                                     `read:packages` uniquement.
+#   - SLACK_WEBHOOK_URL                            : optionnel — absent = notification Slack
+#                                                     dégradée en warning explicite, run visible
+#                                                     sans aucun secret via l'onglet
+#                                                     Environments/Deployments (natif GitHub)
+#
+# Image versionnée : release.yml (pivot-ui#128/#130/#131) ajoute un tag `${VERSION}` (semver),
+# en plus de `${GITHUB_SHA}` et `latest` — nécessaire ici pour la même raison que pivot-core
+# (le tag Git observé pointe sur le commit de bump, pas sur le commit buildé). `latest` interdit
+# en déploiement par `.plumber.yaml` (`containerImageMustNotUseForbiddenTags`).
 
 on:
   release:
     types: [published]
-  workflow_dispatch:   # déclenchement manuel possible (rollback, re-déploiement)
+  workflow_dispatch:
+    inputs:
+      version:
+        description: >-
+          Version à (re)déployer (ex. "1.4.0", sans le préfixe "v"). Optionnel si le run suit un
+          événement "release" (résolue depuis le tag) — obligatoire en déclenchement manuel.
+        required: false
+        type: string
 
 permissions: read-all
+
+# Un déploiement à la fois — même raisonnement que pivot-core/deploy.yml : éviter deux
+# `docker compose up -d` concurrents sur le même service, mettre en file plutôt qu'annuler.
+concurrency:
+  group: deploy-production-ui
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -20,7 +65,124 @@ jobs:
     environment: production
     permissions:
       contents: read
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
     steps:
-      - name: Deploy (TODO)
-        run: echo "TODO — brancher ici le déploiement (image nginx -> SSH / k8s / etc.)"
+      - name: Resolve target version
+        id: version
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          DISPATCH_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          set -euo pipefail
+          if [ -n "${DISPATCH_VERSION:-}" ]; then
+            VERSION="${DISPATCH_VERSION#v}"
+          elif [ -n "${RELEASE_TAG:-}" ]; then
+            VERSION="${RELEASE_TAG#v}"
+          else
+            echo "::error::Aucune version résolue — déclenchement manuel sans input 'version' et hors événement 'release'."
+            exit 1
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Version cible : pivot-ui:${VERSION}"
+
+      - name: Deploy — pull image & restart nginx
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
+        env:
+          PIVOT_UI_VERSION: ${{ steps.version.outputs.version }}
+          DEPLOY_PATH: ${{ secrets.PROD_DEPLOY_PATH }}
+          GH_PACKAGES_USERNAME: ${{ secrets.GH_PACKAGES_USERNAME }}
+          GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+        with:
+          host: ${{ secrets.PROD_SSH_HOST }}
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          port: ${{ secrets.PROD_SSH_PORT || '22' }}
+          envs: PIVOT_UI_VERSION,DEPLOY_PATH,GH_PACKAGES_USERNAME,GH_PACKAGES_TOKEN
+          script: |
+            set -euo pipefail
+            cd "${DEPLOY_PATH:?PROD_DEPLOY_PATH not set}"
+            echo "${GH_PACKAGES_TOKEN}" | docker login ghcr.io -u "${GH_PACKAGES_USERNAME}" --password-stdin
+            echo "Pull + restart nginx (pivot-ui:${PIVOT_UI_VERSION})"
+            docker compose -f docker-compose.prod.yml pull nginx
+            docker compose -f docker-compose.prod.yml up -d nginx
+
+      - name: Smoke test + automatic rollback on failure
+        id: smoke
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
+        env:
+          PIVOT_UI_VERSION: ${{ steps.version.outputs.version }}
+          DEPLOY_PATH: ${{ secrets.PROD_DEPLOY_PATH }}
+        with:
+          host: ${{ secrets.PROD_SSH_HOST }}
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          port: ${{ secrets.PROD_SSH_PORT || '22' }}
+          envs: PIVOT_UI_VERSION,DEPLOY_PATH
+          script: |
+            set -euo pipefail
+            cd "${DEPLOY_PATH:?PROD_DEPLOY_PATH not set}"
+
+            # Même mécanisme de marqueur que pivot-core/deploy.yml — voir son commentaire pour
+            # le raisonnement complet (fichier plutôt qu'inspection docker, écrit uniquement
+            # après un smoke test réussi).
+            VERSION_FILE=".pivot-ui-version"
+            NEW_VERSION="${PIVOT_UI_VERSION}"
+            PREVIOUS_VERSION="$(cat "${VERSION_FILE}" 2>/dev/null || true)"
+
+            # nginx publie :80/:443 sur l'hôte (docker-compose.prod.yml, contrairement à
+            # pivot-core dont l'actuator n'est jamais exposé) — curl direct sur localhost:80
+            # depuis le serveur, pas besoin de `docker compose exec`. /health (pas /) : c'est
+            # le même endpoint que le HEALTHCHECK du conteneur lui-même
+            # (docker-compose.prod.yml, service nginx), exempté de la redirection 80→443.
+            smoke_test() {
+              for _ in $(seq 1 10); do
+                if curl -fsS -m 5 http://localhost:80/health >/dev/null 2>&1; then
+                  return 0
+                fi
+                sleep 6
+              done
+              return 1
+            }
+
+            if smoke_test; then
+              echo "${NEW_VERSION}" > "${VERSION_FILE}"
+              echo "Smoke test OK — pivot-ui:${NEW_VERSION} déployé, marqué comme dernière version saine."
+              exit 0
+            fi
+
+            echo "::error::Smoke test échoué pour pivot-ui:${NEW_VERSION}."
+
+            if [ -z "${PREVIOUS_VERSION}" ]; then
+              echo "::error::Aucune version précédente connue (${VERSION_FILE} absent — probablement le tout premier déploiement) — rollback impossible, intervention manuelle requise."
+              exit 1
+            fi
+
+            echo "Rollback automatique vers pivot-ui:${PREVIOUS_VERSION}…"
+            export PIVOT_UI_VERSION="${PREVIOUS_VERSION}"
+            docker compose -f docker-compose.prod.yml pull nginx
+            docker compose -f docker-compose.prod.yml up -d nginx
+
+            if smoke_test; then
+              echo "::error::Rollback vers pivot-ui:${PREVIOUS_VERSION} réussi et sain — pivot-ui:${NEW_VERSION} n'a PAS été retenu. Investiguer avant de retenter ce déploiement."
+            else
+              echo "::error::Rollback vers pivot-ui:${PREVIOUS_VERSION} a AUSSI échoué le smoke test — état du serveur incertain, intervention manuelle URGENTE."
+            fi
+            exit 1
+
+      - name: Notify — Slack
+        if: always() && env.SLACK_WEBHOOK_URL != ''
+        uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
+        with:
+          webhook: ${{ env.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "${{ job.status == 'success' && ':white_check_mark:' || ':x:' }} Déploiement pivot-ui ${{ steps.version.outputs.version }} — ${{ job.status }}\n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            }
+
+      - name: Notify — fallback (aucun webhook configuré)
+        if: always() && env.SLACK_WEBHOOK_URL == ''
+        run: |
+          echo "::warning::Aucun secret SLACK_WEBHOOK_URL configuré — notification Slack non envoyée. Statut de ce déploiement visible sans aucun secret via l'onglet Environments/Deployments (natif GitHub, déjà actif) : ${{ github.server_url }}/${{ github.repository }}/deployments"
