@@ -51,6 +51,11 @@ jobs:
       version: ${{ steps.version.outputs.version }}
     permissions:
       contents: read
+      # EN17.10 — @pivot-platform/collaboratif-ui (private GitHub Packages) is a real
+      # package.json dependency npm needs to read on install; GITHUB_TOKEN otherwise gets a
+      # 403 in this job even with NODE_AUTH_TOKEN set (confirmed 2026-07-09) — contents: read
+      # alone doesn't imply packages: read.
+      packages: read
 
     steps:
       - name: Checkout
