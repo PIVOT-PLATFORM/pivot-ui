@@ -141,14 +141,29 @@ jobs:
           # EN17.10 — le Dockerfile installe désormais @pivot-platform/collaboratif-ui
           # (registre privé GitHub Packages) ; secret BuildKit, jamais un --build-arg.
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.prepare.outputs.version }}
         run: |
-          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}/pivot-ui"
+          # NOT "${GITHUB_REPOSITORY,,}/pivot-ui" — GITHUB_REPOSITORY is already
+          # "PIVOT-PLATFORM/pivot-ui"; appending the repo name again doubled the path segment
+          # (ghcr.io/pivot-platform/pivot-ui/pivot-ui), which nothing that consumes this image
+          # (docker-compose.prod.yml: ghcr.io/pivot-platform/pivot-ui:*) can ever resolve.
+          # Same bug, same fix as pivot-core's release.yml (confirmed empirically 2026-07-09
+          # deploying a real instance — every previously published image only exists at the
+          # doubled path).
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}"
           echo "IMAGE_REF=${IMAGE}:${GITHUB_SHA}" >> "$GITHUB_ENV"
+          # Stable semver tag, in addition to GITHUB_SHA/latest — matches pivot-core's
+          # release.yml (EN07.5) and closes the gap EN07.5's own spec flagged for pivot-ui
+          # ("a le même gap (pas de tag semver)"). `latest` is forbidden for deployment
+          # targeting by .plumber.yaml (containerImageMustNotUseForbiddenTags) — a real
+          # deploy.yml for pivot-ui needs this to pin a specific release.
+          echo "IMAGE_VERSION=${IMAGE}:${VERSION}" >> "$GITHUB_ENV"
           echo "IMAGE_LATEST=${IMAGE}:latest" >> "$GITHUB_ENV"
           echo "image_name=${IMAGE}" >> "$GITHUB_OUTPUT"
           docker buildx build --platform linux/amd64 --load \
             --secret id=npm_token,env=NODE_AUTH_TOKEN \
             -t "${IMAGE}:${GITHUB_SHA}" \
+            -t "${IMAGE}:${VERSION}" \
             -t "${IMAGE}:latest" \
             .
 
@@ -173,6 +188,7 @@ jobs:
         id: push
         run: |
           docker push "${IMAGE_REF}"
+          docker push "${IMAGE_VERSION}"
           PUSH_OUT=$(docker push "${IMAGE_LATEST}" 2>&1)
           printf '%s\n' "${PUSH_OUT}"
           DIGEST=$(printf '%s\n' "${PUSH_OUT}" | grep -oE 'sha256:[a-f0-9]{64}' | tail -1)
