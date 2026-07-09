@@ -1,3 +1,28 @@
+# [0.28.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.27.1...v0.28.0) (2026-07-09)
+
+
+### Bug Fixes
+
+* **ci:** ajout nginx.dev.conf — variante HTTP dev sans TLS ([#117](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/117)) ([316fefa](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/316fefa069d3f2a1fa4c5392b755587040020083)), closes [#116](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/116)
+* **ci:** GHCR image path doubled the repo segment, add semver tag ([#128](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/128)) ([ef7001e](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/ef7001e1dcf7c260ae9c6e1e363370e65fc9f124))
+* **ci:** NODE_AUTH_TOKEN missing on release.yml prepare job's npm install ([#130](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/130)) ([520f534](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/520f53472269983debb51682d45c0770403337aa))
+* **ci:** npm publish ./dist/ui-core — fix GitHub shorthand misinterpretation (EN17.3) ([#115](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/115)) ([c05bbe3](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/c05bbe377a118226bf051141094a0035c2edd184))
+* **ci:** prepare job missing packages:read permission for npm auth ([#131](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/131)) ([c582dc7](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/c582dc7f1778c4c9d3261cc3d248e79125b95ee0))
+* **ci:** publish-ui-core — missing npm auth + republish-on-every-push bug ([#125](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/125)) ([5ffcdaf](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/5ffcdaf00675ad03dc0a6ee7b48c6c980bbae9a6)), closes [#121](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/121)
+* **ci:** require exact-line match for the release trigger, not substring ([#106](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/106)) ([d38d18c](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/d38d18cbe970b0449e40e215ca6fcc6599a1baf2))
+* **modules:** comingSoon modules disappear once backend registers them ([#118](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/118)) ([364c9d0](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/364c9d0fb67fc087dfdb1838e8fa57e3444a44b4)), closes [pivot-core#178](https://github.com/pivot-core/issues/178) [pivot-core#178](https://github.com/pivot-core/issues/178)
+* **ui:** home page ignores language switch — strings hardcoded in French ([#108](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/108)) ([63ffa75](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/63ffa75d196b47838cc872645bbfde859cdef71e))
+* **ui:** US02.2.4 — bannière de suppression figée après expiration du délai de grâce ([#97](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/97)) ([835b28c](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/835b28c29f9c21a16c50ea2a6136b936634efe01)), closes [#83](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/83)
+
+
+### Features
+
+* **design-system:** EN17.8 — incubation Angular workspace library dans pivot-ui ([#111](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/111)) ([5d6fb78](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/5d6fb7890ac0acf169947dcf153f3bb0bd676664))
+* **infra:** EN17.7 — nginx API Gateway multi-module routing ([#114](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/114)) ([beba556](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/beba556db46d85c1c46aa904ce286065797ea1da))
+* **modules:** EN17.10 — câble /whiteboard sur @pivot-platform/collaboratif-ui ([#121](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/121)) ([5ab4611](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/5ab46116757549f309314972945cb4a894f62a68))
+* **modules:** EN17.9 — câblage shell route /whiteboard vers @pivot-platform/collaboratif-ui ([#122](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/122)) ([f540a69](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/f540a69c10f75bdb6f9751e64527f3228a6886b5)), closes [pivot-collaboratif-ui#36](https://github.com/pivot-collaboratif-ui/issues/36)
+* **ui-core:** publish @pivot-platform/ui-core library — EN17.3 ([#112](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/112)) ([b88545a](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/b88545ad2a89460d7fe24c97bb15c98933efb34e))
+
 ## [0.27.1](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.27.0...v0.27.1) (2026-07-06)
 
 
