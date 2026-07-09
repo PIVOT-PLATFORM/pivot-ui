@@ -31,6 +31,9 @@ github:
         - browser-actions/setup-chrome
         - zaproxy/action-baseline
         - zaproxy/action-full-scan
+        # EN07.5 — deploy.yml (déploiement prod SSH + notification)
+        - appleboy/ssh-action
+        - slackapi/slack-github-action
         - docker/setup-buildx-action
         - docker/login-action
         - slsa-framework/slsa-github-generator
