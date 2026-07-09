@@ -66,6 +66,13 @@ jobs:
           cache: 'npm'
 
       - name: Install Semantic Release
+        env:
+          # EN17.10 — package.json already lists the private @pivot-platform/collaboratif-ui
+          # dependency; npm reconciles the full lockfile on any `npm install`, even one only
+          # adding devDependencies, so it still needs registry auth here. Missing before this
+          # fix — the "release" job's own "Install dependencies" step (npm ci) already sets
+          # this same var, this "prepare" job's install never did.
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm install --save-dev semantic-release @semantic-release/changelog @semantic-release/git @semantic-release/exec
 
       - name: Compute next version (dry-run)
