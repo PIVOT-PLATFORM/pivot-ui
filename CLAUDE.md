@@ -15,7 +15,7 @@ vers `@pivot/design-system` le jour où ce repo existe, pas avant.
 **Le repo est différé, pas le choix technique** : stack actée par `pivot-docs/docs/adr/ADR-007-design-system-angular-cdk.md`
 — Angular CDK (comportement/a11y) + SCSS BEM custom (visuel), **aucune lib visuelle tierce**
 (Material/Taiga/PrimeNG/Tailwind explicitement rejetés). Suivi backlog : Enabler `EN17.2`
-(`Stage: Backlog`, `Phase: phase-3`).
+(`Stage: ⬜`, `Phase: phase-3`).
 
 **Vision :** interface réactive, accessible (WCAG 2.1 AA), activable par module — sans lock-in SaaS.
 
@@ -163,7 +163,7 @@ Toute contribution mobilise les experts concernés — les mentionner explicitem
 |-------|---------|
 | Item Type | Epic / Feature / Enabler / US |
 | Parent | clé du parent (ex. `E01`, `F01.1`) |
-| Stage | Backlog / Ready / In progress / Review / Done |
+| Stage | ⬜ (pas encore terminé) / ✅ (Done — recette mainteneur). États intermédiaires internes, non persistés → pivot-docs/docs/backlog/README.md §2/§5 |
 | Priority | Critical / High / Medium / Low |
 | Module | core / auth / admin / oidc / pilotage / agilite / collaboratif (extensible par domaine) |
 | Phase | Socle / v1-enterprise / phase-3 |
@@ -205,7 +205,7 @@ Travail organisé par sprint. Référence : **`pivot-docs/docs/backlog/sprints/`
 **Principes :**
 - **Une branche par US / Enabler** — `feat/{us-id}-{slug}` (ex. `feat/us03-1-1-admin-active-module`)
 - **Agents en parallèle** — un agent par item du sprint, branches séparées
-- **Backlog pivot-docs** — mises a jour `Stage` dans le frontmatter US + `sprints/sprint-{N}.md`, committés sur la branche de l'US
+- **Backlog pivot-docs** — mises à jour `sprints/sprint-{N}.md` (état d'avancement), committées sur la branche de l'US. Le champ `Stage` du frontmatter US n'est modifié qu'à deux moments : création (`⬜`) et validation finale par le mainteneur (`✅`) — jamais aux états intermédiaires
 - **Issue GitHub liée** — avant de démarrer un item, vérifier qu'une issue existe dans **ce repo** pour cet US/Enabler (recherche par id/titre). Absente → la créer (titre `{id} — {titre US}`, corps = lien vers le fichier backlog pivot-docs + AC). **Déjà assignée** (humain ou agent en cours) → item déjà pris, ne pas démarrer, passer au suivant. Sinon → se l'auto-assigner immédiatement (`gh issue edit {N} --add-assignee @me`) avant le premier commit — verrouille l'item, empêche qu'un autre agent ou une autre personne ne le reprenne en parallèle. Référencer l'issue dans la PR (`Closes #N`) — fermeture automatique à la fusion, jamais de fermeture manuelle en double.
 
 ## Workflow — Merge séquentiel autonome (plusieurs PR)
@@ -271,7 +271,7 @@ hors sprint (`fix/`, `refactor/`, `chore/`, `docs/`) — **sans exception** :
    - **Convergence** — Gate 4 ≥ 85 ET CI verte → sortir
 3. Gate 4 = 100/100 (ou convergence confirmée sans finding restant) :
    - Sortir la PR du mode draft (`gh pr ready`)
-   - `Stage: Review` dans frontmatter US + `sprints/sprint-{N}.md` (branche/PR dédiée `pivot-docs`)
+   - État interne Review (Stage frontmatter reste `⬜`) + mise à jour `sprints/sprint-{N}.md` (branche/PR dédiée `pivot-docs`)
    - **Gate 5** — générer/mettre à jour la spec fonctionnelle et technique figée `pivot-docs/docs/specs/{EPIC}/{us-id}-{slug}.md` (branche/PR `pivot-docs` dédiée — jamais de commit cross-repo, voir `pivot-docs/docs/workflow/README.md`)
    - Signal mainteneur
 4. Blocage 20 boucles → Breaking Point 2
@@ -376,7 +376,7 @@ dossier `gates/`). Le statut vit dans le champ **Stage** du frontmatter US (pivo
 
 | Gate | Moment | Seuils |
 |------|--------|--------|
-| **1 — READINESS** | Avant implémentation | PO Agent self-challenge · = 100 → Stage: Ready → procéder · < 100 → PO Agent réécrit ACs |
+| **1 — READINESS** | Avant implémentation | PO Agent self-challenge · = 100 → état interne Ready → procéder (Stage frontmatter reste `⬜`) · < 100 → PO Agent réécrit ACs |
 | **2 — COVERAGE** | Par commit | ≥ 85 → continuer · 70–84 → compléter tests · < 70 → stop |
 | **3 — QUALITY** | Après CI verte | Hard blocks : secret Gitleaks, label `security`/`breaking-change`, modif contrat module/OIDC |
 | **4 — MERGE CONFIDENCE** | Avant merge | ≥ 85 → merge autonome · 60–84 → merge documenté · < 60 → Breaking Point 2 |
@@ -441,7 +441,7 @@ AC ambigu à l'implémentation → **stopper et demander au PO Agent** — jamai
 
 ```bash
 # 1. Fermer l'issue GitHub liée (si "Closes #N" dans la PR ne l'a pas déjà fait automatiquement)
-# 2. Mainteneur : passe Stage → Done dans le frontmatter US (recette humaine — jamais Claude)
+# 2. Mainteneur : passe Stage: ⬜ → ✅ dans le frontmatter US (recette humaine — jamais Claude)
 # 3. Débloquer les US dépendantes
 # 4. Nettoyer la branche
 git push origin --delete feat/{us-id}-{slug}
