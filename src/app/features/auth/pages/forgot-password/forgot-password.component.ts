@@ -18,15 +18,15 @@ import { AuthService } from '../../../../core/auth/service/auth.service';
         </div>
 
         @if (sent()) {
-          <div class="sent-block" style="text-align:center;padding:8px 0">
-            <div style="margin-bottom:12px;display:flex;justify-content:center">
+          <div class="sent-block">
+            <div class="sent-block__icon">
               <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand-600)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2 4 12 13 22 4"/></svg>
             </div>
             <h2 class="auth-title">{{ 'auth.forgot_password.sent_title' | transloco }}</h2>
-            <p style="font-size:var(--text-sm);color:var(--color-gray-500);margin-top:8px;line-height:1.6">
+            <p class="sent-block__body">
               {{ 'auth.forgot_password.sent_body' | transloco }}
             </p>
-            <a routerLink="/auth/login" class="btn btn-secondary btn-full" style="margin-top:20px">
+            <a routerLink="/auth/login" class="btn btn-secondary btn-full btn-submit">
               {{ 'auth.forgot_password.sent_back' | transloco }}
             </a>
           </div>
@@ -35,11 +35,11 @@ import { AuthService } from '../../../../core/auth/service/auth.service';
           <p class="auth-subtitle">{{ 'auth.forgot_password.subtitle' | transloco }}</p>
 
           @if (error()) {
-            <div class="alert alert-error" style="margin-bottom:12px" role="alert" aria-live="assertive">{{ error() | transloco }}</div>
+            <div class="alert alert-error auth-page__error" role="alert" aria-live="assertive">{{ error() | transloco }}</div>
           }
 
           <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-            <div class="form-group" style="margin-bottom:16px">
+            <div class="form-group form-group--spaced">
               <label class="form-label" for="email">{{ 'auth.forgot_password.email' | transloco }}</label>
               <input id="email" type="email" formControlName="email" class="form-control"
                      [class.is-invalid]="form.controls.email.invalid && form.controls.email.touched"
@@ -60,7 +60,7 @@ import { AuthService } from '../../../../core/auth/service/auth.service';
       </div>
     </div>
   `,
-  styles: [`:host{display:contents}.auth-page{flex:1;display:flex;align-items:center;justify-content:center;padding:16px;position:relative;z-index:1}.auth-card{max-width:440px;width:100%;padding:20px 36px 28px;box-shadow:0 20px 60px rgba(0,0,0,.35)}.auth-brand{display:flex;justify-content:center;margin-bottom:6px}.auth-brand-icon{height:100px;width:100px;object-fit:contain}.auth-title{font-size:var(--text-xl);font-weight:700;color:var(--color-navy-900);margin-bottom:6px;text-align:center}.auth-subtitle{font-size:var(--text-sm);color:var(--color-gray-500);margin-bottom:16px;text-align:center}.auth-footer{margin-top:14px;text-align:center;font-size:var(--text-sm);color:var(--color-gray-500)}`]
+  styleUrl: './forgot-password.component.scss',
 })
 export class ForgotPasswordComponent {
   private readonly fb = inject(FormBuilder);

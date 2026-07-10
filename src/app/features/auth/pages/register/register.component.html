@@ -5,15 +5,15 @@
     </div>
 
     @if (success()) {
-      <div class="success-block" style="text-align:center;padding:16px 0">
-        <div style="margin-bottom:16px;display:flex;justify-content:center">
+      <div class="success-block">
+        <div class="success-block__icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand-600)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2 4 12 13 22 4"/></svg>
         </div>
         <h2 class="auth-title">{{ 'auth.register.success_title' | transloco }}</h2>
-        <p style="font-size:var(--text-sm);color:var(--color-gray-500);margin-top:8px;line-height:1.6">
+        <p class="success-block__body">
           {{ 'auth.register.success_body' | transloco }}
         </p>
-        <p style="font-size:var(--text-xs);color:var(--color-gray-500);margin-top:16px">
+        <p class="success-block__note">
           {{ 'auth.register.success_no_email' | transloco }}
           <a routerLink="/auth/login">{{ 'auth.register.success_back_login' | transloco }}</a>.
         </p>
@@ -23,7 +23,7 @@
       <p class="auth-subtitle">{{ 'auth.register.subtitle' | transloco }}</p>
 
       @if (error()) {
-        <div class="alert alert-error" style="margin-bottom:16px" role="alert" aria-live="assertive">{{ error() | transloco:errorParams() }}</div>
+        <div class="alert alert-error register-error" role="alert" aria-live="assertive">{{ error() | transloco:errorParams() }}</div>
       }
 
       <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
@@ -102,7 +102,7 @@
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:24px"
+        <button type="submit" class="btn btn-primary btn-full btn-lg btn-submit"
                 [disabled]="form.invalid || loading()">
           @if (loading()) { <span class="spinner"></span> }
           {{ 'auth.register.submit' | transloco }}
