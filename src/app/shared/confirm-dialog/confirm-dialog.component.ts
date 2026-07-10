@@ -43,7 +43,24 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (open) {
+      <!--
+        Le backdrop n'a pas d'équivalent clavier dédié par conception : c'est une
+        commodité souris (clic à l'extérieur = annuler), pas un contrôle interactif à
+        part entière. L'équivalent clavier existe déjà et est prioritaire — Escape
+        (voir onKeydown ci-dessous), conformément au WAI-ARIA Dialog (Modal) Pattern.
+        Rendre ce calque focusable ajouterait un arrêt de tabulation fantôme sans
+        libellé, ce qui dégraderait l'a11y réelle.
+      -->
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
       <div class="confirm-dialog__backdrop" data-testid="confirm-dialog-backdrop" (click)="cancel()">
+        <!--
+          (click) ici sert uniquement à stopPropagation (empêcher le clic dans le
+          panneau de remonter jusqu'au backdrop et de fermer le dialogue). Le panneau
+          n'est pas lui-même une cible interactive — le focus y est géré manuellement
+          (voir ngOnChanges/trapFocus ci-dessous), pas par ce conteneur ; le rendre
+          focusable ajouterait un arrêt de tabulation redondant.
+        -->
+        <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -->
         <div
           #dialogEl
           class="confirm-dialog"

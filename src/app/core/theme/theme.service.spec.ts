@@ -1,5 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { ThemeService } from './theme.service';
+import { ensureLocalStorageStub } from '../i18n/testing/local-storage-stub';
+
+ensureLocalStorageStub();
 
 describe('ThemeService', () => {
   let service: ThemeService;

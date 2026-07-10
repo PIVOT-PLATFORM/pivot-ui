@@ -8,7 +8,15 @@ import { notFoundRedirect, routes } from './app.routes';
 import { AuthService } from './core/auth/service/auth.service';
 import { AccountDeletionCancelComponent } from './features/account/deletion/account-deletion-cancel.component';
 import { installMemoryLocalStorage } from './features/account/deletion/testing/memory-local-storage';
+import { ensureLocalStorageStub } from './core/i18n/testing/local-storage-stub';
 import { environment } from '../environments/environment';
+
+// Needed by the "whiteboard route fallback" describe below: mounting the authenticated shell
+// constructs ThemeService, which reads localStorage — see local-storage-stub.ts for why this
+// environment doesn't provide one natively. installMemoryLocalStorage() (used further down for
+// the /account/deletion/cancel describe) is a per-test, restore-after-each mock instead — not a
+// substitute here, since this call must be visible before ANY describe in this file runs.
+ensureLocalStorageStub();
 
 const TRANSLOCO_LANGS = {
   fr: {

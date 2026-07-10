@@ -4,6 +4,9 @@ import { provideRouter } from '@angular/router';
 import { Component } from '@angular/core';
 import { TranslocoTestingModule, TranslocoService } from '@jsverse/transloco';
 import { AuthShellComponent } from './auth-shell.component';
+import { ensureLocalStorageStub } from '../../core/i18n/testing/local-storage-stub';
+
+ensureLocalStorageStub();
 
 @Component({ template: '', standalone: true })
 class StubComponent {}
