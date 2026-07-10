@@ -56,7 +56,7 @@ import { PasswordStrengthComponent } from '../../../../shared/components/passwor
             <p class="auth-subtitle">{{ 'auth.reset_password.subtitle' | transloco }}</p>
 
             @if (error()) {
-              <div class="alert alert-error" style="margin-bottom:12px">{{ error() | transloco }}</div>
+              <div class="alert alert-error" style="margin-bottom:12px" role="alert" aria-live="assertive">{{ error() | transloco }}</div>
             }
 
             <form [formGroup]="form" (ngSubmit)="submit()" novalidate>

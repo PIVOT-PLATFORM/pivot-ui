@@ -23,7 +23,7 @@
       <p class="auth-subtitle">{{ 'auth.register.subtitle' | transloco }}</p>
 
       @if (error()) {
-        <div class="alert alert-error" style="margin-bottom:16px">{{ error() | transloco:errorParams() }}</div>
+        <div class="alert alert-error" style="margin-bottom:16px" role="alert" aria-live="assertive">{{ error() | transloco:errorParams() }}</div>
       }
 
       <form [formGroup]="form" (ngSubmit)="submit()" novalidate>

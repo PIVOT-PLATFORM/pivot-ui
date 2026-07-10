@@ -8,7 +8,7 @@
 
     <div class="error-slot">
       @if (error()) {
-        <div class="alert alert-error">{{ error() | transloco }}</div>
+        <div class="alert alert-error" role="alert" aria-live="assertive">{{ error() | transloco }}</div>
       }
     </div>
 
