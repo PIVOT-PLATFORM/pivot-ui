@@ -9,6 +9,9 @@ import { LoginComponent } from './login.component';
 import { GOOGLE_CLIENT_ID } from '../../../../app.config';
 import { PostLoginRedirectService } from '../../../../core/auth/service/post-login-redirect.service';
 import { environment } from '../../../../../environments/environment';
+import { ensureLocalStorageStub } from '../../../../core/i18n/testing/local-storage-stub';
+
+ensureLocalStorageStub();
 
 @Component({ template: '', standalone: true })
 class StubComponent {}
