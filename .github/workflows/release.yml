@@ -164,19 +164,17 @@ jobs:
           # doubled path).
           IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}"
           echo "IMAGE_REF=${IMAGE}:${GITHUB_SHA}" >> "$GITHUB_ENV"
-          # Stable semver tag, in addition to GITHUB_SHA/latest — matches pivot-core's
+          # Stable semver tag, in addition to GITHUB_SHA — matches pivot-core's
           # release.yml (EN07.5) and closes the gap EN07.5's own spec flagged for pivot-ui
-          # ("a le même gap (pas de tag semver)"). `latest` is forbidden for deployment
-          # targeting by .plumber.yaml (containerImageMustNotUseForbiddenTags) — a real
-          # deploy.yml for pivot-ui needs this to pin a specific release.
+          # ("a le même gap (pas de tag semver)"). No `latest` tag: forbidden for deployment
+          # targeting by .plumber.yaml (containerImageMustNotUseForbiddenTags) — deploy.yml
+          # already pins on ${VERSION} exclusively, so `latest` was pure unused residue (#146).
           echo "IMAGE_VERSION=${IMAGE}:${VERSION}" >> "$GITHUB_ENV"
-          echo "IMAGE_LATEST=${IMAGE}:latest" >> "$GITHUB_ENV"
           echo "image_name=${IMAGE}" >> "$GITHUB_OUTPUT"
           docker buildx build --platform linux/amd64 --load \
             --secret id=npm_token,env=NODE_AUTH_TOKEN \
             -t "${IMAGE}:${GITHUB_SHA}" \
             -t "${IMAGE}:${VERSION}" \
-            -t "${IMAGE}:latest" \
             .
 
       - name: Scan Docker image - Trivy (gate avant push)
@@ -200,8 +198,7 @@ jobs:
         id: push
         run: |
           docker push "${IMAGE_REF}"
-          docker push "${IMAGE_VERSION}"
-          PUSH_OUT=$(docker push "${IMAGE_LATEST}" 2>&1)
+          PUSH_OUT=$(docker push "${IMAGE_VERSION}" 2>&1)
           printf '%s\n' "${PUSH_OUT}"
           DIGEST=$(printf '%s\n' "${PUSH_OUT}" | grep -oE 'sha256:[a-f0-9]{64}' | tail -1)
           if [ -z "${DIGEST}" ]; then

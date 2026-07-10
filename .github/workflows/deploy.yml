@@ -33,9 +33,11 @@ name: Deploy
 #                                                     Environments/Deployments (natif GitHub)
 #
 # Image versionnée : release.yml (pivot-ui#128/#130/#131) ajoute un tag `${VERSION}` (semver),
-# en plus de `${GITHUB_SHA}` et `latest` — nécessaire ici pour la même raison que pivot-core
-# (le tag Git observé pointe sur le commit de bump, pas sur le commit buildé). `latest` interdit
-# en déploiement par `.plumber.yaml` (`containerImageMustNotUseForbiddenTags`).
+# en plus de `${GITHUB_SHA}` — nécessaire ici pour la même raison que pivot-core (le tag Git
+# observé pointe sur le commit de bump, pas sur le commit buildé). release.yml ne pousse plus
+# de tag `latest` (#146) : mutable et interdit en déploiement par `.plumber.yaml`
+# (`containerImageMustNotUseForbiddenTags`) — ce déploiement ne cible de toute façon que
+# `${VERSION}`, `latest` n'était qu'un résidu jamais consommé ici.
 
 on:
   release:
