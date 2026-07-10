@@ -199,6 +199,9 @@ test.describe('US-AUTH-002 — Login', () => {
     // The app displays the transloco key as-is in dev mode when translations
     // are not loaded, but may also display translated text — either is acceptable.
     await expect(alert).not.toBeEmpty();
+    // WCAG 4.1.3 (#135): error banner must be announced to assistive tech without focus
+    await expect(alert).toHaveAttribute('role', 'alert');
+    await expect(alert).toHaveAttribute('aria-live', 'assertive');
 
     // Must stay on the login page
     await expect(page).toHaveURL(new RegExp(LOGIN_URL));
