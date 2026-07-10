@@ -63,7 +63,15 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.device-alert { margin-bottom: 16px; }
+.device-alert {
+  margin-bottom: 16px;
+
+  &__link {
+    font-weight: 600;
+    display: block;
+    margin-top: 8px;
+  }
+}
 
 .btn-submit { margin-top: 14px; }
 

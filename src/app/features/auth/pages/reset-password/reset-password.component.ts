@@ -20,30 +20,30 @@ import { PasswordStrengthComponent } from '../../../../shared/components/passwor
 
         @switch (tokenState()) {
           @case ('checking') {
-            <div style="text-align:center;padding:16px 0">
-              <div class="spinner" style="margin:0 auto 12px"></div>
-              <p style="font-size:var(--text-sm);color:var(--color-gray-500)">{{ 'auth.reset_password.checking' | transloco }}</p>
+            <div class="auth-page__banner auth-page__banner--loading">
+              <div class="spinner spinner--centered"></div>
+              <p class="auth-page__hint">{{ 'auth.reset_password.checking' | transloco }}</p>
             </div>
           }
           @case ('invalid') {
-            <div style="text-align:center;padding:8px 0">
-              <div style="margin-bottom:16px;display:flex;justify-content:center">
+            <div class="auth-page__banner">
+              <div class="auth-page__banner-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-error)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
               </div>
               <h2 class="auth-title">{{ 'auth.reset_password.expired_title' | transloco }}</h2>
               <p class="auth-subtitle">{{ 'auth.reset_password.expired_body' | transloco }}</p>
-              <a routerLink="/auth/forgot-password" class="btn btn-primary btn-full" style="margin-top:16px">
+              <a routerLink="/auth/forgot-password" class="btn btn-primary btn-full auth-page__banner-cta">
                 {{ 'auth.reset_password.request_new' | transloco }}
               </a>
             </div>
           }
           @case ('success') {
-            <div style="text-align:center;padding:8px 0">
-              <div style="margin-bottom:12px;display:flex;justify-content:center">
+            <div class="auth-page__banner">
+              <div class="auth-page__banner-icon auth-page__banner-icon--tight">
                 <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
               </div>
               <h2 class="auth-title">{{ 'auth.reset_password.success_title' | transloco }}</h2>
-              <p style="font-size:var(--text-sm);color:var(--color-gray-500);margin:8px 0 20px">
+              <p class="auth-page__banner-body">
                 {{ 'auth.reset_password.success_body' | transloco }}
               </p>
               <a routerLink="/auth/login" class="btn btn-primary btn-full btn-lg">
@@ -56,11 +56,11 @@ import { PasswordStrengthComponent } from '../../../../shared/components/passwor
             <p class="auth-subtitle">{{ 'auth.reset_password.subtitle' | transloco }}</p>
 
             @if (error()) {
-              <div class="alert alert-error" style="margin-bottom:12px" role="alert" aria-live="assertive">{{ error() | transloco }}</div>
+              <div class="alert alert-error auth-page__error" role="alert" aria-live="assertive">{{ error() | transloco }}</div>
             }
 
             <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-              <div class="form-group" style="margin-bottom:16px">
+              <div class="form-group form-group--spaced">
                 <label class="form-label" for="newPassword">{{ 'auth.reset_password.new_password' | transloco }}</label>
                 <input id="newPassword" type="password" formControlName="newPassword" class="form-control"
                        [class.is-invalid]="form.controls.newPassword.invalid && form.controls.newPassword.touched"
@@ -82,7 +82,7 @@ import { PasswordStrengthComponent } from '../../../../shared/components/passwor
       </div>
     </div>
   `,
-  styles: [`:host{display:contents}.auth-page{flex:1;display:flex;align-items:center;justify-content:center;padding:16px;position:relative;z-index:1}.auth-card{max-width:440px;width:100%;padding:20px 36px 28px;box-shadow:0 20px 60px rgba(0,0,0,.35)}.auth-brand{display:flex;justify-content:center;margin-bottom:6px}.auth-brand-icon{height:100px;width:100px;object-fit:contain}.auth-title{font-size:var(--text-xl);font-weight:700;color:var(--color-navy-900);margin-bottom:6px;text-align:center}.auth-subtitle{font-size:var(--text-sm);color:var(--color-gray-500);margin-bottom:16px;text-align:center}`]
+  styleUrl: './reset-password.component.scss',
 })
 export class ResetPasswordComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
