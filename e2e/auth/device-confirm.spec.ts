@@ -96,6 +96,9 @@ test.describe('US-AUTH-002 — Device MFA (OTP)', () => {
     const err = page.locator('.alert-error');
     await expect(err).toBeVisible({ timeout: 5_000 });
     await expect(err).not.toBeEmpty();
+    // WCAG 4.1.3 (#135): error banner must be announced to assistive tech without focus
+    await expect(err).toHaveAttribute('role', 'alert');
+    await expect(err).toHaveAttribute('aria-live', 'assertive');
   });
 
   test('device confirm — rate limit (429) shows specific error', async ({ page }) => {
@@ -109,6 +112,9 @@ test.describe('US-AUTH-002 — Device MFA (OTP)', () => {
     const err = page.locator('.alert-error');
     await expect(err).toBeVisible({ timeout: 5_000 });
     await expect(err).not.toBeEmpty();
+    // WCAG 4.1.3 (#135): error banner must be announced to assistive tech without focus
+    await expect(err).toHaveAttribute('role', 'alert');
+    await expect(err).toHaveAttribute('aria-live', 'assertive');
   });
 
   test('device confirm — cancel returns to login', async ({ page }) => {
