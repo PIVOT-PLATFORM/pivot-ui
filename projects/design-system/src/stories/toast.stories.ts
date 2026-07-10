@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 import { applicationConfig, moduleMetadata } from '@storybook/angular';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { TranslocoModule, provideTransloco, TranslocoLoader } from '@jsverse/transloco';
 import { Injectable } from '@angular/core';
@@ -25,9 +25,9 @@ class StoryTranslocoLoader implements TranslocoLoader {
   standalone: true,
   imports: [ToastComponent, TranslocoModule],
   template: `
-    <div style="padding: 24px; font-family: var(--font-sans); min-height: 200px;">
-      <h3 style="margin-bottom: 16px; color: var(--color-gray-900);">Toast Container Demo</h3>
-      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+    <div class="toast-demo">
+      <h3 class="toast-demo__title">Toast Container Demo</h3>
+      <div class="toast-demo__actions">
         <button class="btn btn-secondary" (click)="showInfo()">Info toast</button>
         <button class="btn btn-secondary" (click)="showWarning()">Warning toast</button>
         <button class="btn btn-danger" (click)="showError()">Error toast</button>
@@ -35,9 +35,14 @@ class StoryTranslocoLoader implements TranslocoLoader {
       <pivot-ds-toast-container></pivot-ds-toast-container>
     </div>
   `,
+  styles: [`
+    .toast-demo { padding: 24px; font-family: var(--font-sans); min-height: 200px; }
+    .toast-demo__title { margin-bottom: 16px; color: var(--color-gray-900); }
+    .toast-demo__actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  `],
 })
 class ToastDemoComponent {
-  constructor(private readonly toastService: ToastService) {}
+  private readonly toastService = inject(ToastService);
 
   showInfo(): void { this.toastService.show('common.close', 'info'); }
   showWarning(): void { this.toastService.show('auth.session.expired', 'warning'); }

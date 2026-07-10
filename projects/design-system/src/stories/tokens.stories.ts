@@ -9,40 +9,44 @@ import { Component } from '@angular/core';
   selector: 'pivot-ds-token-showcase',
   standalone: true,
   template: `
-    <div style="padding: 24px; font-family: var(--font-sans);">
-      <h1 style="font-size: var(--text-2xl); margin-bottom: 16px; color: var(--color-gray-900);">
+    <div class="token-showcase">
+      <h1 class="token-showcase__title">
         Design Tokens — @pivot/design-system
       </h1>
 
-      <section style="margin-bottom: 32px;">
-        <h2 style="font-size: var(--text-lg); margin-bottom: 12px; color: var(--color-gray-700);">
+      <section class="token-showcase__section">
+        <h2 class="token-showcase__section-title">
           Brand colors (violet)
         </h2>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <div *ngFor="let token of brandTokens" style="text-align: center;">
-            <div [style.background]="'var(' + token + ')'" style="width: 64px; height: 64px; border-radius: 8px; border: 1px solid rgba(0,0,0,.1);"></div>
-            <p style="font-size: 10px; margin-top: 4px; color: var(--color-gray-600);">{{ token }}</p>
-          </div>
+        <div class="token-showcase__grid token-showcase__grid--tight">
+          @for (token of brandTokens; track token) {
+            <div class="token-showcase__swatch">
+              <div class="token-showcase__swatch-box token-showcase__swatch-box--square" [style.background]="'var(' + token + ')'"></div>
+              <p class="token-showcase__swatch-label">{{ token }}</p>
+            </div>
+          }
         </div>
       </section>
 
-      <section style="margin-bottom: 32px;">
-        <h2 style="font-size: var(--text-lg); margin-bottom: 12px; color: var(--color-gray-700);">
+      <section class="token-showcase__section">
+        <h2 class="token-showcase__section-title">
           Semantic colors
         </h2>
-        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-          <div *ngFor="let s of semanticTokens">
-            <div [style.background]="'var(' + s.token + ')'" style="width: 80px; height: 40px; border-radius: 4px;"></div>
-            <p style="font-size: 10px; margin-top: 4px; color: var(--color-gray-600);">{{ s.label }}</p>
-          </div>
+        <div class="token-showcase__grid token-showcase__grid--loose">
+          @for (s of semanticTokens; track s.token) {
+            <div>
+              <div class="token-showcase__swatch-box token-showcase__swatch-box--rect" [style.background]="'var(' + s.token + ')'"></div>
+              <p class="token-showcase__swatch-label">{{ s.label }}</p>
+            </div>
+          }
         </div>
       </section>
 
-      <section style="margin-bottom: 32px;">
-        <h2 style="font-size: var(--text-lg); margin-bottom: 12px; color: var(--color-gray-700);">
+      <section class="token-showcase__section">
+        <h2 class="token-showcase__section-title">
           Typography scale
         </h2>
-        <div style="display: flex; flex-direction: column; gap: 4px;">
+        <div class="token-showcase__type-scale">
           <p [style.fontSize]="'var(--text-xs)'">--text-xs (0.75rem) — Légende</p>
           <p [style.fontSize]="'var(--text-sm)'">--text-sm (0.875rem) — Corps</p>
           <p [style.fontSize]="'var(--text-base)'">--text-base (1rem) — Base</p>
@@ -53,6 +57,21 @@ import { Component } from '@angular/core';
       </section>
     </div>
   `,
+  styles: [`
+    .token-showcase { padding: 24px; font-family: var(--font-sans); }
+    .token-showcase__title { font-size: var(--text-2xl); margin-bottom: 16px; color: var(--color-gray-900); }
+    .token-showcase__section { margin-bottom: 32px; }
+    .token-showcase__section-title { font-size: var(--text-lg); margin-bottom: 12px; color: var(--color-gray-700); }
+    .token-showcase__grid { display: flex; flex-wrap: wrap; }
+    .token-showcase__grid--tight { gap: 8px; }
+    .token-showcase__grid--loose { gap: 16px; }
+    .token-showcase__swatch { text-align: center; }
+    .token-showcase__swatch-box { border-radius: 8px; }
+    .token-showcase__swatch-box--square { width: 64px; height: 64px; border: 1px solid rgba(0,0,0,.1); }
+    .token-showcase__swatch-box--rect { width: 80px; height: 40px; border-radius: 4px; }
+    .token-showcase__swatch-label { font-size: 10px; margin-top: 4px; color: var(--color-gray-600); }
+    .token-showcase__type-scale { display: flex; flex-direction: column; gap: 4px; }
+  `],
 })
 class TokenShowcaseComponent {
   brandTokens = [

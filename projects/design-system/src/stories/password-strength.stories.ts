@@ -31,18 +31,22 @@ class StoryTranslocoLoader implements TranslocoLoader {
   standalone: true,
   imports: [PasswordStrengthComponent, TranslocoModule],
   template: `
-    <div style="padding: 24px; max-width: 400px; font-family: var(--font-sans);">
-      <h3 style="margin-bottom: 16px; color: var(--color-gray-900);">PasswordStrength Demo</h3>
+    <div class="password-demo">
+      <h3 class="password-demo__title">PasswordStrength Demo</h3>
       <input
         type="password"
-        class="form-control"
+        class="form-control password-demo__input"
         placeholder="Saisissez un mot de passe…"
         (input)="password.set($any($event.target).value)"
-        style="margin-bottom: 8px;"
       />
       <pivot-ds-password-strength [password]="password()" />
     </div>
   `,
+  styles: [`
+    .password-demo { padding: 24px; max-width: 400px; font-family: var(--font-sans); }
+    .password-demo__title { margin-bottom: 16px; color: var(--color-gray-900); }
+    .password-demo__input { margin-bottom: 8px; }
+  `],
 })
 class PasswordDemoComponent {
   readonly password = signal('');

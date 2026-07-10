@@ -100,6 +100,13 @@ export function avatarColor(name: string): string {
             <svg class="navbar__chevron" [class.navbar__chevron--open]="userMenuOpen()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           @if (userMenuOpen()) {
+            <!--
+              (click) ici sert uniquement à stopPropagation (empêcher le listener
+              document:click de refermer le menu au clic à l'intérieur) — ce n'est pas
+              un contrôle interactif : les vrais éléments actionnables sont les
+              menuitem enfants (<a>/<button> natifs, déjà clavier-accessibles).
+            -->
+            <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
             <div class="navbar__dropdown" role="menu" [attr.aria-label]="'nav.dropdown.user_menu_aria' | transloco" (click)="$event.stopPropagation()">
               <div class="navbar__dropdown-header" role="none">
                 <span class="navbar__avatar navbar__avatar--lg" [style.background]="userAvatarColor()" aria-hidden="true">{{ initials() }}</span>
