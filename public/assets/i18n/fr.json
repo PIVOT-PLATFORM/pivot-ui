@@ -735,6 +735,7 @@
         "memberUserId": "Identifiant",
         "memberRole": "Rôle",
         "memberJoined": "Ajouté le",
+        "memberActionsColumn": "Actions",
         "changeRole": "Changer le rôle",
         "removeMember": "Retirer",
         "removeError": "Impossible de retirer le membre",
@@ -775,6 +776,7 @@
         "panelLabel": "Palette de couleurs",
         "palette": "Couleur",
         "customHex": "Couleur personnalisée (hex)",
+        "customHexError": "Couleur invalide — format attendu : # suivi de 6 chiffres hexadécimaux (ex. #1A2B3C)",
         "applyCustom": "Appliquer la couleur personnalisée"
       },
       "undo": {
