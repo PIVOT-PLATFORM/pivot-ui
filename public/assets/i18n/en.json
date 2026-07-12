@@ -29,6 +29,10 @@
       "preferences": "Preferences",
       "security": "Security",
       "my_data": "My data",
+      "admin_modules": "Manage modules",
+      "admin_users": "Users",
+      "superadmin_tenants": "Tenants",
+      "superadmin_plans": "Plans",
       "coming_soon": "Soon",
       "coming_soon_a11y": "Coming soon",
       "logout": "Sign out"
