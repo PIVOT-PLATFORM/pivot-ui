@@ -4,8 +4,7 @@
   "compileOnSave": false,
   "compilerOptions": {
     "paths": {
-      "@pivot-platform/ui-core": ["./dist/ui-core"],
-      "design-system": ["./dist/design-system"]
+      "@pivot-platform/ui-core": ["./dist/ui-core"]
     },
     "strict": true,
     "noImplicitOverride": true,
@@ -37,12 +36,6 @@
     },
     {
       "path": "./projects/ui-core/tsconfig.spec.json"
-    },
-    {
-      "path": "./projects/design-system/tsconfig.lib.json"
-    },
-    {
-      "path": "./projects/design-system/tsconfig.spec.json"
     }
   ]
 }

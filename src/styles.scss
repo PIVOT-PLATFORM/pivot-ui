@@ -1,8 +1,9 @@
-// EN17.8 — tokens, reset, components migrés dans projects/design-system/src/scss/
-// L'app importe depuis la lib ; src/styles/tokens|reset|components.scss sont conservés
-// comme shims pour la période de transition (ils seront supprimés à EN17.2).
-@use '../projects/design-system/src/scss/tokens';
+// EN17.2 — le shell consomme le package publié @pivot-platform/design-system
+// (scss/tokens|reset|components|patterns) au lieu du shim local projects/design-system,
+// désormais supprimé. En dev local, le package vient du tgz de local-ui-packages
+// (Dockerfile.local), même mécanisme que les modules.
+@use '@pivot-platform/design-system/scss/tokens';
 @use 'styles/fonts';
-@use '../projects/design-system/src/scss/reset';
-@use '../projects/design-system/src/scss/components';
-@use '../projects/design-system/src/scss/patterns';
+@use '@pivot-platform/design-system/scss/reset';
+@use '@pivot-platform/design-system/scss/components';
+@use '@pivot-platform/design-system/scss/patterns';
