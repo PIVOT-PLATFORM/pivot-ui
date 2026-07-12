@@ -1,16 +1,35 @@
 // Design tokens — charte graphique v3 (violet/magenta duotone, cf. pivot-docs charte graphique)
 :root {
-  // Brand — violet primaire (ramp charte v3)
+  // Brand — violet primaire (ramp charte v3). Ramp complète 50→950 : les paliers
+  // 300/400/800/950 comblent les trous historiques pour que les modules puissent
+  // référencer n'importe quel palier (var(--color-brand-400)…) sans valeur vide.
   --color-brand-50:  #F5F0FE;
   --color-brand-100: #EDE4FD;
   --color-brand-200: #DCC9FB;
+  --color-brand-300: #C7A8F3;
+  --color-brand-400: #A87EEE;
   --color-brand-500: #8B57E8;
   --color-brand-600: #6D28D9;
   --color-brand-700: #5B1FB4;
+  --color-brand-800: #4E1A98;
   --color-brand-900: #431680;
+  --color-brand-950: #2C0E56;
 
-  // Accent — magenta (soulignement, nouveauté ; jamais en fond de grande surface)
-  --color-accent: #DB2777;
+  // Accent — magenta (soulignement, nouveauté ; jamais en fond de grande surface).
+  // --color-accent reste le palier de référence ; la ramp complète sert aux surlignages
+  // dosés (votes, badges "nouveau"), jamais en aplat de grande surface (charte).
+  --color-accent:     #DB2777;
+  --color-accent-50:  #FDF2F8;
+  --color-accent-100: #FCE7F3;
+  --color-accent-200: #FBCFE3;
+  --color-accent-300: #F9A8D0;
+  --color-accent-400: #F472B6;
+  --color-accent-500: #EC4899;
+  --color-accent-600: #DB2777;
+  --color-accent-700: #BE185D;
+  --color-accent-800: #9D174D;
+  --color-accent-900: #831843;
+  --color-accent-950: #500724;
 
   // Navy → encre (texte fort / panneau sombre) — même rôle sémantique, valeurs charte v3
   --color-navy-900: #1A1230;
@@ -26,6 +45,7 @@
   --color-gray-500: #756693;  /* 5.15:1 sur blanc — corrige la régression AA de --pv-text-muted (3.73:1) */
   --color-gray-600: #6B5D8F;
   --color-gray-700: #564A76;
+  --color-gray-800: #33294F;
   --color-gray-900: #1A1230;
 
   // Semantic
@@ -123,10 +143,27 @@
 [data-theme="dark"] {
   --color-brand-50:  #241843;
   --color-brand-100: #40316E;
+  --color-brand-200: #4A2E86;
+  --color-brand-300: #6D4FBE;
+  --color-brand-400: #8B6FE0;
   --color-brand-500: #A78BFA;
   --color-brand-600: #A78BFA;
   --color-brand-700: #C4B5FD;  /* hover plus clair qu'en light — convention dark mode de la charte */
+  --color-brand-800: #2E2154;
+  --color-brand-900: #40316E;
+  --color-brand-950: #1B1340;
   --color-accent:    #F472B6;
+  --color-accent-50:  #3B0A24;
+  --color-accent-100: #5A0F36;
+  --color-accent-200: #7A1449;
+  --color-accent-300: #A61E63;
+  --color-accent-400: #D14C8E;
+  --color-accent-500: #EC72AC;
+  --color-accent-600: #F472B6;
+  --color-accent-700: #F9A8D0;
+  --color-accent-800: #FBCFE3;
+  --color-accent-900: #FCE7F3;
+  --color-accent-950: #FDF2F8;
   --color-navy-900:  #EEE9F8;
   --color-gray-50:   #130D28;
   --color-gray-100:  #221643;
@@ -136,6 +173,7 @@
   --color-gray-500:  #8579A6;
   --color-gray-600:  #A79BC4;
   --color-gray-700:  #B7ABD6;
+  --color-gray-800:  #D3CAE8;
   --color-gray-900:  #EEE9F8;
   --surface-bg:      #0E0A1E;
   --surface-card:    #191131;
