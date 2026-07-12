@@ -110,6 +110,51 @@ describe('NavbarComponent', () => {
   it('notifOpen starts as false', () => { expect(component.notifOpen()).toBe(false); });
   it('notifCount starts at 0', () => { expect(component.notifCount()).toBe(0); });
 
+  describe('admin menu (role-based)', () => {
+    function loginAs(role: string): void {
+      authService.login({ email: 'a@b.com', password: 'pw' }).subscribe();
+      httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush({
+        ...mockAuthResponse,
+        user: { ...mockAuthResponse.user, role },
+      });
+      component.userMenuOpen.set(true);
+      fixture.detectChanges();
+    }
+
+    function menuHrefs(): (string | null)[] {
+      return (Array.from(
+        fixture.nativeElement.querySelectorAll('a[role="menuitem"]'),
+      ) as HTMLAnchorElement[]).map((a) => a.getAttribute('href'));
+    }
+
+    it('exposes no admin/superadmin entry for ROLE_USER', () => {
+      loginAs('ROLE_USER');
+      expect(component.isAdmin()).toBe(false);
+      expect(component.isSuperAdmin()).toBe(false);
+      const hrefs = menuHrefs();
+      expect(hrefs).not.toContain('/admin/modules');
+      expect(hrefs.some((h) => h?.startsWith('/superadmin'))).toBe(false);
+    });
+
+    it('exposes /admin/modules (and /admin/users) for ROLE_ADMIN', () => {
+      loginAs('ROLE_ADMIN');
+      expect(component.isAdmin()).toBe(true);
+      const hrefs = menuHrefs();
+      expect(hrefs).toContain('/admin/modules');
+      expect(hrefs).toContain('/admin/users');
+      expect(hrefs.some((h) => h?.startsWith('/superadmin'))).toBe(false);
+    });
+
+    it('exposes /superadmin/* for ROLE_SUPER_ADMIN', () => {
+      loginAs('ROLE_SUPER_ADMIN');
+      expect(component.isSuperAdmin()).toBe(true);
+      const hrefs = menuHrefs();
+      expect(hrefs).toContain('/superadmin/tenants');
+      expect(hrefs).toContain('/superadmin/plans');
+      expect(hrefs).not.toContain('/admin/modules');
+    });
+  });
+
   describe('initials()', () => {
     it('returns "?" when no user', () => { expect(component.initials()).toBe('?'); });
 
