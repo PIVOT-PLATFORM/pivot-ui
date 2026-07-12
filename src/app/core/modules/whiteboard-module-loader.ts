@@ -1,6 +1,8 @@
+import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { ModuleLoadErrorComponent } from '../../features/module-load-error/module-load-error.component';
+import { AuthService } from '../auth/service/auth.service';
 
 /**
  * Fallback route tree activated when `@pivot-platform/collaboratif-ui`'s dynamic `import()`
@@ -34,15 +36,27 @@ const MODULE_LOAD_ERROR_ROUTES: Routes = [
  * de page blanche silencieuse") is unit-testable with Vitest by mocking the module specifier —
  * Angular's Router only exercises the real `import()` machinery in a browser, which is covered
  * separately by `e2e/modules/whiteboard-shell-wiring.spec.ts`.
+ *
+ * `bearerToken` bridges the shell's `AuthService` to the library's real-time STOMP `CONNECT`
+ * frame (per `COLLABORATIF_BEARER_TOKEN`'s TSDoc in the package) — `AuthService` is captured
+ * here, inside this function's injection context (Angular Router runs `loadChildren` functions
+ * via `runInInjectionContext`), rather than passed as a factory, since the library stores the
+ * accessor as a plain value and invokes it later outside any injection context.
  */
 export function loadWhiteboardModule(): Promise<Routes> {
+  const auth = inject(AuthService);
   return import('@pivot-platform/collaboratif-ui')
     .then(
       m =>
         [
           {
             path: '',
-            providers: [m.provideCollaboratifUi({ apiUrl: environment.collaboratifApiUrl })],
+            providers: [
+              m.provideCollaboratifUi({
+                apiUrl: environment.collaboratifApiUrl,
+                bearerToken: () => auth.accessToken(),
+              }),
+            ],
             children: m.COLLABORATIF_ROUTES,
           },
         ] satisfies Routes,
