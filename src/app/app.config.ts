@@ -6,7 +6,7 @@ export const GOOGLE_CLIENT_ID = new InjectionToken<string>('GOOGLE_CLIENT_ID', {
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideTransloco } from '@jsverse/transloco';
-import { provideCollaboratifUi } from '@pivot-platform/collaboratif-ui';
+import { provideCollaboratifUi, COLLABORATIF_BEARER_TOKEN } from '@pivot-platform/collaboratif-ui';
 import { routes } from './app.routes';
 import { tokenInterceptor } from './core/auth/interceptor/token.interceptor';
 import { AuthService } from './core/auth/service/auth.service';
@@ -47,6 +47,13 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withInterceptors([tokenInterceptor])),
     provideCollaboratifUi({ apiUrl: environment.collaboratifApiUrl }),
+    // Bridge the shell's opaque access token to collaboratif-ui's whiteboard STOMP CONNECT
+    // (the lib has no auth of its own — collaboratif-ui#72). Read lazily at connect time.
+    {
+      provide: COLLABORATIF_BEARER_TOKEN,
+      useFactory: (auth: AuthService) => (): string | null => auth.accessToken(),
+      deps: [AuthService],
+    },
     provideTransloco({
       config: {
         availableLangs: ['en', 'fr'],
