@@ -141,7 +141,7 @@ export const routes: Routes = [
       },
       {
         path: 'teams',
-        loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
+        loadComponent: () => import('./features/teams/teams-admin.component').then(m => m.TeamsAdminComponent),
       },
       {
         path: 'account/profile',

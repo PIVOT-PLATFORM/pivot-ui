@@ -1,0 +1,224 @@
+<section class="tm">
+  <header class="tm__head">
+    <div>
+      <h1 class="tm__title">Gestion des équipes</h1>
+      <p class="tm__subtitle">Organigramme, équipes de travail et délégations d'autorité.</p>
+    </div>
+    <button type="button" class="btn btn-primary" (click)="openNewTeam()">Nouvelle équipe</button>
+  </header>
+
+  <div class="tm__layout">
+    <!-- Org tree -->
+    <nav class="tm__tree" aria-label="Organigramme">
+      @for (u of tree(); track u.id) {
+        <button
+          type="button"
+          class="tm__org-row"
+          [class.tm__org-row--active]="u.selected"
+          [style.padding-left.px]="u.indent"
+          (click)="select(u.id)"
+        >
+          <span class="tm__level" [class.tm__level--active]="u.selected">{{ u.levelLabel }}</span>
+          <span class="tm__org-name" [class.tm__org-name--active]="u.selected">{{ u.name }}</span>
+        </button>
+      }
+    </nav>
+
+    <!-- Detail -->
+    <div class="tm__detail">
+      <div class="tm__crumbs">
+        @for (b of breadcrumb(); track b.id; let last = $last) {
+          <span>{{ b.name }}</span>@if (!last) { <span class="tm__crumb-sep">/</span> }
+        }
+      </div>
+
+      <div class="tm__unit-head">
+        <span class="tm__unit-name">{{ detail().name }}</span>
+        <span class="tm__level tm__level--active">{{ detail().levelLabel }}</span>
+      </div>
+
+      <div class="tm__stats">
+        <div class="tm__card tm__stat">
+          <div class="tm__stat-label">Effectif direct</div>
+          <div class="tm__stat-value">{{ detail().directCount }}</div>
+        </div>
+        <div class="tm__card tm__stat">
+          <div class="tm__stat-label">Effectif total (cumulé)</div>
+          <div class="tm__stat-value tm__stat-value--brand">{{ detail().rollupCount }}</div>
+        </div>
+        <div class="tm__card tm__stat">
+          <div class="tm__stat-label">Équipes rattachées</div>
+          <div class="tm__stat-value">{{ detail().teamCount }}</div>
+        </div>
+      </div>
+
+      <!-- État-major -->
+      <div class="tm__card">
+        <div class="tm__card-title">État-major</div>
+        <div class="tm__card-sub">Responsable et adjoints de l'unité.</div>
+        @for (lead of detail().leadership; track lead.name) {
+          <div class="tm__lead-row">
+            <span class="tm__avatar">{{ lead.initials }}</span>
+            <span class="tm__lead-name">{{ lead.name }}</span>
+            <span class="tm__role" [class]="'tm__role--' + lead.roleKind">{{ lead.roleLabel }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Teams -->
+      <div class="tm__card">
+        <div class="tm__card-title">Équipes rattachées</div>
+        @for (team of detail().teams; track team.name) {
+          <div class="tm__team">
+            <div class="tm__team-head">
+              <div class="tm__team-id">
+                <span class="tm__dot" [style.background]="team.color"></span>
+                <span class="tm__team-name">{{ team.name }}</span>
+              </div>
+              <button type="button" class="btn btn-ghost tm__btn-sm">Gérer</button>
+            </div>
+            <div class="tm__members">
+              @for (m of team.members; track m.name) {
+                <div class="tm__member" [class.tm__member--ext]="m.external">
+                  <div class="tm__member-top">
+                    <span class="tm__avatar tm__avatar--sm" [class.tm__avatar--ext]="m.external">{{ m.initials }}</span>
+                    <span class="tm__member-name">{{ m.name }}</span>
+                    <span class="tm__member-role">{{ m.roleLabel }}</span>
+                    @if (m.external) {
+                      <span class="tm__ext-badge">Externe</span>
+                    }
+                  </div>
+                  @if (m.external && m.attachedTo) {
+                    <div class="tm__member-attach">Rattaché à {{ m.attachedTo }}</div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+        @if (detail().teams.length === 0) {
+          <div class="tm__empty">Aucune équipe directement rattachée à cette unité.</div>
+        }
+      </div>
+
+      <!-- Delegations -->
+      <div class="tm__card">
+        <div class="tm__card-title">Délégations actives</div>
+        @for (d of detail().delegations; track d.delegate) {
+          <div class="tm__deleg">
+            <div class="tm__deleg-body">
+              <div class="tm__deleg-line">{{ d.delegator }} <span class="tm__arrow">→</span> {{ d.delegate }}</div>
+              <div class="tm__deleg-meta">{{ d.dateLabel }} · {{ d.motif }}</div>
+            </div>
+            <span class="tm__scope">{{ d.scopeLabel }}</span>
+          </div>
+        }
+        @if (detail().delegations.length === 0) {
+          <div class="tm__empty">Aucune délégation active sur cette unité.</div>
+        }
+      </div>
+
+      <!-- Orphan teams -->
+      @if (orphanTeamsView().length > 0) {
+        <div class="tm__card">
+          <div class="tm__card-title">Équipes autonomes</div>
+          <div class="tm__card-sub">Équipes sans rattachement à l'organigramme — hors roll-up d'effectif.</div>
+          @for (ot of orphanTeamsView(); track ot.name) {
+            <div class="tm__orphan">
+              <span class="tm__dot" [style.background]="ot.color"></span>
+              <span class="tm__team-name">{{ ot.name }}</span>
+              <span class="tm__orphan-note">— aucune unité</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- New team modal -->
+  @if (showNewTeam()) {
+    <div class="tm__overlay" (click)="closeNewTeam()">
+      <div class="tm__modal" (click)="$event.stopPropagation()">
+        <div class="tm__modal-title">Créer une équipe</div>
+        <p class="tm__card-sub">
+          Une équipe peut être rattachée à une unité organisationnelle, ou créée sans rattachement.
+        </p>
+
+        <div class="form-group">
+          <label class="form-label" for="new-team-name">Nom de l'équipe</label>
+          <input
+            id="new-team-name"
+            class="form-control"
+            type="text"
+            placeholder="Ex : Support renforcé SSO"
+            [value]="newTeamName()"
+            (input)="onNameInput($event)"
+          />
+        </div>
+
+        <div class="tm__field-label">Rattachement</div>
+        <div class="tm__seg">
+          <button
+            type="button"
+            class="btn tm__btn-sm"
+            [class.btn-primary]="newTeamMode() === 'attached'"
+            [class.btn-secondary]="newTeamMode() !== 'attached'"
+            (click)="newTeamMode.set('attached')"
+          >
+            Rattachée à une unité
+          </button>
+          <button
+            type="button"
+            class="btn tm__btn-sm"
+            [class.btn-primary]="newTeamMode() === 'orphan'"
+            [class.btn-secondary]="newTeamMode() !== 'orphan'"
+            (click)="newTeamMode.set('orphan')"
+          >
+            Équipe autonome
+          </button>
+        </div>
+
+        @if (newTeamMode() === 'attached') {
+          <div class="form-group">
+            <label class="form-label" for="new-team-unit">Unité organisationnelle</label>
+            <select id="new-team-unit" class="form-control" [value]="newTeamUnitId()" (change)="onUnitChange($event)">
+              @for (u of units; track u.id) {
+                <option [value]="u.id">{{ u.level }} · {{ u.name }}</option>
+              }
+            </select>
+            <p class="form-hint">
+              L'équipe hérite du contexte de cette unité. L'accès aux ressources partagées reste strict : seuls les
+              membres directs de l'équipe y accèdent.
+            </p>
+          </div>
+        } @else {
+          <p class="form-hint tm__orphan-hint">
+            Cette équipe ne sera rattachée à aucune unité de l'organigramme. Elle n'apparaît dans aucun roll-up
+            d'effectif et reste gérée indépendamment.
+          </p>
+        }
+
+        <div class="tm__field-label">Couleur</div>
+        <div class="tm__colors">
+          @for (c of colors; track c) {
+            <button
+              type="button"
+              class="tm__swatch"
+              [class.tm__swatch--active]="newTeamColor() === c"
+              [style.background]="c"
+              [attr.aria-label]="'Couleur ' + c"
+              (click)="newTeamColor.set(c)"
+            ></button>
+          }
+        </div>
+
+        <div class="tm__modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeNewTeam()">Annuler</button>
+          <button type="button" class="btn btn-primary" [disabled]="createDisabled()" (click)="createTeam()">
+            Créer l'équipe
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</section>
