@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, computed, signal } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 import {
   DELEGATIONS,
   LEAD_ROLE_META,
@@ -51,12 +52,16 @@ interface DetailView {
  * **Mode test.** No org-unit/team CRUD backend exists yet — all data comes from the pure
  * {@link teams.model} demo model and every mutation (select, create team) is local state only
  * (see the model's TSDoc). PIVOT charter throughout (tokens, square radii, Fira).
+ *
+ * i18n: the static chrome is externalised under the `teams.*` Transloco namespace. Row values
+ * (unit/member names, org level & role labels) stay in the demo model — backend-bound data, not
+ * UI labels — consistent with the model's mode-test posture.
  */
 @Component({
   selector: 'app-teams-admin',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [],
+  imports: [TranslocoPipe],
   templateUrl: './teams-admin.component.html',
   styleUrl: './teams-admin.component.scss',
 })
@@ -142,6 +147,14 @@ export class TeamsAdminComponent {
   }
   protected closeNewTeam(): void {
     this.showNewTeam.set(false);
+  }
+
+  /** Keyboard dismiss: Escape closes the modal when open (WCAG 2.1.2 / dialog convention). */
+  @HostListener('document:keydown.escape')
+  protected onEscape(): void {
+    if (this.showNewTeam()) {
+      this.closeNewTeam();
+    }
   }
 
   protected onNameInput(event: Event): void {

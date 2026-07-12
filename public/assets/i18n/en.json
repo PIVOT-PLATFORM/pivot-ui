@@ -972,5 +972,52 @@
         "error_remove": "Unable to remove this module. Please try again."
       }
     }
+  },
+  "teams": {
+    "title": "Team management",
+    "subtitle": "Org chart, working teams and authority delegations.",
+    "newTeam": "New team",
+    "treeLabel": "Org chart",
+    "stats": {
+      "direct": "Direct head-count",
+      "total": "Total head-count (rolled up)",
+      "teams": "Attached teams"
+    },
+    "leadership": {
+      "title": "Leadership",
+      "sub": "Unit lead and deputies."
+    },
+    "teams": {
+      "title": "Attached teams",
+      "manage": "Manage",
+      "external": "External",
+      "attachedTo": "Attached to {{name}}",
+      "empty": "No team directly attached to this unit."
+    },
+    "delegations": {
+      "title": "Active delegations",
+      "empty": "No active delegation on this unit."
+    },
+    "orphan": {
+      "title": "Standalone teams",
+      "sub": "Teams with no org-chart attachment — excluded from head-count roll-up.",
+      "note": "— no unit"
+    },
+    "modal": {
+      "title": "Create a team",
+      "desc": "A team can be attached to an org unit, or created with no attachment.",
+      "nameLabel": "Team name",
+      "namePlaceholder": "e.g. Reinforced SSO support",
+      "attachmentLabel": "Attachment",
+      "attachedMode": "Attached to a unit",
+      "orphanMode": "Standalone team",
+      "unitLabel": "Org unit",
+      "unitHint": "The team inherits this unit’s context. Access to shared resources stays strict: only direct team members reach them.",
+      "orphanHint": "This team will not be attached to any org-chart unit. It appears in no head-count roll-up and is managed independently.",
+      "colorLabel": "Colour",
+      "colorAria": "Colour {{color}}",
+      "cancel": "Cancel",
+      "create": "Create team"
+    }
   }
 }

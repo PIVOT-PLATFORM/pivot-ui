@@ -972,5 +972,52 @@
         "error_remove": "Impossible de retirer ce module. Réessayez."
       }
     }
+  },
+  "teams": {
+    "title": "Gestion des équipes",
+    "subtitle": "Organigramme, équipes de travail et délégations d’autorité.",
+    "newTeam": "Nouvelle équipe",
+    "treeLabel": "Organigramme",
+    "stats": {
+      "direct": "Effectif direct",
+      "total": "Effectif total (cumulé)",
+      "teams": "Équipes rattachées"
+    },
+    "leadership": {
+      "title": "État-major",
+      "sub": "Responsable et adjoints de l’unité."
+    },
+    "teams": {
+      "title": "Équipes rattachées",
+      "manage": "Gérer",
+      "external": "Externe",
+      "attachedTo": "Rattaché à {{name}}",
+      "empty": "Aucune équipe directement rattachée à cette unité."
+    },
+    "delegations": {
+      "title": "Délégations actives",
+      "empty": "Aucune délégation active sur cette unité."
+    },
+    "orphan": {
+      "title": "Équipes autonomes",
+      "sub": "Équipes sans rattachement à l’organigramme — hors roll-up d’effectif.",
+      "note": "— aucune unité"
+    },
+    "modal": {
+      "title": "Créer une équipe",
+      "desc": "Une équipe peut être rattachée à une unité organisationnelle, ou créée sans rattachement.",
+      "nameLabel": "Nom de l’équipe",
+      "namePlaceholder": "Ex : Support renforcé SSO",
+      "attachmentLabel": "Rattachement",
+      "attachedMode": "Rattachée à une unité",
+      "orphanMode": "Équipe autonome",
+      "unitLabel": "Unité organisationnelle",
+      "unitHint": "L’équipe hérite du contexte de cette unité. L’accès aux ressources partagées reste strict : seuls les membres directs de l’équipe y accèdent.",
+      "orphanHint": "Cette équipe ne sera rattachée à aucune unité de l’organigramme. Elle n’apparaît dans aucun roll-up d’effectif et reste gérée indépendamment.",
+      "colorLabel": "Couleur",
+      "colorAria": "Couleur {{color}}",
+      "cancel": "Annuler",
+      "create": "Créer l’équipe"
+    }
   }
 }
