@@ -87,11 +87,11 @@ bg/couleur :
 
 | Surface | Statut |
 |---|---|
-| `teams-admin` (shell) | ✅ migré sur `pv-avatar`/`pv-badge`/`pv-tone-*`/`pv-stat-card` |
-| Pages auth (connexion/inscription) | Glass extrait en `pv-glass-card`/`pv-glass-input` — adoption à finaliser |
-| `gantt-chart` (pilotage) | À migrer (avatar → `pv-avatar`) |
-| `agilite-hub` (agilité) | À migrer (avatar/badge/dot/segmented/stat) |
-| `activities-panel` (collaboratif) | À migrer (glyph → `pv-glyph pv-tone-*`) |
+| `teams-admin` (shell) | ✅ `pv-avatar` / `pv-badge` / `pv-tone-*` / overlay |
+| `agilite-hub` (agilité) | ✅ `pv-avatar` / `pv-badge` / `pv-dot` + tons |
+| `gantt-chart` (pilotage) | ✅ `pv-avatar` |
+| `activities-panel` (collaboratif) | ✅ `pv-glyph` + tons |
+| Pages auth (connexion/inscription) | Glass canonique dispo (`pv-glass-card`/`pv-glass-input`) ; l'impl. reste en SCSS composant — adoption à finaliser |
 
 Les modules consomment ces classes **au runtime** via le CSS global du shell (le paquet
 `@pivot/design-system` n'est pas encore publié — cf. CLAUDE.md). Migration = remplacer les
