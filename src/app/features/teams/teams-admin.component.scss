@@ -96,20 +96,7 @@
     }
   }
 
-  &__level {
-    font-size: var(--text-xs);
-    font-weight: 700;
-    color: var(--color-gray-500);
-    background: var(--color-gray-100);
-    padding: 1px 7px;
-    border-radius: 999px;
-    flex-shrink: 0;
-    white-space: nowrap;
-    &--active {
-      color: var(--color-brand-700);
-      background: var(--color-brand-100);
-    }
-  }
+  // Niveau (badge) → DS `.pv-badge` + tons `.pv-tone-{brand,neutral}`.
 
   // --- Detail ---
   &__detail {
@@ -161,28 +148,7 @@
   }
 
   // --- Avatars / roles ---
-  &__avatar {
-    width: 28px;
-    height: 28px;
-    flex-shrink: 0;
-    border-radius: 999px;
-    background: var(--color-brand-100);
-    color: var(--color-brand-700);
-    font-size: 11px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    &--sm {
-      width: 22px;
-      height: 22px;
-      font-size: 10px;
-    }
-    &--ext {
-      background: var(--color-warning);
-      color: #fff;
-    }
-  }
+  // Avatar → DS `.pv-avatar` (+ `--sm`, `--solid` + ton pour membre externe).
   &__lead-row {
     display: flex;
     align-items: center;
@@ -198,20 +164,7 @@
     font-size: var(--text-sm);
     color: var(--color-gray-900);
   }
-  &__role {
-    font-size: var(--text-xs);
-    font-weight: 600;
-    padding: 3px 10px;
-    border-radius: 999px;
-    &--responsable {
-      background: var(--color-brand-100);
-      color: var(--color-brand-700);
-    }
-    &--adjoint {
-      background: var(--color-gray-100);
-      color: var(--color-gray-600);
-    }
-  }
+  // Rôle (badge) → DS `.pv-badge` + tons `.pv-tone-{brand,neutral}`.
 
   // --- Teams ---
   &__team {
@@ -357,16 +310,7 @@
   }
 
   // --- Modal ---
-  &__overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    background: rgba(26, 18, 48, 0.45);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-  }
+  // Overlay de modale → DS `.pv-modal-overlay`.
   &__modal {
     width: 420px;
     max-width: 90vw;

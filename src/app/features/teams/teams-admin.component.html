@@ -18,7 +18,7 @@
           [style.padding-left.px]="u.indent"
           (click)="select(u.id)"
         >
-          <span class="tm__level" [class.tm__level--active]="u.selected">{{ u.levelLabel }}</span>
+          <span class="pv-badge" [class.pv-tone-brand]="u.selected" [class.pv-tone-neutral]="!u.selected">{{ u.levelLabel }}</span>
           <span class="tm__org-name" [class.tm__org-name--active]="u.selected">{{ u.name }}</span>
         </button>
       }
@@ -34,7 +34,7 @@
 
       <div class="tm__unit-head">
         <span class="tm__unit-name">{{ detail().name }}</span>
-        <span class="tm__level tm__level--active">{{ detail().levelLabel }}</span>
+        <span class="pv-badge pv-tone-brand">{{ detail().levelLabel }}</span>
       </div>
 
       <div class="tm__stats">
@@ -58,9 +58,10 @@
         <div class="tm__card-sub">Responsable et adjoints de l'unité.</div>
         @for (lead of detail().leadership; track lead.name) {
           <div class="tm__lead-row">
-            <span class="tm__avatar">{{ lead.initials }}</span>
+            <span class="pv-avatar">{{ lead.initials }}</span>
             <span class="tm__lead-name">{{ lead.name }}</span>
-            <span class="tm__role" [class]="'tm__role--' + lead.roleKind">{{ lead.roleLabel }}</span>
+            <span class="pv-badge" [class.pv-tone-brand]="lead.roleKind === 'responsable'"
+              [class.pv-tone-neutral]="lead.roleKind !== 'responsable'">{{ lead.roleLabel }}</span>
           </div>
         }
       </div>
@@ -81,7 +82,8 @@
               @for (m of team.members; track m.name) {
                 <div class="tm__member" [class.tm__member--ext]="m.external">
                   <div class="tm__member-top">
-                    <span class="tm__avatar tm__avatar--sm" [class.tm__avatar--ext]="m.external">{{ m.initials }}</span>
+                    <span class="pv-avatar pv-avatar--sm" [class.pv-avatar--solid]="m.external"
+                      [class.pv-tone-warning]="m.external">{{ m.initials }}</span>
                     <span class="tm__member-name">{{ m.name }}</span>
                     <span class="tm__member-role">{{ m.roleLabel }}</span>
                     @if (m.external) {
@@ -137,7 +139,7 @@
 
   <!-- New team modal -->
   @if (showNewTeam()) {
-    <div class="tm__overlay" (click)="closeNewTeam()">
+    <div class="pv-modal-overlay" (click)="closeNewTeam()">
       <div class="tm__modal" (click)="$event.stopPropagation()">
         <div class="tm__modal-title">Créer une équipe</div>
         <p class="tm__card-sub">
