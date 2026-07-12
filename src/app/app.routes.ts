@@ -6,6 +6,8 @@ import { adminGuard } from './core/auth/guard/admin.guard';
 import { superAdminGuard } from './core/auth/guard/super-admin.guard';
 import { moduleGuard } from './core/modules/module.guard';
 import { loadWhiteboardModule } from './core/modules/whiteboard-module-loader';
+import { loadPilotageModule } from './core/modules/pilotage-module-loader';
+import { loadAgiliteModule } from './core/modules/agilite-module-loader';
 
 /**
  * Cible de redirection pour toute route inexistante (US01.1.4) :
@@ -54,6 +56,24 @@ const WHITEBOARD_ROUTE: Routes = [
     path: 'whiteboard',
     canActivate: [moduleGuard('whiteboard')],
     loadChildren: loadWhiteboardModule,
+  },
+];
+
+/** `/pilotage` — EN18. Real module (`@pivot-platform/pilotage-ui`), same pattern as whiteboard. */
+const PILOTAGE_ROUTE: Routes = [
+  {
+    path: 'pilotage',
+    canActivate: [moduleGuard('pilotage')],
+    loadChildren: loadPilotageModule,
+  },
+];
+
+/** `/agilite` — EN18. Real module (`@pivot-platform/agilite-ui`), same pattern as whiteboard. */
+const AGILITE_ROUTE: Routes = [
+  {
+    path: 'agilite',
+    canActivate: [moduleGuard('agilite')],
+    loadChildren: loadAgiliteModule,
   },
 ];
 
@@ -210,6 +230,8 @@ export const routes: Routes = [
           import('./features/account/account-settings.component').then(m => m.AccountSettingsComponent),
       },
       ...WHITEBOARD_ROUTE,
+      ...PILOTAGE_ROUTE,
+      ...AGILITE_ROUTE,
       ...MODULE_CHILDREN,
       { path: 'legal', children: LEGAL_CHILDREN },
       {

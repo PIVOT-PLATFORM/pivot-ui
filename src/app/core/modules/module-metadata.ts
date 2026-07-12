@@ -33,6 +33,22 @@ export const MODULE_METADATA: Record<string, ModuleUiMeta> = {
     comingSoon: false,
     color: '#8B5CF6',
   },
+  pilotage: {
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"/><polyline points="15 6 21 12 15 18"/><circle cx="7" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="17" cy="12" r="1.5" fill="currentColor"/></svg>`,
+    description: 'Roadmap, Gantt, portefeuille et calendrier',
+    // EN18 — real shell integration (loadChildren from @pivot-platform/pilotage-ui), not a placeholder.
+    route: '/pilotage',
+    comingSoon: false,
+    color: '#10B981',
+  },
+  agilite: {
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="7" height="14" rx="1"/><rect x="14" y="5" width="7" height="9" rx="1"/></svg>`,
+    description: "Scrum Poker, rétrospectives et roues d'équipe",
+    // EN18 — real shell integration (loadChildren from @pivot-platform/agilite-ui), not a placeholder.
+    route: '/agilite',
+    comingSoon: false,
+    color: '#F59E0B',
+  },
   session: {
     icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/><circle cx="17" cy="8" r="2"/><path d="M15 14s0-3 2-3 2 3 2 3"/></svg>`,
     description: 'Sessions live : quiz, sondages, brainstorm',
