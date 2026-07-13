@@ -1,3 +1,27 @@
+# [0.29.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.28.0...v0.29.0) (2026-07-13)
+
+
+### Bug Fixes
+
+* **a11y:** auth error banners announce to screen readers ([#149](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/149)) ([d7bab50](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/d7bab50e5310f1f804b4d04a2f70812ece2474c1)), closes [#135](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/135) [#135](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/135)
+* add ChangeDetectionStrategy.OnPush to sidebar.component.ts ([#150](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/150)) ([f776707](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/f776707c15bae2c31d7c60b0390f431472d9dc6f)), closes [#137](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/137)
+* **ci:** packages: read pour le build deploy-dev (deps [@pivot-platform](https://github.com/pivot-platform)) ([#193](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/193)) ([5ff95bf](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/5ff95bf4799f5ed217d7d8fd1268862932b8366d))
+* **ci:** publish npm ui-core inline in release.yml, not on dead tag trigger ([#164](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/164)) ([260ebca](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/260ebca9f0e14c0b99312780c1a54ed69608d967)), closes [#163](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/163)
+* **ci:** stop pushing mutable 'latest' Docker tag ([#148](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/148)) ([40348a7](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/40348a7466ad21683450551e51b985ba6a2fe007)), closes [#146](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/146) [#146](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/146)
+* **i18n:** sync lockfile to module packages ^0.3.0 ([#184](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/184)) ([9c9a78f](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/9c9a78f2b1c4f5f5d5f764a30db47f81924387a9)), closes [#183](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/183)
+* pivot-core /api/ location uses stale-DNS-prone static upstream, causing 502 ([#155](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/155)) ([4c903e6](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/4c903e66ec1926a55700166e6653c9c305d90761)), closes [#154](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/154)
+* **ui:** EN17.10 — 2 clés Transloco whiteboard manquantes dans le catalogue shell ([#156](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/156)) ([bf4a70e](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/bf4a70ee41b51db6d1bf5d7c6aa30be6ea36d6f4))
+* **whiteboard:** vignettes de templates (assets manquants) ([#161](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/161)) ([6b1c85f](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/6b1c85f509fe777a3e0237433a6e5633fafc183a))
+* **ws:** upgrade le handshake WebSocket whiteboard (/api/collaboratif/ws/) ([#159](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/159)) ([c455c5d](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/c455c5dd221e81cc8ec21a400e30a9d68ef4a435)), closes [#157](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/157)
+
+
+### Features
+
+* **ci:** implement deploy.yml (EN07.5) — was a TODO placeholder ([#132](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/132)) ([7111723](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/7111723531cae634b641be439010b1bbef9abd26))
+* **edge:** variante nginx Cloud Run pour l'edge managed-min ([#189](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/189)) ([6a647e2](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/6a647e2d3c3696160a07658e65595f53ce3ec4f1))
+* **i18n:** merge module catalogues from packages at build ([#183](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/183)) ([7d28eb6](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/7d28eb6269d7fbae1df7deee904fb7421c573968))
+* **ui:** expose les pages admin/superadmin dans le menu utilisateur de la navbar ([#160](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/160)) ([e57ccc2](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/e57ccc2197251944a2439ee59f99d7e10b413506)), closes [pivot-ui#158](https://github.com/pivot-ui/issues/158) [#158](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/158)
+
 # [0.28.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.27.1...v0.28.0) (2026-07-09)
 
 
