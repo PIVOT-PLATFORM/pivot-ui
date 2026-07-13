@@ -18,6 +18,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      packages: read   # lire les deps privées @pivot-platform/*-ui (npm GitHub Packages)
     env:
       SHA_TAG: ${{ github.sha }}
     steps:
