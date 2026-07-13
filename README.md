@@ -78,6 +78,22 @@ npm start
 # → http://localhost:4200
 ```
 
+### Écosystème complet (shell + modules + backends)
+
+Le shell seul ne suffit pas à tester les modules métier. Pour lancer **toute la plateforme en
+local** (backend, module-cores, infra, et ce shell derrière le gateway nginx sur `:80`),
+l'orchestrateur est **`pivot-core`** — voir sa section *Développement local* :
+<https://github.com/PIVOT-PLATFORM/pivot-core#développement-local--lancer-tout-lécosystème>.
+
+Deux modes y sont documentés :
+- **Par défaut** — le service `frontend` build ce repo et consomme les libs `@pivot-platform/*-ui`
+  **publiées** (GitHub Packages, `NODE_AUTH_TOKEN` requis).
+- **Offline / UI locales** — `Dockerfile.local` (ce repo) build le shell contre les libs
+  `-ui` **buildées depuis les sources locales** (tarballs `local-ui-packages/`), **sans GitHub npm**.
+  Piloté par `pivot-core/scripts/pack-local-ui.sh` + `pivot-core/compose.local.yml`.
+
+Le seed des comptes de test + l'activation des modules sont aussi documentés côté pivot-core.
+
 ---
 
 ## Commandes

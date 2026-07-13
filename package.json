@@ -10,7 +10,7 @@
     "test:ci": "ng test --watch=false --coverage",
     "test:mutation": "stryker run",
     "build:ui-core": "ng build ui-core",
-    "lint": "eslint src/ projects/ui-core/src/ projects/design-system/src/"
+    "lint": "eslint src/ projects/ui-core/src/"
   },
   "private": true,
   "packageManager": "npm@11.13.0",
@@ -23,7 +23,10 @@
     "@angular/platform-browser": "^22.0.0",
     "@angular/router": "^22.0.0",
     "@jsverse/transloco": "^8.4.0",
-    "@pivot-platform/collaboratif-ui": "^0.1.0",
+    "@pivot-platform/agilite-ui": "^0.2.1",
+    "@pivot-platform/collaboratif-ui": "^0.2.0",
+    "@pivot-platform/design-system": "^0.2.0",
+    "@pivot-platform/pilotage-ui": "^0.2.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

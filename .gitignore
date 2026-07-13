@@ -43,3 +43,6 @@ lighthouse-reports/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Local-only UI tarballs for Dockerfile.local (pivot-core/scripts/pack-local-ui.sh)
+local-ui-packages/
