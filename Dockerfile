@@ -16,5 +16,11 @@ RUN npm run build -- --configuration production
 FROM nginx:alpine
 RUN apk upgrade --no-cache
 COPY --from=builder /app/dist/frontend/browser /usr/share/nginx/html
+# Default config = docker-compose gateway (:443/TLS, Docker service upstreams).
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80 443
+# Cloud Run edge: template + entrypoint hook. When PIVOT_CORE_UPSTREAM is set
+# (Cloud Run / managed-min), 40-pivot-cloudrun-upstreams.sh renders the template
+# over default.conf (listen :8080, *.run.app upstreams). Inert otherwise.
+COPY nginx.cloudrun.conf.template /etc/nginx/pivot/nginx.cloudrun.conf.template
+COPY --chmod=0755 docker-entrypoint.d/40-pivot-cloudrun-upstreams.sh /docker-entrypoint.d/40-pivot-cloudrun-upstreams.sh
+EXPOSE 80 443 8080

@@ -1,0 +1,231 @@
+# EN — PIVOT API Gateway, Cloud Run edge variant (managed-min stack).
+#
+# Differences vs nginx.conf (the docker-compose gateway):
+#   - Listens plain HTTP on 8080 — Cloud Run terminates TLS in front of the
+#     container. No :443 server, no cert mounts, no 80->443 redirect.
+#   - Upstreams are the backends' *.run.app hostnames, injected at container
+#     start by docker-entrypoint.d/40-pivot-cloudrun-upstreams.sh via envsubst:
+#       ${PIVOT_CORE_UPSTREAM} ${PIVOT_COLLABORATIF_UPSTREAM}
+#       ${PIVOT_AGILITE_UPSTREAM} ${PIVOT_PILOTAGE_UPSTREAM}
+#     (host only, no scheme). Each is proxied over HTTPS with SNI + a Host header
+#     rewritten to the run.app host (Cloud Run routes on Host).
+#   - Public resolver (Cloud Run has no Docker embedded DNS) so run.app names are
+#     resolved at request time; `set $var` defers resolution past nginx start.
+#
+# Routing order mirrors nginx.conf (longest-prefix wins).
+
+map $uri $pivot_module {
+    ~^/api/collaboratif/ws  collaboratif-ws;
+    ~^/ws/pilotage       pilotage-ws;
+    ~^/ws/agilite        agilite-ws;
+    ~^/api/collaboratif  collaboratif;
+    ~^/api/pilotage      pilotage;
+    ~^/api/agilite       agilite;
+    ~^/api               core;
+    default              static;
+}
+
+log_format json_access escape=json
+    '{'
+        '"time":"$time_iso8601",'
+        '"remote_addr":"$remote_addr",'
+        '"method":"$request_method",'
+        '"uri":"$request_uri",'
+        '"status":$status,'
+        '"upstream":"$upstream_addr",'
+        '"module":"$pivot_module",'
+        '"request_time":$request_time'
+    '}';
+
+server {
+    listen 8080;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Cloud Run has no embedded DNS — use a public resolver so *.run.app upstream
+    # hostnames resolve at request time (paired with `set $var` below).
+    resolver 8.8.8.8 1.1.1.1 ipv6=off valid=30s;
+    resolver_timeout 5s;
+
+    access_log /var/log/nginx/access.log json_access;
+
+    # Security headers (repeated per-location that sets its own add_header —
+    # nginx does not inherit parent add_header into such locations).
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none';" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css application/json application/javascript text/javascript application/xml;
+
+    # Health endpoint — Cloud Run startup/liveness probe hits this on :8080.
+    location = /health {
+        access_log off;
+        add_header Content-Type text/plain;
+        return 200 'ok';
+    }
+
+    # ── WebSocket — /ws/pilotage/ ─────────────────────────────────────────
+    location /ws/pilotage/ {
+        set $pilotage_up "${PIVOT_PILOTAGE_UPSTREAM}";
+        proxy_pass https://$pilotage_up;
+        proxy_ssl_server_name on;
+        proxy_ssl_name $pilotage_up;
+        proxy_set_header Host $pilotage_up;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_connect_timeout 5s;
+        proxy_read_timeout    3600s;
+        proxy_send_timeout    3600s;
+        proxy_intercept_errors on;
+        error_page 502 503 504 @module_unavailable;
+    }
+
+    # ── WebSocket — /ws/agilite/ ──────────────────────────────────────────
+    location /ws/agilite/ {
+        set $agilite_up "${PIVOT_AGILITE_UPSTREAM}";
+        proxy_pass https://$agilite_up;
+        proxy_ssl_server_name on;
+        proxy_ssl_name $agilite_up;
+        proxy_set_header Host $agilite_up;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_connect_timeout 5s;
+        proxy_read_timeout    3600s;
+        proxy_send_timeout    3600s;
+        proxy_intercept_errors on;
+        error_page 502 503 504 @module_unavailable;
+    }
+
+    # ── WebSocket — /api/collaboratif/ws/ (STOMP whiteboard) ─────────────
+    location ^~ /api/collaboratif/ws/ {
+        set $collaboratif_up "${PIVOT_COLLABORATIF_UPSTREAM}";
+        proxy_pass https://$collaboratif_up;
+        proxy_ssl_server_name on;
+        proxy_ssl_name $collaboratif_up;
+        proxy_set_header Host $collaboratif_up;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_connect_timeout 5s;
+        proxy_read_timeout    3600s;
+        proxy_send_timeout    3600s;
+        proxy_intercept_errors on;
+        error_page 502 503 504 @module_unavailable;
+    }
+
+    # ── REST — /api/pilotage/ ─────────────────────────────────────────────
+    location /api/pilotage/ {
+        set $pilotage_up "${PIVOT_PILOTAGE_UPSTREAM}";
+        proxy_pass https://$pilotage_up;
+        proxy_ssl_server_name on;
+        proxy_ssl_name $pilotage_up;
+        proxy_set_header Host $pilotage_up;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_connect_timeout 5s;
+        proxy_send_timeout    60s;
+        proxy_read_timeout    60s;
+        proxy_intercept_errors on;
+        error_page 502 503 504 @module_unavailable;
+    }
+
+    # ── REST — /api/agilite/ ──────────────────────────────────────────────
+    location /api/agilite/ {
+        set $agilite_up "${PIVOT_AGILITE_UPSTREAM}";
+        proxy_pass https://$agilite_up;
+        proxy_ssl_server_name on;
+        proxy_ssl_name $agilite_up;
+        proxy_set_header Host $agilite_up;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_connect_timeout 5s;
+        proxy_send_timeout    60s;
+        proxy_read_timeout    60s;
+        proxy_intercept_errors on;
+        error_page 502 503 504 @module_unavailable;
+    }
+
+    # ── REST — /api/collaboratif/ ─────────────────────────────────────────
+    location /api/collaboratif/ {
+        set $collaboratif_up "${PIVOT_COLLABORATIF_UPSTREAM}";
+        proxy_pass https://$collaboratif_up;
+        proxy_ssl_server_name on;
+        proxy_ssl_name $collaboratif_up;
+        proxy_set_header Host $collaboratif_up;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_connect_timeout 5s;
+        proxy_send_timeout    60s;
+        proxy_read_timeout    60s;
+        proxy_intercept_errors on;
+        error_page 502 503 504 @module_unavailable;
+    }
+
+    # ── REST — /api/ (pivot-core catch-all after module prefixes) ─────────
+    location /api/ {
+        set $core_up "${PIVOT_CORE_UPSTREAM}";
+        proxy_pass https://$core_up;
+        proxy_ssl_server_name on;
+        proxy_ssl_name $core_up;
+        proxy_set_header Host $core_up;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_connect_timeout 5s;
+        proxy_send_timeout    60s;
+        proxy_read_timeout    60s;
+        proxy_intercept_errors on;
+        error_page 502 504 @api_unavailable;
+    }
+
+    # ── Static — i18n JSON (no-cache) ────────────────────────────────────
+    location ~* /assets/i18n/.*\.json$ {
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        expires 0;
+        try_files $uri =404;
+    }
+
+    # ── Static — hashed assets (long cache) ──────────────────────────────
+    location ~* \.(js|css|woff2?|ttf|eot|ico|svg|png|jpg|webp)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        add_header X-Content-Type-Options "nosniff" always;
+    }
+
+    # ── SPA Angular — HTML5 pushState routing ────────────────────────────
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location @api_unavailable {
+        default_type application/json;
+        return 503 '{"status":"DOWN","service":"pivot-core"}';
+    }
+    location @module_unavailable {
+        default_type application/json;
+        return 503 '{"status":"DOWN"}';
+    }
+}
