@@ -27,7 +27,7 @@ jobs:
         # truth), résolue cross-repo sans checkout du repo hôte. Pinnée par SHA (commit de
         # merge de pivot-core#187 sur main) — requis par Plumber
         # (actionsMustBePinnedByCommitSha) : action interne à l'org, pas d'exemption.
-        uses: PIVOT-PLATFORM/pivot-core/.github/actions/setup@bb282afc1f297095ba8353621ebd53a60818345a # main (US05.15.1)
+        uses: PIVOT-PLATFORM/pivot-core/.github/actions/setup@90c23c21f02b4e78e38661ff4c6b1a8e97b1bc39 # main (US05.15.1)
         with:
           node-version: '24'
 
