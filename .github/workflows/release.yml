@@ -100,13 +100,6 @@ jobs:
     needs: [prepare]
     if: needs.prepare.outputs.version != ''
     timeout-minutes: 30
-    # VERSION au niveau job : requis par les steps "Set/Publish @pivot-platform/ui-core"
-    # (npm version / npm view) autant que par le build Docker. Une déclaration seulement
-    # au niveau du step Docker laissait $VERSION vide dans les steps ui-core → `npm version ""`
-    # (Invalid version) faisait échouer la release après le push de l'image, avant la création
-    # du tag/release (surface à la 1re release exerçant la publication de ui-core).
-    env:
-      VERSION: ${{ needs.prepare.outputs.version }}
     outputs:
       image:  ${{ steps.build-docker.outputs.image_name }}
       digest: ${{ steps.push.outputs.digest }}
@@ -162,8 +155,8 @@ jobs:
         env:
           # EN17.10 — le Dockerfile installe désormais @pivot-platform/collaboratif-ui
           # (registre privé GitHub Packages) ; secret BuildKit, jamais un --build-arg.
-          # VERSION vient de l'env du job (visible aussi par les steps ui-core plus bas).
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.prepare.outputs.version }}
         run: |
           # NOT "${GITHUB_REPOSITORY,,}/pivot-ui" — GITHUB_REPOSITORY is already
           # "PIVOT-PLATFORM/pivot-ui"; appending the repo name again doubled the path segment
@@ -218,6 +211,10 @@ jobs:
           echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
 
       - name: Set @pivot-platform/ui-core package version
+        # VERSION doit être fourni au niveau du step (comme le build Docker) : le contexte
+        # `needs` n'est pas résolu dans un `env:` de niveau job → il y resterait vide.
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
         run: npm --prefix dist/ui-core version "$VERSION" --no-git-tag-version
 
       - name: Publish @pivot-platform/ui-core to GitHub Packages
@@ -240,6 +237,7 @@ jobs:
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.prepare.outputs.version }}
 
       - name: Semantic Release (create tag + release)
         env:
