@@ -94,6 +94,14 @@ Deux modes y sont documentés :
 
 Le seed des comptes de test + l'activation des modules sont aussi documentés côté pivot-core.
 
+### i18n des modules
+
+Le shell charge un catalogue Transloco **global** (`/assets/i18n/{lang}.json`). Chaque
+`@pivot-platform/{module}-ui` embarque ses propres traductions dans son package
+(`i18n/{fr,en}.json`) ; le script `postbuild` [`scripts/merge-module-i18n.mjs`](scripts/merge-module-i18n.mjs)
+les fusionne dans le catalogue construit (`dist/…/assets/i18n/`) après `ng build`. Aucune clé
+module à recopier à la main : mettre à jour la lib, republier, bumper la dépendance ici.
+
 ---
 
 ## Commandes
