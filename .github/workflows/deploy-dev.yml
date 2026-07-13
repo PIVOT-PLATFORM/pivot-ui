@@ -1,0 +1,80 @@
+name: Deploy (recette, continuous)
+# Continuous deploy to managed-min Cloud Run recette: build+scan the nginx image,
+# push to Artifact Registry by immutable SHA, notify the pivot-infra orchestrator
+# to deploy by digest. Decoupled from the versioned release (release.yml).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+permissions: read-all
+concurrency:
+  group: deploy-dev-pivot-ui
+  cancel-in-progress: true
+jobs:
+  build-deploy:
+    name: Build, scan, push to AR & deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      SHA_TAG: ${{ github.sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      # The nginx image is built entirely inside the Dockerfile (its own `npm ci` +
+      # Angular prod build); no runner-side npm install/build is needed here. The private
+      # GitHub Packages registry (@pivot-platform/*) is authenticated via the BuildKit
+      # secret npm_token — the Dockerfile mounts it as NODE_AUTH_TOKEN, which .npmrc reads
+      # (//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}). Never a --build-arg (would
+      # leak the token into image history). Exactly as pr-checks.yml / release.yml wire it.
+      - name: Build image (load)
+        run: |
+          docker buildx build --platform linux/amd64 --load \
+            --secret id=npm_token,env=NODE_AUTH_TOKEN \
+            -t "local/pivot-ui:${SHA_TAG}" .
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Scan image - Trivy (gate)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: local/pivot-ui:${{ env.SHA_TAG }}
+          format: sarif
+          output: trivy-dev.sarif
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - name: Authenticate to GCP (keyless / WIF)
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.DEPLOYER_SA }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+
+      - name: Push to Artifact Registry (by SHA) & resolve digest
+        id: push
+        run: |
+          gcloud auth configure-docker "${{ vars.AR_HOST }}" --quiet
+          docker tag "local/pivot-ui:${SHA_TAG}" "${{ vars.AR_IMAGE }}:${SHA_TAG}"
+          PUSH_OUT=$(docker push "${{ vars.AR_IMAGE }}:${SHA_TAG}" 2>&1); printf '%s\n' "$PUSH_OUT"
+          DIGEST=$(printf '%s\n' "$PUSH_OUT" | grep -oE 'sha256:[a-f0-9]{64}' | tail -1)
+          if [ -z "$DIGEST" ]; then echo "::error::no digest after AR push"; exit 1; fi
+          echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
+
+      - name: Notify orchestrator (deploy by digest)
+        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
+        with:
+          token: ${{ secrets.ORCHESTRATOR_DISPATCH_TOKEN }}
+          repository: PIVOT-PLATFORM/pivot-infra
+          event-type: deploy-service
+          client-payload: |
+            {"service": "pivot-ui", "image": "${{ vars.IMAGE }}", "digest": "${{ steps.push.outputs.digest }}", "version": "dev-${{ github.sha }}"}
