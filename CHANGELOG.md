@@ -1,3 +1,15 @@
+# [0.30.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.29.0...v0.30.0) (2026-07-14)
+
+
+### Bug Fixes
+
+* **modules:** timeout(8s) sur ModuleStatusService.getStatus() ([#200](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/200)) ([22576bf](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/22576bf171a8b4f71b3da3b6d7ca8c0a9f93dbc0)), closes [#199](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/199)
+
+
+### Features
+
+* **ci:** bump-lib.yml — reçoit les releases des libs -ui et les déploie ([#196](https://github.com/PIVOT-PLATFORM/pivot-ui/issues/196)) ([b069653](https://github.com/PIVOT-PLATFORM/pivot-ui/commit/b069653a890bfbe64910c473d914563441696b76))
+
 # [0.29.0](https://github.com/PIVOT-PLATFORM/pivot-ui/compare/v0.28.0...v0.29.0) (2026-07-13)
 
 
