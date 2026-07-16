@@ -1,10 +1,12 @@
 <div class="shell">
   <piv-navbar/>
-  <main class="shell__content">
-    <div class="shell__page">
+  <main class="shell__content" [class.shell__content--full]="fullBleed()">
+    <div class="shell__page" [class.shell__page--full]="fullBleed()">
       <router-outlet/>
     </div>
-    <piv-footer/>
+    @if (!fullBleed()) {
+      <piv-footer/>
+    }
   </main>
   <piv-module-access-overlay/>
 </div>
