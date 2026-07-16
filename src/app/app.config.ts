@@ -6,7 +6,7 @@ export const GOOGLE_CLIENT_ID = new InjectionToken<string>('GOOGLE_CLIENT_ID', {
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideTransloco } from '@jsverse/transloco';
-import { provideCollaboratifUi, COLLABORATIF_BEARER_TOKEN } from '@pivot-platform/collaboratif-ui';
+import { provideCollaboratifUi, COLLABORATIF_BEARER_TOKEN, COLLABORATIF_CURRENT_USER, type CollaboratifCurrentUser } from '@pivot-platform/collaboratif-ui';
 import { providePilotageUi } from '@pivot-platform/pilotage-ui';
 import { provideAgiliteUi } from '@pivot-platform/agilite-ui';
 import { routes } from './app.routes';
@@ -54,6 +54,18 @@ export const appConfig: ApplicationConfig = {
     {
       provide: COLLABORATIF_BEARER_TOKEN,
       useFactory: (auth: AuthService) => (): string | null => auth.accessToken(),
+      deps: [AuthService],
+    },
+    // Bridge the shell's authenticated user profile to collaboratif-ui's whiteboard presence
+    // (the `board:join` displayName) — without it the backend labels every participant
+    // "Anonymous" (e.g. the "… modifie" soft-lock indicator on a card being edited).
+    {
+      provide: COLLABORATIF_CURRENT_USER,
+      useFactory: (auth: AuthService) => (): CollaboratifCurrentUser => {
+        const u = auth.currentUser();
+        const displayName = u ? [u.firstName, u.lastName].filter(Boolean).join(' ').trim() || null : null;
+        return { displayName, avatarUrl: null };
+      },
       deps: [AuthService],
     },
     // Les tokens PILOTAGE_API_URL / AGILITE_API_URL doivent être fournis dans l'injecteur
