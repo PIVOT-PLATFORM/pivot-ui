@@ -25,3 +25,16 @@
 @media (max-width: 767px) {
   .shell__page { padding: 24px 16px 24px; }
 }
+
+// Full-bleed routes (e.g. whiteboard board canvas): the routed view owns the whole content
+// area — no page padding/max-width, no footer, no shell scroll (the view scrolls internally).
+.shell__content--full {
+  overflow: hidden;
+}
+
+.shell__page--full {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0;
+}
