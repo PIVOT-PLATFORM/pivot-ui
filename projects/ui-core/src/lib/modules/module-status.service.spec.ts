@@ -33,8 +33,8 @@ describe('ModuleStatusService', () => {
 
   it('emits the DTO from the server', () => {
     let result: { enabled: boolean } | undefined;
-    service.getStatus('pilotage').subscribe(dto => (result = dto));
-    httpMock.expectOne(`${API}/modules/pilotage/status`).flush({ enabled: false });
+    service.getStatus('agilite').subscribe(dto => (result = dto));
+    httpMock.expectOne(`${API}/modules/agilite/status`).flush({ enabled: false });
     expect(result?.enabled).toBe(false);
   });
 });

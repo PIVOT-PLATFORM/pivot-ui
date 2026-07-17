@@ -7,7 +7,6 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideTransloco } from '@jsverse/transloco';
 import { provideCollaboratifUi, COLLABORATIF_BEARER_TOKEN, COLLABORATIF_CURRENT_USER, type CollaboratifCurrentUser } from '@pivot-platform/collaboratif-ui';
-import { providePilotageUi } from '@pivot-platform/pilotage-ui';
 import { provideAgiliteUi } from '@pivot-platform/agilite-ui';
 import { routes } from './app.routes';
 import { tokenInterceptor } from './core/auth/interceptor/token.interceptor';
@@ -68,10 +67,9 @@ export const appConfig: ApplicationConfig = {
       },
       deps: [AuthService],
     },
-    // Les tokens PILOTAGE_API_URL / AGILITE_API_URL doivent être fournis dans l'injecteur
-    // racine — les services de ces modules sont `providedIn: 'root'` et s'y instancient
-    // (sinon NG0201). Même patron que provideCollaboratifUi ci-dessus.
-    providePilotageUi({ apiUrl: environment.pilotageApiUrl }),
+    // Le token AGILITE_API_URL doit être fourni dans l'injecteur racine — les services de
+    // ce module sont `providedIn: 'root'` et s'y instancient (sinon NG0201). Même patron
+    // que provideCollaboratifUi ci-dessus.
     provideAgiliteUi({ apiUrl: environment.agiliteApiUrl, wsUrl: environment.agiliteWsUrl }),
     provideTransloco({
       config: {

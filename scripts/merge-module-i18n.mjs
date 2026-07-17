@@ -18,7 +18,7 @@ import { dirname, join } from 'node:path';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const LANGS = ['fr', 'en'];
-const MODULES = ['collaboratif-ui', 'agilite-ui', 'pilotage-ui'];
+const MODULES = ['collaboratif-ui', 'agilite-ui'];
 // Dev-harness-only namespaces shipped by a module but irrelevant to the shell.
 const SKIP_TOP = new Set(['app']);
 

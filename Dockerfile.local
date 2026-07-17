@@ -12,13 +12,11 @@ COPY package*.json ./
 COPY local-ui-packages ./local-ui-packages
 
 # Repoint every GitHub-Packages @pivot-platform UI dependency at its local tarball, then install
-# WITHOUT any registry auth. collaboratif-ui is the only such dependency today; add more lines
-# here as pilotage-ui / agilite-ui get wired into the shell. `npm install` (not `ci`) because the
-# lockfile intentionally diverges once a dep is rewritten to file:. Public deps still come from
-# the default public npm registry — never GitHub.
+# WITHOUT any registry auth. `npm install` (not `ci`) because the lockfile intentionally
+# diverges once a dep is rewritten to file:. Public deps still come from the default public
+# npm registry — never GitHub.
 RUN npm pkg set dependencies.@pivot-platform/design-system="file:./local-ui-packages/pivot-platform-design-system.tgz" \
  && npm pkg set dependencies.@pivot-platform/collaboratif-ui="file:./local-ui-packages/pivot-platform-collaboratif-ui.tgz" \
- && npm pkg set dependencies.@pivot-platform/pilotage-ui="file:./local-ui-packages/pivot-platform-pilotage-ui.tgz" \
  && npm pkg set dependencies.@pivot-platform/agilite-ui="file:./local-ui-packages/pivot-platform-agilite-ui.tgz" \
  && npm install --no-audit --no-fund --ignore-scripts
 

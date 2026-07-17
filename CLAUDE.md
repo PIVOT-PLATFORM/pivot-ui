@@ -29,7 +29,7 @@ vers `@pivot/design-system` le jour où ce repo existe, pas avant.
 | `@pivot/ui-core/modules` | ModuleGuard, ModuleStatusService |
 | `@pivot/design-system` | Prévu — ré-export complet une fois `pivot-design-system` créé (pas actif aujourd'hui) |
 
-**Modules fonctionnels** : dans les repos dédiés (`pivot-pilotage-ui`, `pivot-agilite-ui`, `pivot-collaboratif-ui`). pivot-ui ne contient PAS les features métier.
+**Modules fonctionnels** : dans les repos dédiés (`pivot-agilite-ui`, `pivot-collaboratif-ui`). pivot-ui ne contient PAS les features métier.
 
 **Déploiement :**
 - Image Docker nginx (assets statiques + reverse proxy API)
@@ -165,7 +165,7 @@ Toute contribution mobilise les experts concernés — les mentionner explicitem
 | Parent | clé du parent (ex. `E01`, `F01.1`) |
 | Stage | ⬜ (pas encore terminé) / ✅ (Done — recette mainteneur). États intermédiaires internes, non persistés → pivot-docs/docs/backlog/README.md §2/§5 |
 | Priority | Critical / High / Medium / Low |
-| Module | core / auth / admin / oidc / pilotage / agilite / collaboratif (extensible par domaine) |
+| Module | core / auth / admin / oidc / agilite / collaboratif (extensible par domaine) |
 | Phase | Socle / v1-enterprise / phase-3 |
 | Sprint | Sprint 1…N |
 | Size | XS / S / M / L / XL |

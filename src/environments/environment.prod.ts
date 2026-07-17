@@ -10,9 +10,8 @@ export const environment = {
   // see the multi-backend gateway table at the top of nginx.conf, EN17.7). Relative for the same
   // reverse-proxy reason as apiUrl above.
   collaboratifApiUrl: '/api/collaboratif',
-  // EN18 — routed by this image's nginx.conf (/api/pilotage/ → pivot-pilotage-core, /api/agilite/
-  // → pivot-agilite-core, EN17.7 gateway table). Relative for the reverse-proxy reason above.
-  pilotageApiUrl: '/api/pilotage',
+  // EN18 — routed by this image's nginx.conf (/api/agilite/ → pivot-agilite-core,
+  // EN17.7 gateway table). Relative for the reverse-proxy reason above.
   agiliteApiUrl: '/api/agilite',
   // agilite native STOMP WS — this image's nginx.conf routes /ws/agilite → pivot-agilite-core.
   agiliteWsUrl: '/ws/agilite',
