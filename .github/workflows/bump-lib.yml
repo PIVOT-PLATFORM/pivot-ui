@@ -1,7 +1,7 @@
 name: Bump lib dependency (automated)
 
-# Closes the loop so a release of @pivot-platform/collaboratif-ui, pilotage-ui or agilite-ui
-# actually reaches recette: those 3 repos have no Cloud Run service of their own (they're npm
+# Closes the loop so a release of @pivot-platform/collaboratif-ui or agilite-ui
+# actually reaches recette: those repos have no Cloud Run service of their own (they're npm
 # libs bundled into this app's build, see package.json), so publishing a new version alone
 # never triggers a rebuild here. Each lib repo's notify-pivot-ui.yml fires a repository_dispatch
 # here on `release: published`; this workflow bumps the exact dependency version, verifies the

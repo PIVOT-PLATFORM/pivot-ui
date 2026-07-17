@@ -6,7 +6,7 @@
 #   - Upstreams are the backends' *.run.app hostnames, injected at container
 #     start by docker-entrypoint.d/40-pivot-cloudrun-upstreams.sh via envsubst:
 #       ${PIVOT_CORE_UPSTREAM} ${PIVOT_COLLABORATIF_UPSTREAM}
-#       ${PIVOT_AGILITE_UPSTREAM} ${PIVOT_PILOTAGE_UPSTREAM}
+#       ${PIVOT_AGILITE_UPSTREAM}
 #     (host only, no scheme). Each is proxied over HTTPS with SNI + a Host header
 #     rewritten to the run.app host (Cloud Run routes on Host).
 #   - Public resolver (Cloud Run has no Docker embedded DNS) so run.app names are
@@ -16,10 +16,8 @@
 
 map $uri $pivot_module {
     ~^/api/collaboratif/ws  collaboratif-ws;
-    ~^/ws/pilotage       pilotage-ws;
     ~^/ws/agilite        agilite-ws;
     ~^/api/collaboratif  collaboratif;
-    ~^/api/pilotage      pilotage;
     ~^/api/agilite       agilite;
     ~^/api               core;
     default              static;
@@ -71,26 +69,6 @@ server {
         return 200 'ok';
     }
 
-    # ── WebSocket — /ws/pilotage/ ─────────────────────────────────────────
-    location /ws/pilotage/ {
-        set $pilotage_up "${PIVOT_PILOTAGE_UPSTREAM}";
-        proxy_pass https://$pilotage_up;
-        proxy_ssl_server_name on;
-        proxy_ssl_name $pilotage_up;
-        proxy_set_header Host $pilotage_up;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
-        proxy_connect_timeout 5s;
-        proxy_read_timeout    3600s;
-        proxy_send_timeout    3600s;
-        proxy_intercept_errors on;
-        error_page 502 503 504 @module_unavailable;
-    }
-
     # ── WebSocket — /ws/agilite/ ──────────────────────────────────────────
     location /ws/agilite/ {
         set $agilite_up "${PIVOT_AGILITE_UPSTREAM}";
@@ -127,23 +105,6 @@ server {
         proxy_connect_timeout 5s;
         proxy_read_timeout    3600s;
         proxy_send_timeout    3600s;
-        proxy_intercept_errors on;
-        error_page 502 503 504 @module_unavailable;
-    }
-
-    # ── REST — /api/pilotage/ ─────────────────────────────────────────────
-    location /api/pilotage/ {
-        set $pilotage_up "${PIVOT_PILOTAGE_UPSTREAM}";
-        proxy_pass https://$pilotage_up;
-        proxy_ssl_server_name on;
-        proxy_ssl_name $pilotage_up;
-        proxy_set_header Host $pilotage_up;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
-        proxy_connect_timeout 5s;
-        proxy_send_timeout    60s;
-        proxy_read_timeout    60s;
         proxy_intercept_errors on;
         error_page 502 503 504 @module_unavailable;
     }
