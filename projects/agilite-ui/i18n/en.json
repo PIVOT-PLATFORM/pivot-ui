@@ -1,0 +1,414 @@
+{
+  "home": {
+    "title": "PIVOT Agility"
+  },
+  "hub": {
+    "title": "Agility",
+    "subtitle": "Daily, team draw and capacity.",
+    "tabs": {
+      "daily": "Daily",
+      "wheel": "Team wheel",
+      "capacity": "Capacity"
+    },
+    "daily": {
+      "todayTitle": "Today’s daily",
+      "sprintTasks": "Current sprint tasks",
+      "history": "Daily history"
+    },
+    "wheel": {
+      "goalLabel": "Random draw:",
+      "goalTarget": "Daily facilitator",
+      "spinning": "Spinning…",
+      "spin": "Spin the wheel",
+      "resultLabel": "Daily facilitator drawn",
+      "history": "Draw history"
+    },
+    "capacity": {
+      "velocity": "Velocity — last 6 sprints",
+      "chargeTitle": "Load vs capacity",
+      "legendOver": "Overloaded",
+      "legendBalanced": "Balanced",
+      "legendUnder": "Underloaded",
+      "days": "{{charge}}d / {{capacity}}d"
+    }
+  },
+  "wheels": {
+    "list": {
+      "title": "My wheels",
+      "selectTeam": "Team",
+      "noTeams": "You don't belong to any team.",
+      "create": "Create a wheel",
+      "empty": "No wheels for this team.",
+      "edit": "Edit",
+      "delete": "Delete",
+      "loadError": "Unable to load wheels.",
+      "retry": "Retry",
+      "deleteSuccess": "Wheel deleted.",
+      "deleteError": "Unable to delete the wheel.",
+      "dismiss": "Dismiss"
+    },
+    "confirmDelete": {
+      "title": "Delete this wheel?",
+      "message": "\"{{name}}\" and all its entries will be permanently deleted.",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "form": {
+      "createTitle": "Create a wheel",
+      "editTitle": "Edit wheel",
+      "nameLabel": "Wheel name",
+      "entriesTitle": "Entries",
+      "entriesEmpty": "Add at least one entry.",
+      "memberPickerLabel": "Add a team member",
+      "addMember": "Add",
+      "freeTextLabel": "Add a free-text name",
+      "addFreeText": "Add",
+      "weightLabel": "Weight",
+      "remove": "Remove",
+      "save": "Save",
+      "saving": "Saving…",
+      "saveSuccess": "Wheel saved.",
+      "saveError": "Unable to save the wheel.",
+      "retry": "Retry",
+      "loadError": "Unable to load this wheel.",
+      "errors": {
+        "INVALID_NAME": "The name must be between 1 and 100 characters.",
+        "EMPTY_ENTRIES": "Add at least one entry.",
+        "DUPLICATE_ENTRY": "This entry is already in the wheel.",
+        "INVALID_ENTRY_TEAM_MEMBER": "This member does not belong to this team.",
+        "INVALID_WEIGHT": "Weight must be between 1 and 10."
+      }
+    },
+    "detail": {
+      "loadError": "Unable to load this wheel.",
+      "modeLabel": "Anti-repeat mode",
+      "mode": {
+        "reduced_weight": "Reduced weight",
+        "exclude": "Exclude"
+      },
+      "spin": "Spin the wheel",
+      "spinning": "Spinning…",
+      "spinError": "Unable to perform the draw.",
+      "result": {
+        "announce": "Draw result: {{label}}."
+      },
+      "history": {
+        "title": "Draw history",
+        "empty": "No draw yet."
+      }
+    }
+  },
+  "retro": {
+    "createSession": {
+      "title": "Create a retrospective session",
+      "form": {
+        "titleLabel": "Title",
+        "titleRequired": "Title is required.",
+        "titleMaxLength": "Title must be at most 100 characters.",
+        "teamIdLabel": "Team ID",
+        "teamIdHint": "Team picker coming soon (depends on @pivot/ui-core) — enter the team's numeric identifier for now.",
+        "teamIdRequired": "Team ID is required.",
+        "teamIdPositive": "Team ID must be a positive integer.",
+        "formatLabel": "Format",
+        "formatPlaceholder": "Choose a format",
+        "formatRequired": "Format is required.",
+        "format": {
+          "START_STOP_CONTINUE": "Start / Stop / Continue",
+          "KIF_KAF": "KIF / KAF",
+          "FOUR_L": "4L",
+          "MAD_SAD_GLAD": "Mad / Sad / Glad",
+          "CUSTOM": "Custom"
+        },
+        "sprintRefLabel": "Sprint reference (optional)",
+        "sprintRefMaxLength": "Sprint reference must be at most 100 characters.",
+        "timersLegend": "Per-phase timers (optional, in seconds)",
+        "contributionTimerLabel": "Contribution timer (seconds)",
+        "voteTimerLabel": "Vote timer (seconds)",
+        "actionTimerLabel": "Action timer (seconds)",
+        "timerPositive": "The timer must be a strictly positive whole number of seconds.",
+        "voteCountLabel": "Votes per participant (optional, defaults to 3)",
+        "voteCountPositive": "The vote count must be a strictly positive whole number.",
+        "submit": "Create session",
+        "submitting": "Creating…",
+        "formatColumnCount": "Has {{count}} columns."
+      },
+      "result": {
+        "heading": "Session created",
+        "joinCodeLabel": "Join code",
+        "copy": "Copy code",
+        "copied": "Code copied!",
+        "announce": "Session created. Join code: {{joinCode}}.",
+        "titleLabel": "Title",
+        "formatLabel": "Format",
+        "phaseLabel": "Current phase",
+        "expiresAtLabel": "Expires on",
+        "phase": {
+          "CONTRIBUTION": "Contribution",
+          "REVUE": "Review",
+          "VOTE": "Vote",
+          "ACTION": "Actions",
+          "CLOSED": "Closed"
+        },
+        "createAnother": "Create another session"
+      },
+      "error": {
+        "INVALID_TITLE": "Title is invalid (required, at most 100 characters).",
+        "INVALID_FORMAT": "The selected format is invalid.",
+        "INVALID_TIMER": "One of the timers must be a strictly positive whole number of seconds.",
+        "INVALID_VOTE_COUNT": "The votes-per-participant count must be a strictly positive whole number.",
+        "teamNotFound": "Team not found.",
+        "teamAccessDenied": "You are not a member of this team.",
+        "unauthorized": "Authentication required — this feature is not available until the authentication module (@pivot/ui-core) is wired in.",
+        "generic": "Something went wrong while creating the session. Please try again.",
+        "CUSTOM_FORMAT_ID_REQUIRED": "A custom format must be selected or created.",
+        "CUSTOM_FORMAT_NOT_FOUND": "The selected custom format could not be found.",
+        "CUSTOM_FORMAT_ID_NOT_ALLOWED": "The custom format id must only be sent for the \"Custom\" format.",
+        "INVALID_FORMAT_LABEL": "The custom format name is invalid.",
+        "CUSTOM_FORMAT_INVALID_COLUMN_COUNT": "The custom format must have between 2 and 8 columns.",
+        "INVALID_COLUMN_LABEL": "One of the column labels is invalid."
+      },
+      "formatsLoading": "Loading retrospective formats…",
+      "formatsError": "Could not load retrospective formats.",
+      "formatsRetry": "Retry",
+      "customFormat": {
+        "cardHint": "Create a custom format (2 to 8 columns)",
+        "legend": "Custom format",
+        "labelField": "Custom format name",
+        "labelRequired": "The custom format name is required.",
+        "labelMaxLength": "The custom format name must be at most 60 characters.",
+        "columnsHint": "Between 2 and 8 columns, each with a label.",
+        "columnLabel": "Label for column {{position}}",
+        "columnRequired": "The column label is required.",
+        "columnMaxLength": "The column label must be at most 40 characters.",
+        "addColumn": "Add a column",
+        "removeColumn": "Remove this column",
+        "columnAdded": "Column {{position}} added.",
+        "columnRemoved": "Column {{position}} removed."
+      }
+    },
+    "sessionRoom": {
+      "title": "Retrospective room",
+      "joining": "Joining the room…",
+      "wsStatus": {
+        "connecting": "Connecting to the realtime room…",
+        "connected": "Connected to the realtime room.",
+        "error": "Could not connect to the realtime room."
+      },
+      "phase": {
+        "CONTRIBUTION": "Phase: Contribution",
+        "REVUE": "Phase: Review",
+        "VOTE": "Phase: Vote",
+        "ACTION": "Phase: Action",
+        "CLOSED": "Session closed"
+      },
+      "timeRemaining": "Time remaining: {{seconds}}s",
+      "fallbackNote": "Shown columns are provisional (format catalogue unavailable).",
+      "closeContributionNow": "Close contribution now",
+      "triggerReveal": "Reveal cards",
+      "openVoteNow": "Open voting",
+      "closeVoteNow": "Close voting",
+      "closeSessionNow": "Close the session now",
+      "closedBanner": "This session is closed: read-only, no further writes are accepted.",
+      "submitAnonymously": "Submit anonymously",
+      "noCards": "No cards yet.",
+      "facilitatorPreview": "Facilitator preview (content in clear before reveal)",
+      "submitFormLabel": "Submit a card in column {{column}}",
+      "cardInputLabel": "Card content",
+      "submit": "Submit",
+      "maskedCount": "{{count}} card(s) submitted",
+      "vote": {
+        "remaining": "Votes remaining: {{remaining}} / {{allowed}}",
+        "count": "{{count}} vote(s)",
+        "castLabel": "Add a vote to \"{{content}}\"",
+        "uncastLabel": "Remove a vote from \"{{content}}\"",
+        "mine": "Including {{count}} of yours"
+      },
+      "ranking": {
+        "heading": "Card ranking"
+      },
+      "action": {
+        "createFromCard": "Create action",
+        "createLabel": "Create an action from \"{{content}}\"",
+        "created": "Action created.",
+        "status": {
+          "A_FAIRE": "To do",
+          "EN_COURS": "In progress",
+          "TERMINEE": "Done",
+          "ABANDONNEE": "Abandoned"
+        },
+        "form": {
+          "heading": "Create an action",
+          "titleLabel": "Title",
+          "ownerLabel": "Owner (optional)",
+          "ownerNone": "No owner",
+          "dueDateLabel": "Due date (optional)",
+          "sourceCardLabel": "Source card (optional)",
+          "sourceCardNone": "No source card",
+          "submit": "Create the action",
+          "submitting": "Creating…",
+          "error": {
+            "invalid": "The selected owner is not a team member, or the source card does not belong to this session.",
+            "sessionUnavailable": "Unable to create the action for this session.",
+            "wrongPhase": "Cannot create an action outside the Action phase.",
+            "generic": "An error occurred while creating the action. Please try again."
+          }
+        },
+        "list": {
+          "heading": "Actions from this session",
+          "ownerLabel": "Owner: {{owner}}",
+          "dueDateLabel": "Due date: {{dueDate}}"
+        }
+      },
+      "error": {
+        "notFound": "Session not found.",
+        "expired": "This session has expired or is closed.",
+        "generic": "An error occurred. Please try again.",
+        "actionFailed": "The action failed. Please try again."
+      },
+      "fallbackColumns": {
+        "start": "Start",
+        "stop": "Stop",
+        "continue": "Continue",
+        "kif": "Kif",
+        "kaf": "Kaf",
+        "liked": "Liked",
+        "learned": "Learned",
+        "lacked": "Lacked",
+        "longedFor": "Longed for",
+        "mad": "Mad",
+        "sad": "Sad",
+        "glad": "Glad",
+        "general": "General"
+      },
+      "viewTeamActions": "View the team's actions",
+      "warmup": {
+        "checking": "Checking the team's ongoing actions…",
+        "heading": "Team's ongoing actions",
+        "intro": "These actions, from a previous retrospective, are still open. Mark them done or abandoned if needed before starting.",
+        "ownerPrefix": "Owner:",
+        "unknownOwner": "Unassigned",
+        "dueDatePrefix": "Due date:",
+        "noDueDate": "No due date",
+        "markDone": "Mark done",
+        "markDoneLabel": "Mark done — {{ title }}",
+        "markAbandoned": "Mark abandoned",
+        "markAbandonedLabel": "Mark abandoned — {{ title }}",
+        "updateError": "The status change failed. Please try again.",
+        "allResolved": "All actions have been resolved.",
+        "continue": "Continue to the retrospective"
+      }
+    }
+  },
+  "scrumPoker": {
+    "createRoom": {
+      "title": "Create a planning poker room",
+      "nameLabel": "Room name",
+      "nameRequired": "The room name is required.",
+      "nameTooLong": "The name must not exceed 120 characters.",
+      "submit": "Create room",
+      "submitting": "Creating…",
+      "success": "Room created successfully.",
+      "inviteCodeLabel": "Invite code",
+      "copyButton": "Copy invite code",
+      "copySuccess": "Invite code copied to clipboard.",
+      "copyError": "Could not copy the code — copy it manually.",
+      "createAnother": "Create another room",
+      "errors": {
+        "unauthorized": "You must be signed in to create a room.",
+        "invalidName": "The room name is invalid.",
+        "invalidRequest": "The request is invalid. Check the room name.",
+        "generic": "Something went wrong. Please try again."
+      }
+    },
+    "joinRoom": {
+      "title": "Join a planning poker room",
+      "codeLabel": "Room code",
+      "codeRequired": "The code is required.",
+      "codeInvalidLength": "The code must be exactly 6 characters.",
+      "submit": "Join room",
+      "submitAnonymous": "Join without an account",
+      "submitting": "Joining…",
+      "success": "Room joined successfully.",
+      "nameLabel": "Room name",
+      "pseudonymLabel": "Display name",
+      "optional": "(optional)",
+      "modeToggleLabel": "How to join",
+      "modeAuthenticated": "Sign in",
+      "modeAnonymous": "Join without an account",
+      "joinAnother": "Join another room",
+      "wsStatus": {
+        "connecting": "Connecting to the live room…",
+        "connected": "Connected to the live room.",
+        "error": "Could not connect to the live room."
+      },
+      "errors": {
+        "unauthorized": "You must be signed in to join a room.",
+        "invalidCode": "The entered code is invalid.",
+        "invalidPseudonym": "The display name must be at most 40 characters.",
+        "notFound": "Code not found or expired.",
+        "invalidRequest": "The request is invalid. Check the entered code.",
+        "sessionExpired": "Your guest session has expired. Please join again.",
+        "generic": "Something went wrong. Please try again."
+      }
+    },
+    "roomBoard": {
+      "heading": "Current ticket",
+      "ticketTitleLabel": "Ticket title",
+      "ticketTitleRequired": "The ticket title is required.",
+      "ticketTitleTooLong": "The title must not exceed 200 characters.",
+      "createTicket": "Create ticket",
+      "creatingTicket": "Creating…",
+      "cardsLabel": "Voting cards",
+      "votedCounter": "{{voted}}/{{total}} have voted",
+      "waitingForTicket": "Waiting for the facilitator to create a ticket…",
+      "errors": {
+        "facilitatorOnly": "Only the room's facilitator can create a ticket.",
+        "activeTicketExists": "A ticket is already being voted on in this room.",
+        "invalidTitle": "The ticket title is invalid.",
+        "invalidRequest": "The request is invalid. Check the ticket title.",
+        "generic": "Something went wrong. Please try again.",
+        "ticketNotFound": "This ticket could not be found.",
+        "ticketAlreadyRevealed": "This ticket has already been revealed."
+      },
+      "reveal": "Reveal votes",
+      "revealing": "Revealing…",
+      "revealedHeading": "Revealed votes",
+      "revealedValuesLabel": "Revealed cards",
+      "consensusMean": "Mean",
+      "consensusMedian": "Median",
+      "consensusMajority": "Majority value",
+      "noNumericConsensus": "No numeric consensus"
+    }
+  },
+  "teamActions": {
+    "title": "Team actions",
+    "filterLabel": "Filter by status",
+    "filterAll": "All statuses",
+    "status": {
+      "A_FAIRE": "To do",
+      "EN_COURS": "In progress",
+      "TERMINEE": "Done",
+      "ABANDONNEE": "Abandoned"
+    },
+    "sortLabel": "Sort by due date",
+    "sortAscending": "Due date ascending",
+    "sortDescending": "Due date descending",
+    "columns": {
+      "title": "Title",
+      "owner": "Owner",
+      "dueDate": "Due date",
+      "status": "Status",
+      "sourceCard": "Source card"
+    },
+    "noDueDate": "No due date",
+    "unknownOwner": "Unassigned",
+    "fromCard": "From a retrospective card",
+    "loading": "Loading actions…",
+    "loadError": "Unable to load this team's actions.",
+    "retry": "Retry",
+    "empty": "No actions for this team.",
+    "statusChangeLabel": "Change the status of \"{{title}}\"",
+    "statusChangeError": "The status change failed. Please try again.",
+    "missingTeamId": "Missing team id."
+  }
+}

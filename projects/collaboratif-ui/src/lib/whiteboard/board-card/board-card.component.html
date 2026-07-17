@@ -1,0 +1,314 @@
+<!--
+  Card body. The parent canvas delegates pointer interactions (select/drag/resize/connect)
+  by inspecting `data-*` attributes on descendants of this host, so most elements here are
+  presentational. Only inline text editing is owned locally.
+-->
+<div
+  class="wb-card__body"
+  [class.wb-card__body--shape]="card().type === 'SHAPE' || card().type === 'DRAW'"
+  [class.wb-card__body--line]="isLine()"
+  [class.wb-card__body--label]="isLabel()"
+  [class.wb-card__body--editing]="editing()"
+  [style.background]="card().type === 'TEXT' ? card().color : null"
+  [style.outlineColor]="card().groupColor || null"
+  (dblclick)="onDoubleClick()"
+>
+  @switch (card().type) {
+    @case ('TEXT') {
+      @if (editing()) {
+        <textarea
+          #editArea
+          class="wb-card__edit"
+          [value]="editValue()"
+          [style.fontSize.px]="textFmt().size"
+          [style.fontWeight]="textFmt().bold ? '700' : '400'"
+          [style.fontStyle]="textFmt().italic ? 'italic' : 'normal'"
+          [style.textAlign]="textFmt().align"
+          [style.color]="displayTextColor()"
+          [style.textDecoration]="(textFmt().underline ? 'underline ' : '') + (textFmt().strike ? 'line-through' : '')"
+          (input)="onEditInput($event)"
+          (blur)="commitEdit()"
+          (keydown)="onEditKeydown($event)"
+          [attr.aria-label]="'whiteboard.card.text.contentAriaLabel' | transloco"
+          maxlength="2000"
+        ></textarea>
+      } @else {
+        <div
+          class="wb-card__text"
+          [style.fontSize.px]="textFmt().size"
+          [style.fontWeight]="textFmt().bold ? '700' : '400'"
+          [style.fontStyle]="textFmt().italic ? 'italic' : 'normal'"
+          [style.textAlign]="textFmt().align"
+          [style.color]="displayTextColor()"
+          [style.textDecoration]="(textFmt().underline ? 'underline ' : '') + (textFmt().strike ? 'line-through' : '')"
+        >{{ textFmt().text }}</div>
+      }
+    }
+    @case ('LABEL') {
+      @if (editing()) {
+        <textarea
+          #editArea
+          class="wb-card__edit wb-card__edit--label"
+          [value]="editValue()"
+          [style.fontSize.px]="labelFmt().size"
+          [style.fontWeight]="labelFmt().bold ? '700' : '400'"
+          [style.fontStyle]="labelFmt().italic ? 'italic' : 'normal'"
+          [style.color]="labelFmt().color"
+          [style.textDecoration]="(labelFmt().underline ? 'underline ' : '') + (labelFmt().strike ? 'line-through' : '')"
+          (input)="onEditInput($event)"
+          (blur)="commitEdit()"
+          (keydown)="onEditKeydown($event)"
+          [attr.aria-label]="'whiteboard.card.editLabel' | transloco"
+          maxlength="500"
+        ></textarea>
+      } @else {
+        <span
+          class="wb-card__label"
+          [class.wb-card__label--empty]="labelEmpty()"
+          [style.justifyContent]="labelJustify()"
+          [style.textAlign]="labelFmt().align"
+          [style.fontSize.px]="labelFmt().size"
+          [style.fontWeight]="labelFmt().bold ? '700' : '400'"
+          [style.fontStyle]="labelFmt().italic ? 'italic' : 'normal'"
+          [style.color]="labelEmpty() ? null : labelFmt().color"
+          [style.textDecoration]="(labelFmt().underline ? 'underline ' : '') + (labelFmt().strike ? 'line-through' : '')"
+        >{{ labelEmpty() ? ('whiteboard.card.labelPlaceholder' | transloco) : labelFmt().text }}</span>
+      }
+    }
+    @case ('SHAPE') {
+      <svg class="wb-card__svg" viewBox="0 0 100 100" preserveAspectRatio="none" [style.opacity]="shape().opacity" role="img" [attr.aria-label]="shapeAriaLabel()">
+        @switch (shape().kind) {
+          @case ('circle') {
+            <ellipse cx="50" cy="50" rx="48" ry="48" [attr.fill]="shape().fill || 'none'" [attr.stroke]="shape().stroke" stroke-width="2" vector-effect="non-scaling-stroke" />
+          }
+          @case ('diamond') {
+            <polygon points="50,2 98,50 50,98 2,50" [attr.fill]="shape().fill || 'none'" [attr.stroke]="shape().stroke" stroke-width="2" vector-effect="non-scaling-stroke" />
+          }
+          @case ('triangle') {
+            <polygon points="50,4 96,96 4,96" [attr.fill]="shape().fill || 'none'" [attr.stroke]="shape().stroke" stroke-width="2" vector-effect="non-scaling-stroke" />
+          }
+          @case ('line') {
+            <!-- The line IS the diagonal of its box (`diag` picks which one), so any angle is
+                 reachable by sizing the box. The SVG is `preserveAspectRatio="none"`, so these
+                 corner-to-corner coordinates land exactly on the box's corners. -->
+            <!-- Selection halo along the line itself. The card's rectangular halo would draw a box
+                 around a diagonal, telling the user the whole rectangle is the object — they would
+                 then try to grab it anywhere inside and nothing would move, since only the line
+                 catches pointers. What you see is now what you can grab. -->
+            @if (selected()) {
+              <line
+                class="wb-card__line-halo"
+                x1="0"
+                [attr.y1]="shape().diag === 'bltr' ? 100 : 0"
+                x2="100"
+                [attr.y2]="shape().diag === 'bltr' ? 0 : 100"
+                [attr.stroke-width]="lineHitWidth"
+                vector-effect="non-scaling-stroke"
+              />
+            }
+            <!-- Invisible hit path: a 2px line — often on a box that is flat on one axis — is far
+                 too thin to aim at. Same trick as the connectors' own hit path. -->
+            <line
+              class="wb-card__line-hit"
+              x1="0"
+              [attr.y1]="shape().diag === 'bltr' ? 100 : 0"
+              x2="100"
+              [attr.y2]="shape().diag === 'bltr' ? 0 : 100"
+              stroke="transparent"
+              [attr.stroke-width]="lineHitWidth"
+              vector-effect="non-scaling-stroke"
+            />
+            <line
+              x1="0"
+              [attr.y1]="shape().diag === 'bltr' ? 100 : 0"
+              x2="100"
+              [attr.y2]="shape().diag === 'bltr' ? 0 : 100"
+              [attr.stroke]="shape().stroke"
+              stroke-width="2"
+              vector-effect="non-scaling-stroke"
+            />
+          }
+          @case ('star') {
+            <polygon points="50,3 61,38 98,38 68,60 79,95 50,73 21,95 32,60 2,38 39,38" [attr.fill]="shape().fill || 'none'" [attr.stroke]="shape().stroke" stroke-width="2" vector-effect="non-scaling-stroke" />
+          }
+          @default {
+            <rect x="1" y="1" width="98" height="98" [attr.fill]="shape().fill || 'none'" [attr.stroke]="shape().stroke" stroke-width="2" vector-effect="non-scaling-stroke" />
+          }
+        }
+      </svg>
+    }
+    @case ('DRAW') {
+      <svg class="wb-card__svg" [attr.viewBox]="'0 0 ' + card().width + ' ' + card().height" preserveAspectRatio="none" aria-hidden="true">
+        <path [attr.d]="card().content" [attr.stroke]="card().color" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    }
+    @case ('IMAGE') {
+      <img class="wb-card__image" [src]="card().content" [alt]="'whiteboard.card.imageAlt' | transloco" draggable="false" />
+    }
+    @case ('LINK') {
+      <a
+        class="wb-card__link"
+        [class.wb-card__link--no-preview]="!linkImage() && !card().meta"
+        [attr.href]="linkHref()"
+        target="_blank"
+        rel="noopener noreferrer nofollow"
+        [attr.aria-label]="linkLabel()"
+      >
+        @if (linkImage(); as image) {
+          <img class="wb-card__link-image" [src]="image" [alt]="linkImageAlt()" draggable="false" />
+        }
+        <span class="wb-card__link-body">
+          <span class="wb-card__link-title">{{ linkLabel() }}</span>
+          @if (card().meta?.description) {
+            <span class="wb-card__link-description">{{ card().meta?.description }}</span>
+          }
+          @if (card().meta?.siteName) {
+            <span class="wb-card__link-sitename">{{ card().meta?.siteName }}</span>
+          }
+        </span>
+      </a>
+    }
+    @case ('TABLE') {
+      <table class="wb-card__table" role="table" [attr.aria-label]="'whiteboard.card.table.aria' | transloco">
+        <tbody>
+          @for (row of table().rows; track $index; let ri = $index) {
+            <tr role="row">
+              @for (cell of row; track $index; let ci = $index) {
+                @if (isEditingCell(ri, ci)) {
+                  <td role="cell">
+                    <input
+                      #cellInput
+                      class="wb-card__table-cell-input"
+                      type="text"
+                      data-wb-table-cell="true"
+                      [attr.data-card-id]="card().id"
+                      [value]="editCellValue()"
+                      (input)="editCellValue.set($any($event.target).value)"
+                      (blur)="commitCellEdit()"
+                      (keydown)="onCellEditKeydown($event)"
+                      (pointerdown)="$event.stopPropagation()"
+                      (dblclick)="$event.stopPropagation()"
+                      [attr.aria-label]="'whiteboard.card.table.editCell' | transloco"
+                    />
+                  </td>
+                } @else if (ri === 0) {
+                  <th
+                    scope="col"
+                    role="columnheader"
+                    tabindex="0"
+                    data-wb-table-nav="true"
+                    [attr.data-row]="ri"
+                    [attr.data-col]="ci"
+                    (click)="focusCell(ri, ci)"
+                    (dblclick)="onCellDoubleClick($event, ri, ci)"
+                    (keydown)="onCellNavKeydown($event, ri, ci)"
+                  >{{ cell }}</th>
+                } @else {
+                  <td
+                    role="cell"
+                    tabindex="0"
+                    data-wb-table-nav="true"
+                    [attr.data-row]="ri"
+                    [attr.data-col]="ci"
+                    (click)="focusCell(ri, ci)"
+                    (dblclick)="onCellDoubleClick($event, ri, ci)"
+                    (keydown)="onCellNavKeydown($event, ri, ci)"
+                  >{{ cell }}</td>
+                }
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+    @default {
+      <div class="wb-card__text">{{ card().content }}</div>
+    }
+  }
+
+  @if (chips().length) {
+    <ul class="wb-card__chips">
+      @for (chip of chips(); track chip.field.id) {
+        <li class="wb-card__chip" [attr.data-type]="chip.field.type">
+          @if (chip.field.emoji) {<span aria-hidden="true">{{ chip.field.emoji }}</span>}
+          {{ chip.text }}
+        </li>
+      }
+    </ul>
+  }
+</div>
+
+@if (card().locked) {
+  <span class="wb-card__lock" [attr.aria-label]="'whiteboard.card.locked' | transloco">🔒</span>
+}
+
+@if (remoteEditorName()) {
+  <span class="wb-card__remote-editor">{{ 'whiteboard.card.editing' | transloco: { name: remoteEditorName() } }}</span>
+}
+
+@if (selected() && !readOnly() && !editing() && !card().locked) {
+  <!--
+    Resize handles — canvas reads data-resize-dir on pointerdown. tabindex + aria-label make
+    them keyboard-reachable (US08.6.1 A11y AC); hidden entirely when the card is locked
+    (gated on `!card().locked` above) so resize affordances aren't reachable by mouse or
+    keyboard on a locked card (US08.6.3/US08.6.4 A11y AC), on top of the pre-existing
+    readOnly/editing guards.
+  -->
+  @for (dir of handleDirs(); track dir) {
+    <span
+      class="wb-card__resize wb-card__resize--{{ dir }}"
+      [attr.data-resize-dir]="dir"
+      [attr.data-card-id]="card().id"
+      tabindex="0"
+      [attr.aria-label]="'whiteboard.card.resizeHandle' | transloco"
+    ></span>
+  }
+}
+<!-- `!isLine()`: a line gets no connect anchors. They sit at the midpoints of the box, which on a
+     line is the line itself — they landed right on top of it and on its resize handles, stealing
+     every click and making the line impossible to reshape (recette 2026-07-17). Linking *to* a
+     line has no meaning either: connectors join cards, and a line is already one. -->
+@if (selected() && !readOnly() && !editing() && !isLine()) {
+  <!-- Connect handles (N/E/S/W) — canvas reads data-connect on pointerdown. Connecting is not
+       blocked by `locked` in this Socle (only move/resize/update/recolor are — EN08.4). -->
+  <span class="wb-card__connect wb-card__connect--n" data-connect="N" [attr.data-card-id]="card().id" [attr.aria-label]="'whiteboard.card.connect' | transloco"></span>
+  <span class="wb-card__connect wb-card__connect--e" data-connect="E" [attr.data-card-id]="card().id"></span>
+  <span class="wb-card__connect wb-card__connect--s" data-connect="S" [attr.data-card-id]="card().id"></span>
+  <span class="wb-card__connect wb-card__connect--w" data-connect="W" [attr.data-card-id]="card().id"></span>
+}
+
+@if (voteActive()) {
+  <!-- US08.12.2 — dot-vote control. `pointerdown` is stopped so tapping it never starts a
+       card drag (the canvas reads pointerdown on the host to begin moving). -->
+  <div
+    class="wb-card__vote"
+    [class.wb-card__vote--mine]="myVotes() > 0"
+    (pointerdown)="$event.stopPropagation()"
+  >
+    @if (myVotes() > 0) {
+      <button
+        type="button"
+        class="wb-card__vote-btn"
+        (click)="uncastVote.emit()"
+        [attr.aria-label]="'whiteboard.vote.card.uncast' | transloco"
+        [title]="'whiteboard.vote.card.uncast' | transloco"
+      >
+        −
+      </button>
+    }
+    <span class="wb-card__vote-count" [attr.aria-label]="'whiteboard.vote.card.count' | transloco: { count: voteCount() }">
+      <span class="wb-card__vote-dot" aria-hidden="true"></span>
+      {{ voteCount() }}
+    </span>
+    <button
+      type="button"
+      class="wb-card__vote-btn wb-card__vote-btn--add"
+      [disabled]="!canVoteMore()"
+      (click)="castVote.emit()"
+      [attr.aria-label]="'whiteboard.vote.card.cast' | transloco"
+      [title]="'whiteboard.vote.card.cast' | transloco"
+    >
+      +
+    </button>
+  </div>
+}

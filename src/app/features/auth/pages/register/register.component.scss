@@ -1,5 +1,6 @@
-// EN17.8 — import depuis la lib design-system
-@use '@pivot-platform/design-system/scss/tokens';
+// EN17.8 — import depuis la lib design-system (EN53.4 : projet interne, résolu via
+// stylePreprocessorOptions.includePaths — voir src/styles.scss)
+@use 'tokens';
 
 :host { display: contents; }
 

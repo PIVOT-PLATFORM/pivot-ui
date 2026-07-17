@@ -1,0 +1,88 @@
+@if (selected()) {
+  <svg:path
+    class="wb-connection__halo"
+    [attr.d]="pathD()"
+    fill="none"
+    [attr.stroke-width]="haloWidth()" />
+}
+
+<svg:path
+  class="wb-connection__hit"
+  data-connection-hit
+  [attr.d]="pathD()"
+  fill="none"
+  stroke="transparent"
+  [attr.stroke-width]="hitWidth()"
+  role="button"
+  tabindex="0"
+  [attr.aria-label]="ariaLabel()"
+  (click)="onSelect($event)"
+  (dblclick)="onLabelDblClick($event)"
+  (keydown.enter)="onSelect($event)"
+  (keydown.space)="onSelect($event)" />
+
+<svg:path
+  class="wb-connection__line"
+  [attr.d]="pathD()"
+  fill="none"
+  [attr.stroke]="strokeColor()"
+  [attr.stroke-width]="strokeWidth()"
+  [attr.stroke-linecap]="lineCap()"
+  stroke-linejoin="round"
+  [attr.stroke-dasharray]="dashArray()" />
+
+@if (endCap(); as cap) {
+  @if (cap.kind === 'polygon') {
+    <svg:polygon class="wb-connection__cap" [attr.points]="cap.points" [attr.fill]="strokeColor()" />
+  } @else {
+    <svg:circle class="wb-connection__cap" [attr.cx]="cap.cx" [attr.cy]="cap.cy" [attr.r]="cap.r" [attr.fill]="strokeColor()" />
+  }
+}
+@if (startCap(); as cap) {
+  @if (cap.kind === 'polygon') {
+    <svg:polygon class="wb-connection__cap" [attr.points]="cap.points" [attr.fill]="strokeColor()" />
+  } @else {
+    <svg:circle class="wb-connection__cap" [attr.cx]="cap.cx" [attr.cy]="cap.cy" [attr.r]="cap.r" [attr.fill]="strokeColor()" />
+  }
+}
+
+<!-- Inline label editing, on the board's own precedent (`BoardCardComponent`): double-click edits.
+     A `foreignObject` is what puts an HTML input inside the SVG layer, anchored on the label box
+     that is already computed for the text. -->
+@if (editing()) {
+  <svg:foreignObject
+    data-connection-label
+    [attr.x]="labelBox().x - 8"
+    [attr.y]="labelBox().y - 4"
+    [attr.width]="labelBox().width + 40"
+    [attr.height]="labelBox().height + 8"
+  >
+    <!-- Uncontrolled on purpose: a `[value]` binding re-applies the signal on every keystroke and
+         wipes what was just typed (measured — the field stayed empty). The value is seeded once on
+         open and read back here at commit. -->
+    <input
+      #labelInput
+      class="wb-connection__label-input"
+      [attr.aria-label]="'whiteboard.connector.style.labelFieldLabel' | transloco"
+      (blur)="commitLabel()"
+      (keydown.enter)="commitLabel()"
+      (keydown.escape)="cancelLabel($event)"
+    />
+  </svg:foreignObject>
+} @else if (label(); as text) {
+  <svg:g class="wb-connection__label" data-connection-label (click)="onSelect($event)" (dblclick)="onLabelDblClick($event)">
+    <svg:rect
+      class="wb-connection__label-box"
+      [attr.x]="labelBox().x"
+      [attr.y]="labelBox().y"
+      [attr.width]="labelBox().width"
+      [attr.height]="labelBox().height"
+      rx="6"
+      [attr.stroke]="selected() ? '#6366f1' : '#e5e7eb'" />
+    <svg:text
+      class="wb-connection__label-text"
+      [attr.x]="labelTextPos().x"
+      [attr.y]="labelTextPos().y"
+      text-anchor="middle">{{ text }}</svg:text>
+  </svg:g>
+}

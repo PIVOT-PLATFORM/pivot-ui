@@ -1,0 +1,76 @@
+<div class="wb-frame__header" [style.background]="frame().color" data-frame-drag [attr.data-frame-id]="frame().id">
+  @if (editing()) {
+    <input
+      #titleInput
+      class="wb-frame__title-edit"
+      [value]="draft()"
+      (input)="draft.set($any($event.target).value)"
+      (blur)="commit()"
+      (keydown)="onKeydown($event)"
+      [attr.aria-label]="'whiteboard.frame.titleLabel' | transloco"
+    />
+  } @else {
+    <span class="wb-frame__title" data-frame-title (dblclick)="startEdit()">{{ frame().title || ('whiteboard.frame.untitled' | transloco) }}</span>
+  }
+
+  <!-- Frame options only once the frame is selected: they are actions *on this frame*, and showing
+       them on every frame at all times turned each header into a permanent button strip. Selecting
+       is what says "this is the one I'm working on". -->
+  @if (selected() && !readOnly()) {
+    <button
+      type="button"
+      class="wb-frame__btn"
+      [attr.aria-label]="'whiteboard.layer.bringToFront' | transloco"
+      [title]="'whiteboard.layer.bringToFront' | transloco"
+      (click)="bringToFront.emit()"
+    >
+      <svg class="wb-frame__btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">
+        <rect x="9" y="3" width="12" height="12" rx="2" stroke-width="2" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-8a2 2 0 012-2h4" />
+      </svg>
+    </button>
+
+    <button
+      type="button"
+      class="wb-frame__btn"
+      [attr.aria-label]="'whiteboard.layer.sendToBack' | transloco"
+      [title]="'whiteboard.layer.sendToBack' | transloco"
+      (click)="sendToBack.emit()"
+    >
+      <svg class="wb-frame__btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9V5a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2h-4" />
+        <rect x="3" y="9" width="12" height="12" rx="2" stroke-width="2" fill="currentColor" fill-opacity="0.16" />
+      </svg>
+    </button>
+
+    <button
+      type="button"
+      class="wb-frame__active-toggle"
+      [class.wb-frame__active-toggle--on]="frame().active"
+      [attr.aria-pressed]="frame().active"
+      [attr.aria-label]="'whiteboard.frame.carryCards' | transloco"
+      [title]="'whiteboard.frame.carryCards' | transloco"
+      (click)="toggleActive.emit(!frame().active)"
+    >
+      <span aria-hidden="true">🧲</span>
+    </button>
+
+    <button
+      type="button"
+      class="wb-frame__btn wb-frame__btn--danger"
+      [attr.aria-label]="'whiteboard.frame.delete' | transloco: { title: frame().title || ('whiteboard.frame.untitled' | transloco) }"
+      [title]="'whiteboard.frame.delete' | transloco: { title: frame().title || ('whiteboard.frame.untitled' | transloco) }"
+      (click)="remove.emit()"
+    >
+      <svg class="wb-frame__btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+      </svg>
+    </button>
+  }
+</div>
+
+@if (selected() && !readOnly()) {
+  @for (dir of resizeDirs; track dir) {
+    <span class="wb-frame__resize wb-frame__resize--{{ dir }}" [attr.data-frame-resize-dir]="dir" [attr.data-frame-id]="frame().id"></span>
+  }
+}

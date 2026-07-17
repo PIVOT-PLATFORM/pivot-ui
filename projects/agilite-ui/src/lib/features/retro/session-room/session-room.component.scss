@@ -1,0 +1,279 @@
+// Styles minimaux, auto-contenus (pas de tokens @pivot/design-system — EN17.2, repo pas
+// encore créé, voir CLAUDE.md). Contraste vérifié WCAG 2.1 AA (texte normal >= 4.5:1).
+
+.session-room {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.session-room__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.session-room__error {
+  color: #b3261e;
+  font-size: 0.875rem;
+}
+
+.session-room__fallback-note {
+  color: #58606b;
+  font-style: italic;
+}
+
+.session-room__facilitator-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.session-room__facilitator-controls button,
+.session-room__action-form button[type='submit'] {
+  align-self: flex-start;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  border: 1px solid transparent;
+  background: #0b5fff;
+  color: #fff;
+  cursor: pointer;
+}
+
+.session-room__anonymous-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.session-room__columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem;
+}
+
+.session-room__column {
+  border: 1px solid #d8dce1;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.session-room__column-heading {
+  font-size: 1.05rem;
+  margin: 0 0 0.75rem;
+}
+
+.session-room__card-list,
+.session-room__action-list ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.session-room__card-list {
+  margin: 0 0 0.75rem;
+}
+
+.session-room__card,
+.session-room__action-item {
+  background: #f4f5f7;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  overflow-wrap: break-word;
+}
+
+.session-room__card-content {
+  display: block;
+}
+
+.session-room__vote-balance,
+.session-room__action-item-title {
+  font-weight: 600;
+}
+
+.session-room__vote-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.session-room__vote-button {
+  min-width: 2rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 0.25rem;
+  border: 1px solid #58606b;
+  background: #fff;
+  font-size: 1rem;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.session-room__vote-count {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.session-room__my-votes {
+  color: #58606b;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+.session-room__ranking-group {
+  margin-bottom: 1.25rem;
+
+  h3 {
+    font-size: 1rem;
+    margin: 0 0 0.5rem;
+  }
+}
+
+.session-room__ranking-list {
+  list-style: decimal;
+  margin: 0;
+  padding-left: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.session-room__ranking-item,
+.session-room__action-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.session-room__ranking-count {
+  font-weight: 700;
+}
+
+.session-room__ranking-content {
+  overflow-wrap: break-word;
+}
+
+.session-room__create-action-button {
+  padding: 0.3rem 0.75rem;
+  border-radius: 0.25rem;
+  border: 1px solid #0b5fff;
+  background: transparent;
+  color: #0b5fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.session-room__action-result,
+.session-room__action-item-owner,
+.session-room__action-item-due-date,
+.session-room__action-item-status {
+  font-size: 0.8rem;
+  color: #58606b;
+  font-style: italic;
+}
+
+.session-room__closed-banner {
+  font-weight: 600;
+  color: #58606b;
+  border: 1px solid #d8dce1;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.session-room__card--empty {
+  background: transparent;
+  color: #58606b;
+  font-style: italic;
+}
+
+.session-room__masked-count {
+  color: #1a1c1e;
+  font-size: 0.9rem;
+  margin: 0 0 0.75rem;
+}
+
+.session-room__submit-form,
+.session-room__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.session-room__field-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.session-room__card-input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #58606b;
+  border-radius: 0.25rem;
+  font-size: 0.95rem;
+  resize: vertical;
+}
+
+.session-room__submit-form button {
+  align-self: flex-start;
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.25rem;
+  border: 1px solid #58606b;
+  background: transparent;
+  cursor: pointer;
+}
+
+// The action-creation form's own fields deliberately reuse `.session-room__field-label` /
+// `.session-room__card-input` (already defined above for the card-submission form) rather than
+// duplicating near-identical label/input rules — keeps this stylesheet under the
+// `anyComponentStyle` build budget.
+.session-room__team-actions-link {
+  color: #0b5fff;
+}
+
+.session-room__action-list ul {
+  margin: 1.5rem 0 0;
+}
+
+// Consolidated: every interactive control here shares the exact same focus ring / disabled
+// look — two grouped rules instead of many duplicated `&:focus-visible`/`&[disabled]` blocks
+// (keeps this stylesheet's compiled size under the `anyComponentStyle` build budget).
+.session-room__facilitator-controls button:focus-visible,
+.session-room__action-form button[type='submit']:focus-visible,
+.session-room__vote-button:focus-visible,
+.session-room__create-action-button:focus-visible,
+.session-room__card-input:focus-visible,
+.session-room__submit-form button:focus-visible,
+.session-room__team-actions-link:focus-visible {
+  outline: 2px solid #0b5fff;
+  outline-offset: 1px;
+}
+
+.session-room__facilitator-controls button[disabled],
+.session-room__action-form button[type='submit'][disabled],
+.session-room__vote-button[disabled],
+.session-room__create-action-button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+// Warm-up panel (US20.3.2) — deliberately reuses existing building blocks from this same
+// stylesheet (`.session-room__column` for the box, `.session-room__card`/`.session-room__action-
+// item*` for each row, `.session-room__vote-controls`/`.session-room__vote-button` for the
+// per-row controls, `.session-room__create-action-button` for the continue CTA, `.session-room__
+// error` for the inline error) rather than introducing a parallel set of near-identical rules —
+// keeps this stylesheet's compiled size under the `anyComponentStyle` build budget (same reason
+// as the action-creation form's own precedent comment above). The only genuinely new rule needed
+// is spacing, since this panel sits standalone rather than inside the `.session-room__columns`
+// grid.
+.session-room__warmup {
+  margin-bottom: 1.5rem;
+}

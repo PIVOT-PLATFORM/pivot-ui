@@ -1,0 +1,414 @@
+{
+  "home": {
+    "title": "PIVOT Agilité"
+  },
+  "hub": {
+    "title": "Agilité",
+    "subtitle": "Daily, tirage au sort et capacité de l’équipe.",
+    "tabs": {
+      "daily": "Daily",
+      "wheel": "Roue d’équipe",
+      "capacity": "Capacity"
+    },
+    "daily": {
+      "todayTitle": "Daily du jour",
+      "sprintTasks": "Tâches du sprint en cours",
+      "history": "Historique des dailies"
+    },
+    "wheel": {
+      "goalLabel": "Tirage au sort :",
+      "goalTarget": "Animateur du daily",
+      "spinning": "Tirage en cours…",
+      "spin": "Lancer le tirage",
+      "resultLabel": "Animateur du daily désigné",
+      "history": "Historique des tirages"
+    },
+    "capacity": {
+      "velocity": "Vélocité — 6 derniers sprints",
+      "chargeTitle": "Charge vs capacité",
+      "legendOver": "Surcharge",
+      "legendBalanced": "Équilibré",
+      "legendUnder": "Sous-charge",
+      "days": "{{charge}}j / {{capacity}}j"
+    }
+  },
+  "wheels": {
+    "list": {
+      "title": "Mes roues",
+      "selectTeam": "Équipe",
+      "noTeams": "Vous n'appartenez à aucune équipe.",
+      "create": "Créer une roue",
+      "empty": "Aucune roue pour cette équipe.",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "loadError": "Impossible de charger les roues.",
+      "retry": "Réessayer",
+      "deleteSuccess": "Roue supprimée.",
+      "deleteError": "Impossible de supprimer la roue.",
+      "dismiss": "Fermer"
+    },
+    "confirmDelete": {
+      "title": "Supprimer la roue ?",
+      "message": "« {{name}} » sera définitivement supprimée, ainsi que tous ses participants.",
+      "confirm": "Supprimer",
+      "cancel": "Annuler"
+    },
+    "form": {
+      "createTitle": "Créer une roue",
+      "editTitle": "Modifier la roue",
+      "nameLabel": "Nom de la roue",
+      "entriesTitle": "Participants",
+      "entriesEmpty": "Ajoutez au moins un participant.",
+      "memberPickerLabel": "Ajouter un membre de l'équipe",
+      "addMember": "Ajouter",
+      "freeTextLabel": "Ajouter un nom libre",
+      "addFreeText": "Ajouter",
+      "weightLabel": "Poids",
+      "remove": "Retirer",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "saveSuccess": "Roue enregistrée.",
+      "saveError": "Impossible d'enregistrer la roue.",
+      "retry": "Réessayer",
+      "loadError": "Impossible de charger cette roue.",
+      "errors": {
+        "INVALID_NAME": "Le nom doit contenir entre 1 et 100 caractères.",
+        "EMPTY_ENTRIES": "Ajoutez au moins un participant.",
+        "DUPLICATE_ENTRY": "Cette entrée est déjà présente dans la roue.",
+        "INVALID_ENTRY_TEAM_MEMBER": "Ce membre n'appartient pas à cette équipe.",
+        "INVALID_WEIGHT": "Le poids doit être compris entre 1 et 10."
+      }
+    },
+    "detail": {
+      "loadError": "Impossible de charger cette roue.",
+      "modeLabel": "Mode anti-répétition",
+      "mode": {
+        "reduced_weight": "Poids réduit",
+        "exclude": "Exclure"
+      },
+      "spin": "Lancer le tirage",
+      "spinning": "Tirage en cours…",
+      "spinError": "Impossible d'effectuer le tirage.",
+      "result": {
+        "announce": "Résultat du tirage : {{label}}."
+      },
+      "history": {
+        "title": "Historique des tirages",
+        "empty": "Aucun tirage effectué pour le moment."
+      }
+    }
+  },
+  "retro": {
+    "createSession": {
+      "title": "Créer une session de rétrospective",
+      "form": {
+        "titleLabel": "Titre",
+        "titleRequired": "Le titre est requis.",
+        "titleMaxLength": "Le titre doit contenir 100 caractères maximum.",
+        "teamIdLabel": "ID de l'équipe",
+        "teamIdHint": "Sélecteur d'équipe à venir (dépend de @pivot/ui-core) — saisir l'identifiant numérique de l'équipe en attendant.",
+        "teamIdRequired": "L'identifiant de l'équipe est requis.",
+        "teamIdPositive": "L'identifiant de l'équipe doit être un nombre entier positif.",
+        "formatLabel": "Format",
+        "formatPlaceholder": "Choisir un format",
+        "formatRequired": "Le format est requis.",
+        "format": {
+          "START_STOP_CONTINUE": "Start / Stop / Continue",
+          "KIF_KAF": "KIF / KAF",
+          "FOUR_L": "4L",
+          "MAD_SAD_GLAD": "Mad / Sad / Glad",
+          "CUSTOM": "Personnalisé"
+        },
+        "sprintRefLabel": "Référence du sprint (optionnel)",
+        "sprintRefMaxLength": "La référence du sprint doit contenir 100 caractères maximum.",
+        "timersLegend": "Minuteurs par phase (optionnels, en secondes)",
+        "contributionTimerLabel": "Minuteur de contribution (secondes)",
+        "voteTimerLabel": "Minuteur de vote (secondes)",
+        "actionTimerLabel": "Minuteur d'actions (secondes)",
+        "timerPositive": "Le minuteur doit être un nombre entier de secondes strictement positif.",
+        "voteCountLabel": "Nombre de votes par participant (optionnel, défaut 3)",
+        "voteCountPositive": "Le nombre de votes doit être un nombre entier strictement positif.",
+        "submit": "Créer la session",
+        "submitting": "Création en cours…",
+        "formatColumnCount": "Comporte {{count}} colonnes."
+      },
+      "result": {
+        "heading": "Session créée",
+        "joinCodeLabel": "Code de participation",
+        "copy": "Copier le code",
+        "copied": "Code copié !",
+        "announce": "Session créée. Code de participation : {{joinCode}}.",
+        "titleLabel": "Titre",
+        "formatLabel": "Format",
+        "phaseLabel": "Phase actuelle",
+        "expiresAtLabel": "Expire le",
+        "phase": {
+          "CONTRIBUTION": "Contribution",
+          "REVUE": "Revue",
+          "VOTE": "Vote",
+          "ACTION": "Actions",
+          "CLOSED": "Clôturée"
+        },
+        "createAnother": "Créer une autre session"
+      },
+      "error": {
+        "INVALID_TITLE": "Le titre est invalide (requis, 100 caractères maximum).",
+        "INVALID_FORMAT": "Le format sélectionné est invalide.",
+        "INVALID_TIMER": "Un des minuteurs doit être un nombre entier de secondes strictement positif.",
+        "INVALID_VOTE_COUNT": "Le nombre de votes par participant doit être un nombre entier strictement positif.",
+        "teamNotFound": "Équipe introuvable.",
+        "teamAccessDenied": "Vous n'êtes pas membre de cette équipe.",
+        "unauthorized": "Authentification requise — fonctionnalité non disponible tant que le module d'authentification (@pivot/ui-core) n'est pas intégré.",
+        "generic": "Une erreur est survenue lors de la création de la session. Veuillez réessayer.",
+        "CUSTOM_FORMAT_ID_REQUIRED": "Un format personnalisé doit être sélectionné ou créé.",
+        "CUSTOM_FORMAT_NOT_FOUND": "Le format personnalisé sélectionné est introuvable.",
+        "CUSTOM_FORMAT_ID_NOT_ALLOWED": "Le format personnalisé ne doit être fourni que pour le format « Personnalisé ».",
+        "INVALID_FORMAT_LABEL": "Le nom du format personnalisé est invalide.",
+        "CUSTOM_FORMAT_INVALID_COLUMN_COUNT": "Le format personnalisé doit comporter entre 2 et 8 colonnes.",
+        "INVALID_COLUMN_LABEL": "Le libellé d'une colonne est invalide."
+      },
+      "formatsLoading": "Chargement des formats de rétrospective…",
+      "formatsError": "Impossible de charger les formats de rétrospective.",
+      "formatsRetry": "Réessayer",
+      "customFormat": {
+        "cardHint": "Créer un format personnalisé (2 à 8 colonnes)",
+        "legend": "Format personnalisé",
+        "labelField": "Nom du format personnalisé",
+        "labelRequired": "Le nom du format personnalisé est requis.",
+        "labelMaxLength": "Le nom du format personnalisé doit contenir 60 caractères maximum.",
+        "columnsHint": "Entre 2 et 8 colonnes, chacune avec un libellé.",
+        "columnLabel": "Libellé de la colonne {{position}}",
+        "columnRequired": "Le libellé de la colonne est requis.",
+        "columnMaxLength": "Le libellé de la colonne doit contenir 40 caractères maximum.",
+        "addColumn": "Ajouter une colonne",
+        "removeColumn": "Supprimer cette colonne",
+        "columnAdded": "Colonne {{position}} ajoutée.",
+        "columnRemoved": "Colonne {{position}} supprimée."
+      }
+    },
+    "sessionRoom": {
+      "title": "Salon de rétrospective",
+      "joining": "Connexion au salon en cours…",
+      "wsStatus": {
+        "connecting": "Connexion au salon temps réel…",
+        "connected": "Connecté au salon temps réel.",
+        "error": "Connexion au salon temps réel impossible."
+      },
+      "phase": {
+        "CONTRIBUTION": "Phase : Contribution",
+        "REVUE": "Phase : Revue",
+        "VOTE": "Phase : Vote",
+        "ACTION": "Phase : Action",
+        "CLOSED": "Session clôturée"
+      },
+      "timeRemaining": "Temps restant : {{seconds}} s",
+      "fallbackNote": "Les colonnes affichées sont provisoires (catalogue de formats indisponible).",
+      "closeContributionNow": "Clôturer la contribution maintenant",
+      "triggerReveal": "Révéler les cards",
+      "openVoteNow": "Ouvrir le vote",
+      "closeVoteNow": "Clôturer le vote",
+      "closeSessionNow": "Clôturer la session maintenant",
+      "closedBanner": "Cette session est clôturée : lecture seule, plus aucune écriture n'est acceptée.",
+      "submitAnonymously": "Soumettre anonymement",
+      "noCards": "Aucune card pour le moment.",
+      "facilitatorPreview": "Aperçu animateur (contenu en clair avant révélation)",
+      "submitFormLabel": "Proposer une card dans la colonne {{column}}",
+      "cardInputLabel": "Contenu de la card",
+      "submit": "Proposer",
+      "maskedCount": "{{count}} card(s) proposée(s)",
+      "vote": {
+        "remaining": "Votes restants : {{remaining}} / {{allowed}}",
+        "count": "{{count}} vote(s)",
+        "castLabel": "Ajouter un vote à « {{content}} »",
+        "uncastLabel": "Retirer un vote de « {{content}} »",
+        "mine": "Dont {{count}} de vous"
+      },
+      "ranking": {
+        "heading": "Classement des cards"
+      },
+      "action": {
+        "createFromCard": "Créer une action",
+        "createLabel": "Créer une action à partir de « {{content}} »",
+        "created": "Action créée.",
+        "status": {
+          "A_FAIRE": "À faire",
+          "EN_COURS": "En cours",
+          "TERMINEE": "Terminée",
+          "ABANDONNEE": "Abandonnée"
+        },
+        "form": {
+          "heading": "Créer une action",
+          "titleLabel": "Titre",
+          "ownerLabel": "Responsable (optionnel)",
+          "ownerNone": "Aucun responsable",
+          "dueDateLabel": "Échéance (optionnelle)",
+          "sourceCardLabel": "Card source (optionnelle)",
+          "sourceCardNone": "Aucune card source",
+          "submit": "Créer l'action",
+          "submitting": "Création en cours…",
+          "error": {
+            "invalid": "Le responsable sélectionné n'est pas membre de l'équipe, ou la card source ne correspond pas à cette session.",
+            "sessionUnavailable": "Impossible de créer l'action pour cette session.",
+            "wrongPhase": "Impossible de créer une action en dehors de la phase Action.",
+            "generic": "Une erreur est survenue lors de la création de l'action. Veuillez réessayer."
+          }
+        },
+        "list": {
+          "heading": "Actions de cette session",
+          "ownerLabel": "Responsable : {{owner}}",
+          "dueDateLabel": "Échéance : {{dueDate}}"
+        }
+      },
+      "error": {
+        "notFound": "Session introuvable.",
+        "expired": "Cette session a expiré ou est clôturée.",
+        "generic": "Une erreur est survenue. Veuillez réessayer.",
+        "actionFailed": "L'action a échoué. Veuillez réessayer."
+      },
+      "fallbackColumns": {
+        "start": "Commencer",
+        "stop": "Arrêter",
+        "continue": "Continuer",
+        "kif": "Kif",
+        "kaf": "Kaf",
+        "liked": "Apprécié",
+        "learned": "Appris",
+        "lacked": "Manqué",
+        "longedFor": "Souhaité",
+        "mad": "Fâché",
+        "sad": "Triste",
+        "glad": "Content",
+        "general": "Général"
+      },
+      "viewTeamActions": "Voir les actions de l'équipe",
+      "warmup": {
+        "checking": "Vérification des actions en cours de l'équipe…",
+        "heading": "Actions en cours de l'équipe",
+        "intro": "Ces actions, issues d'une rétrospective précédente, sont encore en cours. Marquez-les comme terminées ou abandonnées si besoin avant de commencer.",
+        "ownerPrefix": "Responsable :",
+        "unknownOwner": "Non assigné",
+        "dueDatePrefix": "Échéance :",
+        "noDueDate": "Aucune échéance",
+        "markDone": "Marquer terminée",
+        "markDoneLabel": "Marquer terminée — {{ title }}",
+        "markAbandoned": "Marquer abandonnée",
+        "markAbandonedLabel": "Marquer abandonnée — {{ title }}",
+        "updateError": "Le changement de statut a échoué. Veuillez réessayer.",
+        "allResolved": "Toutes les actions ont été traitées.",
+        "continue": "Continuer vers la rétrospective"
+      }
+    }
+  },
+  "scrumPoker": {
+    "createRoom": {
+      "title": "Créer une room de planning poker",
+      "nameLabel": "Nom de la room",
+      "nameRequired": "Le nom de la room est requis.",
+      "nameTooLong": "Le nom ne doit pas dépasser 120 caractères.",
+      "submit": "Créer la room",
+      "submitting": "Création en cours…",
+      "success": "Room créée avec succès.",
+      "inviteCodeLabel": "Code d'invitation",
+      "copyButton": "Copier le code d'invitation",
+      "copySuccess": "Code d'invitation copié dans le presse-papiers.",
+      "copyError": "Impossible de copier le code — copiez-le manuellement.",
+      "createAnother": "Créer une autre room",
+      "errors": {
+        "unauthorized": "Vous devez être connecté pour créer une room.",
+        "invalidName": "Le nom de la room est invalide.",
+        "invalidRequest": "La demande est invalide. Vérifiez le nom de la room.",
+        "generic": "Une erreur est survenue. Veuillez réessayer."
+      }
+    },
+    "joinRoom": {
+      "title": "Rejoindre une room de planning poker",
+      "codeLabel": "Code de la room",
+      "codeRequired": "Le code est requis.",
+      "codeInvalidLength": "Le code doit contenir exactement 6 caractères.",
+      "submit": "Rejoindre la room",
+      "submitAnonymous": "Rejoindre anonymement",
+      "submitting": "Connexion en cours…",
+      "success": "Room rejointe avec succès.",
+      "nameLabel": "Nom de la room",
+      "pseudonymLabel": "Pseudonyme",
+      "optional": "(facultatif)",
+      "modeToggleLabel": "Mode de connexion",
+      "modeAuthenticated": "Se connecter",
+      "modeAnonymous": "Rejoindre sans compte",
+      "joinAnother": "Rejoindre une autre room",
+      "wsStatus": {
+        "connecting": "Connexion au salon temps réel…",
+        "connected": "Connecté au salon temps réel.",
+        "error": "Connexion au salon temps réel impossible."
+      },
+      "errors": {
+        "unauthorized": "Vous devez être connecté pour rejoindre une room.",
+        "invalidCode": "Le code saisi est invalide.",
+        "invalidPseudonym": "Le pseudonyme ne doit pas dépasser 40 caractères.",
+        "notFound": "Code introuvable ou expiré.",
+        "invalidRequest": "La demande est invalide. Vérifiez le code saisi.",
+        "sessionExpired": "Votre session invité a expiré. Merci de rejoindre à nouveau.",
+        "generic": "Une erreur est survenue. Veuillez réessayer."
+      }
+    },
+    "roomBoard": {
+      "heading": "Ticket en cours",
+      "ticketTitleLabel": "Titre du ticket",
+      "ticketTitleRequired": "Le titre du ticket est requis.",
+      "ticketTitleTooLong": "Le titre ne doit pas dépasser 200 caractères.",
+      "createTicket": "Créer le ticket",
+      "creatingTicket": "Création en cours…",
+      "cardsLabel": "Cartes de vote",
+      "votedCounter": "{{voted}}/{{total}} ont voté",
+      "waitingForTicket": "En attente d'un ticket créé par le facilitateur…",
+      "errors": {
+        "facilitatorOnly": "Seul le facilitateur de la room peut créer un ticket.",
+        "activeTicketExists": "Un ticket est déjà en cours de vote dans cette room.",
+        "invalidTitle": "Le titre du ticket est invalide.",
+        "invalidRequest": "La demande est invalide. Vérifiez le titre du ticket.",
+        "generic": "Une erreur est survenue. Veuillez réessayer.",
+        "ticketNotFound": "Ce ticket est introuvable.",
+        "ticketAlreadyRevealed": "Ce ticket a déjà été révélé."
+      },
+      "reveal": "Révéler les votes",
+      "revealing": "Révélation en cours…",
+      "revealedHeading": "Votes révélés",
+      "revealedValuesLabel": "Cartes révélées",
+      "consensusMean": "Moyenne",
+      "consensusMedian": "Médiane",
+      "consensusMajority": "Valeur majoritaire",
+      "noNumericConsensus": "Pas de consensus numérique"
+    }
+  },
+  "teamActions": {
+    "title": "Actions de l'équipe",
+    "filterLabel": "Filtrer par statut",
+    "filterAll": "Tous les statuts",
+    "status": {
+      "A_FAIRE": "À faire",
+      "EN_COURS": "En cours",
+      "TERMINEE": "Terminée",
+      "ABANDONNEE": "Abandonnée"
+    },
+    "sortLabel": "Trier par échéance",
+    "sortAscending": "Échéance croissante",
+    "sortDescending": "Échéance décroissante",
+    "columns": {
+      "title": "Titre",
+      "owner": "Responsable",
+      "dueDate": "Échéance",
+      "status": "Statut",
+      "sourceCard": "Card source"
+    },
+    "noDueDate": "Aucune échéance",
+    "unknownOwner": "Non assignée",
+    "fromCard": "Issue d'une card de rétrospective",
+    "loading": "Chargement des actions…",
+    "loadError": "Impossible de charger les actions de cette équipe.",
+    "retry": "Réessayer",
+    "empty": "Aucune action pour cette équipe.",
+    "statusChangeLabel": "Changer le statut de « {{title}} »",
+    "statusChangeError": "Le changement de statut a échoué. Veuillez réessayer.",
+    "missingTeamId": "Identifiant d'équipe manquant."
+  }
+}

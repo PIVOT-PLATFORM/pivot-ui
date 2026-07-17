@@ -1,0 +1,74 @@
+<button
+  #trigger
+  type="button"
+  class="form-control pv-select__trigger"
+  [class.is-invalid]="invalid"
+  aria-haspopup="listbox"
+  [attr.aria-expanded]="open()"
+  [attr.aria-controls]="open() ? listboxId : null"
+  [attr.aria-label]="ariaLabel || null"
+  [attr.aria-describedby]="ariaDescribedby || null"
+  [attr.aria-invalid]="invalid ? 'true' : null"
+  [disabled]="disabled"
+  cdkOverlayOrigin
+  #origin="cdkOverlayOrigin"
+  (click)="toggle()"
+  (keydown.escape)="close()"
+>
+  <span class="pv-select__value" [class.pv-select__value--placeholder]="!hasSelection()">{{
+    triggerLabel()
+  }}</span>
+  <pivot-ds-icon name="chevron-down" [size]="18" />
+</button>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="origin"
+  [cdkConnectedOverlayOpen]="open()"
+  [cdkConnectedOverlayPositions]="positions"
+  [cdkConnectedOverlayWidth]="origin.elementRef.nativeElement.offsetWidth"
+  (overlayOutsideClick)="close()"
+  (detach)="close()"
+>
+  <div class="pv-select__panel">
+    @if (searchable) {
+      <input
+        #searchInput
+        type="text"
+        class="form-control pv-select__search"
+        [placeholder]="searchPlaceholder"
+        [value]="query()"
+        [attr.aria-label]="searchPlaceholder || null"
+        (input)="onSearch($event)"
+        (keydown.escape)="close()"
+        (keydown.arrowdown)="focusListbox(); $event.preventDefault()"
+      />
+    }
+    <ul
+      #listboxEl
+      cdkListbox
+      [tabindex]="0"
+      [id]="listboxId"
+      class="pv-select__options"
+      [cdkListboxMultiple]="multiple"
+      [cdkListboxValue]="listboxValue()"
+      [cdkListboxDisabled]="disabled"
+      [attr.aria-label]="ariaLabel || null"
+      (cdkListboxValueChange)="onListboxChange($event)"
+      (keydown.escape)="close()"
+    >
+      @for (opt of filteredOptions(); track opt.value) {
+        <li
+          class="pv-select__option"
+          [cdkOption]="opt.value"
+          [cdkOptionDisabled]="!!opt.disabled"
+          [cdkOptionTypeaheadLabel]="opt.label"
+        >
+          {{ opt.label }}
+        </li>
+      } @empty {
+        <li class="pv-select__empty">{{ emptyLabel }}</li>
+      }
+    </ul>
+  </div>
+</ng-template>

@@ -1,0 +1,290 @@
+// Shared UI component styles
+
+// Visually hidden but accessible to screen readers (WCAG SR-only pattern)
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// ---- Form controls ----
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-gray-700);
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--color-gray-900);
+  background: #fff;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+  outline: none;
+
+  &:focus {
+    border-color: var(--color-brand-500);
+    box-shadow: 0 0 0 3px var(--color-brand-100);
+  }
+
+  &.is-invalid {
+    border-color: var(--color-error);
+    &:focus {
+      box-shadow: 0 0 0 3px var(--color-error-light);
+    }
+  }
+
+  &::placeholder {
+    color: var(--color-gray-400);
+  }
+}
+
+.form-error {
+  font-size: var(--text-xs);
+  color: var(--color-error);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.form-hint {
+  font-size: var(--text-xs);
+  color: var(--color-gray-500);
+  margin: 0;
+}
+
+.form-success {
+  font-size: var(--text-xs);
+  // WCAG 2.1 AA: --color-success (#0E9F6E) on white is ~3.4:1, below the 4.5:1
+  // minimum for normal text. --color-success-dark clears >6.5:1 in light theme;
+  // in dark theme (where --color-success-dark isn't redefined) the override
+  // below switches to --color-success-400, which already clears >9:1 against
+  // the dark surface — see skill-accessibility contrast rule.
+  color: var(--color-success-dark);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+[data-theme='dark'] .form-success {
+  color: var(--color-success-400);
+}
+
+// ---- Buttons ----
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  transition:
+    background var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: none;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
+
+.btn-primary {
+  background: var(--color-brand-600);
+  color: #fff;
+  box-shadow: var(--btn-primary-shadow);
+
+  &:hover:not(:disabled) {
+    background: var(--color-brand-700);
+    box-shadow: var(--btn-primary-shadow-hover);
+    transform: translateY(-1px);
+  }
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: var(--btn-primary-shadow);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+}
+
+.btn-secondary {
+  background: var(--color-gray-100);
+  color: var(--color-gray-700);
+  border: 1px solid var(--color-gray-200);
+  box-shadow: var(--btn-secondary-shadow);
+
+  &:hover:not(:disabled) {
+    background: var(--color-gray-200);
+    border-color: var(--color-gray-300);
+    box-shadow: var(--btn-secondary-shadow-hover);
+    transform: translateY(-1px);
+  }
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: var(--btn-secondary-shadow);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--color-gray-400);
+    outline-offset: 2px;
+  }
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-brand-600);
+
+  &:hover:not(:disabled) {
+    background: var(--color-brand-50);
+    box-shadow: var(--btn-ghost-shadow-hover);
+    transform: translateY(-1px);
+  }
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+}
+
+.btn-danger {
+  background: var(--color-error);
+  color: #fff;
+  box-shadow: var(--btn-danger-shadow);
+
+  &:hover:not(:disabled) {
+    background: var(--color-error-dark);
+    box-shadow: var(--btn-danger-shadow-hover);
+    transform: translateY(-1px);
+  }
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: var(--btn-danger-shadow);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--color-error);
+    outline-offset: 2px;
+  }
+}
+
+.btn-full {
+  width: 100%;
+}
+
+.btn-lg {
+  padding: 12px 24px;
+  font-size: var(--text-base);
+}
+
+// ---- Cards ----
+.card {
+  background: var(--surface-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-gray-200);
+}
+
+// ---- Alerts ----
+.alert {
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+
+  &-error {
+    background: var(--color-error-light);
+    color: var(--color-error-dark);
+    border: 1px solid var(--color-error-border);
+  }
+  &-success {
+    background: var(--color-success-light);
+    color: var(--color-success-dark);
+    border: 1px solid var(--color-success-border);
+  }
+  &-info {
+    background: var(--color-info-light);
+    color: var(--color-info-dark);
+    border: 1px solid var(--color-info-border);
+  }
+  &-warning {
+    background: var(--color-warning-light);
+    color: var(--color-warning-dark);
+    border: 1px solid var(--color-warning-border);
+  }
+}
+
+// ---- Spinner ----
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ---- Divider with text ----
+.divider-text {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0;
+  color: var(--color-gray-400);
+  font-size: var(--text-sm);
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-gray-200);
+  }
+}
+
+// ---- Liens inline dans un bloc de texte (WCAG 1.4.1 / audit link-in-text-block) ----
+// Un lien au sein d'un paragraphe/liste doit être distinguable autrement que par la
+// couleur (contraste lien/texte souvent < 3:1). Soulignement systématique des liens
+// en prose. Les liens « blocs » (boutons, nav, retour) ne sont pas concernés.
+p a,
+li a {
+  text-decoration: underline;
+}

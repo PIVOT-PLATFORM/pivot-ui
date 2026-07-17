@@ -30,7 +30,10 @@
               }
             ],
             "styles": ["src/styles.scss"],
-            "allowedCommonJsDependencies": ["@stomp/stompjs"]
+            "stylePreprocessorOptions": {
+              "includePaths": ["projects/design-system/src/scss"]
+            },
+            "allowedCommonJsDependencies": ["@stomp/stompjs", "jszip"]
           },
           "configurations": {
             "production": {
@@ -51,7 +54,7 @@
                 {
                   "type": "anyComponentStyle",
                   "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumError": "12kB"
                 }
               ],
               "outputHashing": "all",
@@ -72,7 +75,7 @@
                 {
                   "type": "anyComponentStyle",
                   "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumError": "12kB"
                 }
               ],
               "outputHashing": "all"
@@ -108,20 +111,20 @@
         }
       }
     },
-    "ui-core": {
+    "agilite-ui": {
       "projectType": "library",
-      "root": "projects/ui-core",
-      "sourceRoot": "projects/ui-core/src",
-      "prefix": "piv",
+      "root": "projects/agilite-ui",
+      "sourceRoot": "projects/agilite-ui/src",
+      "prefix": "piv-agilite",
       "architect": {
         "build": {
           "builder": "@angular/build:ng-packagr",
           "configurations": {
             "production": {
-              "tsConfig": "projects/ui-core/tsconfig.lib.prod.json"
+              "tsConfig": "projects/agilite-ui/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/ui-core/tsconfig.lib.json"
+              "tsConfig": "projects/agilite-ui/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"
@@ -129,7 +132,59 @@
         "test": {
           "builder": "@angular/build:unit-test",
           "options": {
-            "tsConfig": "projects/ui-core/tsconfig.spec.json"
+            "tsConfig": "projects/agilite-ui/tsconfig.spec.json"
+          }
+        }
+      }
+    },
+    "collaboratif-ui": {
+      "projectType": "library",
+      "root": "projects/collaboratif-ui",
+      "sourceRoot": "projects/collaboratif-ui/src",
+      "prefix": "piv-collab",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/collaboratif-ui/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/collaboratif-ui/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/collaboratif-ui/tsconfig.spec.json"
+          }
+        }
+      }
+    },
+    "design-system": {
+      "projectType": "library",
+      "root": "projects/design-system",
+      "sourceRoot": "projects/design-system/src",
+      "prefix": "pivot-ds",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/design-system/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/design-system/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/design-system/tsconfig.spec.json"
           }
         }
       }

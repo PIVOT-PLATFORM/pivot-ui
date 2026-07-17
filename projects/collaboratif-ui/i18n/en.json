@@ -1,0 +1,653 @@
+{
+  "app": {
+    "title": "PIVOT — Collaboratif",
+    "devHarnessNotice": "Development harness — implemented features are available via their routes (e.g. /whiteboard)."
+  },
+  "whiteboard": {
+    "selection": {
+      "actions": "Selection actions",
+      "count": "{{count}} selected",
+      "countPlural": "{{count}} selected",
+      "color": "Colour",
+      "duplicate": "Duplicate (Ctrl+D)",
+      "lock": "Lock",
+      "unlock": "Unlock",
+      "delete": "Delete (Del)",
+      "fill": "Fill colour",
+      "align": {
+        "left": "Align left",
+        "center": "Center",
+        "right": "Align right"
+      }
+    },
+    "layer": {
+      "bringToFront": "Bring to front",
+      "sendToBack": "Send to back"
+    },
+    "guard": {
+      "accessDenied": "You don't have access to this board"
+    },
+    "board": {
+      "list": {
+        "title": "My boards",
+        "newBoard": "New board",
+        "emptyTitle": "No boards yet",
+        "emptySubtitle": "Create your first collaborative board",
+        "emptyCta": "Create my first board",
+        "loadMore": "Load more",
+        "retry": "Try again",
+        "errorSubtitle": "Unable to load your boards. Check your connection.",
+        "createError": "Unable to create the board",
+        "online": "online",
+        "role": {
+          "owner": "Owner",
+          "editor": "Editor",
+          "viewer": "Viewer"
+        },
+        "menu": {
+          "rename": "Rename",
+          "delete": "Delete"
+        },
+        "create": {
+          "title": "New board",
+          "label": "Board title",
+          "placeholder": "My board",
+          "confirm": "Create",
+          "cancel": "Cancel"
+        },
+        "aria": {
+          "openBoard": "{{title}} — modified on {{date}} — {{role}}",
+          "boardMenu": "Options for {{title}}",
+          "activeParticipants": "{{count}} collaborator(s) currently online"
+        },
+        "tabActive": "My boards"
+      },
+      "rename": {
+        "error": "Unable to rename the board",
+        "aria": "Rename board {{title}}"
+      },
+      "delete": {
+        "success": "Board deleted",
+        "error": "Unable to delete the board",
+        "confirm": {
+          "title": "Delete «{{title}}»?",
+          "message": "The board will be moved to the trash. You can restore it from the Trash tab.",
+          "confirm": "Move to trash",
+          "cancel": "Cancel"
+        }
+      },
+      "untitled": "Untitled board",
+      "backToList": "Back to board list",
+      "reset": "Reset board",
+      "favorite": {
+        "add": "Add {{title}} to favorites",
+        "remove": "Remove {{title}} from favorites",
+        "error": "Unable to update favorites"
+      },
+      "trash": {
+        "tab": "Trash",
+        "empty": "Trash is empty",
+        "deletedOn": "Deleted on {{date}}",
+        "restore": "Restore",
+        "restoreAria": "Restore {{title}}",
+        "restoreSuccess": "Board restored",
+        "restoreError": "Unable to restore the board",
+        "purge": "Delete permanently",
+        "purgeAria": "Permanently delete {{title}}",
+        "purgeSuccess": "Board permanently deleted",
+        "purgeError": "Unable to permanently delete the board",
+        "purgeConfirm": {
+          "title": "Permanently delete «{{title}}»?",
+          "message": "This action is irreversible and deletes all board data, including its history. The board cannot be restored afterwards.",
+          "confirm": "Delete permanently",
+          "cancel": "Cancel"
+        }
+      },
+      "settings": {
+        "open": "Board settings",
+        "title": "Settings for «{{title}}»",
+        "close": "Close settings",
+        "nameLabel": "Board name",
+        "descriptionLabel": "Description",
+        "descriptionHint": "500 characters maximum",
+        "activitiesLabel": "Available activities",
+        "activitySoon": "Coming soon",
+        "save": "Save",
+        "saveSuccess": "Settings saved",
+        "saveError": "Unable to save settings",
+        "saveAsTemplate": "Save as template",
+        "saveAsTemplateNamePrompt": "Template name",
+        "saveAsTemplateSuccess": "Template saved",
+        "saveAsTemplateError": "Unable to save the template",
+        "resetConfirm": {
+          "title": "Reset «{{title}}»?",
+          "message": "All canvas content will be deleted. The board's title, members and favorites are kept. This action is irreversible.",
+          "confirm": "Reset",
+          "cancel": "Cancel"
+        },
+        "resetSuccess": "Board reset",
+        "resetError": "Unable to reset the board"
+      },
+      "resetAria": "Reset board {{title}} — deletes all canvas content",
+      "search": {
+        "label": "Search a board",
+        "placeholder": "Search by name or description…",
+        "clear": "Clear search",
+        "noResults": "No results for «{{term}}»",
+        "resultsCount": "{{count}} result(s)"
+      },
+      "presence": {
+        "aria": "{{count}} participant(s) connected"
+      }
+    },
+    "share": {
+      "panel": {
+        "title": "Share board",
+        "close": "Close sharing panel",
+        "linkSection": "Invitation link",
+        "selectRole": "Role:",
+        "generateLink": "Generate a link",
+        "generatingLink": "Generating…",
+        "linkLabel": "Invitation link",
+        "copyLink": "Copy link",
+        "linkCopied": "Link copied to clipboard!",
+        "clipboardFallback": "Copy the link above manually.",
+        "generateError": "Unable to generate the invitation link",
+        "membersSection": "Members",
+        "memberUserId": "ID",
+        "memberRole": "Role",
+        "memberJoined": "Added on",
+        "memberActionsColumn": "Actions",
+        "changeRole": "Change role",
+        "removeMember": "Remove",
+        "removeError": "Unable to remove member",
+        "roleUpdateError": "Unable to update role",
+        "loadMembersError": "Unable to load member list",
+        "confirmRemove": {
+          "title": "Remove this member?",
+          "message": "This member will lose access to the board immediately.",
+          "confirm": "Remove",
+          "cancel": "Cancel"
+        }
+      }
+    },
+    "canvas": {
+      "ariaLabel": "Collaborative canvas —",
+      "readOnly": "Read-only mode — reconnecting…",
+      "toolbar": {
+        "label": "Drawing tools",
+        "tools": "Tools",
+        "colorGroup": "Colors",
+        "currentColor": "Active color:",
+        "undoRedo": "Undo / Redo",
+        "selectionActions": "Selection actions",
+        "zoom": "Zoom",
+        "duplicate": "Duplicate (Ctrl+D)",
+        "zoomIn": "Zoom in (Ctrl++)",
+        "zoomOut": "Zoom out (Ctrl+-)"
+      },
+      "tool": {
+        "select": "Selection tool (V)",
+        "pencil": "Pencil tool (P)",
+        "rectangle": "Rectangle tool (R)",
+        "ellipse": "Ellipse tool",
+        "text": "Text tool (T)",
+        "erase": "Erase tool (E)"
+      },
+      "color": {
+        "panelLabel": "Color palette",
+        "palette": "Color",
+        "customHex": "Custom color (hex)",
+        "customHexError": "Invalid color — expected format: # followed by 6 hexadecimal digits (e.g. #1A2B3C)",
+        "applyCustom": "Apply custom color"
+      },
+      "undo": {
+        "label": "Undo (Ctrl+Z)",
+        "redo": "Redo (Ctrl+Y)"
+      },
+      "group": {
+        "group": "Group selection (Ctrl+G)",
+        "ungroup": "Ungroup (Ctrl+Shift+G)"
+      },
+      "text": {
+        "inputLabel": "Text input on canvas"
+      },
+      "minimap": {
+        "ariaLabel": "Minimap — board overview",
+        "show": "Show minimap",
+        "hide": "Hide minimap"
+      },
+      "shortcuts": {
+        "dialogToggle": "Show keyboard shortcuts (?)",
+        "dialogLabel": "Keyboard shortcuts",
+        "tableCaption": "Available keyboard shortcuts",
+        "close": "Close",
+        "description": "Press ? to see available keyboard shortcuts.",
+        "select": "Selection tool",
+        "pencil": "Pencil tool",
+        "text": "Text tool",
+        "erase": "Erase tool",
+        "rectangle": "Rectangle tool",
+        "undo": "Undo",
+        "redo": "Redo",
+        "selectAll": "Select all",
+        "duplicate": "Duplicate selection",
+        "copy": "Copy",
+        "paste": "Paste",
+        "group": "Group",
+        "ungroup": "Ungroup",
+        "delete": "Delete selection",
+        "zoomIn": "Zoom in",
+        "zoomOut": "Zoom out",
+        "zoomWheel": "Zoom (wheel)",
+        "pan": "Pan",
+        "showShortcuts": "Show shortcuts"
+      }
+    },
+    "template": {
+      "gallery": {
+        "label": "Board template",
+        "loadError": "Unable to load board templates.",
+        "retry": "Try again"
+      },
+      "createError": "Unable to create the board. Please try again.",
+      "previewAlt": "Preview of the {{name}} template",
+      "brainstorm": {
+        "name": "Brainstorm",
+        "description": "Freely collect ideas on sticky notes before organizing them."
+      },
+      "retrospective": {
+        "name": "Retrospective",
+        "description": "Structure the team's feedback: what went well, what can improve, action items."
+      },
+      "userStoryMap": {
+        "name": "User Story Map",
+        "description": "Map out the user journey and prioritize user stories by release."
+      }
+    },
+    "join": {
+      "loading": "Joining board…",
+      "error401": "You must be logged in to join this board.",
+      "error403": "You don't have permission to join this board.",
+      "error404": "The invitation link is invalid or not found.",
+      "error409": "You are already a member of this board.",
+      "error410": "This invitation link has expired or been revoked.",
+      "error429": "Too many attempts. Please wait before trying again.",
+      "errorDefault": "An error occurred. Please try again.",
+      "retry": "Try again"
+    },
+    "ws": {
+      "connecting": "Connecting…",
+      "lost": "Connection lost — reconnecting",
+      "reconnected": "Reconnected",
+      "failed": "Unable to join the board",
+      "retryManual": "Retry manually",
+      "offline": "Offline mode — changes are not being saved",
+      "revoked": "You no longer have access to this board"
+    },
+    "presence": {
+      "cursorLabel": "Cursor of {{name}}",
+      "panelAriaLabel": "Online participants",
+      "avatarAriaLabel": "{{name}} — {{role}}",
+      "overflowBadge": "+{{count}}",
+      "overflowAriaLabel": "And {{count}} more participants: {{names}}",
+      "online": "online",
+      "role": {
+        "owner": "Owner",
+        "editor": "Editor",
+        "viewer": "Viewer"
+      }
+    },
+    "toolbar": {
+      "label": "Toolbar",
+      "select": "Select",
+      "pan": "Pan",
+      "sticky": "Sticky note",
+      "text": "Label",
+      "rect": "Rectangle",
+      "circle": "Circle",
+      "diamond": "Diamond",
+      "triangle": "Triangle",
+      "line": "Line",
+      "star": "Star",
+      "draw": "Freehand",
+      "table": "Table",
+      "frame": "Frame",
+      "colorGroup": "Colours",
+      "pickColor": "Colour {{color}}",
+      "fillColorGroup": "Fill colour",
+      "pickFillColor": "Fill {{color}}",
+      "noFill": "No fill",
+      "collapse": "Collapse toolbar",
+      "expand": "Expand toolbar",
+      "shapes": "Shapes",
+      "shapesMenu": "Choose a shape",
+      "colorMenu": "Colours (stroke and fill)",
+      "escapeHint": "Esc",
+      "hint": {
+        "draw": "Drag to draw freehand.",
+        "frame": "Drag to draw a frame.",
+        "pan": "Drag to move the board.",
+        "shape": "Drag to draw the shape.",
+        "sticky": "Click to drop a note.",
+        "table": "Click to drop a table.",
+        "text": "Click to write some text."
+      },
+      "lineStyle": {
+        "dashed": "Dashed",
+        "dotted": "Dotted",
+        "solid": "Solid"
+      },
+      "arrowDir": {
+        "none": "No arrow",
+        "end": "Arrow at the end",
+        "start": "Arrow at the start",
+        "both": "Arrows at both ends"
+      },
+      "labelAdd": "Add a label",
+      "labelEdit": "Edit the label"
+    },
+    "card": {
+      "editText": "Edit text",
+      "editLabel": "Edit label",
+      "imageAlt": "Card image",
+      "locked": "Locked card",
+      "editing": "{{name}} is editing…",
+      "connect": "Connect from this card",
+      "link": {
+        "previewAlt": "Link preview"
+      },
+      "resizeHandle": "Resize card",
+      "text": {
+        "contentAriaLabel": "Sticky note content"
+      },
+      "label": {
+        "ariaLabel": "Label"
+      },
+      "shape": {
+        "ariaLabel": "Shape: {{kind}}",
+        "kind": {
+          "rect": "rectangle",
+          "circle": "ellipse",
+          "diamond": "diamond",
+          "triangle": "triangle",
+          "line": "line",
+          "star": "star"
+        }
+      },
+      "image": {
+        "insertButton": "Insert an image",
+        "uploadInput": "Choose an image file"
+      },
+      "table": {
+        "aria": "Table",
+        "editCell": "Edit cell"
+      },
+      "labelPlaceholder": "Text…"
+    },
+    "frame": {
+      "titleLabel": "Frame title",
+      "untitled": "Untitled frame",
+      "carryCards": "Carry the frame's cards",
+      "delete": "Delete the frame «{{title}}» (the cards it contains are kept)"
+    },
+    "connection": {
+      "untitledCard": "untitled card",
+      "ariaLabel": {
+        "solid": "Connector {{shape}} from {{from}} to {{to}}",
+        "dashed": "Connector {{shape}}, dashed, from {{from}} to {{to}}",
+        "dotted": "Connector {{shape}}, dotted, from {{from}} to {{to}}",
+        "caps": " (start: {{start}}, end: {{end}})"
+      }
+    },
+    "connector": {
+      "style": {
+        "shape": {
+          "straight": "Straight",
+          "curved": "Curved",
+          "orthogonal": "Orthogonal"
+        },
+        "lineStyle": {
+          "solid": "Solid",
+          "dashed": "Dashed",
+          "dotted": "Dotted"
+        },
+        "cap": {
+          "none": "None",
+          "arrow": "Arrow",
+          "triangle": "Triangle",
+          "circle": "Circle",
+          "diamond": "Diamond"
+        },
+        "labelFieldLabel": "Label",
+        "labelPlaceholder": "Connector text"
+      }
+    },
+    "timer": {
+      "dialogLabel": "The timer has ended",
+      "badge": "Done",
+      "timeUp": "Time's up!",
+      "waiting": "Waiting for what's next…",
+      "actionLabel": "Action",
+      "clickToClose": "Click to close",
+      "dismiss": "Dismiss timer",
+      "config": {
+        "title": "Start a timer",
+        "hint": "Time-box your workshop — the timer is shared with the whole team.",
+        "presetsLabel": "Preset durations",
+        "minutes": "{{count}} min",
+        "custom": "Custom duration",
+        "minutesLabel": "Minutes",
+        "secondsLabel": "Seconds",
+        "minUnit": "min",
+        "secUnit": "s",
+        "start": "Start",
+        "cancel": "Cancel"
+      },
+      "running": {
+        "stop": "Stop timer",
+        "aria": "Shared timer: {{time}} remaining"
+      }
+    },
+    "vote": {
+      "dialogLabel": "The vote has ended",
+      "badge": "Results",
+      "ended": "Vote ended!",
+      "resultsReady": "The results are ready",
+      "displayIn": "Showing in",
+      "countdown": "{{count}}s · Click to view",
+      "showResults": "Show results",
+      "config": {
+        "title": "Start a vote",
+        "hint": "Each participant spreads their points across the board's cards.",
+        "budget": "Points per person",
+        "decrease": "Remove a point",
+        "increase": "Add a point",
+        "withTimer": "Time-limit the vote",
+        "timerMinutesLabel": "Duration in minutes",
+        "minUnit": "min",
+        "start": "Start vote",
+        "cancel": "Cancel"
+      },
+      "card": {
+        "cast": "Vote for this card",
+        "uncast": "Remove my vote",
+        "count": "{{count}} vote(s)"
+      }
+    },
+    "groups": {
+      "title": "Groups",
+      "empty": "No group on this board.",
+      "groupLabel": "Group {{index}}",
+      "memberCount": "{{count}} card(s)",
+      "highlight": "Highlight group {{index}}",
+      "recolor": "Group {{index}} colour",
+      "recolorTo": "Recolour to {{color}}",
+      "dissolve": "Dissolve group {{index}}"
+    },
+    "field": {
+      "title": "Custom fields",
+      "close": "Close the fields panel",
+      "empty": "No field defined on this board.",
+      "name": "Name",
+      "namePlaceholder": "Field name",
+      "emoji": "Emoji",
+      "type": {
+        "label": "Type",
+        "text": "Text",
+        "number": "Number",
+        "date": "Date",
+        "select": "Select list"
+      },
+      "typeLocked": "The type cannot be changed. Delete and recreate the field to change it.",
+      "options": "Options",
+      "addOption": "Add an option",
+      "optionPlaceholder": "New option",
+      "removeOption": "Remove option {{value}}",
+      "create": "Create field",
+      "createTitle": "New field",
+      "edit": "Edit field {{name}}",
+      "editTitle": "Edit field",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete field {{name}}",
+      "confirmDelete": "Confirm deletion of {{name}}",
+      "deleteWarning": "Deleting this field removes all its values on cards."
+    },
+    "fieldValue": {
+      "title": "Field values",
+      "close": "Close the field values panel",
+      "empty": "No field defined on this board.",
+      "none": "— none —",
+      "valueFor": "Value of field {{name}}",
+      "clear": "Clear the value of field {{name}}"
+    },
+    "voteResults": {
+      "title": "Vote results",
+      "summary": "{{votes}} votes · {{voters}} participants",
+      "closeAria": "Close vote results",
+      "close": "Close",
+      "stopVote": "End vote",
+      "stat": {
+        "votesPerPerson": "Votes per person",
+        "votedCards": "Voted cards",
+        "maxVotes": "Max votes"
+      },
+      "resultsLabel": "Vote ranking",
+      "barAria": "Rank {{rank}}: {{text}}, {{count}} votes",
+      "winner": "Winner",
+      "emptyCard": "Empty card",
+      "voteCount": "{{count}} votes",
+      "empty": "No votes recorded"
+    },
+    "activities": {
+      "title": "Activities",
+      "open": "Activities",
+      "close": "Close",
+      "recentSection": "Recently used",
+      "items": {
+        "brainstorming": {
+          "name": "Brainstorming",
+          "desc": "Generate ideas as a team with stickies"
+        },
+        "poll": {
+          "name": "Poll",
+          "desc": "Ask a question, vote live"
+        },
+        "dotvote": {
+          "name": "Dot vote",
+          "desc": "Prioritise ideas with weighted voting"
+        },
+        "icebreaker": {
+          "name": "Icebreaker",
+          "desc": "Kick off the session with a light question"
+        },
+        "quiz": {
+          "name": "Quiz",
+          "desc": "Test the team’s knowledge"
+        },
+        "timer": {
+          "name": "Timer",
+          "desc": "Time-box a workshop"
+        },
+        "retro": {
+          "name": "Retrospective",
+          "desc": "Ready-made 3-column template"
+        }
+      }
+    },
+    "shortcuts": {
+      "close": "Close shortcuts",
+      "copy": "Copy",
+      "cut": "Cut",
+      "delete": "Delete selection",
+      "duplicate": "Duplicate",
+      "escape": "Deselect / leave the tool",
+      "fromCenter": "Resize from the centre",
+      "groupCanvas": "Navigation and gestures",
+      "groupEdit": "Editing",
+      "groupTools": "Tools",
+      "move": "Move the selection",
+      "moveFast": "Move by steps of 20",
+      "multiSelect": "Add to the selection",
+      "open": "Show keyboard shortcuts",
+      "panGesture": "Move the board",
+      "paste": "Paste",
+      "ratio": "Keep the ratio while resizing",
+      "redo": "Redo",
+      "selectAll": "Select all",
+      "shortcuts": "Show these shortcuts",
+      "title": "Keyboard shortcuts",
+      "undo": "Undo",
+      "zoom": "Zoom",
+      "keys": {
+        "alt": "Alt",
+        "click": "click",
+        "ctrl": "Ctrl",
+        "del": "Del",
+        "drag": "drag",
+        "esc": "Esc",
+        "shift": "Shift",
+        "space": "Space",
+        "wheel": "wheel"
+      }
+    },
+    "import": {
+      "trigger": "Import from Klaxoon",
+      "title": "Import from Klaxoon",
+      "close": "Close",
+      "pickHint": "Drop your Klaxoon export (.klx) as-is — it is decompressed automatically and the right files are located for you.",
+      "dropzone": "Drag the .klx file here, or click to choose it",
+      "reading": "Unpacking and reading files…",
+      "chooseHint": "This archive contains several boards. Which one do you want to import?",
+      "cancel": "Cancel",
+      "previewTitle": "Import preview",
+      "stats": {
+        "postits": "Notes (sticky notes)",
+        "texts": "Text boxes",
+        "draws": "Drawings",
+        "shapes": "Shapes",
+        "images": "Images",
+        "zones": "Frames (zones)",
+        "links": "Connections",
+        "groups": "Groups",
+        "fields": "Fields (category, dimensions)",
+        "skipped": "Skipped (inactive…)"
+      },
+      "confirm": "Import",
+      "importing": "Importing…",
+      "doneMessage": "{{count}} element(s) imported.",
+      "closeAction": "Close",
+      "undo": "Undo import",
+      "undoing": "Undoing…",
+      "retry": "Retry",
+      "error": {
+        "notKlx": "This file is not a .klx archive.",
+        "noBrainstormData": "Invalid .klx archive: _brainstorm_data.json not found inside.",
+        "corrupted": "Unable to read the .klx archive. Check that the file is not corrupted.",
+        "importFailed": "Import failed.",
+        "undoFailed": "Unable to undo the import."
+      }
+    }
+  }
+}
