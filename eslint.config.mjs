@@ -16,6 +16,20 @@ export default tseslint.config(
       '@typescript-eslint/explicit-function-return-type': 'off',
     },
   },
+  // ─── EN53.4 — agilite-ui / collaboratif-ui (libs absorbées) — parité avec le lint de
+  // leur repo d'origine (pivot-agilite-ui / pivot-collaboratif-ui) : uniquement les règles
+  // TS de base (`eslint.configs.recommended` + `tseslint.configs.recommended` + ce bloc).
+  // Ces repos n'utilisaient PAS @angular-eslint (ni règles TS ni règles template/a11y) — les
+  // blocs `**/*.ts` et `**/*.html` ci-dessous les excluent donc explicitement (`ignores`)
+  // pour ne pas leur appliquer des règles jamais tolérées à l'origine.
+  {
+    files: ['projects/agilite-ui/src/**/*.ts', 'projects/collaboratif-ui/src/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/explicit-function-return-type': 'off',
+    },
+  },
   // ─── #133 — @angular-eslint (TS) — mêmes règles que le tier "recommended" amont ──
   // Le paquet scopé @angular-eslint/eslint-plugin (contrairement au meta-paquet
   // `angular-eslint`) n'exporte pas de config flat prête à l'emploi : les règles sont
@@ -27,6 +41,7 @@ export default tseslint.config(
   // lintés par le bloc @angular-eslint/template ci-dessous, pas seulement les .html.
   {
     files: ['**/*.ts'],
+    ignores: ['projects/agilite-ui/**', 'projects/collaboratif-ui/**'],
     plugins: { '@angular-eslint': angular },
     processor: angularTemplate.processors['extract-inline-html'],
     rules: {
@@ -55,6 +70,7 @@ export default tseslint.config(
   // (@angular-eslint/eslint-plugin-template), pas vérifiée automatiquement.
   {
     files: ['**/*.html'],
+    ignores: ['projects/agilite-ui/**', 'projects/collaboratif-ui/**'],
     languageOptions: {
       parser: angularTemplateParser,
     },
@@ -107,6 +123,26 @@ export default tseslint.config(
           ],
         },
       ],
+    },
+  },
+  // ─── EN53.4 — design-system : fichiers Storybook (démo/doc, jamais publiés dans le
+  // package npm — exclus de `ng-package.json`/`tsconfig.lib.json`) — parité avec le repo
+  // d'origine (pivot-design-system), dont l'`eslint.config.js` n'inclut PAS la règle
+  // `no-inline-styles` (ajout spécifique au shell pivot-ui, issue #133/#151, jamais
+  // portée sur pivot-design-system). Les stories illustrent volontairement des styles de
+  // démonstration inline — pas du code produit.
+  // Note : le processor `extract-inline-html` (bloc @angular-eslint TS ci-dessus) linte les
+  // templates inline sous un chemin virtuel `<fichier.ts>/<n>_inline-template-....component.html`
+  // (ESLint `ProcessorService#preprocessSync` fait un `path.join(file.path, ...)` — le fichier
+  // `.ts` d'origine devient un dossier virtuel, cf. eslint/lib/services/processor-service.js).
+  // D'où un glob qui matche ce sous-chemin plutôt que le nom de fichier `.ts` réel.
+  {
+    files: [
+      'projects/design-system/src/stories/**/*.component.html',
+      'projects/design-system/.storybook/**/*.component.html',
+    ],
+    rules: {
+      '@angular-eslint/template/no-inline-styles': 'off',
     },
   },
   {

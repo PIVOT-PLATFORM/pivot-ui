@@ -11,7 +11,7 @@
     "test:ci": "ng test --watch=false --coverage",
     "test:mutation": "stryker run",
     "build:ui-core": "ng build ui-core",
-    "lint": "eslint src/ projects/ui-core/src/"
+    "lint": "eslint src/ projects/agilite-ui projects/collaboratif-ui projects/design-system"
   },
   "private": true,
   "packageManager": "npm@11.13.0",
@@ -54,7 +54,9 @@
     "semantic-release": "^25.0.7",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.63.0",
-    "vitest": "^4.0.8"
+    "vitest": "^4.0.8",
+    "vitest-axe": "^0.1.0",
+    "axe-core": "^4.12.1"
   },
   "overrides": {
     "piscina": "5.2.0",

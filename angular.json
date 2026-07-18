@@ -84,6 +84,12 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "test": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "externalDependencies": ["@pivot-platform/collaboratif-ui"]
             }
           },
           "defaultConfiguration": "production"
@@ -105,6 +111,8 @@
           "options": {
             "tsConfig": "tsconfig.spec.json",
             "runner": "vitest",
+            "buildTarget": "frontend:build:test",
+            "runnerConfig": "vitest.unit-test-runner.config.ts",
             "coverageReporters": ["lcov", "text", "html"],
             "setupFiles": ["src/test-setup-vitest.ts"]
           }
@@ -158,7 +166,9 @@
         "test": {
           "builder": "@angular/build:unit-test",
           "options": {
-            "tsConfig": "projects/collaboratif-ui/tsconfig.spec.json"
+            "tsConfig": "projects/collaboratif-ui/tsconfig.spec.json",
+            "setupFiles": ["projects/collaboratif-ui/src/test-setup-vitest.ts"],
+            "isolate": true
           }
         }
       }
