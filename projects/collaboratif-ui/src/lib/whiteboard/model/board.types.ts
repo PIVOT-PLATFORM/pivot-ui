@@ -1,0 +1,232 @@
+/**
+ * Structured whiteboard domain model — ported from the PouetPouet reference
+ * (`apps/web/src/hooks/board-types.ts`).
+ *
+ * Content encodings are **load-bearing** and kept byte-compatible with the
+ * backend / existing data:
+ * - `TEXT` / `LABEL` → plain text, or a rich-text formatting JSON (see `card-format.ts`)
+ * - `TABLE` → JSON `{ rows, colW }` (see `table.ts`)
+ * - `SHAPE` → `'type|stroke|fill|opacity[|rotation]'`
+ * - `DRAW` → SVG path `d` string
+ * - `IMAGE` → data URL / URL
+ * - `LINK` → the raw `http(s)` URL, verbatim (US08.6.5). `meta` is populated asynchronously,
+ *   server-side, after creation/update — see `card:meta_updated` in `board.store.ts` and
+ *   `link-preview.ts` for the render-time sanitisation applied to it.
+ */
+
+/** A custom-field value attached to a single card. */
+export interface FieldValue {
+  id: string;
+  cardId: string;
+  fieldId: string;
+  value: string;
+}
+
+/** Open-Graph link preview metadata, resolved server-side for URL text cards. */
+export interface OgMeta {
+  title?: string;
+  description?: string;
+  image?: string;
+  siteName?: string;
+}
+
+/** Discriminant string for a card's rendering kind. */
+export type CardType = 'TEXT' | 'LABEL' | 'IMAGE' | 'DRAW' | 'TABLE' | 'SHAPE' | 'LINK';
+
+/** A single board object. `content` encoding depends on `type` (see file header). */
+export interface Card {
+  id: string;
+  /**
+   * Stable client-side identity that survives the optimistic→server reconciliation (BUG A).
+   * Set to the `clientTag` on the provisional card and **preserved** on the authoritative
+   * `card:created` echo, whose `id` swaps from the temporary `clientTag` to the server uuid.
+   * The canvas `@for` tracks by `card.key ?? card.id`, so a card mid-edit is never destroyed
+   * and re-mounted when its id changes — the in-flight textarea content is kept. Absent for
+   * cards that originate server-side (board:state, imports, other participants), which fall
+   * back to their already-stable `id`.
+   */
+  key?: string;
+  boardId: string;
+  type: CardType | string;
+  content: string;
+  meta?: OgMeta | null;
+  posX: number;
+  posY: number;
+  width: number;
+  height: number;
+  color: string;
+  groupId: string | null;
+  groupColor: string | null;
+  locked: boolean;
+  layer: number;
+  fieldValues: FieldValue[];
+}
+
+export type ConnShape = 'straight' | 'curved' | 'orthogonal';
+export type ConnArrow = 'none' | 'end' | 'start' | 'both';
+
+/**
+ * Stroke pattern of a connector line (US08.7.2 extended styling) — supersedes the legacy
+ * boolean {@link Connection.dashed}. `solid` = continuous, `dashed` = long dashes,
+ * `dotted` = fine dots. Matches the backend `ConnLineStyle` contract.
+ */
+export type ConnLineStyle = 'solid' | 'dashed' | 'dotted';
+
+/**
+ * Endpoint marker (cap) drawn at a connector's start/end (US08.7.2 extended styling) —
+ * supersedes the legacy {@link Connection.arrow} enum by making each end independently
+ * shapeable. Matches the backend `ConnCap` contract.
+ */
+export type ConnCap = 'none' | 'arrow' | 'triangle' | 'circle' | 'diamond';
+
+/** Card edge a connector endpoint is pinned to (N/E/S/W midpoint). */
+export type ConnAnchor = 'N' | 'E' | 'S' | 'W';
+
+/** A directed link between two cards. */
+export interface Connection {
+  id: string;
+  boardId: string;
+  fromId: string;
+  toId: string;
+  label: string | null;
+  color: string | null;
+  shape: ConnShape;
+  /** @deprecated Legacy single-enum arrow — kept for back-compat mapping; use {@link startCap}/{@link endCap}. */
+  arrow: ConnArrow;
+  /** @deprecated Legacy boolean dash — kept for back-compat mapping; use {@link lineStyle}. */
+  dashed: boolean;
+  /** Stroke pattern (US08.7.2 extended styling). Supersedes {@link dashed}. */
+  lineStyle: ConnLineStyle;
+  /** Marker drawn at the `from` endpoint (US08.7.2 extended styling). Supersedes {@link arrow}. */
+  startCap: ConnCap;
+  /** Marker drawn at the `to` endpoint (US08.7.2 extended styling). Supersedes {@link arrow}. */
+  endCap: ConnCap;
+  width: number;
+  /**
+   * Optional pinned edge for each endpoint. When set, the connector attaches to that exact side
+   * of the card; when absent (the default for every connector created today — the backend
+   * `connection:create` payload carries no anchor), routing falls back to the side facing the
+   * other card's centre. Kept optional for backward compatibility with persisted connections.
+   */
+  fromAnchor?: ConnAnchor | null;
+  toAnchor?: ConnAnchor | null;
+}
+
+export type ConnectionPatch = Partial<
+  Pick<
+    Connection,
+    'label' | 'color' | 'shape' | 'arrow' | 'dashed' | 'lineStyle' | 'startCap' | 'endCap' | 'width'
+  >
+>;
+
+/**
+ * A frame / section box. When `active`, dragging the frame carries every
+ * unlocked card inside it (and their groups); when inactive it moves alone.
+ */
+export interface Frame {
+  id: string;
+  boardId: string;
+  title: string;
+  posX: number;
+  posY: number;
+  width: number;
+  height: number;
+  color: string;
+  active: boolean;
+  layer: number;
+}
+
+export type BoardFieldType = 'TEXT' | 'NUMBER' | 'DATE' | 'SELECT';
+
+/** A custom-field definition on the board schema. */
+export interface BoardField {
+  id: string;
+  boardId: string;
+  name: string;
+  emoji: string | null;
+  type: BoardFieldType;
+  options: string[] | null;
+  order: number;
+}
+
+export type BoardRole = 'OWNER' | 'EDITOR' | 'VIEWER';
+
+/** Full board payload delivered when opening a board. */
+export interface BoardDetail {
+  id: string;
+  name: string;
+  description: string | null;
+  coverImage: string | null;
+  maxParticipants: number | null;
+  enabledActivities: string[] | null;
+  templateDraftOf: string | null;
+  cards: Card[];
+}
+
+/** A participant currently present on the board (presence stream). */
+export interface PresenceUser {
+  id: string;
+  name: string;
+  avatar: string | null;
+}
+
+/** A board member with a persisted access role. */
+export interface BoardMember {
+  id: string;
+  name: string;
+  avatar: string | null;
+  role: BoardRole;
+}
+
+/** A live remote cursor position. */
+export interface RemoteCursor {
+  userId: string;
+  name: string;
+  avatar: string | null;
+  x: number;
+  y: number;
+}
+
+/** Soft-lock: another user is currently editing a card. */
+export interface RemoteEditor {
+  cardId: string;
+  userId: string;
+  name: string;
+}
+
+/** A single vote cast during a vote session. */
+export interface BoardVote {
+  id: string;
+  sessionId: string;
+  cardId: string;
+  userId: string;
+  createdAt: string;
+}
+
+/** A dot-voting session over the board's cards. */
+export interface VoteSession {
+  id: string;
+  boardId: string;
+  status: 'ACTIVE' | 'CLOSED';
+  votesPerPerson: number;
+  timerSeconds: number | null;
+  timerEndsAt: string | null;
+  voterIds: string[];
+  votes: BoardVote[];
+  createdAt: string;
+  closedAt: string | null;
+}
+
+/** Card payload copied to the clipboard (localStorage), portable across boards. */
+export interface ClipboardCard {
+  type: string;
+  content: string;
+  color: string;
+  posX: number;
+  posY: number;
+  width: number;
+  height: number;
+  layer: number;
+  groupId: string | null;
+  groupColor: string | null;
+}

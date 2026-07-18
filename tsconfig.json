@@ -4,7 +4,9 @@
   "compileOnSave": false,
   "compilerOptions": {
     "paths": {
-      "@pivot-platform/ui-core": ["./dist/ui-core"]
+      "@pivot-platform/agilite-ui": ["./projects/agilite-ui/src/public-api.ts"],
+      "@pivot-platform/collaboratif-ui": ["./projects/collaboratif-ui/src/public-api.ts"],
+      "@pivot-platform/design-system": ["./projects/design-system/src/public-api.ts"]
     },
     "strict": true,
     "noImplicitOverride": true,
@@ -32,10 +34,22 @@
       "path": "./tsconfig.spec.json"
     },
     {
-      "path": "./projects/ui-core/tsconfig.lib.json"
+      "path": "./projects/agilite-ui/tsconfig.lib.json"
     },
     {
-      "path": "./projects/ui-core/tsconfig.spec.json"
+      "path": "./projects/agilite-ui/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/collaboratif-ui/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/collaboratif-ui/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/design-system/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/design-system/tsconfig.spec.json"
     }
   ]
 }

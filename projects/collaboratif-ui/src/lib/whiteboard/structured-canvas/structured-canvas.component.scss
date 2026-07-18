@@ -1,0 +1,81 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.wb-surface {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--wb-canvas-bg);
+  // Dotted grid on the viewport-covering surface (ITEM 1). The pattern's size and origin follow
+  // pan/zoom via inline [style.background-size]/[style.background-position] bindings so it stays
+  // aligned with the transformed content layer.
+  background-image: radial-gradient(circle, var(--wb-grid-dot) 1px, transparent 1px);
+  cursor: default;
+  outline: none;
+  touch-action: none;
+
+  &--pan {
+    cursor: grab;
+  }
+}
+
+.wb-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+}
+
+.wb-connections {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+
+  :where([wbConnectionLine]) {
+    pointer-events: auto;
+  }
+}
+
+.wb-connect-ghost {
+  stroke: var(--wb-accent);
+  stroke-width: 2;
+  stroke-dasharray: 4 4;
+}
+
+// Live free-draw stroke traced while the pointer is down (stroke colour set inline from the
+// active drawing colour). Never interactive — it must not intercept the ongoing pointer gesture.
+.wb-draw-preview {
+  pointer-events: none;
+}
+
+// Anchor pastilles shown on a hovered target card during a connect drag (ITEM B).
+// The routing-resolved attach anchor (where the connector actually lands) is filled with the
+// accent colour and enlarged — WYSIWYG, not merely the pastille nearest the cursor.
+.wb-anchor {
+  fill: var(--wb-surface);
+  stroke: var(--wb-accent);
+  stroke-width: 2;
+  pointer-events: none;
+
+  &--active {
+    fill: var(--wb-accent);
+  }
+}
+
+.wb-marquee {
+  position: absolute;
+  border: 1px solid var(--wb-accent);
+  background: var(--wb-accent-ghost-fill);
+  pointer-events: none;
+}

@@ -1,0 +1,71 @@
+:host {
+  // The host is the <g wbConnectionLine> group projected into the parent SVG layer.
+  display: inline;
+}
+
+.wb-connection__halo {
+  stroke: var(--wb-accent);
+  stroke-opacity: 0.25;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+.wb-connection__hit {
+  cursor: pointer;
+  // Only the transparent stroke captures interaction, not the (empty) fill.
+  pointer-events: stroke;
+
+  &:focus-visible {
+    outline: none;
+    stroke: var(--wb-accent);
+    stroke-opacity: 0.35;
+  }
+}
+
+.wb-connection__line {
+  pointer-events: none;
+}
+
+.wb-connection__cap {
+  pointer-events: none;
+}
+
+.wb-connection__label {
+  cursor: pointer;
+}
+
+.wb-connection__label-box {
+  fill: var(--wb-surface);
+  stroke: var(--wb-border);
+}
+
+.wb-connection__label-text {
+  font-size: var(--wb-text-sm);
+  font-family: var(--wb-font);
+  fill: var(--wb-ink-muted);
+  user-select: none;
+  pointer-events: none;
+}
+
+// Champ d'édition de l'étiquette, posé dans le calque SVG via un `foreignObject` : il hérite donc
+// du zoom du tableau, ce qui est le comportement voulu (il grossit avec le reste).
+.wb-connection__label-input {
+  width: 100%;
+  height: 100%;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border: 1px solid var(--wb-accent);
+  border-radius: 6px;
+  background: var(--wb-surface);
+  color: var(--wb-ink);
+  font: inherit;
+  font-size: 11px;
+  pointer-events: auto;
+}
+
+// Le double-clic ouvre l'éditeur ; sans ceci il surligne aussi le texte SVG en dessous, ce qui
+// donne une sélection bleue parasite par-dessus le champ.
+.wb-connection__label-text,
+.wb-connection__label {
+  user-select: none;
+}

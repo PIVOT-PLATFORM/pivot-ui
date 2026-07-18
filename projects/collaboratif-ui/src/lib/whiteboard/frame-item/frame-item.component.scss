@@ -1,0 +1,120 @@
+:host {
+  position: absolute;
+  box-sizing: border-box;
+  border: 2px dashed var(--wb-border-strong);
+  border-radius: var(--wb-radius-card);
+  background: rgba(26, 18, 48, 0.015); // teinte encre violette très légère (= --color-navy-900)
+  pointer-events: none;
+}
+
+:host > * {
+  pointer-events: auto;
+}
+
+.wb-frame--selected {
+  border-color: var(--wb-accent);
+}
+
+.wb-frame--active {
+  border-style: solid;
+}
+
+.wb-frame__header {
+  position: absolute;
+  top: -26px;
+  left: -2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 var(--wb-space-2);
+  border-radius: 6px 6px 0 0;
+  background: var(--wb-frame-band);
+  color: var(--wb-ink);
+  font-size: var(--wb-text-sm);
+  font-weight: var(--wb-fw-semibold);
+  cursor: grab;
+  max-width: 100%;
+}
+
+.wb-frame__title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wb-frame__title-edit {
+  border: none;
+  outline: none;
+  background: rgba(255, 255, 255, 0.9);
+  font: inherit;
+  border-radius: var(--wb-radius-chip);
+  padding: 0 4px;
+}
+
+.wb-frame__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--wb-ink);
+  cursor: pointer;
+  opacity: 0.5;
+  padding: 0 2px;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--wb-focus);
+  }
+
+  // Destructive action — only reads as danger on hover/focus, so the header stays calm at rest.
+  &--danger:hover,
+  &--danger:focus-visible {
+    color: var(--wb-danger, #e5484d);
+  }
+}
+
+.wb-frame__btn-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.wb-frame__active-toggle {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.5;
+  font-size: 12px;
+  padding: 0 2px;
+
+  &--on {
+    opacity: 1;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--wb-focus);
+  }
+}
+
+.wb-frame__resize {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--wb-surface);
+  border: 1.5px solid var(--wb-accent);
+  border-radius: 2px;
+  box-sizing: border-box;
+
+  &--tl { top: -5px; left: -5px; cursor: nwse-resize; }
+  &--t  { top: -5px; left: calc(50% - 5px); cursor: ns-resize; }
+  &--tr { top: -5px; right: -5px; cursor: nesw-resize; }
+  &--l  { top: calc(50% - 5px); left: -5px; cursor: ew-resize; }
+  &--r  { top: calc(50% - 5px); right: -5px; cursor: ew-resize; }
+  &--bl { bottom: -5px; left: -5px; cursor: nesw-resize; }
+  &--b  { bottom: -5px; left: calc(50% - 5px); cursor: ns-resize; }
+  &--br { bottom: -5px; right: -5px; cursor: nwse-resize; }
+}

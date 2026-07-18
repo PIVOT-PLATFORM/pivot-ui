@@ -1,0 +1,653 @@
+{
+  "app": {
+    "title": "PIVOT — Collaboratif",
+    "devHarnessNotice": "Harnais de développement — les features implémentées sont accessibles via leurs routes (ex. /whiteboard)."
+  },
+  "whiteboard": {
+    "selection": {
+      "actions": "Actions de sélection",
+      "count": "{{count}} sélectionné",
+      "countPlural": "{{count}} sélectionnés",
+      "color": "Couleur",
+      "duplicate": "Dupliquer (Ctrl+D)",
+      "lock": "Verrouiller",
+      "unlock": "Déverrouiller",
+      "delete": "Supprimer (Suppr)",
+      "fill": "Couleur de remplissage",
+      "align": {
+        "left": "Aligner à gauche",
+        "center": "Centrer",
+        "right": "Aligner à droite"
+      }
+    },
+    "layer": {
+      "bringToFront": "Passer au premier plan",
+      "sendToBack": "Envoyer à l'arrière-plan"
+    },
+    "guard": {
+      "accessDenied": "Vous n'avez pas accès à ce tableau"
+    },
+    "board": {
+      "list": {
+        "title": "Mes tableaux",
+        "newBoard": "Nouveau tableau",
+        "emptyTitle": "Aucun tableau pour l'instant",
+        "emptySubtitle": "Créez votre premier tableau collaboratif",
+        "emptyCta": "Créer mon premier tableau",
+        "loadMore": "Charger plus",
+        "retry": "Réessayer",
+        "errorSubtitle": "Impossible de charger vos tableaux. Vérifiez votre connexion.",
+        "createError": "Impossible de créer le tableau",
+        "online": "en ligne",
+        "role": {
+          "owner": "Propriétaire",
+          "editor": "Éditeur",
+          "viewer": "Lecteur"
+        },
+        "menu": {
+          "rename": "Renommer",
+          "delete": "Supprimer"
+        },
+        "create": {
+          "title": "Nouveau tableau",
+          "label": "Titre du tableau",
+          "placeholder": "Mon tableau",
+          "confirm": "Créer",
+          "cancel": "Annuler"
+        },
+        "aria": {
+          "openBoard": "{{title}} — modifié le {{date}} — {{role}}",
+          "boardMenu": "Actions pour {{title}}",
+          "activeParticipants": "{{count}} collaborateur(s) actuellement en ligne"
+        },
+        "tabActive": "Mes tableaux"
+      },
+      "rename": {
+        "error": "Impossible de renommer le tableau",
+        "aria": "Renommer le tableau {{title}}"
+      },
+      "delete": {
+        "success": "Tableau supprimé",
+        "error": "Impossible de supprimer le tableau",
+        "confirm": {
+          "title": "Supprimer « {{title}} » ?",
+          "message": "Le tableau sera déplacé dans la corbeille. Vous pourrez le restaurer depuis l'onglet Corbeille.",
+          "confirm": "Mettre à la corbeille",
+          "cancel": "Annuler"
+        }
+      },
+      "untitled": "Tableau sans titre",
+      "backToList": "Retour à la liste des tableaux",
+      "reset": "Réinitialiser le tableau",
+      "favorite": {
+        "add": "Ajouter {{title}} aux favoris",
+        "remove": "Retirer {{title}} des favoris",
+        "error": "Impossible de mettre à jour les favoris"
+      },
+      "trash": {
+        "tab": "Corbeille",
+        "empty": "Corbeille vide",
+        "deletedOn": "Supprimé le {{date}}",
+        "restore": "Restaurer",
+        "restoreAria": "Restaurer {{title}}",
+        "restoreSuccess": "Tableau restauré",
+        "restoreError": "Impossible de restaurer le tableau",
+        "purge": "Supprimer définitivement",
+        "purgeAria": "Supprimer définitivement {{title}}",
+        "purgeSuccess": "Tableau supprimé définitivement",
+        "purgeError": "Impossible de supprimer définitivement le tableau",
+        "purgeConfirm": {
+          "title": "Supprimer définitivement « {{title}} » ?",
+          "message": "Cette action est irréversible et supprime toutes les données du tableau, y compris son historique. Le tableau ne pourra plus être restauré.",
+          "confirm": "Supprimer définitivement",
+          "cancel": "Annuler"
+        }
+      },
+      "settings": {
+        "open": "Paramètres du tableau",
+        "title": "Paramètres de « {{title}} »",
+        "close": "Fermer les paramètres",
+        "nameLabel": "Nom du tableau",
+        "descriptionLabel": "Description",
+        "descriptionHint": "500 caractères maximum",
+        "activitiesLabel": "Activités disponibles",
+        "activitySoon": "Bientôt disponible",
+        "save": "Enregistrer",
+        "saveSuccess": "Paramètres enregistrés",
+        "saveError": "Impossible d'enregistrer les paramètres",
+        "saveAsTemplate": "Enregistrer comme template",
+        "saveAsTemplateNamePrompt": "Nom du template",
+        "saveAsTemplateSuccess": "Template enregistré",
+        "saveAsTemplateError": "Impossible d'enregistrer le template",
+        "resetConfirm": {
+          "title": "Réinitialiser « {{title}} » ?",
+          "message": "Tous les éléments du canvas seront supprimés. Le titre, les membres et les favoris du tableau sont conservés. Cette action est irréversible.",
+          "confirm": "Réinitialiser",
+          "cancel": "Annuler"
+        },
+        "resetSuccess": "Tableau réinitialisé",
+        "resetError": "Impossible de réinitialiser le tableau"
+      },
+      "resetAria": "Réinitialiser le tableau {{title}} — supprime tout le contenu du canvas",
+      "search": {
+        "label": "Rechercher un tableau",
+        "placeholder": "Rechercher par nom ou description…",
+        "clear": "Effacer la recherche",
+        "noResults": "Aucun résultat pour « {{term}} »",
+        "resultsCount": "{{count}} résultat(s)"
+      },
+      "presence": {
+        "aria": "{{count}} participant(s) connecté(s)"
+      }
+    },
+    "share": {
+      "panel": {
+        "title": "Partager le tableau",
+        "close": "Fermer le panneau de partage",
+        "linkSection": "Lien d'invitation",
+        "selectRole": "Rôle :",
+        "generateLink": "Générer un lien",
+        "generatingLink": "Génération…",
+        "linkLabel": "Lien d'invitation",
+        "copyLink": "Copier le lien",
+        "linkCopied": "Lien copié dans le presse-papiers !",
+        "clipboardFallback": "Copiez le lien ci-dessus manuellement.",
+        "generateError": "Impossible de générer le lien d'invitation",
+        "membersSection": "Membres",
+        "memberUserId": "Identifiant",
+        "memberRole": "Rôle",
+        "memberJoined": "Ajouté le",
+        "memberActionsColumn": "Actions",
+        "changeRole": "Changer le rôle",
+        "removeMember": "Retirer",
+        "removeError": "Impossible de retirer le membre",
+        "roleUpdateError": "Impossible de modifier le rôle",
+        "loadMembersError": "Impossible de charger la liste des membres",
+        "confirmRemove": {
+          "title": "Retirer ce membre ?",
+          "message": "Ce membre perdra l'accès au tableau immédiatement.",
+          "confirm": "Retirer",
+          "cancel": "Annuler"
+        }
+      }
+    },
+    "canvas": {
+      "ariaLabel": "Canvas collaboratif —",
+      "readOnly": "Mode lecture seule — reconnexion en cours…",
+      "toolbar": {
+        "label": "Outils de dessin",
+        "tools": "Outils",
+        "colorGroup": "Couleurs",
+        "currentColor": "Couleur active :",
+        "undoRedo": "Annuler / Rétablir",
+        "selectionActions": "Actions de sélection",
+        "zoom": "Zoom",
+        "duplicate": "Dupliquer (Ctrl+D)",
+        "zoomIn": "Zoom avant (Ctrl++)",
+        "zoomOut": "Zoom arrière (Ctrl+-)"
+      },
+      "tool": {
+        "select": "Outil sélection (V)",
+        "pencil": "Outil crayon (P)",
+        "rectangle": "Outil rectangle (R)",
+        "ellipse": "Outil ellipse",
+        "text": "Outil texte (T)",
+        "erase": "Outil effacement (E)"
+      },
+      "color": {
+        "panelLabel": "Palette de couleurs",
+        "palette": "Couleur",
+        "customHex": "Couleur personnalisée (hex)",
+        "customHexError": "Couleur invalide — format attendu : # suivi de 6 chiffres hexadécimaux (ex. #1A2B3C)",
+        "applyCustom": "Appliquer la couleur personnalisée"
+      },
+      "undo": {
+        "label": "Annuler (Ctrl+Z)",
+        "redo": "Rétablir (Ctrl+Y)"
+      },
+      "group": {
+        "group": "Grouper la sélection (Ctrl+G)",
+        "ungroup": "Dégrouper (Ctrl+Maj+G)"
+      },
+      "text": {
+        "inputLabel": "Saisie de texte sur le canvas"
+      },
+      "minimap": {
+        "ariaLabel": "Minimap — vue d'ensemble du tableau",
+        "show": "Afficher la minimap",
+        "hide": "Masquer la minimap"
+      },
+      "shortcuts": {
+        "dialogToggle": "Afficher les raccourcis clavier (?)",
+        "dialogLabel": "Raccourcis clavier",
+        "tableCaption": "Liste des raccourcis clavier disponibles",
+        "close": "Fermer",
+        "description": "Appuyez sur ? pour voir les raccourcis clavier disponibles.",
+        "select": "Outil sélection",
+        "pencil": "Outil crayon",
+        "text": "Outil texte",
+        "erase": "Outil effacement",
+        "rectangle": "Outil rectangle",
+        "undo": "Annuler",
+        "redo": "Rétablir",
+        "selectAll": "Tout sélectionner",
+        "duplicate": "Dupliquer la sélection",
+        "copy": "Copier",
+        "paste": "Coller",
+        "group": "Grouper",
+        "ungroup": "Dégrouper",
+        "delete": "Supprimer la sélection",
+        "zoomIn": "Zoom avant",
+        "zoomOut": "Zoom arrière",
+        "zoomWheel": "Zoom (molette)",
+        "pan": "Panoramique",
+        "showShortcuts": "Afficher les raccourcis"
+      }
+    },
+    "template": {
+      "gallery": {
+        "label": "Modèle de tableau",
+        "loadError": "Impossible de charger les modèles de tableau.",
+        "retry": "Réessayer"
+      },
+      "createError": "Impossible de créer le tableau. Veuillez réessayer.",
+      "previewAlt": "Aperçu du modèle {{name}}",
+      "brainstorm": {
+        "name": "Brainstorm",
+        "description": "Collectez librement des idées sur des post-its avant de les organiser."
+      },
+      "retrospective": {
+        "name": "Rétrospective",
+        "description": "Structurez le retour d'expérience de l'équipe : ce qui a bien fonctionné, ce qui peut s'améliorer, actions à mener."
+      },
+      "userStoryMap": {
+        "name": "User Story Map",
+        "description": "Cartographiez le parcours utilisateur et priorisez les user stories par release."
+      }
+    },
+    "join": {
+      "loading": "Rejoindre le tableau…",
+      "error401": "Vous devez être connecté pour rejoindre ce tableau.",
+      "error403": "Vous n'avez pas les droits pour rejoindre ce tableau.",
+      "error404": "Le lien d'invitation est invalide ou introuvable.",
+      "error409": "Vous êtes déjà membre de ce tableau.",
+      "error410": "Ce lien d'invitation a expiré ou a été révoqué.",
+      "error429": "Trop de tentatives. Veuillez patienter avant de réessayer.",
+      "errorDefault": "Une erreur est survenue. Veuillez réessayer.",
+      "retry": "Réessayer"
+    },
+    "ws": {
+      "connecting": "Connexion en cours…",
+      "lost": "Connexion perdue — tentative de reconnexion",
+      "reconnected": "Reconnecté",
+      "failed": "Impossible de rejoindre le tableau",
+      "retryManual": "Réessayer manuellement",
+      "offline": "Mode hors ligne — les modifications ne sont pas sauvegardées",
+      "revoked": "Vous n'avez plus accès à ce tableau"
+    },
+    "presence": {
+      "cursorLabel": "Curseur de {{name}}",
+      "panelAriaLabel": "Participants en ligne",
+      "avatarAriaLabel": "{{name}} — {{role}}",
+      "overflowBadge": "+{{count}}",
+      "overflowAriaLabel": "Et {{count}} autres participants : {{names}}",
+      "online": "en ligne",
+      "role": {
+        "owner": "Propriétaire",
+        "editor": "Éditeur",
+        "viewer": "Lecteur"
+      }
+    },
+    "toolbar": {
+      "label": "Barre d'outils",
+      "select": "Sélection",
+      "pan": "Déplacer la vue",
+      "sticky": "Post-it",
+      "text": "Étiquette",
+      "rect": "Rectangle",
+      "circle": "Cercle",
+      "diamond": "Losange",
+      "triangle": "Triangle",
+      "line": "Ligne",
+      "star": "Étoile",
+      "draw": "Dessin libre",
+      "table": "Tableau",
+      "frame": "Cadre",
+      "colorGroup": "Couleurs",
+      "pickColor": "Couleur {{color}}",
+      "fillColorGroup": "Couleur de remplissage",
+      "pickFillColor": "Remplissage {{color}}",
+      "noFill": "Aucun remplissage",
+      "collapse": "Replier la barre",
+      "expand": "Déplier la barre",
+      "shapes": "Formes",
+      "shapesMenu": "Choisir une forme",
+      "colorMenu": "Couleurs (trait et remplissage)",
+      "escapeHint": "Échap",
+      "hint": {
+        "draw": "Glissez pour dessiner à main levée.",
+        "frame": "Glissez pour tracer un cadre.",
+        "pan": "Glissez pour déplacer le tableau.",
+        "shape": "Glissez pour tracer la forme.",
+        "sticky": "Cliquez pour poser une note.",
+        "table": "Cliquez pour poser un tableau.",
+        "text": "Cliquez pour écrire un texte."
+      },
+      "lineStyle": {
+        "dashed": "Tirets",
+        "dotted": "Pointillés",
+        "solid": "Trait plein"
+      },
+      "arrowDir": {
+        "none": "Aucune flèche",
+        "end": "Flèche vers l'arrivée",
+        "start": "Flèche vers le départ",
+        "both": "Flèches aux deux bouts"
+      },
+      "labelAdd": "Ajouter une étiquette",
+      "labelEdit": "Modifier l'étiquette"
+    },
+    "card": {
+      "editText": "Modifier le texte",
+      "editLabel": "Modifier l'étiquette",
+      "imageAlt": "Image de la carte",
+      "locked": "Carte verrouillée",
+      "editing": "{{name}} modifie…",
+      "connect": "Relier depuis cette carte",
+      "link": {
+        "previewAlt": "Aperçu du lien"
+      },
+      "resizeHandle": "Redimensionner la carte",
+      "text": {
+        "contentAriaLabel": "Contenu du pense-bête"
+      },
+      "label": {
+        "ariaLabel": "Étiquette"
+      },
+      "shape": {
+        "ariaLabel": "Forme : {{kind}}",
+        "kind": {
+          "rect": "rectangle",
+          "circle": "ellipse",
+          "diamond": "diamant",
+          "triangle": "triangle",
+          "line": "ligne",
+          "star": "étoile"
+        }
+      },
+      "image": {
+        "insertButton": "Insérer une image",
+        "uploadInput": "Choisir un fichier image"
+      },
+      "table": {
+        "aria": "Tableau",
+        "editCell": "Modifier la cellule"
+      },
+      "labelPlaceholder": "Texte…"
+    },
+    "frame": {
+      "titleLabel": "Titre du cadre",
+      "untitled": "Cadre sans titre",
+      "carryCards": "Emporter les cartes du cadre",
+      "delete": "Supprimer le cadre « {{title}} » (les cartes qu'il contient sont conservées)"
+    },
+    "connection": {
+      "untitledCard": "carte sans titre",
+      "ariaLabel": {
+        "solid": "Connecteur {{shape}} de {{from}} vers {{to}}",
+        "dashed": "Connecteur {{shape}} en pointillés de {{from}} vers {{to}}",
+        "dotted": "Connecteur {{shape}} en pointillé fin de {{from}} vers {{to}}",
+        "caps": " (départ : {{start}}, arrivée : {{end}})"
+      }
+    },
+    "connector": {
+      "style": {
+        "shape": {
+          "straight": "Droit",
+          "curved": "Courbe",
+          "orthogonal": "Orthogonal"
+        },
+        "lineStyle": {
+          "solid": "Plein",
+          "dashed": "Tirets",
+          "dotted": "Pointillé"
+        },
+        "cap": {
+          "none": "Aucune",
+          "arrow": "Flèche",
+          "triangle": "Triangle",
+          "circle": "Cercle",
+          "diamond": "Losange"
+        },
+        "labelFieldLabel": "Étiquette",
+        "labelPlaceholder": "Texte du connecteur"
+      }
+    },
+    "timer": {
+      "dialogLabel": "Le minuteur est écoulé",
+      "badge": "Terminé",
+      "timeUp": "Temps écoulé !",
+      "waiting": "En attente de la suite…",
+      "actionLabel": "Action",
+      "clickToClose": "Cliquez pour fermer",
+      "dismiss": "Fermer le minuteur",
+      "config": {
+        "title": "Démarrer un minuteur",
+        "hint": "Cadrez votre atelier en temps limité — le minuteur est partagé avec toute l'équipe.",
+        "presetsLabel": "Durées prédéfinies",
+        "minutes": "{{count}} min",
+        "custom": "Durée personnalisée",
+        "minutesLabel": "Minutes",
+        "secondsLabel": "Secondes",
+        "minUnit": "min",
+        "secUnit": "s",
+        "start": "Démarrer",
+        "cancel": "Annuler"
+      },
+      "running": {
+        "stop": "Arrêter le minuteur",
+        "aria": "Minuteur partagé : {{time}} restant"
+      }
+    },
+    "vote": {
+      "dialogLabel": "Le vote est terminé",
+      "badge": "Résultats",
+      "ended": "Vote terminé !",
+      "resultsReady": "Les résultats sont prêts",
+      "displayIn": "Affichage dans",
+      "countdown": "{{count}}s · Cliquez pour voir",
+      "showResults": "Afficher les résultats",
+      "config": {
+        "title": "Lancer un vote",
+        "hint": "Chaque participant répartit ses points sur les cartes du tableau.",
+        "budget": "Points par personne",
+        "decrease": "Retirer un point",
+        "increase": "Ajouter un point",
+        "withTimer": "Limiter dans le temps",
+        "timerMinutesLabel": "Durée en minutes",
+        "minUnit": "min",
+        "start": "Lancer le vote",
+        "cancel": "Annuler"
+      },
+      "card": {
+        "cast": "Voter pour cette carte",
+        "uncast": "Retirer mon vote",
+        "count": "{{count}} vote(s)"
+      }
+    },
+    "groups": {
+      "title": "Groupes",
+      "empty": "Aucun groupe sur ce tableau.",
+      "groupLabel": "Groupe {{index}}",
+      "memberCount": "{{count}} carte(s)",
+      "highlight": "Mettre le groupe {{index}} en surbrillance",
+      "recolor": "Couleur du groupe {{index}}",
+      "recolorTo": "Recolorer en {{color}}",
+      "dissolve": "Dissoudre le groupe {{index}}"
+    },
+    "field": {
+      "title": "Champs personnalisés",
+      "close": "Fermer le panneau des champs",
+      "empty": "Aucun champ défini sur ce tableau.",
+      "name": "Nom",
+      "namePlaceholder": "Nom du champ",
+      "emoji": "Emoji",
+      "type": {
+        "label": "Type",
+        "text": "Texte",
+        "number": "Nombre",
+        "date": "Date",
+        "select": "Liste de choix"
+      },
+      "typeLocked": "Le type ne peut pas être modifié. Supprimez et recréez le champ pour en changer.",
+      "options": "Options",
+      "addOption": "Ajouter une option",
+      "optionPlaceholder": "Nouvelle option",
+      "removeOption": "Retirer l'option {{value}}",
+      "create": "Créer le champ",
+      "createTitle": "Nouveau champ",
+      "edit": "Modifier le champ {{name}}",
+      "editTitle": "Modifier le champ",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "delete": "Supprimer le champ {{name}}",
+      "confirmDelete": "Confirmer la suppression de {{name}}",
+      "deleteWarning": "Supprimer ce champ efface toutes ses valeurs sur les cartes."
+    },
+    "fieldValue": {
+      "title": "Valeurs des champs",
+      "close": "Fermer le panneau des valeurs",
+      "empty": "Aucun champ défini sur ce tableau.",
+      "none": "— aucune —",
+      "valueFor": "Valeur du champ {{name}}",
+      "clear": "Effacer la valeur du champ {{name}}"
+    },
+    "voteResults": {
+      "title": "Résultats du vote",
+      "summary": "{{votes}} votes · {{voters}} participants",
+      "closeAria": "Fermer les résultats du vote",
+      "close": "Fermer",
+      "stopVote": "Terminer le vote",
+      "stat": {
+        "votesPerPerson": "Votes par personne",
+        "votedCards": "Post-its votés",
+        "maxVotes": "Votes max"
+      },
+      "resultsLabel": "Classement des votes",
+      "barAria": "Rang {{rank}} : {{text}}, {{count}} votes",
+      "winner": "Gagnant",
+      "emptyCard": "Post-it vide",
+      "voteCount": "{{count}} votes",
+      "empty": "Aucun vote enregistré"
+    },
+    "activities": {
+      "title": "Activités",
+      "open": "Activités",
+      "close": "Fermer",
+      "recentSection": "Récemment utilisées",
+      "items": {
+        "brainstorming": {
+          "name": "Brainstorming",
+          "desc": "Générez des idées en équipe avec des stickies"
+        },
+        "poll": {
+          "name": "Sondage",
+          "desc": "Posez une question, votez en direct"
+        },
+        "dotvote": {
+          "name": "Vote à points",
+          "desc": "Priorisez des idées par vote pondéré"
+        },
+        "icebreaker": {
+          "name": "Icebreaker",
+          "desc": "Lancez la session avec une question légère"
+        },
+        "quiz": {
+          "name": "Quiz",
+          "desc": "Testez les connaissances de l’équipe"
+        },
+        "timer": {
+          "name": "Minuteur",
+          "desc": "Cadrez un atelier en temps limité"
+        },
+        "retro": {
+          "name": "Rétrospective",
+          "desc": "Modèle 3 colonnes prêt à l’emploi"
+        }
+      }
+    },
+    "shortcuts": {
+      "close": "Fermer les raccourcis",
+      "copy": "Copier",
+      "cut": "Couper",
+      "delete": "Supprimer la sélection",
+      "duplicate": "Dupliquer",
+      "escape": "Désélectionner / quitter l'outil",
+      "fromCenter": "Redimensionner depuis le centre",
+      "groupCanvas": "Navigation et gestes",
+      "groupEdit": "Édition",
+      "groupTools": "Outils",
+      "move": "Déplacer la sélection",
+      "moveFast": "Déplacer par pas de 20",
+      "multiSelect": "Ajouter à la sélection",
+      "open": "Afficher les raccourcis clavier",
+      "panGesture": "Déplacer le tableau",
+      "paste": "Coller",
+      "ratio": "Conserver le ratio au redimensionnement",
+      "redo": "Rétablir",
+      "selectAll": "Tout sélectionner",
+      "shortcuts": "Afficher ces raccourcis",
+      "title": "Raccourcis clavier",
+      "undo": "Annuler",
+      "zoom": "Zoomer",
+      "keys": {
+        "alt": "Alt",
+        "click": "clic",
+        "ctrl": "Ctrl",
+        "del": "Suppr",
+        "drag": "glisser",
+        "esc": "Échap",
+        "shift": "Maj",
+        "space": "Espace",
+        "wheel": "molette"
+      }
+    },
+    "import": {
+      "trigger": "Importer depuis Klaxoon",
+      "title": "Importer depuis Klaxoon",
+      "close": "Fermer",
+      "pickHint": "Déposez votre export Klaxoon (.klx) tel quel — il est décompressé automatiquement et les bons fichiers sont retrouvés pour vous.",
+      "dropzone": "Glissez le fichier .klx ici, ou cliquez pour le choisir",
+      "reading": "Décompression et lecture des fichiers…",
+      "chooseHint": "Cette archive contient plusieurs tableaux. Lequel importer ?",
+      "cancel": "Annuler",
+      "previewTitle": "Aperçu de l’import",
+      "stats": {
+        "postits": "Notes (post-its)",
+        "texts": "Zones de texte",
+        "draws": "Dessins",
+        "shapes": "Formes",
+        "images": "Images",
+        "zones": "Cadres (zones)",
+        "links": "Liaisons",
+        "groups": "Groupes",
+        "fields": "Champs (catégorie, dimensions)",
+        "skipped": "Ignorés (inactifs…)"
+      },
+      "confirm": "Importer",
+      "importing": "Import en cours…",
+      "doneMessage": "{{count}} élément(s) importé(s).",
+      "closeAction": "Fermer",
+      "undo": "Annuler l’import",
+      "undoing": "Annulation…",
+      "retry": "Réessayer",
+      "error": {
+        "notKlx": "Ce fichier n’est pas une archive .klx.",
+        "noBrainstormData": "Archive .klx invalide : _brainstorm_data.json introuvable à l’intérieur.",
+        "corrupted": "Impossible de lire l’archive .klx. Vérifiez que le fichier n’est pas corrompu.",
+        "importFailed": "Erreur lors de l’import.",
+        "undoFailed": "Impossible d’annuler l’import."
+      }
+    }
+  }
+}

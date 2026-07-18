@@ -11,7 +11,7 @@
     "test:ci": "ng test --watch=false --coverage",
     "test:mutation": "stryker run",
     "build:ui-core": "ng build ui-core",
-    "lint": "eslint src/ projects/ui-core/src/"
+    "lint": "eslint src/ projects/agilite-ui projects/collaboratif-ui projects/design-system"
   },
   "private": true,
   "packageManager": "npm@11.13.0",
@@ -24,9 +24,9 @@
     "@angular/platform-browser": "^22.0.0",
     "@angular/router": "^22.0.0",
     "@jsverse/transloco": "^8.4.0",
-    "@pivot-platform/agilite-ui": "^0.3.0",
-    "@pivot-platform/collaboratif-ui": "0.6.1",
-    "@pivot-platform/design-system": "^0.2.0",
+    "@stomp/rx-stomp": "^2.4.0",
+    "@stomp/stompjs": "^7.3.0",
+    "jszip": "^3.10.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -54,7 +54,9 @@
     "semantic-release": "^25.0.7",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.63.0",
-    "vitest": "^4.0.8"
+    "vitest": "^4.0.8",
+    "vitest-axe": "^0.1.0",
+    "axe-core": "^4.12.1"
   },
   "overrides": {
     "piscina": "5.2.0",

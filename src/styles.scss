@@ -1,9 +1,11 @@
-// EN17.2 — le shell consomme le package publié @pivot-platform/design-system
-// (scss/tokens|reset|components|patterns) au lieu du shim local projects/design-system,
-// désormais supprimé. En dev local, le package vient du tgz de local-ui-packages
-// (Dockerfile.local), même mécanisme que les modules.
-@use '@pivot-platform/design-system/scss/tokens';
+// EN53.4 (Vague 4 modulith) — design-system est désormais un projet interne
+// (projects/design-system) résolu par `stylePreprocessorOptions.includePaths`
+// (angular.json, cible `frontend:build`, includePaths: projects/design-system/src/scss)
+// plutôt qu'un package npm publié. Les specifiers ci-dessous se résolvent donc directement
+// dans `projects/design-system/src/scss/{tokens,reset,components,patterns}.scss` — plus
+// besoin de node_modules/@pivot-platform/design-system (supprimé, EN53.4).
+@use 'tokens';
 @use 'styles/fonts';
-@use '@pivot-platform/design-system/scss/reset';
-@use '@pivot-platform/design-system/scss/components';
-@use '@pivot-platform/design-system/scss/patterns';
+@use 'reset';
+@use 'components';
+@use 'patterns';

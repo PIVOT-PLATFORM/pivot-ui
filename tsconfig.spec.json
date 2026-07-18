@@ -10,8 +10,6 @@
   },
   "include": [
     "src/**/*.d.ts",
-    "src/**/*.spec.ts",
-    "projects/ui-core/src/**/*.spec.ts",
-    "projects/design-system/src/**/*.spec.ts"
+    "src/**/*.spec.ts"
   ]
 }

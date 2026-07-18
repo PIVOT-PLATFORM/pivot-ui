@@ -1,0 +1,27 @@
+:host {
+  display: inline-flex;
+  line-height: 0;
+  vertical-align: middle;
+}
+
+.pv-icon {
+  display: inline-flex;
+  color: inherit;
+}
+
+// Rotation sur le conteneur (portée par l'encapsulation de vue — le SVG injecté suit).
+.pv-icon--spin {
+  animation: pv-icon-spin 1s linear infinite;
+}
+
+@keyframes pv-icon-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pv-icon--spin {
+    animation: none;
+  }
+}

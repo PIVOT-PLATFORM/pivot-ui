@@ -1,0 +1,385 @@
+<section class="session-room" aria-labelledby="session-room-heading">
+  <h1 id="session-room-heading">{{ 'retro.sessionRoom.title' | transloco }}</h1>
+
+  @if (joining()) {
+    <p class="session-room__status" role="status" aria-live="polite">
+      {{ 'retro.sessionRoom.joining' | transloco }}
+    </p>
+  } @else if (joinErrorKey(); as errorKey) {
+    <p class="session-room__error" role="alert">{{ errorKey | transloco }}</p>
+  } @else if (!warmupResolved()) {
+    <p class="session-room__status" role="status" aria-live="polite">
+      {{ 'retro.sessionRoom.warmup.checking' | transloco }}
+    </p>
+  } @else if (showWarmup()) {
+    <section class="session-room__warmup session-room__column" aria-labelledby="warmup-heading">
+      <h2 id="warmup-heading">{{ 'retro.sessionRoom.warmup.heading' | transloco }}</h2>
+      <p class="session-room__fallback-note">{{ 'retro.sessionRoom.warmup.intro' | transloco }}</p>
+
+      <ul class="session-room__card-list">
+        @for (action of pendingActions(); track action.id) {
+          <li class="session-room__card session-room__action-item">
+            <span class="session-room__action-item-title">{{ action.title }}</span>
+            <span class="session-room__action-item-owner">
+              {{ 'retro.sessionRoom.warmup.ownerPrefix' | transloco }}
+              {{ ownerDisplayName(action.ownerUserId) ?? ('retro.sessionRoom.warmup.unknownOwner' | transloco) }}
+            </span>
+            <span class="session-room__action-item-due-date">
+              {{ 'retro.sessionRoom.warmup.dueDatePrefix' | transloco }}
+              {{ action.dueDate ?? ('retro.sessionRoom.warmup.noDueDate' | transloco) }}
+            </span>
+            <span class="session-room__action-item-status">
+              {{ 'retro.sessionRoom.action.status.' + action.status | transloco }}
+            </span>
+            <div class="session-room__vote-controls">
+              <button
+                type="button"
+                class="session-room__vote-button"
+                [disabled]="warmupUpdatingActionId() === action.id"
+                [attr.aria-label]="'retro.sessionRoom.warmup.markDoneLabel' | transloco : { title: action.title }"
+                (click)="markPendingAction(action, 'TERMINEE')"
+              >
+                {{ 'retro.sessionRoom.warmup.markDone' | transloco }}
+              </button>
+              <button
+                type="button"
+                class="session-room__vote-button"
+                [disabled]="warmupUpdatingActionId() === action.id"
+                [attr.aria-label]="'retro.sessionRoom.warmup.markAbandonedLabel' | transloco : { title: action.title }"
+                (click)="markPendingAction(action, 'ABANDONNEE')"
+              >
+                {{ 'retro.sessionRoom.warmup.markAbandoned' | transloco }}
+              </button>
+              @if (warmupErrorActionId() === action.id) {
+                <p class="session-room__error" role="alert">{{ 'retro.sessionRoom.warmup.updateError' | transloco }}</p>
+              }
+            </div>
+          </li>
+        } @empty {
+          <li class="session-room__card session-room__card--empty">
+            {{ 'retro.sessionRoom.warmup.allResolved' | transloco }}
+          </li>
+        }
+      </ul>
+
+      <button type="button" class="session-room__create-action-button" (click)="dismissWarmup()">
+        {{ 'retro.sessionRoom.warmup.continue' | transloco }}
+      </button>
+    </section>
+  } @else {
+    <div class="session-room__meta">
+      <p class="session-room__ws-status" role="status" aria-live="polite">
+        {{ 'retro.sessionRoom.wsStatus.' + retroWs.status() | transloco }}
+      </p>
+      <p class="session-room__phase" aria-live="polite">
+        {{ 'retro.sessionRoom.phase.' + phase() | transloco }}
+      </p>
+      @if (remainingSeconds(); as seconds) {
+        <p class="session-room__timer" role="timer" aria-live="off">
+          {{ 'retro.sessionRoom.timeRemaining' | transloco : { seconds } }}
+        </p>
+      }
+      @if (usingFallbackColumns()) {
+        <p class="session-room__fallback-note">{{ 'retro.sessionRoom.fallbackNote' | transloco }}</p>
+      }
+      @if (phase() === 'VOTE') {
+        <p class="session-room__vote-balance" role="status" aria-live="polite">
+          {{ 'retro.sessionRoom.vote.remaining' | transloco : { remaining: votesRemaining() ?? 0, allowed: votesAllowed() ?? 0 } }}
+        </p>
+      }
+      @if (phase() === 'CLOSED') {
+        <p class="session-room__closed-banner" role="status" aria-live="polite">
+          {{ 'retro.sessionRoom.closedBanner' | transloco }}
+        </p>
+      }
+      @if (sessionDetail(); as detail) {
+        <a class="session-room__team-actions-link" [routerLink]="['/retro/teams', detail.teamId, 'actions']">
+          {{ 'retro.sessionRoom.viewTeamActions' | transloco }}
+        </a>
+      }
+    </div>
+
+    @if (isFacilitator()) {
+      <div class="session-room__facilitator-controls">
+        @if (phase() === 'CONTRIBUTION') {
+          <button type="button" [disabled]="actionPending()" (click)="closeContributionNow()">
+            {{ 'retro.sessionRoom.closeContributionNow' | transloco }}
+          </button>
+        }
+        @if (phase() === 'REVUE' && !revealedColumns()) {
+          <button type="button" [disabled]="actionPending()" (click)="triggerReveal()">
+            {{ 'retro.sessionRoom.triggerReveal' | transloco }}
+          </button>
+        }
+        @if (phase() === 'REVUE' && revealedColumns()) {
+          <button type="button" [disabled]="actionPending()" (click)="openVoteNow()">
+            {{ 'retro.sessionRoom.openVoteNow' | transloco }}
+          </button>
+        }
+        @if (phase() === 'VOTE') {
+          <button type="button" [disabled]="actionPending()" (click)="closeVoteNow()">
+            {{ 'retro.sessionRoom.closeVoteNow' | transloco }}
+          </button>
+        }
+        @if (phase() === 'ACTION') {
+          <button type="button" [disabled]="actionPending()" (click)="closeSessionNow()">
+            {{ 'retro.sessionRoom.closeSessionNow' | transloco }}
+          </button>
+        }
+        @if (actionErrorKey(); as actionError) {
+          <p class="session-room__error" role="alert">{{ actionError | transloco }}</p>
+        }
+      </div>
+    }
+
+    @if (phase() === 'CONTRIBUTION') {
+      <label class="session-room__anonymous-toggle">
+        <input
+          type="checkbox"
+          [checked]="anonymousDraft()"
+          (change)="toggleAnonymousDraft($any($event.target).checked)"
+        />
+        {{ 'retro.sessionRoom.submitAnonymously' | transloco }}
+      </label>
+    }
+
+    @if (rankedCards()) {
+      <section class="session-room__ranking" aria-labelledby="ranking-heading">
+        <h2 id="ranking-heading">{{ 'retro.sessionRoom.ranking.heading' | transloco }}</h2>
+        @for (columnGroup of rankedColumnEntries(); track columnGroup.key) {
+          <div
+            class="session-room__ranking-group"
+            [attr.aria-labelledby]="'ranking-column-heading-' + columnGroup.key"
+          >
+            <h3 [id]="'ranking-column-heading-' + columnGroup.key">{{ columnGroup.label }}</h3>
+            <ol class="session-room__ranking-list">
+              @for (card of columnGroup.cards; track card.cardId) {
+                <li class="session-room__ranking-item">
+                  <span class="session-room__ranking-count">
+                    {{ 'retro.sessionRoom.vote.count' | transloco : { count: card.voteCount } }}
+                  </span>
+                  <span class="session-room__ranking-content">{{ card.content }}</span>
+                  @if (phase() === 'ACTION') {
+                    <button
+                      type="button"
+                      class="session-room__create-action-button"
+                      [disabled]="isCreatingActionFor(card.cardId)"
+                      [attr.aria-label]="'retro.sessionRoom.action.createLabel' | transloco : { content: card.content }"
+                      (click)="createActionFromCard(card)"
+                    >
+                      {{ 'retro.sessionRoom.action.createFromCard' | transloco }}
+                    </button>
+                    @if (actionCreationResultFor(card.cardId); as result) {
+                      <span class="session-room__action-result" role="status" aria-live="polite">
+                        {{
+                          (result === 'success' ? 'retro.sessionRoom.action.created' : 'retro.sessionRoom.error.actionFailed')
+                            | transloco
+                        }}
+                      </span>
+                    }
+                  }
+                </li>
+              }
+            </ol>
+          </div>
+        }
+      </section>
+
+      @if (phase() === 'ACTION') {
+        <section class="session-room__action-form" aria-labelledby="action-form-heading">
+          <h2 id="action-form-heading">{{ 'retro.sessionRoom.action.form.heading' | transloco }}</h2>
+          <form class="session-room__submit-form" (ngSubmit)="submitActionForm()">
+            <div class="session-room__field">
+              <label class="session-room__field-label" for="action-title">
+                {{ 'retro.sessionRoom.action.form.titleLabel' | transloco }}
+              </label>
+              <input
+                id="action-title"
+                class="session-room__card-input"
+                type="text"
+                required
+                [value]="actionFormTitle()"
+                (input)="updateActionFormTitle($any($event.target).value)"
+              />
+            </div>
+
+            <div class="session-room__field">
+              <label class="session-room__field-label" for="action-owner">
+                {{ 'retro.sessionRoom.action.form.ownerLabel' | transloco }}
+              </label>
+              <select
+                id="action-owner"
+                class="session-room__card-input"
+                [value]="actionFormOwnerId() ?? ''"
+                (change)="updateActionFormOwner($any($event.target).value)"
+              >
+                <option value="">{{ 'retro.sessionRoom.action.form.ownerNone' | transloco }}</option>
+                @for (member of teamMembers(); track member.id) {
+                  <option [value]="member.userId">{{ member.displayName }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="session-room__field">
+              <label class="session-room__field-label" for="action-due-date">
+                {{ 'retro.sessionRoom.action.form.dueDateLabel' | transloco }}
+              </label>
+              <input
+                id="action-due-date"
+                class="session-room__card-input"
+                type="date"
+                [value]="actionFormDueDate()"
+                (change)="updateActionFormDueDate($any($event.target).value)"
+              />
+            </div>
+
+            <div class="session-room__field">
+              <label class="session-room__field-label" for="action-source-card">
+                {{ 'retro.sessionRoom.action.form.sourceCardLabel' | transloco }}
+              </label>
+              <select
+                id="action-source-card"
+                class="session-room__card-input"
+                [value]="actionFormSourceCardId() ?? ''"
+                (change)="updateActionFormSourceCard($any($event.target).value)"
+              >
+                <option value="">{{ 'retro.sessionRoom.action.form.sourceCardNone' | transloco }}</option>
+                @for (card of rankedCards() ?? []; track card.cardId) {
+                  <option [value]="card.cardId">{{ card.content }}</option>
+                }
+              </select>
+            </div>
+
+            @if (actionFormErrorKey(); as formError) {
+              <p class="session-room__error" role="alert">{{ formError | transloco }}</p>
+            }
+
+            <button type="submit" [disabled]="!canSubmitActionForm()">
+              {{
+                (actionFormPending() ? 'retro.sessionRoom.action.form.submitting' : 'retro.sessionRoom.action.form.submit')
+                  | transloco
+              }}
+            </button>
+          </form>
+        </section>
+      }
+
+      @if (sessionActions().length > 0) {
+        <section class="session-room__action-list" aria-labelledby="action-list-heading">
+          <h2 id="action-list-heading">{{ 'retro.sessionRoom.action.list.heading' | transloco }}</h2>
+          <ul>
+            @for (action of sessionActions(); track action.id) {
+              <li class="session-room__action-item">
+                <span class="session-room__action-item-title">{{ action.title }}</span>
+                <span class="session-room__action-item-status">
+                  {{ 'retro.sessionRoom.action.status.' + action.status | transloco }}
+                </span>
+                @if (ownerDisplayName(action.ownerUserId); as owner) {
+                  <span class="session-room__action-item-owner">
+                    {{ 'retro.sessionRoom.action.list.ownerLabel' | transloco : { owner } }}
+                  </span>
+                }
+                @if (action.dueDate) {
+                  <span class="session-room__action-item-due-date">
+                    {{ 'retro.sessionRoom.action.list.dueDateLabel' | transloco : { dueDate: action.dueDate } }}
+                  </span>
+                }
+              </li>
+            }
+          </ul>
+        </section>
+      }
+    } @else {
+      <div class="session-room__columns">
+        @for (column of columns(); track column.key) {
+          <section class="session-room__column" [attr.aria-labelledby]="'column-heading-' + column.key">
+            <h2 [id]="'column-heading-' + column.key" class="session-room__column-heading">
+              {{ column.label }}
+            </h2>
+
+            @if (revealedColumns(); as revealed) {
+              <ul class="session-room__card-list">
+                @for (card of revealedCardsFor(column.key); track card.id) {
+                  <li class="session-room__card">
+                    <span class="session-room__card-content">{{ card.content }}</span>
+                    @if (phase() === 'VOTE') {
+                      <div class="session-room__vote-controls">
+                        <button
+                          type="button"
+                          class="session-room__vote-button"
+                          [disabled]="!canCastVote()"
+                          [attr.aria-label]="'retro.sessionRoom.vote.castLabel' | transloco : { content: card.content }"
+                          (click)="castVote(card.id)"
+                        >
+                          +
+                        </button>
+                        <span class="session-room__vote-count" aria-live="polite">
+                          {{ 'retro.sessionRoom.vote.count' | transloco : { count: voteCountFor(card.id) } }}
+                        </span>
+                        <button
+                          type="button"
+                          class="session-room__vote-button"
+                          [disabled]="!canUncastVote(card.id)"
+                          [attr.aria-label]="'retro.sessionRoom.vote.uncastLabel' | transloco : { content: card.content }"
+                          (click)="uncastVote(card.id)"
+                        >
+                          −
+                        </button>
+                        @if (myVoteCountFor(card.id); as mine) {
+                          <span class="session-room__my-votes">
+                            {{ 'retro.sessionRoom.vote.mine' | transloco : { count: mine } }}
+                          </span>
+                        }
+                      </div>
+                    }
+                  </li>
+                }
+                @empty {
+                  <li class="session-room__card session-room__card--empty">
+                    {{ 'retro.sessionRoom.noCards' | transloco }}
+                  </li>
+                }
+              </ul>
+            } @else if (isFacilitator()) {
+              <ul class="session-room__card-list" aria-label="{{ 'retro.sessionRoom.facilitatorPreview' | transloco }}">
+                @for (card of facilitatorCardsFor(column.key); track card.id) {
+                  <li class="session-room__card">{{ card.content }}</li>
+                }
+                @empty {
+                  <li class="session-room__card session-room__card--empty">
+                    {{ 'retro.sessionRoom.noCards' | transloco }}
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="session-room__masked-count">
+                {{ 'retro.sessionRoom.maskedCount' | transloco : { count: maskedCountFor(column.key) } }}
+              </p>
+            }
+
+            @if (phase() === 'CONTRIBUTION') {
+              <form
+                class="session-room__submit-form"
+                (ngSubmit)="submitCard(column.key)"
+                [attr.aria-label]="'retro.sessionRoom.submitFormLabel' | transloco : { column: column.label }"
+              >
+                <label class="session-room__field-label" [for]="'card-input-' + column.key">
+                  {{ 'retro.sessionRoom.cardInputLabel' | transloco }}
+                </label>
+                <textarea
+                  [id]="'card-input-' + column.key"
+                  class="session-room__card-input"
+                  rows="2"
+                  maxlength="2000"
+                  [value]="draftValue(column.key)"
+                  (input)="updateDraft(column.key, $any($event.target).value)"
+                ></textarea>
+                <button type="submit">{{ 'retro.sessionRoom.submit' | transloco }}</button>
+              </form>
+            }
+          </section>
+        }
+      </div>
+    }
+  }
+</section>

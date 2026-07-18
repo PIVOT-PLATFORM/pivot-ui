@@ -1,26 +1,18 @@
 # syntax=docker/dockerfile:1
-# LOCAL-ONLY build of the pivot-ui shell — consumes the @pivot-platform/*-ui libraries from
-# locally-built tarballs (produced by pivot-core/scripts/pack-local-ui.sh into ./local-ui-packages)
-# instead of GitHub Packages. NOTHING is fetched from GitHub: no .npmrc registry mapping is
-# copied, no npm_token secret is used. Used by pivot-core/compose.local.yml for offline/local
-# integration testing of all modules together. NOT the production Dockerfile (see Dockerfile).
+# LOCAL-ONLY build of the pivot-ui shell. EN53.4 (modulith Vague 4) : les modules
+# agilite-ui/collaboratif-ui + le design-system sont désormais des PROJETS INTERNES du workspace
+# (projects/*), plus des packages GitHub Packages — donc plus aucun tarball ni mapping registre.
+# `npm ci` ne résout que des deps npm publiques (aucune dep @pivot-platform). Les libs sont buildées
+# depuis la source par `ng build`. Utilisé par pivot-core/compose.local.yml pour l'intégration
+# locale. NOT the production Dockerfile (see Dockerfile).
 FROM node:24-alpine AS builder
 WORKDIR /app
 
-# Only package manifests + the locally-packed UI tarballs at first, for layer caching.
+# Manifests d'abord pour le cache de couche.
 COPY package*.json ./
-COPY local-ui-packages ./local-ui-packages
+RUN npm ci --no-audit --no-fund --ignore-scripts
 
-# Repoint every GitHub-Packages @pivot-platform UI dependency at its local tarball, then install
-# WITHOUT any registry auth. `npm install` (not `ci`) because the lockfile intentionally
-# diverges once a dep is rewritten to file:. Public deps still come from the default public
-# npm registry — never GitHub.
-RUN npm pkg set dependencies.@pivot-platform/design-system="file:./local-ui-packages/pivot-platform-design-system.tgz" \
- && npm pkg set dependencies.@pivot-platform/collaboratif-ui="file:./local-ui-packages/pivot-platform-collaboratif-ui.tgz" \
- && npm pkg set dependencies.@pivot-platform/agilite-ui="file:./local-ui-packages/pivot-platform-agilite-ui.tgz" \
- && npm install --no-audit --no-fund --ignore-scripts
-
-# App sources (workspace libs ui-core/design-system build from source in this repo already).
+# App sources — inclut projects/{agilite-ui,collaboratif-ui,design-system} buildés depuis la source.
 COPY . .
 RUN npm run build -- --configuration production
 

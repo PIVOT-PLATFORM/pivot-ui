@@ -1,0 +1,131 @@
+<div
+  #surface
+  class="wb-surface"
+  tabindex="0"
+  role="application"
+  [attr.aria-label]="'whiteboard.canvas.ariaLabel' | transloco"
+  [class.wb-surface--pan]="tool() === 'pan'"
+  [style.background-size]="gridSize()"
+  [style.background-position]="gridPosition()"
+  (pointerdown)="onPointerDown($event)"
+  (pointermove)="onPointerMove($event)"
+  (pointerup)="onPointerUp($event)"
+  (dblclick)="onDoubleClick($event)"
+  (wheel)="onWheel($event)"
+  (keydown)="onKeyDown($event)"
+  (keyup)="onKeyUp($event)"
+>
+  <div class="wb-layer" [style.transform]="layerTransform()">
+    <!-- Connections + live drag ghost -->
+    <svg class="wb-connections" xmlns="http://www.w3.org/2000/svg">
+      @for (rc of renderConnections(); track rc.conn.id) {
+        <svg:g
+          wbConnectionLine
+          [connection]="rc.conn"
+          [fromRect]="rc.fromRect"
+          [toRect]="rc.toRect"
+          [selected]="isSelected(rc.conn.id)"
+          [readOnly]="store.isReadonly()"
+          [fromLabel]="rc.fromLabel"
+          [toLabel]="rc.toLabel"
+          (select)="onConnectionSelect($event)"
+          (labelCommit)="store.updateConnection(rc.conn.id, { label: $event })"
+        ></svg:g>
+      }
+      <!-- Live free-draw stroke (US free-draw): renders in real time while the pointer is down -->
+      @if (drawPreview(); as d) {
+        <svg:path
+          class="wb-draw-preview"
+          [attr.d]="d"
+          [attr.stroke]="color()"
+          fill="none"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        ></svg:path>
+      }
+      <!-- Live line being dragged: shows the exact segment that will be committed, including the
+           Shift angle snap, rather than leaving the user to guess until release. -->
+      @if (linePreview(); as l) {
+        <svg:line
+          class="wb-line-preview"
+          [attr.x1]="l.x1"
+          [attr.y1]="l.y1"
+          [attr.x2]="l.x2"
+          [attr.y2]="l.y2"
+          [attr.stroke]="color()"
+          stroke-width="2"
+          stroke-linecap="round"
+        ></svg:line>
+      }
+      @if (connectGhost(); as g) {
+        <svg:line
+          class="wb-connect-ghost"
+          [attr.x1]="g.from.x"
+          [attr.y1]="g.from.y"
+          [attr.x2]="g.to.x"
+          [attr.y2]="g.to.y"
+        ></svg:line>
+      }
+      <!-- Anchor pastilles on the hovered target card while linking (ITEM B) -->
+      @if (hoverAnchors(); as ha) {
+        @for (a of ha.points; track a.side) {
+          <svg:circle
+            class="wb-anchor"
+            [class.wb-anchor--active]="a.side === ha.attach"
+            [attr.cx]="a.x"
+            [attr.cy]="a.y"
+            [attr.r]="a.side === ha.attach ? 7 : 5"
+          ></svg:circle>
+        }
+      }
+    </svg>
+
+    <!-- Frames (below cards) -->
+    @for (frame of store.frames(); track frame.id) {
+      <wb-frame-item
+        [frame]="frame"
+        [selected]="isSelected(frame.id)"
+        [readOnly]="store.isReadonly()"
+        (titleCommit)="onFrameTitle(frame.id, $event)"
+        (toggleActive)="onFrameActive(frame.id, $event)"
+        (bringToFront)="onFrameBringToFront(frame.id)"
+        (sendToBack)="onFrameSendToBack(frame.id)"
+        (remove)="onFrameRemove(frame.id)"
+      ></wb-frame-item>
+    }
+
+    <!-- Cards -->
+    @for (card of store.cards(); track trackCard($index, card)) {
+      <wb-board-card
+        [card]="card"
+        [fields]="store.fields()"
+        [selected]="isSelected(card.id)"
+        [remoteEditorName]="remoteEditorFor(card.id)"
+        [readOnly]="store.isReadonly()"
+        [autoEdit]="store.autoEditCardId() === card.id"
+        [voteActive]="store.activeVoteSession() !== null"
+        [voteCount]="store.voteTallyByCard().get(card.id) ?? 0"
+        [myVotes]="store.myVoteTallyByCard().get(card.id) ?? 0"
+        [canVoteMore]="(store.voteBudgetRemaining() ?? 0) > 0"
+        (contentCommit)="onCardContent(card, $event)"
+        (heightGrow)="onCardHeightGrow(card, $event)"
+        (editingChange)="onCardEditing(card, $event)"
+        (openDetail)="openDetail.emit($event)"
+        (castVote)="store.castVote(card.id)"
+        (uncastVote)="store.uncastVote(card.id)"
+      ></wb-board-card>
+    }
+
+    <!-- Marquee selection -->
+    @if (marquee(); as m) {
+      <div
+        class="wb-marquee"
+        [style.left.px]="m.x"
+        [style.top.px]="m.y"
+        [style.width.px]="m.width"
+        [style.height.px]="m.height"
+      ></div>
+    }
+  </div>
+</div>

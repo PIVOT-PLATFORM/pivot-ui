@@ -1,0 +1,294 @@
+@if (store.accessDenied()) {
+  <div class="wb-page__denied" role="alert">{{ 'whiteboard.guard.accessDenied' | transloco }}</div>
+} @else {
+  <header class="wb-page__topbar">
+    <button type="button" class="wb-page__btn wb-page__btn--icon" (click)="goBack()"
+      [attr.aria-label]="'whiteboard.board.backToList' | transloco" [title]="'whiteboard.board.backToList' | transloco">
+      <svg class="wb-page__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </button>
+
+    <h1 class="wb-page__title">{{ store.board()?.name || ('whiteboard.board.untitled' | transloco) }}</h1>
+
+    <div class="wb-page__actions">
+      @if (timerRunning() && !timerExpired()) {
+        <div
+          class="wb-page__timer-pill"
+          [class.wb-page__timer-pill--ending]="(timerRemaining() ?? 99) <= 10"
+          role="status"
+          [attr.aria-label]="'whiteboard.timer.running.aria' | transloco: { time: timerRemainingLabel() }"
+        >
+          <svg class="wb-page__timer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="9" stroke-width="1.8" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 7v5l3.5 3.5" />
+          </svg>
+          <span class="wb-page__timer-value">{{ timerRemainingLabel() }}</span>
+          <button
+            type="button"
+            class="wb-page__timer-stop"
+            (click)="store.stopTimer()"
+            [attr.aria-label]="'whiteboard.timer.running.stop' | transloco"
+            [title]="'whiteboard.timer.running.stop' | transloco"
+          >
+            ×
+          </button>
+        </div>
+      }
+
+      <button type="button" class="wb-page__btn wb-page__btn--icon" [class.wb-page__btn--on]="showGroups()"
+        (click)="showGroups.set(!showGroups())" [attr.aria-pressed]="showGroups()"
+        [attr.aria-label]="'whiteboard.groups.title' | transloco" [title]="'whiteboard.groups.title' | transloco">
+        <svg class="wb-page__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">
+          <circle cx="9" cy="7" r="3" stroke-width="2" />
+          <circle cx="15" cy="7" r="3" stroke-width="2" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 20c0-3.314 2.686-6 6-6s6 2.686 6 6" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 14c1.657 0 3 1.343 3 3v3" />
+        </svg>
+      </button>
+
+      <button type="button" class="wb-page__btn wb-page__btn--icon" [class.wb-page__btn--on]="showFields()"
+        (click)="showFields.set(!showFields())" [attr.aria-pressed]="showFields()"
+        [attr.aria-label]="'whiteboard.field.title' | transloco" [title]="'whiteboard.field.title' | transloco">
+        <svg class="wb-page__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10" />
+          <circle cx="19" cy="18" r="2" stroke-width="2" />
+        </svg>
+      </button>
+
+      @if (store.lastVoteSession() || store.activeVoteSession()) {
+        <button type="button" class="wb-page__btn wb-page__btn--icon" [class.wb-page__btn--on]="showVoteResults()"
+          (click)="showVoteResults.set(!showVoteResults())" [attr.aria-pressed]="showVoteResults()"
+          [attr.aria-label]="'whiteboard.voteResults.title' | transloco" [title]="'whiteboard.voteResults.title' | transloco">
+          <svg class="wb-page__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </button>
+      }
+
+      <span class="wb-page__sep" aria-hidden="true"></span>
+
+      <button type="button" class="wb-page__btn wb-page__btn--icon" [disabled]="!store.canUndo()" (click)="store.undo()"
+        [attr.aria-label]="'whiteboard.canvas.undo.label' | transloco" [title]="'whiteboard.canvas.undo.label' | transloco">
+        <svg class="wb-page__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6-6M3 10l6 6" />
+        </svg>
+      </button>
+      <button type="button" class="wb-page__btn wb-page__btn--icon" [disabled]="!store.canRedo()" (click)="store.redo()"
+        [attr.aria-label]="'whiteboard.canvas.undo.redo' | transloco" [title]="'whiteboard.canvas.undo.redo' | transloco">
+        <svg class="wb-page__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10H11a8 8 0 00-8 8v2M21 10l-6-6M21 10l-6 6" />
+        </svg>
+      </button>
+      <button type="button" class="wb-page__btn wb-page__btn--icon" [class.wb-page__btn--danger]="resetPendingConfirm()" (click)="onResetClick()"
+        [attr.aria-label]="resetPendingConfirm() ? ('whiteboard.board.resetAria' | transloco:{ title: store.board()?.name || '' }) : ('whiteboard.board.reset' | transloco)"
+        [title]="'whiteboard.board.reset' | transloco">
+        <svg class="wb-page__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+      </button>
+      @if (resetPendingConfirm()) {
+        <span class="wb-page__reset-confirm" role="status" aria-live="polite">
+          {{ 'whiteboard.board.settings.resetConfirm.confirm' | transloco }}
+        </span>
+      }
+
+      @if (!store.isReadonly()) {
+        <button type="button" class="wb-page__btn wb-page__btn--icon" (click)="showImportKlaxoon.set(true)"
+          [attr.aria-label]="'whiteboard.import.trigger' | transloco" [title]="'whiteboard.import.trigger' | transloco">
+          <svg class="wb-page__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+          </svg>
+        </button>
+      }
+
+      <span class="wb-page__sep" aria-hidden="true"></span>
+
+      <button type="button" class="wb-page__btn wb-page__btn--icon" (click)="showShare.set(true)"
+        [attr.aria-label]="'whiteboard.share.panel.title' | transloco" [title]="'whiteboard.share.panel.title' | transloco">
+        <svg class="wb-page__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+        </svg>
+      </button>
+
+      @if (isOwner() && store.board()) {
+        <button type="button" class="wb-page__btn wb-page__btn--icon" (click)="openSettings($event)"
+          [attr.aria-label]="'whiteboard.board.settings.open' | transloco" [title]="'whiteboard.board.settings.open' | transloco">
+          <svg class="wb-page__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </button>
+      }
+
+      <button type="button" class="wb-page__btn wb-page__btn--primary" [class.wb-page__btn--on]="showActivities()"
+        (click)="showActivities.set(!showActivities())" [attr.aria-pressed]="showActivities()"
+        [attr.aria-label]="'whiteboard.activities.open' | transloco" [title]="'whiteboard.activities.open' | transloco">
+        <svg class="wb-page__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span class="wb-page__btn-label">{{ 'whiteboard.activities.open' | transloco }}</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="wb-page__body">
+    <div class="wb-page__toolbar">
+      <wb-floating-toolbar
+        [tool]="tool()"
+        [color]="color()"
+        [fillColor]="fillColor()"
+        [disabled]="store.isReadonly()"
+        (toolChange)="tool.set($event)"
+        (colorChange)="onColorChange($event)"
+        (fillColorChange)="fillColor.set($event)"
+        (insertImage)="onInsertImage($event)"
+      ></wb-floating-toolbar>
+    </div>
+
+    <!-- (openDetail) → card-detail modal is WIP; not yet wired. -->
+    <wb-structured-canvas
+      class="wb-page__canvas"
+      [tool]="tool()"
+      [color]="color()"
+      [colorPicked]="colorPicked()"
+      [fillColor]="fillColor()"
+      (toolConsumed)="onToolConsumed()"
+    ></wb-structured-canvas>
+
+    <!-- Contextual hint for the active tool. Bottom-left of the board, not inside the toolbar:
+         the bar is ~50px wide, and a 180px hint stretched it. Same vertical axis as the bar, so
+         it stays where the eye already is after picking a tool. -->
+    @if (hintKey(); as key) {
+      <div class="wb-page__hint" aria-hidden="true">
+        <span>{{ key | transloco }}</span>
+        <span class="wb-page__hint-esc">{{ 'whiteboard.toolbar.escapeHint' | transloco }}</span>
+      </div>
+    }
+
+    @if (showGroups()) {
+      <aside class="wb-page__panel wb-page__panel--groups" [attr.aria-label]="'whiteboard.groups.title' | transloco">
+        <wb-groups-panel
+          [cards]="store.cards()"
+          [highlightedGroupId]="highlightedGroup()"
+          (highlight)="highlightedGroup.set($event)"
+          (recolor)="onRecolorGroup($event)"
+          (dissolve)="onDissolveGroup($event)"
+        ></wb-groups-panel>
+      </aside>
+    }
+
+    @if (showFields()) {
+      <aside class="wb-page__panel wb-page__panel--fields" [attr.aria-label]="'whiteboard.field.title' | transloco">
+        <wb-board-fields-panel
+          (close)="showFields.set(false)"
+        ></wb-board-fields-panel>
+      </aside>
+    }
+
+
+
+    @if (selectedCard(); as card) {
+      @if (store.fields().length > 0) {
+        <aside class="wb-page__panel wb-page__panel--card-fields" [attr.aria-label]="'whiteboard.fieldValue.title' | transloco">
+          <wb-card-field-values-panel
+            [card]="card"
+            (close)="clearSelection()"
+          ></wb-card-field-values-panel>
+        </aside>
+      }
+    }
+
+    @if (showActivities()) {
+      <aside class="wb-page__panel wb-page__panel--activities" [attr.aria-label]="'whiteboard.activities.title' | transloco">
+        <wb-activities-panel
+          (launch)="onLaunchActivity($event)"
+          (close)="showActivities.set(false)"
+        ></wb-activities-panel>
+      </aside>
+    }
+
+    @if (showVoteResults()) {
+      @if (store.activeVoteSession() || store.lastVoteSession(); as session) {
+        <aside class="wb-page__panel wb-page__panel--votes" [attr.aria-label]="'whiteboard.voteResults.title' | transloco">
+          <wb-vote-results-panel
+            [session]="session"
+            [cards]="store.cards()"
+            [isOwner]="isOwner()"
+            (stopVote)="store.stopVote()"
+            (close)="showVoteResults.set(false)"
+          ></wb-vote-results-panel>
+        </aside>
+      }
+    }
+  </div>
+
+  @if (selectionCount() > 0) {
+    <wb-selection-toolbar
+      [count]="selectionCount()"
+      [color]="selectionColor()"
+      [fillColor]="selectionFill()"
+      [textAlign]="selectionAlign()"
+      [connection]="selectedConnection()"
+      [allLocked]="allSelectedLocked()"
+      [readOnly]="store.isReadonly()"
+      (duplicate)="store.duplicateSelected()"
+      (recolor)="onColorChange($event)"
+      (refill)="store.fillSelectedShapes($event)"
+      (realign)="store.alignSelectedText($event)"
+      (connectionStyleChange)="onConnectorStyleChange(selectedConnection()!.id, $event)"
+      (editLabel)="onEditConnectionLabel()"
+      (toggleLock)="store.lockSelected($event)"
+      (bringToFront)="store.setLayerSelected(store.frontLayer())"
+      (sendToBack)="store.setLayerSelected(store.backLayer())"
+      (remove)="store.deleteSelected()"
+    ></wb-selection-toolbar>
+  }
+
+  @if (timerExpired()) {
+    <wb-timer-overlay (dismiss)="dismissTimer()"></wb-timer-overlay>
+  }
+
+  @if (showTimerConfig()) {
+    <wb-timer-config-dialog
+      (start)="onStartTimer($event)"
+      (close)="showTimerConfig.set(false)"
+    ></wb-timer-config-dialog>
+  }
+
+  @if (showVoteConfig()) {
+    <wb-vote-config-dialog
+      (start)="onStartVote($event)"
+      (close)="showVoteConfig.set(false)"
+    ></wb-vote-config-dialog>
+  }
+
+  @if (showShortcuts()) {
+    <wb-shortcuts-panel (closePanel)="showShortcuts.set(false)"></wb-shortcuts-panel>
+  }
+
+  @if (showShare()) {
+    <dialog class="wb-page__modal" open [attr.aria-label]="'whiteboard.share.panel.title' | transloco">
+      <app-share-panel [boardId]="boardId" (closed)="showShare.set(false)"></app-share-panel>
+    </dialog>
+  }
+
+  @if (showImportKlaxoon()) {
+    <dialog class="wb-page__modal" open [attr.aria-label]="'whiteboard.import.title' | transloco">
+      <wb-import-klaxoon-modal [boardId]="boardId" (closed)="showImportKlaxoon.set(false)"></wb-import-klaxoon-modal>
+    </dialog>
+  }
+
+  @if (showSettings() && settingsBoard(); as sBoard) {
+    <dialog class="wb-page__modal" open [attr.aria-label]="'whiteboard.board.settings.open' | transloco">
+      <wb-board-settings-modal
+        [board]="sBoard"
+        [triggerElement]="settingsTriggerEl"
+        (closed)="closeSettings()"
+        (saved)="onSettingsSaved($event)"
+        (resetDone)="closeSettings()"
+      ></wb-board-settings-modal>
+    </dialog>
+  }
+}

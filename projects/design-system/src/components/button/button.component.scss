@@ -1,0 +1,5 @@
+// L'hôte ne génère pas de boîte : la mise en page est pilotée par le <button> interne
+// (qui porte `.btn`/`.btn-full`). Évite un wrapper parasite autour du bouton natif.
+:host {
+  display: contents;
+}

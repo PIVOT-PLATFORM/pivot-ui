@@ -1,0 +1,459 @@
+:host {
+  position: absolute;
+  box-sizing: border-box;
+  touch-action: none;
+  user-select: none;
+}
+
+// A11y (US08.6.1): visible keyboard-focus indicator for the card itself and its resize
+// handles — :focus-visible only (not :focus) so a pointer-driven select doesn't draw the ring.
+:host(:focus-visible) {
+  outline: 2px solid var(--wb-focus);
+  outline-offset: 2px;
+}
+
+// Apparition (§4) : opacity + scale depuis le point de dépôt, easing tokenisé.
+:host {
+  animation: wb-card-in var(--wb-dur-base) var(--wb-ease-out);
+}
+
+.wb-card__resize:focus-visible {
+  outline: 2px solid var(--wb-focus);
+  outline-offset: 1px;
+}
+
+.wb-card__body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border-radius: var(--wb-radius-card);
+  box-shadow: var(--wb-elev-1);
+  overflow: hidden;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition: box-shadow var(--wb-dur-fast) var(--wb-ease-standard);
+
+  &--shape {
+    box-shadow: none;
+    background: transparent;
+  }
+
+  // A line's box is flat on one axis when it is horizontal or vertical (Shift snap), and its
+  // 2px stroke straddles the box edge. `overflow: hidden` would clip the stroke to nothing —
+  // the line would be stored correctly and still be invisible. Scoped to lines: every other
+  // shape keeps its own clipping.
+  // A label is free text on the board, not a card: no shadow, no rounded box. Keeping the card
+  // chrome around a transparent background drew a hollow, shadowed rectangle around every label.
+  &--label {
+    box-shadow: none;
+    background: transparent;
+  }
+
+  &--line {
+    overflow: visible;
+
+    // The `<svg>` element clips to its own viewport by default (UA stylesheet), which on a 1px-high
+    // box would cut both the stroke and its hit band down to that single pixel — the line would
+    // look hairline-thin and be almost impossible to click. Lifting it on the card alone is not
+    // enough; the SVG has to stop clipping too.
+    .wb-card__svg {
+      overflow: visible;
+    }
+  }
+
+  // Multi-line inline edit (fix/card-multiline-text): the edit textarea auto-grows past the
+  // card's stored height (see BoardCardComponent.autosizeEditArea) — let it show in full while
+  // editing instead of clipping it, mirroring PouetPouet's expanding edit box.
+  &--editing {
+    overflow: visible;
+  }
+}
+
+// Micro-lift au survol (§3.2) — carte tactile.
+:host(:hover) .wb-card__body:not(.wb-card__body--shape) {
+  box-shadow: var(--wb-elev-2);
+}
+
+.wb-card--selected .wb-card__body {
+  box-shadow: var(--wb-halo-select);
+}
+
+@keyframes wb-card-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host { animation: none; }
+  .wb-card__body { transition: none; }
+}
+
+.wb-card--locked {
+  cursor: default;
+}
+
+// A note's text stays a plain block: `text-align` is what aligns it, and a flex container would
+// silently ignore that property — the alignment control would set it and nothing would move
+// (regression introduced with the label rework, caught in recette 2026-07-17).
+.wb-card__text {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  background: transparent;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: hidden;
+}
+
+// A label *is* flex, on purpose: it is a short phrase in a box far larger than it needs, and text
+// stranded in the corner of empty space reads as a rendering accident. Its horizontal alignment is
+// therefore `justify-content` (see `labelJustify`), not `text-align`.
+.wb-card__label {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  background: transparent;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: hidden;
+}
+
+// An empty label has nothing to draw — and its box is transparent, so it would be an invisible
+// rectangle that still swallows clicks. The placeholder says "there is something here".
+.wb-card__label--empty {
+  color: var(--wb-ink-faint);
+  font-style: italic;
+}
+
+.wb-card__edit {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  resize: none;
+  padding: 8px;
+  box-sizing: border-box;
+  background: transparent;
+  font: inherit;
+
+  &--label {
+    background: rgba(255, 255, 255, 0.85);
+  }
+}
+
+.wb-card__svg,
+.wb-card__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.wb-card__table {
+  width: 100%;
+  height: 100%;
+  border-collapse: collapse;
+  background: var(--wb-surface);
+  font-size: var(--wb-text-sm);
+
+  th,
+  td {
+    border: 1px solid var(--wb-border-strong);
+    padding: 2px 6px;
+    text-align: left;
+  }
+
+  th {
+    background: var(--wb-surface-sunken);
+    font-weight: var(--wb-fw-semibold);
+  }
+
+  th[tabindex],
+  td[tabindex] {
+    cursor: text;
+    outline-offset: -2px;
+
+    &:focus-visible {
+      outline: 2px solid var(--wb-accent);
+    }
+  }
+}
+
+.wb-card__table-cell-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: none;
+  outline: 2px solid var(--wb-accent);
+  outline-offset: -2px;
+  padding: 1px 4px;
+  font: inherit;
+  background: var(--wb-surface);
+}
+
+.wb-card__link {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  background: var(--wb-surface);
+  color: inherit;
+  text-decoration: none;
+  overflow: hidden;
+  transition: box-shadow var(--wb-dur-fast) var(--wb-ease-standard);
+
+  &:hover {
+    box-shadow: var(--wb-elev-2);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--wb-focus);
+    outline-offset: -2px;
+  }
+
+  &--no-preview {
+    justify-content: center;
+    padding: var(--wb-space-2);
+  }
+}
+
+.wb-card__link-image {
+  display: block;
+  width: 100%;
+  height: 55%;
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+
+.wb-card__link-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.wb-card__link-title {
+  font-size: var(--wb-text-13);
+  font-weight: var(--wb-fw-semibold);
+  color: var(--wb-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+}
+
+.wb-card__link-description {
+  font-size: var(--wb-text-xs);
+  color: var(--wb-ink-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.wb-card__link-sitename {
+  font-size: var(--wb-text-hint);
+  color: var(--wb-ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.wb-card__chips {
+  position: absolute;
+  left: 4px;
+  bottom: 4px;
+  right: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.wb-card__chip {
+  font-size: var(--wb-text-hint);
+  padding: 1px 5px;
+  border-radius: var(--wb-radius-chip);
+  background: var(--wb-accent-weak);
+  color: var(--wb-accent-active);
+  border: 1px solid var(--wb-accent-weak-2);
+}
+
+.wb-card__lock {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 12px;
+  color: var(--wb-ink-muted);
+}
+
+// Badge éditeur distant. TODO(hors-périmètre) : lier le fond à la couleur du participant
+// (`--wb-user-*`) — nécessite un binding TS ; encre marque en attendant (§3.2).
+.wb-card__remote-editor {
+  position: absolute;
+  top: -18px;
+  left: 0;
+  font-size: var(--wb-text-hint);
+  padding: 1px 6px;
+  border-radius: var(--wb-radius-chip);
+  background: var(--wb-ink);
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.wb-card__resize {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--wb-surface);
+  border: 1.5px solid var(--wb-accent);
+  border-radius: 2px;
+  box-sizing: border-box;
+
+  &--tl { top: -5px; left: -5px; cursor: nwse-resize; }
+  &--t  { top: -5px; left: calc(50% - 5px); cursor: ns-resize; }
+  &--tr { top: -5px; right: -5px; cursor: nesw-resize; }
+  &--l  { top: calc(50% - 5px); left: -5px; cursor: ew-resize; }
+  &--r  { top: calc(50% - 5px); right: -5px; cursor: ew-resize; }
+  &--bl { bottom: -5px; left: -5px; cursor: nesw-resize; }
+  &--b  { bottom: -5px; left: calc(50% - 5px); cursor: ns-resize; }
+  &--br { bottom: -5px; right: -5px; cursor: nwse-resize; }
+}
+
+.wb-card__connect {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--wb-accent);
+  border: 2px solid var(--wb-surface);
+  border-radius: var(--wb-radius-pill);
+  box-sizing: border-box;
+  cursor: crosshair;
+  opacity: 0;
+  transition: opacity var(--wb-dur-fast);
+
+  &--n { top: -6px; left: calc(50% - 6px); }
+  &--e { right: -6px; top: calc(50% - 6px); }
+  &--s { bottom: -6px; left: calc(50% - 6px); }
+  &--w { left: -6px; top: calc(50% - 6px); }
+}
+
+:host(:hover) .wb-card__connect {
+  opacity: 1;
+}
+
+// ── US08.12.2 — per-card dot-vote control ──
+.wb-card__vote {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--wb-radius-pill, 999px);
+  background: #fff;
+  border: 1px solid var(--wb-border, #e6e4ef);
+  box-shadow: var(--wb-elev-2, 0 2px 8px rgba(20, 16, 41, 0.12));
+  font-family: var(--wb-font, inherit);
+
+  &--mine {
+    border-color: var(--wb-accent, #7c5cff);
+    background: var(--wb-accent-weak, #efe9ff);
+  }
+}
+
+.wb-card__vote-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 22px;
+  justify-content: center;
+  padding: 0 4px;
+  font-size: 12px;
+  font-weight: var(--wb-fw-semibold, 600);
+  font-variant-numeric: tabular-nums;
+  color: var(--wb-ink, #201a3b);
+}
+
+.wb-card__vote-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--wb-accent, #7c5cff);
+}
+
+.wb-card__vote-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--wb-ink-muted, #5b5470);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--wb-accent, #7c5cff);
+    color: #fff;
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--wb-focus, #7c5cff);
+    outline-offset: 1px;
+  }
+}
+
+// ── Line selection halo ─────────────────────────────────────────────────────
+// Drawn along the line, exactly where the hit band is — so the highlight shows what is actually
+// grabbable. The card's own rectangular halo is suppressed for lines: it drew a box around a
+// diagonal and made people try to drag the empty rectangle around it.
+:host(.wb-card--line.wb-card--selected) .wb-card__body {
+  box-shadow: none;
+}
+
+.wb-card__line-halo {
+  stroke: var(--wb-accent);
+  opacity: 0.28;
+}
+
+// ── Line hit area ───────────────────────────────────────────────────────────
+// A line's box is a rectangle, but the line only occupies its diagonal. Letting that rectangle
+// catch pointers would make a diagonal line steal clicks across a large empty area — and would
+// make anything sitting behind it unreachable. So the card stops catching pointers entirely and
+// hands the job to a transparent stroke running *along the line itself* (`wb-card__line-hit`,
+// the same trick the connectors already use). The clickable area is therefore the line, not its
+// box — widen or narrow it with LINE_HIT_WIDTH (model/board-constants.ts).
+:host(.wb-card--line) {
+  pointer-events: none;
+}
+
+// …except the parts that must stay grabbable: the line itself, and the handles/anchors, which
+// live outside the body and are the only way to resize or connect it.
+:host(.wb-card--line) .wb-card__line-hit,
+:host(.wb-card--line) .wb-card__resize {
+  pointer-events: auto;
+}
