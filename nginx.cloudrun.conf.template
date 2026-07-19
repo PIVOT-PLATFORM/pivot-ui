@@ -3,11 +3,14 @@
 # Differences vs nginx.conf (the docker-compose gateway):
 #   - Listens plain HTTP on 8080 — Cloud Run terminates TLS in front of the
 #     container. No :443 server, no cert mounts, no 80->443 redirect.
-#   - Upstreams are the backends' *.run.app hostnames, injected at container
+#   - EN53 (ADR-030) — agilité et collaboratif sont des modules internes du
+#     backend modulith pivot-core : tout /api/** (REST + WS) est routé vers
+#     ${PIVOT_CORE_UPSTREAM}. Il n'y a plus de services Cloud Run agilite/
+#     collaboratif séparés.
+#   - The upstream is the backend's *.run.app hostname, injected at container
 #     start by docker-entrypoint.d/40-pivot-cloudrun-upstreams.sh via envsubst:
-#       ${PIVOT_CORE_UPSTREAM} ${PIVOT_COLLABORATIF_UPSTREAM}
-#       ${PIVOT_AGILITE_UPSTREAM}
-#     (host only, no scheme). Each is proxied over HTTPS with SNI + a Host header
+#       ${PIVOT_CORE_UPSTREAM}
+#     (host only, no scheme), proxied over HTTPS with SNI + a Host header
 #     rewritten to the run.app host (Cloud Run routes on Host).
 #   - Public resolver (Cloud Run has no Docker embedded DNS) so run.app names are
 #     resolved at request time; `set $var` defers resolution past nginx start.
@@ -16,7 +19,7 @@
 
 map $uri $pivot_module {
     ~^/api/collaboratif/ws  collaboratif-ws;
-    ~^/ws/agilite        agilite-ws;
+    ~^/api/agilite/ws    agilite-ws;
     ~^/api/collaboratif  collaboratif;
     ~^/api/agilite       agilite;
     ~^/api               core;
@@ -69,9 +72,11 @@ server {
         return 200 'ok';
     }
 
-    # ── WebSocket — /ws/agilite/ ──────────────────────────────────────────
-    location /ws/agilite/ {
-        set $agilite_up "${PIVOT_AGILITE_UPSTREAM}";
+    # ── WebSocket — /api/agilite/ws/ (STOMP agilité) ──────────────────────
+    # EN53 (ADR-030) — endpoint STOMP du module agilité sous le context-path
+    # global /api : /api/agilite/ws/agilite (cf. agilite/config/WebSocketConfig).
+    location ^~ /api/agilite/ws/ {
+        set $agilite_up "${PIVOT_CORE_UPSTREAM}";
         proxy_pass https://$agilite_up;
         proxy_ssl_server_name on;
         proxy_ssl_name $agilite_up;
@@ -91,7 +96,7 @@ server {
 
     # ── WebSocket — /api/collaboratif/ws/ (STOMP whiteboard) ─────────────
     location ^~ /api/collaboratif/ws/ {
-        set $collaboratif_up "${PIVOT_COLLABORATIF_UPSTREAM}";
+        set $collaboratif_up "${PIVOT_CORE_UPSTREAM}";
         proxy_pass https://$collaboratif_up;
         proxy_ssl_server_name on;
         proxy_ssl_name $collaboratif_up;
@@ -111,7 +116,7 @@ server {
 
     # ── REST — /api/agilite/ ──────────────────────────────────────────────
     location /api/agilite/ {
-        set $agilite_up "${PIVOT_AGILITE_UPSTREAM}";
+        set $agilite_up "${PIVOT_CORE_UPSTREAM}";
         proxy_pass https://$agilite_up;
         proxy_ssl_server_name on;
         proxy_ssl_name $agilite_up;
@@ -128,7 +133,7 @@ server {
 
     # ── REST — /api/collaboratif/ ─────────────────────────────────────────
     location /api/collaboratif/ {
-        set $collaboratif_up "${PIVOT_COLLABORATIF_UPSTREAM}";
+        set $collaboratif_up "${PIVOT_CORE_UPSTREAM}";
         proxy_pass https://$collaboratif_up;
         proxy_ssl_server_name on;
         proxy_ssl_name $collaboratif_up;

@@ -8,8 +8,13 @@
 # /etc/nginx/conf.d/default.conf, so the same image serves both targets.
 #
 # This runs from /docker-entrypoint.d/ before nginx starts (nginx:alpine
-# official entrypoint). envsubst is restricted to our four variables so nginx's
+# official entrypoint). envsubst is restricted to our single variable so nginx's
 # own runtime $variables ($uri, $host, $proxy_add_x_forwarded_for, …) survive.
+#
+# EN53 (ADR-030) — agilité et collaboratif sont des modules internes du backend
+# modulith pivot-core : le template route tout /api/** vers ${PIVOT_CORE_UPSTREAM}.
+# Les variables PIVOT_COLLABORATIF_UPSTREAM / PIVOT_AGILITE_UPSTREAM sont retirées
+# (plus de services Cloud Run séparés).
 set -eu
 
 if [ -z "${PIVOT_CORE_UPSTREAM:-}" ]; then
@@ -19,11 +24,8 @@ fi
 
 echo "[pivot] Cloud Run edge mode — rendering nginx.cloudrun.conf.template" >&2
 
-: "${PIVOT_COLLABORATIF_UPSTREAM:?PIVOT_COLLABORATIF_UPSTREAM required in Cloud Run mode}"
-: "${PIVOT_AGILITE_UPSTREAM:?PIVOT_AGILITE_UPSTREAM required in Cloud Run mode}"
-
-envsubst '${PIVOT_CORE_UPSTREAM} ${PIVOT_COLLABORATIF_UPSTREAM} ${PIVOT_AGILITE_UPSTREAM}' \
+envsubst '${PIVOT_CORE_UPSTREAM}' \
     < /etc/nginx/pivot/nginx.cloudrun.conf.template \
     > /etc/nginx/conf.d/default.conf
 
-echo "[pivot] upstreams: core=${PIVOT_CORE_UPSTREAM} collaboratif=${PIVOT_COLLABORATIF_UPSTREAM} agilite=${PIVOT_AGILITE_UPSTREAM}" >&2
+echo "[pivot] upstream: core=${PIVOT_CORE_UPSTREAM} (agilité/collaboratif servis par le core — modulith)" >&2

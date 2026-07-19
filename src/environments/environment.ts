@@ -7,10 +7,12 @@ export const environment = {
   // préfixes vers le modulith. Voir aussi environment.prod.ts (même convention, déjà relative).
   collaboratifApiUrl: '/api/collaboratif',
   agiliteApiUrl: '/api/agilite',
-  // agilite uses a native STOMP WebSocket (US09.1.2) — nginx.dev.conf routes /ws/agilite.
+  // agilite uses a native STOMP WebSocket (US09.1.2). EN53 (ADR-030) — le module agilité
+  // enregistre son endpoint sous le context-path global /api : /api/agilite/ws/agilite
+  // (cf. agilite/config/WebSocketConfig). nginx route ce préfixe vers le modulith :8080.
   // Chemin relatif : *WsService.buildWsUrl() (agilite-ui) résout déjà un chemin relatif en
   // ws(s)://<host>/... à partir de window.location — pas besoin d'URL absolue ici.
-  agiliteWsUrl: '/ws/agilite',
+  agiliteWsUrl: '/api/agilite/ws/agilite',
   googleClientId: '',
   bugReportUrl: 'mailto:bugs@pivot-platform.fr?subject=Bug%20PIVOT',
 };
