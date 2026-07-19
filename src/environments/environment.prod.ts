@@ -6,15 +6,16 @@
 export const environment = {
   production: true,
   apiUrl: '/api',
-  // EN17.10 — routed by this image's nginx.conf (/api/collaboratif/ → pivot-collaboratif-core,
-  // see the multi-backend gateway table at the top of nginx.conf, EN17.7). Relative for the same
-  // reverse-proxy reason as apiUrl above.
+  // EN53 (ADR-030) — routed by this image's nginx.conf (/api/collaboratif/ → pivot-core modulith,
+  // see the gateway table at the top of nginx.conf). Relative for the same reverse-proxy reason
+  // as apiUrl above.
   collaboratifApiUrl: '/api/collaboratif',
-  // EN18 — routed by this image's nginx.conf (/api/agilite/ → pivot-agilite-core,
-  // EN17.7 gateway table). Relative for the reverse-proxy reason above.
+  // EN53 (ADR-030) — routed by this image's nginx.conf (/api/agilite/ → pivot-core modulith).
+  // Relative for the reverse-proxy reason above.
   agiliteApiUrl: '/api/agilite',
-  // agilite native STOMP WS — this image's nginx.conf routes /ws/agilite → pivot-agilite-core.
-  agiliteWsUrl: '/ws/agilite',
+  // agilite native STOMP WS — EN53 (ADR-030) : endpoint sous le context-path global /api du
+  // modulith (/api/agilite/ws/agilite) ; nginx.conf route /api/agilite/ws/ → pivot-core:8080.
+  agiliteWsUrl: '/api/agilite/ws/agilite',
   googleClientId: '',
   bugReportUrl: 'mailto:bugs@pivot-platform.fr?subject=Bug%20PIVOT',
 };
