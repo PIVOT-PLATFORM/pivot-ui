@@ -8,14 +8,13 @@
 2. **Librairie npm partagée** : publie `@pivot/ui-core` (GitHub Packages) — consommé par tous les repos `pivot-xxx-ui`.
 
 Partenaire de `pivot-core` (backend Java/Spring Boot + API REST).
-Design system **prévu** dans **pivot-design-system** (`@pivot/design-system`) — repo pas encore
-créé, pas de dépendance réelle aujourd'hui (vérifié : absent de `package.json` et de `src/`).
-En attendant, styles/composants gérés directement dans `pivot-ui` (`src/styles/`) — migration
-vers `@pivot/design-system` le jour où ce repo existe, pas avant.
-**Le repo est différé, pas le choix technique** : stack actée par `pivot-docs/docs/adr/ADR-007-design-system-angular-cdk.md`
+Depuis la bascule Spring Modulith (ADR-030, EN53.4), `pivot-ui` est un **workspace Angular unique** :
+le **design system** (`@pivot/design-system`) et les **libs de module** (`agilite-ui`,
+`collaboratif-ui`) sont incubés dans `projects/*` et référencés via les `paths` TypeScript — plus de
+packages npm privés externes ni de repos dédiés (`pivot-design-system`, `pivot-{agilite,collaboratif}-ui`
+sont **archivés**). Stack design system actée par `pivot-docs/docs/adr/ADR-007-design-system-angular-cdk.md`
 — Angular CDK (comportement/a11y) + SCSS BEM custom (visuel), **aucune lib visuelle tierce**
-(Material/Taiga/PrimeNG/Tailwind explicitement rejetés). Suivi backlog : Enabler `EN17.2`
-(`Stage: ⬜`, `Phase: phase-3`).
+(Material/Taiga/PrimeNG/Tailwind explicitement rejetés).
 
 **Vision :** interface réactive, accessible (WCAG 2.1 AA), activable par module — sans lock-in SaaS.
 
@@ -27,9 +26,11 @@ vers `@pivot/design-system` le jour où ce repo existe, pas avant.
 | `@pivot/ui-core/tenant` | TenantService, TenantContextDirective |
 | `@pivot/ui-core/shell` | HeaderComponent, FooterComponent, NavigationService |
 | `@pivot/ui-core/modules` | ModuleGuard, ModuleStatusService |
-| `@pivot/design-system` | Prévu — ré-export complet une fois `pivot-design-system` créé (pas actif aujourd'hui) |
+| `@pivot/design-system` | Lib incubée dans `projects/design-system` (EN17.8) — composants, tokens, patterns |
 
-**Modules fonctionnels** : dans les repos dédiés (`pivot-agilite-ui`, `pivot-collaboratif-ui`). pivot-ui ne contient PAS les features métier.
+**Modules fonctionnels** : depuis EN53.4, les libs de feature `agilite-ui` et `collaboratif-ui` sont
+des **projets internes** du workspace (`projects/agilite-ui`, `projects/collaboratif-ui`), lazy-loadées
+par le shell. Les anciens repos `pivot-{agilite,collaboratif}-ui` sont archivés.
 
 **Déploiement :**
 - Image Docker nginx (assets statiques + reverse proxy API)
@@ -96,10 +97,10 @@ pivot-ui/
 └── Dockerfile                 # nginx production
 ```
 
-**Features métier (whiteboard, quiz, roadmap…) → repos `pivot-xxx-ui` dédiés, jamais dans pivot-ui.**
-WebSocket STOMP (`@stomp/rx-stomp`) → dans les repos modules qui en ont besoin (pivot-collaboratif-ui, etc.), pas dans pivot-ui.
+**Features métier (whiteboard, quiz…) → projets internes du workspace (`projects/{agilite,collaboratif}-ui`), lazy-loadés par le shell** (EN53.4). Le shell (`src/`) ne contient pas la logique métier.
+WebSocket STOMP (`@stomp/rx-stomp`) → dans les libs de module qui en ont besoin (`projects/collaboratif-ui`, etc.).
 
-Backend API → **pivot-core** (repo séparé). Design system → **pivot-design-system** (`@pivot/design-system`, repo pas encore créé — voir Projet).
+Backend API → **pivot-core** (repo séparé). Design system → lib interne `projects/design-system` (`@pivot/design-system`).
 
 ---
 
