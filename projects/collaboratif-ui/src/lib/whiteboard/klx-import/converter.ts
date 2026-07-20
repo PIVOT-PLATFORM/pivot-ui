@@ -11,6 +11,10 @@
 const DRAW_PAD = 8; // padding inside DRAW card bounding box
 const KLX_POSTIT = 192; // Klaxoon postit base width at scale 1 (confirmed by
 // grid spacing measured across several real exports)
+// Postit font-size at scale 1 = the board's TEXT default (board-card TEXT_DEFAULTS.size)
+// and the base fitTextHeight assumes. Klaxoon postits carry no inline font-size — their
+// on-screen size is driven by the note's `scale`, so the imported font must scale with it.
+const KLX_POSTIT_BASE_FONT = 14;
 
 // Height a TEXT card needs for its content at the given width. Metrics match
 // the board card: 14px font ≈ 7.8px/char, line-height ≈ 23px, 28px header.
@@ -487,13 +491,18 @@ export function convertKlaxoon(data: KlxRawData, imageMap?: Map<string, string>,
       ? width
       : Math.min(Math.round(fitTextHeight(text, KLX_POSTIT) * scale), width * 3);
 
+    // The board renders TEXT cards at a FIXED font-size (no fit-to-width), so the
+    // postit's Klaxoon scale must be baked into the font — otherwise every imported
+    // note shows the default 14px regardless of how large/small it was in Klaxoon.
+    // Mirrors the LABEL branch (which bakes size = font × scale). A scale-1 postit
+    // stays exactly the plain-text default (14px), so only scaled notes change.
+    const fontSize = Math.min(400, Math.max(8, Math.round(KLX_POSTIT_BASE_FONT * scale)));
+
     cards.push({
       klxId: idea.uuid,
       type: 'TEXT',
-      // Plain text: the board scales the font to the card width (192px base),
-      // so a ×3 postit (576px) already renders ~3× bigger text — no need to bake
-      // a size here, and baking would double-count against that render scaling.
-      content: text,
+      content:
+        fontSize === KLX_POSTIT_BASE_FONT ? text : JSON.stringify({ text, size: fontSize }),
       color,
       posX, posY,
       width,

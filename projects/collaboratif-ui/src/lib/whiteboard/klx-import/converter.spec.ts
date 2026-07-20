@@ -50,15 +50,27 @@ describe('convertKlaxoon', () => {
     expect(stats.postits).toBe(1);
   });
 
-  it('keeps postit content as plain text; the board scales the font to the card width', () => {
+  it('bakes the postit scale into the TEXT font size (the board renders TEXT at a fixed size, no fit-to-width)', () => {
     const data: KlxRawData = {
       colors: [],
       ideas: [makeIdea({ content_html: '<p>Titre</p>', scale: { scale_x: 2, scale_y: 2 } })],
       state: [], links: [], groups: [],
     };
     const { cards } = convertKlaxoon(data);
-    expect(cards[0].content).toBe('Titre'); // pas de JSON de taille : le rendu fait la proportion
-    expect(cards[0].width).toBe(384); // 192 × 2 → le board rendra la police ~2× plus grande
+    // scale 2 × 14px base = 28px, baked as JSON so the fixed-size renderer shows it larger.
+    expect(JSON.parse(cards[0].content)).toEqual({ text: 'Titre', size: 28 });
+    expect(cards[0].width).toBe(384); // 192 × 2
+  });
+
+  it('clamps a tiny postit scale to the minimum 8px font', () => {
+    const data: KlxRawData = {
+      colors: [],
+      ideas: [makeIdea({ content_html: '<p>x</p>', scale: { scale_x: 0.3, scale_y: 0.3 } })],
+      state: [], links: [], groups: [],
+    };
+    const { cards } = convertKlaxoon(data);
+    // 14 × 0.3 = 4.2 → rounded 4 → clamped up to the 8px floor.
+    expect(JSON.parse(cards[0].content)).toEqual({ text: 'x', size: 8 });
   });
 
   it('strips HTML tags from idea content', () => {
