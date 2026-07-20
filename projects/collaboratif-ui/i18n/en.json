@@ -144,6 +144,19 @@
       "panel": {
         "title": "Share board",
         "close": "Close sharing panel",
+        "inviteSection": "Invite by e-mail",
+        "invite": {
+          "emailLabel": "E-mail address",
+          "emailPlaceholder": "name@example.com",
+          "submit": "Invite",
+          "submitting": "Sending…",
+          "success": "Invitation sent!",
+          "errorNotFound": "No user matches this e-mail address",
+          "errorSelf": "You cannot invite yourself",
+          "errorInvalidEmail": "Invalid e-mail address",
+          "errorForbidden": "Only the board owner can invite members",
+          "errorGeneric": "Unable to send the invitation"
+        },
         "linkSection": "Invitation link",
         "selectRole": "Role:",
         "generateLink": "Generate a link",

@@ -21,6 +21,59 @@
     </button>
   </div>
 
+  <!-- ── Invite by e-mail section (US08.2.5) ─────────────────────────── -->
+  <section class="share-panel__section" aria-labelledby="share-invite-heading">
+    <h3 id="share-invite-heading" class="share-panel__section-heading">
+      {{ 'whiteboard.share.panel.inviteSection' | transloco }}
+    </h3>
+
+    <div class="share-panel__invite-form">
+      <label class="share-panel__label" for="invite-email-input">
+        {{ 'whiteboard.share.panel.invite.emailLabel' | transloco }}
+      </label>
+      <input
+        id="invite-email-input"
+        class="share-panel__invite-input"
+        type="email"
+        autocomplete="email"
+        [placeholder]="'whiteboard.share.panel.invite.emailPlaceholder' | transloco"
+        [value]="inviteEmail()"
+        [disabled]="inviteStatus() === 'sending'"
+        (input)="setInviteEmail($event)"
+        (keydown.enter)="submitInvite()"
+      />
+
+      <div class="share-panel__role-row">
+        <label class="share-panel__label" for="invite-role-select">
+          {{ 'whiteboard.share.panel.selectRole' | transloco }}
+        </label>
+        <select
+          id="invite-role-select"
+          class="share-panel__select"
+          [disabled]="inviteStatus() === 'sending'"
+          (change)="setInviteRole($event)"
+        >
+          <option value="EDITOR">{{ 'whiteboard.presence.role.editor' | transloco }}</option>
+          <option value="VIEWER">{{ 'whiteboard.presence.role.viewer' | transloco }}</option>
+        </select>
+      </div>
+
+      <button
+        class="share-panel__invite-btn"
+        type="button"
+        [disabled]="inviteStatus() === 'sending' || !inviteEmail().trim()"
+        (click)="submitInvite()"
+      >
+        @if (inviteStatus() === 'sending') {
+          <span class="share-panel__spinner" aria-hidden="true"></span>
+          {{ 'whiteboard.share.panel.invite.submitting' | transloco }}
+        } @else {
+          {{ 'whiteboard.share.panel.invite.submit' | transloco }}
+        }
+      </button>
+    </div>
+  </section>
+
   <!-- ── Link section ────────────────────────────────────────────────── -->
   <section class="share-panel__section" aria-labelledby="share-link-heading">
     <h3 id="share-link-heading" class="share-panel__section-heading">

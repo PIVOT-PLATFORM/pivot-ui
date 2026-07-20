@@ -21,6 +21,19 @@ const FR: Record<string, unknown> = {
       panel: {
         title: 'Partager le tableau',
         close: 'Fermer',
+        inviteSection: 'Inviter par e-mail',
+        invite: {
+          emailLabel: 'E-mail',
+          emailPlaceholder: 'nom@exemple.com',
+          submit: 'Inviter',
+          submitting: 'Envoi…',
+          success: 'Invitation envoyée !',
+          errorNotFound: 'E-mail inconnu',
+          errorSelf: 'Auto-invitation impossible',
+          errorInvalidEmail: 'E-mail invalide',
+          errorForbidden: 'Non autorisé',
+          errorGeneric: 'Erreur invitation',
+        },
         linkSection: 'Lien d\'invitation',
         selectRole: 'Rôle :',
         generateLink: 'Générer un lien',
@@ -153,6 +166,155 @@ describe('SharePanelComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('.share-panel__remove-btn')).toBeTruthy();
+  });
+
+  // ── Invite by e-mail — success (new member) ──
+  it('invite form sends POST with email/role and appends the new member on success', () => {
+    const toastSpy = vi.spyOn(toastService, 'show');
+    fixture.detectChanges();
+    httpMock.expectOne(MEMBERS_URL).flush([OWNER]);
+    fixture.detectChanges();
+
+    const emailInput = fixture.nativeElement.querySelector('#invite-email-input') as HTMLInputElement;
+    emailInput.value = 'new@pivot.invalid';
+    emailInput.dispatchEvent(new Event('input'));
+
+    const roleSelect = fixture.nativeElement.querySelector('#invite-role-select') as HTMLSelectElement;
+    roleSelect.value = 'VIEWER';
+    roleSelect.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector('.share-panel__invite-btn') as HTMLButtonElement).click();
+
+    const req = httpMock.expectOne(r => r.url === MEMBERS_URL && r.method === 'POST');
+    expect(req.request.body).toEqual({ email: 'new@pivot.invalid', role: 'VIEWER' });
+
+    const newMember: BoardMember = {
+      userId: 'user-new-cccc-cccc-cccccccccccc',
+      role: 'VIEWER',
+      joinedAt: '2026-07-10T00:00:00Z',
+    };
+    req.flush(newMember);
+    fixture.detectChanges();
+
+    expect(toastSpy).toHaveBeenCalledWith('whiteboard.share.panel.invite.success', 'success');
+    expect((fixture.nativeElement.querySelector('#invite-email-input') as HTMLInputElement).value).toBe('');
+    expect(fixture.nativeElement.textContent).toContain('user-new');
+  });
+
+  // ── Invite by e-mail — success (re-invite updates existing member) ──
+  it('invite form updates an existing member in place rather than duplicating it', () => {
+    fixture.detectChanges();
+    httpMock.expectOne(MEMBERS_URL).flush([OWNER, EDITOR]);
+    fixture.detectChanges();
+
+    const emailInput = fixture.nativeElement.querySelector('#invite-email-input') as HTMLInputElement;
+    emailInput.value = 'editor@pivot.invalid';
+    emailInput.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector('.share-panel__invite-btn') as HTMLButtonElement).click();
+
+    const req = httpMock.expectOne(r => r.url === MEMBERS_URL && r.method === 'POST');
+    req.flush({ ...EDITOR, role: 'VIEWER' });
+    fixture.detectChanges();
+
+    const rows = fixture.nativeElement.querySelectorAll('.share-panel__tr');
+    expect(rows.length).toBe(2);
+    const roleSelect = fixture.nativeElement.querySelector(
+      `#role-${EDITOR.userId}`,
+    ) as HTMLSelectElement;
+    expect(roleSelect.value).toBe('VIEWER');
+  });
+
+  // ── Invite by e-mail — submit disabled without an e-mail ──
+  it('invite submit button is disabled while the e-mail field is empty', () => {
+    fixture.detectChanges();
+    httpMock.expectOne(MEMBERS_URL).flush([OWNER]);
+    fixture.detectChanges();
+
+    const btn = fixture.nativeElement.querySelector('.share-panel__invite-btn') as HTMLButtonElement;
+    expect(btn.disabled).toBe(true);
+  });
+
+  // ── Invite by e-mail — INVITEE_NOT_FOUND ──
+  it('shows the unknown-e-mail toast when the backend returns INVITEE_NOT_FOUND', () => {
+    const toastSpy = vi.spyOn(toastService, 'show');
+    fixture.detectChanges();
+    httpMock.expectOne(MEMBERS_URL).flush([OWNER]);
+    fixture.detectChanges();
+
+    const emailInput = fixture.nativeElement.querySelector('#invite-email-input') as HTMLInputElement;
+    emailInput.value = 'nobody@pivot.invalid';
+    emailInput.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('.share-panel__invite-btn') as HTMLButtonElement).click();
+
+    httpMock.expectOne(r => r.url === MEMBERS_URL && r.method === 'POST')
+      .flush({ code: 'INVITEE_NOT_FOUND' }, { status: 404, statusText: 'Not Found' });
+    fixture.detectChanges();
+
+    expect(toastSpy).toHaveBeenCalledWith('whiteboard.share.panel.invite.errorNotFound', 'error');
+  });
+
+  // ── Invite by e-mail — SELF_INVITE ──
+  it('shows the self-invite toast when the backend returns SELF_INVITE', () => {
+    const toastSpy = vi.spyOn(toastService, 'show');
+    fixture.detectChanges();
+    httpMock.expectOne(MEMBERS_URL).flush([OWNER]);
+    fixture.detectChanges();
+
+    const emailInput = fixture.nativeElement.querySelector('#invite-email-input') as HTMLInputElement;
+    emailInput.value = 'me@pivot.invalid';
+    emailInput.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('.share-panel__invite-btn') as HTMLButtonElement).click();
+
+    httpMock.expectOne(r => r.url === MEMBERS_URL && r.method === 'POST')
+      .flush({ code: 'SELF_INVITE' }, { status: 400, statusText: 'Bad Request' });
+    fixture.detectChanges();
+
+    expect(toastSpy).toHaveBeenCalledWith('whiteboard.share.panel.invite.errorSelf', 'error');
+  });
+
+  // ── Invite by e-mail — non-owner caller (403, no code) ──
+  it('shows the forbidden toast on a 403 with no machine-readable code', () => {
+    const toastSpy = vi.spyOn(toastService, 'show');
+    fixture.detectChanges();
+    httpMock.expectOne(MEMBERS_URL).flush([OWNER]);
+    fixture.detectChanges();
+
+    const emailInput = fixture.nativeElement.querySelector('#invite-email-input') as HTMLInputElement;
+    emailInput.value = 'someone@pivot.invalid';
+    emailInput.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('.share-panel__invite-btn') as HTMLButtonElement).click();
+
+    httpMock.expectOne(r => r.url === MEMBERS_URL && r.method === 'POST')
+      .flush({}, { status: 403, statusText: 'Forbidden' });
+    fixture.detectChanges();
+
+    expect(toastSpy).toHaveBeenCalledWith('whiteboard.share.panel.invite.errorForbidden', 'error');
+  });
+
+  // ── Invite by e-mail — generic failure ──
+  it('shows the generic invite-error toast for an unmapped failure', () => {
+    const toastSpy = vi.spyOn(toastService, 'show');
+    fixture.detectChanges();
+    httpMock.expectOne(MEMBERS_URL).flush([OWNER]);
+    fixture.detectChanges();
+
+    const emailInput = fixture.nativeElement.querySelector('#invite-email-input') as HTMLInputElement;
+    emailInput.value = 'someone@pivot.invalid';
+    emailInput.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('.share-panel__invite-btn') as HTMLButtonElement).click();
+
+    httpMock.expectOne(r => r.url === MEMBERS_URL && r.method === 'POST')
+      .flush('', { status: 500, statusText: 'Error' });
+    fixture.detectChanges();
+
+    expect(toastSpy).toHaveBeenCalledWith('whiteboard.share.panel.invite.errorGeneric', 'error');
   });
 
   // ── Generate link ──
