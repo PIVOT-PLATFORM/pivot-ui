@@ -110,6 +110,11 @@ export class FloatingToolbarComponent {
    *  (US08.6.4 — accessible upload entry point, not only drag-and-drop/paste). */
   readonly insertImage = output<File>();
 
+  /** Whether grid snapping is currently on (US08.11.1) — drives the button's pressed state. */
+  readonly snapEnabled = input<boolean>(false);
+  /** Emits when the user toggles the grid-snap button (US08.11.1). */
+  readonly snapToggle = output<void>();
+
   protected readonly pointerTools = POINTER_TOOLS;
   protected readonly contentTools = CONTENT_TOOLS;
   protected readonly drawTools = DRAW_TOOLS;

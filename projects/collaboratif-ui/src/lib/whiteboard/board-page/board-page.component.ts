@@ -35,6 +35,7 @@ import type { Board } from '../../core/whiteboard/board.model';
 import type { Card, Connection, ConnectionPatch } from '../model/board.types';
 import { TOOL_SHORTCUTS, isShapeTool, type ToolMode } from '../model/tools';
 import { DEFAULT_SHAPE_COLOR } from '../model/colors';
+import { readGridPreference, writeGridPreference } from '../model/board-constants';
 import { parseShape } from '../model/shape';
 import { parseLabelFmt, parseTextFmt, type TextAlign } from '../model/card-format';
 
@@ -103,6 +104,12 @@ export class BoardPageComponent implements OnInit, OnDestroy {
   protected readonly colorPicked = signal(false);
   /** SHAPE fill colour (US08.6.3) — `null` means no fill (transparent), the SHAPE default. */
   protected readonly fillColor = signal<string | null>(null);
+
+  /**
+   * Grid-snap preference (US08.11.1) — owned here because both the toolbar (button state) and the
+   * canvas (snapping) need it. Restored from the browser on load, off by default.
+   */
+  protected readonly snapEnabled = signal<boolean>(readGridPreference());
   /** Whether the keyboard shortcut cheat-sheet is open (toggled by `?`). */
   protected readonly showShortcuts = signal(false);
 
@@ -414,6 +421,18 @@ export class BoardPageComponent implements OnInit, OnDestroy {
    * and keep it as the default colour for the next created card. Without the `recolorSelected`
    * call, picking a colour only affected future cards — an existing card could never be recoloured.
    */
+  /**
+   * Toggles grid snapping and persists it for this browser (US08.11.1).
+   *
+   * Client-only: no STOMP message, no server write — the other participants on the board keep
+   * their own preference.
+   */
+  protected onSnapToggle(): void {
+    const next = !this.snapEnabled();
+    this.snapEnabled.set(next);
+    writeGridPreference(next);
+  }
+
   protected onColorChange(color: string): void {
     this.color.set(color);
     // An explicit pick (toolbar swatch or selection recolour) becomes the colour applied to

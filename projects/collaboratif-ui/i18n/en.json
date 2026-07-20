@@ -390,7 +390,8 @@
         "both": "Arrows at both ends"
       },
       "labelAdd": "Add a label",
-      "labelEdit": "Edit the label"
+      "labelEdit": "Edit the label",
+      "snapToGrid": "Snap to grid"
     },
     "card": {
       "editText": "Edit text",
