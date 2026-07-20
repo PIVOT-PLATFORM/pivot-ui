@@ -1,0 +1,33 @@
+@if (status() === 'ready') {
+  <svg
+    class="board-preview__svg"
+    [attr.viewBox]="viewBox()"
+    preserveAspectRatio="xMidYMid meet"
+    aria-hidden="true"
+  >
+    @for (f of frames(); track $index) {
+      <rect
+        [attr.x]="f.x"
+        [attr.y]="f.y"
+        [attr.width]="f.w"
+        [attr.height]="f.h"
+        fill="none"
+        [attr.stroke]="f.color"
+        stroke-width="3"
+        rx="6"
+      />
+    }
+    @for (c of cards(); track $index) {
+      <rect
+        [attr.x]="c.x"
+        [attr.y]="c.y"
+        [attr.width]="c.w"
+        [attr.height]="c.h"
+        [attr.fill]="c.color"
+        rx="3"
+      />
+    }
+  </svg>
+} @else {
+  <div class="board-preview__placeholder" aria-hidden="true"></div>
+}

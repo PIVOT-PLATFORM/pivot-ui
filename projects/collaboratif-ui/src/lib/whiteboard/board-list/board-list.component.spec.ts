@@ -607,12 +607,14 @@ describe('BoardListComponent', () => {
     expect(img.src).toContain('thumb.png');
   });
 
-  it('renders placeholder when thumbnailUrl is null', () => {
+  it('renders the board content preview when thumbnailUrl is null', () => {
     httpMock.expectOne(r => r.url === BASE).flush(
       makePageResponse([makeBoard({ thumbnailUrl: null })]),
     );
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.board-list__card-thumbnail-placeholder')).toBeTruthy();
+    // No stored thumbnail → the lazy mini-render component takes the slot (it stays on its own
+    // placeholder here since jsdom has no IntersectionObserver, so it fires no request).
+    expect(fixture.nativeElement.querySelector('app-board-preview')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.board-list__card-thumbnail')).toBeNull();
   });
 

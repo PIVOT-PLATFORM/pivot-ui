@@ -6,6 +6,7 @@ import {
   BoardListQuery,
   BoardMember,
   BoardPage,
+  BoardPreview,
   BoardSettingsPatch,
   JoinBoardResult,
   KlaxoonImportRequest,
@@ -65,6 +66,15 @@ export class BoardService {
    */
   getBoard(boardId: string): Observable<Board> {
     return this.http.get<Board>(`${this.apiUrl}/whiteboard/boards/${boardId}`);
+  }
+
+  /**
+   * Fetches a board's lightweight geometry preview (cards + frames, no content) for the
+   * board-list mini-thumbnail. Kept separate from {@link getBoard} so the list never downloads
+   * card content (text, base64 images) just to draw a thumbnail.
+   */
+  getBoardPreview(boardId: string): Observable<BoardPreview> {
+    return this.http.get<BoardPreview>(`${this.apiUrl}/whiteboard/boards/${boardId}/preview`);
   }
 
   /**

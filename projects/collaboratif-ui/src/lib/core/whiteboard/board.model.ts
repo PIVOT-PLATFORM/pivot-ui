@@ -210,3 +210,29 @@ export interface KlaxoonUndoResponse {
   connections: number;
   frames: number;
 }
+
+/** One card in a board preview — geometry + colour only, no content (US08.1.x board thumbnails). */
+export interface PreviewCard {
+  type: string;
+  posX: number;
+  posY: number;
+  width: number;
+  height: number;
+  color: string;
+}
+
+/** One frame (section container) in a board preview — geometry + colour only. */
+export interface PreviewFrame {
+  posX: number;
+  posY: number;
+  width: number;
+  height: number;
+  color: string;
+}
+
+/** Response from `GET /whiteboard/boards/{boardId}/preview` — lightweight geometry for a
+ *  board-list mini-thumbnail (no card content / base64 images). */
+export interface BoardPreview {
+  cards: PreviewCard[];
+  frames: PreviewFrame[];
+}
