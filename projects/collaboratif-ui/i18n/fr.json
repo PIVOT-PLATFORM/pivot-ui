@@ -144,6 +144,19 @@
       "panel": {
         "title": "Partager le tableau",
         "close": "Fermer le panneau de partage",
+        "inviteSection": "Inviter par e-mail",
+        "invite": {
+          "emailLabel": "Adresse e-mail",
+          "emailPlaceholder": "nom@exemple.com",
+          "submit": "Inviter",
+          "submitting": "Envoi…",
+          "success": "Invitation envoyée !",
+          "errorNotFound": "Aucun utilisateur ne correspond à cette adresse e-mail",
+          "errorSelf": "Vous ne pouvez pas vous inviter vous-même",
+          "errorInvalidEmail": "Adresse e-mail invalide",
+          "errorForbidden": "Seul le propriétaire du tableau peut inviter des membres",
+          "errorGeneric": "Impossible d'envoyer l'invitation"
+        },
         "linkSection": "Lien d'invitation",
         "selectRole": "Rôle :",
         "generateLink": "Générer un lien",
