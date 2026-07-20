@@ -106,8 +106,36 @@ export interface VotesRevealedEvent {
   readonly revealedAt: string;
 }
 
+/**
+ * One entry of a room's live named roster (E09 — classic parity). `hasVoted` is the only
+ * vote-related signal exposed while a ticket is open (masked-until-reveal is preserved — the
+ * chosen card value is never carried here). Always `false` for a `VISITEUR` and when no ticket
+ * is open. Mirrors the backend `RosterParticipant`; identity (token/hash) is never included.
+ */
+export interface RosterParticipant {
+  readonly name: string;
+  readonly role: 'JOUEUR' | 'VISITEUR';
+  readonly hasVoted: boolean;
+}
+
+/**
+ * `ROSTER_UPDATED` event received on the room's regular topic whenever the roster changes in a
+ * way everyone should see (a participant joins, or a participant's vote state on the active
+ * ticket flips). Carries the FULL current roster, not a delta — a late subscriber that receives
+ * one event has the complete picture.
+ */
+export interface RosterUpdatedEvent {
+  readonly type: 'ROSTER_UPDATED';
+  readonly roomId: string;
+  readonly participants: readonly RosterParticipant[];
+}
+
 /** Discriminated union of every event type carried on the room's regular topic. */
-export type RoomTopicEvent = TicketCreatedEvent | VoteCastEvent | VotesRevealedEvent;
+export type RoomTopicEvent =
+  | TicketCreatedEvent
+  | VoteCastEvent
+  | VotesRevealedEvent
+  | RosterUpdatedEvent;
 
 /**
  * RFC 7807 `ProblemDetail` error shape returned by `pivot-agilite-core` for ticket endpoints, with

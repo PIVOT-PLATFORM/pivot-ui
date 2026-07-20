@@ -99,6 +99,30 @@
           }
         </div>
 
+        <div class="join-room__field">
+          <label class="join-room__label" for="join-room-name">
+            {{ 'scrumPoker.joinRoom.displayNameLabel' | transloco }}
+            <span class="join-room__optional">{{ 'scrumPoker.joinRoom.optional' | transloco }}</span>
+          </label>
+          <input
+            id="join-room-name"
+            class="join-room__input"
+            type="text"
+            formControlName="displayName"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="join-room__field">
+          <label class="join-room__label" for="join-room-role">
+            {{ 'scrumPoker.joinRoom.roleLabel' | transloco }}
+          </label>
+          <select id="join-room-role" class="join-room__input" formControlName="role">
+            <option value="JOUEUR">{{ 'scrumPoker.joinRoom.roleJoueur' | transloco }}</option>
+            <option value="VISITEUR">{{ 'scrumPoker.joinRoom.roleVisiteur' | transloco }}</option>
+          </select>
+        </div>
+
         <button
           type="submit"
           class="join-room__submit"
@@ -175,6 +199,16 @@
               {{ 'scrumPoker.joinRoom.errors.invalidPseudonym' | transloco }}
             </p>
           }
+        </div>
+
+        <div class="join-room__field">
+          <label class="join-room__label" for="join-room-anonymous-role">
+            {{ 'scrumPoker.joinRoom.roleLabel' | transloco }}
+          </label>
+          <select id="join-room-anonymous-role" class="join-room__input" formControlName="role">
+            <option value="JOUEUR">{{ 'scrumPoker.joinRoom.roleJoueur' | transloco }}</option>
+            <option value="VISITEUR">{{ 'scrumPoker.joinRoom.roleVisiteur' | transloco }}</option>
+          </select>
         </div>
 
         <button

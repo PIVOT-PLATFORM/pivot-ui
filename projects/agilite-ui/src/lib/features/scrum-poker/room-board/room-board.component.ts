@@ -12,7 +12,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { RoomWsService } from '../room-ws.service';
-import { ConsensusResponse, RoomTopicEvent, TicketProblemDetail, TicketResponse } from '../ticket.model';
+import {
+  ConsensusResponse,
+  RosterParticipant,
+  RoomTopicEvent,
+  TicketProblemDetail,
+  TicketResponse,
+} from '../ticket.model';
 import { TicketService } from '../ticket.service';
 
 /** Maximum ticket title length accepted by the backend (US09.2.1). */
@@ -73,6 +79,13 @@ export class RoomBoardComponent implements OnInit {
 
   /** Total participants currently registered in the room. */
   protected readonly totalParticipants = signal(0);
+
+  /**
+   * The room's live named roster (E09), from `ROSTER_UPDATED` broadcasts — each participant's
+   * name, role, and masked "has voted" state for the open ticket. Empty until the first roster
+   * event arrives.
+   */
+  protected readonly roster = signal<readonly RosterParticipant[]>([]);
 
   /** The caller's own selected card — purely local state, never sent back by the server. */
   protected readonly selectedValue = signal<string | null>(null);
@@ -250,6 +263,9 @@ export class RoomBoardComponent implements OnInit {
         break;
       case 'VOTES_REVEALED':
         this.applyReveal(event.ticketId, 'REVEALED', event.values, event.consensus);
+        break;
+      case 'ROSTER_UPDATED':
+        this.roster.set(event.participants);
         break;
     }
   }
