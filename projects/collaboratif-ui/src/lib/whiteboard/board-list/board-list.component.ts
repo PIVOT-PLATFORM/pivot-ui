@@ -17,6 +17,7 @@ import { BoardService } from '../../core/whiteboard/board.service';
 import { ToastService } from '../../core/toast/toast.service';
 import { Board } from '../../core/whiteboard/board.model';
 import { TemplateGalleryComponent } from '../template-gallery/template-gallery.component';
+import { BoardPreviewComponent } from '../board-preview/board-preview.component';
 
 /** Debounce delay (ms) applied to the search input before re-querying the backend (US08.1.8). */
 const SEARCH_DEBOUNCE_MS = 300;
@@ -37,7 +38,7 @@ type ViewMode = 'active' | 'trash';
   selector: 'app-board-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslocoPipe, DatePipe, BoardListAutofocusDirective, TemplateGalleryComponent],
+  imports: [RouterLink, TranslocoPipe, DatePipe, BoardListAutofocusDirective, TemplateGalleryComponent, BoardPreviewComponent],
   templateUrl: './board-list.component.html',
   styleUrl: './board-list.component.scss',
 })

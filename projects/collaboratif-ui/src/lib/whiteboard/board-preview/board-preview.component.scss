@@ -1,0 +1,23 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 140px;
+}
+
+.board-preview__svg,
+.board-preview__placeholder {
+  width: 100%;
+  height: 100%;
+  // Match the board-list thumbnail slot: rounded top corners only.
+  border-radius: 0.5rem 0.5rem 0 0;
+  display: block;
+}
+
+.board-preview__svg {
+  background: #f8fafc;
+  object-fit: contain;
+}
+
+.board-preview__placeholder {
+  background: linear-gradient(135deg, #e2e8f0, #f1f5f9);
+}

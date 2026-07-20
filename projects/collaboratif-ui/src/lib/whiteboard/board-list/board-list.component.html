@@ -179,7 +179,7 @@
                   [alt]="board.title"
                 />
               } @else {
-                <div class="board-list__card-thumbnail-placeholder" aria-hidden="true"></div>
+                <app-board-preview [boardId]="board.id" />
               }
               <div class="board-list__card-body">
                 <h2 class="board-list__card-title">{{ board.title }}</h2>
@@ -211,7 +211,7 @@
                   [alt]="board.title"
                 />
               } @else {
-                <div class="board-list__card-thumbnail-placeholder" aria-hidden="true"></div>
+                <app-board-preview [boardId]="board.id" />
               }
               <div class="board-list__card-body">
                 <div class="board-list__card-rename-field">
