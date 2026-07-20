@@ -940,14 +940,31 @@ export class BoardStore {
     return merged;
   }
 
-  private flushMoveEmits(): void {
+  /**
+   * Flushes the throttled `card:move` buffer. Mirrors {@link flushCoalescedEmits} (the resize
+   * path) exactly, and for the same reason: {@link BoardTransport.emit} DROPS any non-`guaranteed`
+   * frame while the socket is down. An intermediate flush ({@code guaranteed=false}) that lands
+   * during a blip therefore emits nothing AND keeps `pending`, so the latest geometry survives for
+   * the commit flush (or the next reconnect); the commit flush ({@code guaranteed=true}) always
+   * emits, with guaranteed delivery, so the authoritative drop position is never lost.
+   *
+   * @param guaranteed whether these are authoritative commit emits that must be delivered
+   */
+  private flushMoveEmits(guaranteed: boolean): void {
     this.moveEmit.timer = null;
     this.moveEmit.lastTs = Date.now();
     const pending = this.moveEmit.pending;
     if (pending.size === 0) {
       return;
     }
-    pending.forEach((p, cid) => this.transport.emit('card:move', { id: cid, boardId: this.boardId, posX: p.posX, posY: p.posY }));
+    if (!guaranteed && !this.transport.isConnected()) {
+      // Keep pending: a dropped intermediate must not discard the latest position — the commit
+      // flush (or next reconnect) still needs to deliver it.
+      return;
+    }
+    pending.forEach((p, cid) =>
+      this.transport.emit('card:move', { id: cid, boardId: this.boardId, posX: p.posX, posY: p.posY }, { guaranteed }),
+    );
     pending.clear();
   }
   private scheduleMoveFlush(): void {
@@ -955,7 +972,7 @@ export class BoardStore {
       return;
     }
     const delay = Math.max(0, MOVE_EMIT_THROTTLE_MS - (Date.now() - this.moveEmit.lastTs));
-    this.moveEmit.timer = setTimeout(() => this.flushMoveEmits(), delay);
+    this.moveEmit.timer = setTimeout(() => this.flushMoveEmits(false), delay);
   }
 
   /** Buffers the latest emit for a `(channel, id)` and schedules a throttled flush (see {@link emitCoalescer}). */
@@ -1098,7 +1115,10 @@ export class BoardStore {
       clearTimeout(this.moveEmit.timer);
       this.moveEmit.timer = null;
     }
-    this.flushMoveEmits();
+    // Guaranteed: this is the authoritative drop position — it must survive a network blip
+    // instead of being dropped by the transport's disconnect guard (same contract as
+    // {@link flushCoalescedEmitsNow} on the resize path).
+    this.flushMoveEmits(true);
 
     const starts = this.cardDragStart;
     this.cardDragStart = null;
@@ -1329,15 +1349,57 @@ export class BoardStore {
     this.transport.emit('card:update', { id, boardId: this.boardId, content });
   }
 
+  /**
+   * Re-creates the connectors that a card deletion took away — server-side through the
+   * `ON DELETE CASCADE` FK, locally through the `card:deleted` handler's endpoint filter — after
+   * the cards themselves have been restored. A restored card comes back with a **new** server id,
+   * so every endpoint that was itself restored is remapped through `idMap` (same
+   * old-id → new-id mechanism as {@link restoreSnapshot}); an endpoint that was never deleted
+   * keeps its id. A connector whose other endpoint is gone for good is skipped rather than
+   * emitted — the server would reject it silently anyway.
+   *
+   * @param conns   The connectors captured **before** the delete was emitted, styles included.
+   * @param idMap   old card id → new card id, for the cards restored by this same undo.
+   * @param trackId Receives the new server id of each re-created connector, by index in `conns`,
+   *                so a subsequent redo can address it.
+   */
+  private restoreCascadedConnections(
+    conns: readonly Connection[],
+    idMap: ReadonlyMap<string, string>,
+    trackId: (index: number, newId: string) => void = () => undefined,
+  ): void {
+    const cards = this.cards();
+    // A restored card is not in `cards()` yet at this point (the `card:created` handler drains the
+    // pending-history queue *before* appending), which is exactly what `idMap` accounts for.
+    const alive = (endpointId: string) => idMap.has(endpointId) || cards.some((c) => c.id === endpointId);
+    conns.forEach((cn, i) => {
+      if (!alive(cn.fromId) || !alive(cn.toId)) {
+        return;
+      }
+      const fromId = idMap.get(cn.fromId) ?? cn.fromId;
+      const toId = idMap.get(cn.toId) ?? cn.toId;
+      this.recreateConnection({ ...cn, fromId, toId }, (newId) => trackId(i, newId));
+    });
+  }
+
   deleteCard(id: string): void {
     const card = this.cards().find((c) => c.id === id);
     if (!card) {
       return;
     }
     const saved = { ...card };
+    // Captured BEFORE the delete is emitted: once the `card:deleted` broadcast lands, these are
+    // gone from local state too and there is nothing left to restore from.
+    const savedConns = this.connections()
+      .filter((c) => c.fromId === id || c.toId === id)
+      .map((c) => ({ ...c }));
     let trackedId = id;
     this.pushHistory({
       undo: () => {
+        this.pendingCardHistory.push((newCard: Card) => {
+          trackedId = newCard.id;
+          this.restoreCascadedConnections(savedConns, new Map([[saved.id, newCard.id]]));
+        });
         this.transport.emit('card:create', {
           boardId: this.boardId,
           content: saved.content,
@@ -1348,8 +1410,9 @@ export class BoardStore {
           width: saved.width,
           height: saved.height,
         });
-        this.pendingCardHistory.push((newCard: Card) => (trackedId = newCard.id));
       },
+      // Deleting the card again cascades its connectors away server-side — no explicit
+      // `connection:delete` needed.
       redo: () => this.transport.emit('card:delete', { id: trackedId, boardId: this.boardId }),
     });
     this.transport.emit('card:delete', { id, boardId: this.boardId });
@@ -1405,11 +1468,43 @@ export class BoardStore {
     if (savedCards.length === 0 && connectionIds.length === 0 && frameIds.length === 0) {
       return;
     }
-    if (savedCards.length > 0) {
-      const trackedIds = savedCards.map((c) => c.id);
+
+    const cardIds = savedCards.map((c) => c.id);
+    // Explicitly-selected connectors first, then the ones the deleted cards drag away by
+    // cascade (server FK + the `card:deleted` endpoint filter). Only the explicit ones need an
+    // outbound `connection:delete`; the cascaded ones die with their card. Both need restoring
+    // on undo — that asymmetry is the whole bug.
+    const explicitConns = connectionIds
+      .map((id) => connections.find((c) => c.id === id))
+      .filter((c): c is Connection => !!c)
+      .map((c) => ({ ...c }));
+    const cascadedConns = connections
+      .filter((c) => !connectionIds.includes(c.id) && (cardIds.includes(c.fromId) || cardIds.includes(c.toId)))
+      .map((c) => ({ ...c }));
+    const savedConns = [...explicitConns, ...cascadedConns];
+    const explicitCount = explicitConns.length;
+
+    // ONE composite history entry for cards + connectors. Previously each got its own entry, so
+    // the LIFO order replayed the connector *first* — re-creating it against the still-dead card
+    // ids (silently rejected server-side), and forcing a second Ctrl+Z for the card itself.
+    if (savedCards.length > 0 || savedConns.length > 0) {
+      const trackedIds = [...cardIds];
+      const trackedConnIds = savedConns.map((c) => c.id);
       this.pushHistory({
         undo: () => {
+          const idMap = new Map<string, string>();
+          let remaining = savedCards.length;
           savedCards.forEach((card, i) => {
+            this.pendingCardHistory.push((newCard: Card) => {
+              trackedIds[i] = newCard.id;
+              idMap.set(card.id, newCard.id);
+              remaining--;
+              if (remaining === 0) {
+                // Every card is back and remapped — only now can the connectors be re-created
+                // against ids the server will accept.
+                this.restoreCascadedConnections(savedConns, idMap, (idx, newId) => (trackedConnIds[idx] = newId));
+              }
+            });
             this.transport.emit('card:create', {
               boardId: this.boardId,
               content: card.content,
@@ -1420,17 +1515,23 @@ export class BoardStore {
               width: card.width,
               height: card.height,
             });
-            this.pendingCardHistory.push((newCard: Card) => (trackedIds[i] = newCard.id));
           });
+          if (remaining === 0) {
+            // Connectors only (no card in the selection): nothing to wait for, nothing to remap.
+            this.restoreCascadedConnections(savedConns, idMap, (idx, newId) => (trackedConnIds[idx] = newId));
+          }
         },
-        redo: () => trackedIds.forEach((id) => this.transport.emit('card:delete', { id, boardId: this.boardId })),
+        redo: () => {
+          trackedConnIds
+            .slice(0, explicitCount)
+            .forEach((id) => this.transport.emit('connection:delete', { id, boardId: this.boardId }));
+          trackedIds.forEach((id) => this.transport.emit('card:delete', { id, boardId: this.boardId }));
+        },
       });
       trackedIds.forEach((id) => this.transport.emit('card:delete', { id, boardId: this.boardId }));
+      connectionIds.forEach((id) => this.transport.emit('connection:delete', { id, boardId: this.boardId }));
     }
-    // Each connection gets its own undo/redo history entry via deleteConnection — consistent
-    // with how a lone connector delete (mouse-driven) already behaves.
-    connectionIds.forEach((id) => this.deleteConnection(id));
-    // Same per-item history convention for frames, via the existing deleteFrame.
+    // Frames keep the per-item history convention, via the existing deleteFrame.
     frameIds.forEach((id) => this.deleteFrame(id));
     this.selectedIds.set(new Set());
   }

@@ -377,6 +377,33 @@ describe('BoardStore — card:moved/card:resized sender exclusion (fix/EN08.4)',
     }
   });
 
+  /**
+   * Drag counterpart of the resize regression below. `StompBoardTransport.emit` drops every
+   * non-`guaranteed` frame while the socket is down, and `commitDragCard` used to flush the move
+   * buffer ungated *and* clear it unconditionally — so a drop landing during a network blip lost
+   * the final position for good: the wire frame was dropped and the buffered value discarded, and
+   * the board resynced everyone (including the dragger, past the grace window) to the stale
+   * server position. Real desync, not a cosmetic glitch.
+   */
+  it('keeps the final drop position pending while disconnected, then delivers it guaranteed on commit', () => {
+    vi.useFakeTimers();
+    try {
+      transport.setConnected(false);
+      const moves = () => transport.emitted.filter((e) => e.type === 'card:move');
+      store.startDragCard('card-1');
+      store.moveCard('card-1', 300, 400);
+      vi.advanceTimersByTime(50); // throttled intermediate flush fires while disconnected...
+      expect(moves()).toHaveLength(0); // ...emits nothing and keeps the latest position pending
+      store.commitDragCard(); // commit flush delivers the terminal position, guaranteed
+      const last = moves().at(-1);
+      expect(last!.data).toEqual({ id: 'card-1', boardId: BOARD_ID, posX: 300, posY: 400 });
+      expect(last!.guaranteed).toBe(true);
+    } finally {
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    }
+  });
+
   it('keeps the final resize pending while disconnected, then delivers it guaranteed on commit (U3 regression)', () => {
     vi.useFakeTimers();
     try {
@@ -934,6 +961,124 @@ describe('BoardStore — connections (US08.7.1)', () => {
     transport.trigger('connection:updated', updated);
 
     expect(store.connections()).toEqual([updated]);
+  });
+
+  // ── Undo of a card deletion must bring the connectors back too ──────────────
+  // A card delete cascades its connectors away on both sides — server-side through the
+  // `ON DELETE CASCADE` FK, locally through the `card:deleted` endpoint filter — while the undo
+  // only ever re-created the card, under a brand new server id. The connectors were simply lost.
+
+  it('undo of deleteCard restores the card AND its connector, rebound to the new card id', async () => {
+    store.init(BOARD_ID);
+    await flushInitRequests();
+    store.cards.set([makeCard('card-a'), makeCard('card-b')]);
+    store.connections.set([makeConnection('conn-1', 'card-a', 'card-b', { color: '#ff0000', arrow: 'end' })]);
+
+    store.deleteCard('card-a');
+    transport.trigger('card:deleted', 'card-a'); // server echo: the connector goes with the card
+    expect(store.connections()).toEqual([]);
+
+    store.undo();
+    // The card comes back under a NEW server id — the connector must follow that id, not the dead one.
+    transport.trigger('card:created', makeCard('card-a-new'));
+
+    const created = transport.emitted.filter((e) => e.type === 'connection:create');
+    expect(created).toHaveLength(1);
+    expect(created[0].data).toEqual({ boardId: BOARD_ID, fromId: 'card-a-new', toId: 'card-b' });
+
+    // …and its style is replayed once the server echoes the re-created connector back.
+    transport.trigger('connection:created', makeConnection('conn-2', 'card-a-new', 'card-b'));
+    const updated = transport.emitted.filter((e) => e.type === 'connection:update');
+    expect(updated).toHaveLength(1);
+    expect(updated[0].data).toMatchObject({ id: 'conn-2', color: '#ff0000', arrow: 'end' });
+  });
+
+  it('undo of deleteSelected restores, in a SINGLE undo, both the selected card and its selected connector', async () => {
+    store.init(BOARD_ID);
+    await flushInitRequests();
+    store.cards.set([makeCard('card-a'), makeCard('card-b')]);
+    store.connections.set([makeConnection('conn-1', 'card-a', 'card-b')]);
+    store.selectCards(new Set(['card-a', 'conn-1']));
+
+    store.deleteSelected();
+    transport.trigger('card:deleted', 'card-a');
+    transport.trigger('connection:deleted', 'conn-1');
+
+    // One composite entry, not one per item: a single Ctrl+Z must restore everything. Before the
+    // fix the LIFO order replayed the connector first, against still-dead card ids (rejected
+    // server-side), and a second Ctrl+Z was needed just to get the card back.
+    store.undo();
+    expect(store.canUndo()).toBe(false);
+    transport.trigger('card:created', makeCard('card-a-new'));
+
+    const created = transport.emitted.filter((e) => e.type === 'connection:create');
+    expect(created).toHaveLength(1);
+    expect(created[0].data).toEqual({ boardId: BOARD_ID, fromId: 'card-a-new', toId: 'card-b' });
+  });
+
+  it('undo of deleteSelected restores a connector the deleted card only took away by cascade', async () => {
+    store.init(BOARD_ID);
+    await flushInitRequests();
+    store.cards.set([makeCard('card-a'), makeCard('card-b')]);
+    store.connections.set([makeConnection('conn-1', 'card-a', 'card-b')]);
+    store.selectCards(new Set(['card-a'])); // the connector is NOT selected — it dies by cascade
+
+    store.deleteSelected();
+    // Nothing explicit is sent for a cascaded connector: the server FK removes it.
+    expect(transport.emitted.some((e) => e.type === 'connection:delete')).toBe(false);
+    transport.trigger('card:deleted', 'card-a');
+    expect(store.connections()).toEqual([]);
+
+    store.undo();
+    transport.trigger('card:created', makeCard('card-a-new'));
+
+    const created = transport.emitted.filter((e) => e.type === 'connection:create');
+    expect(created).toHaveLength(1);
+    expect(created[0].data).toEqual({ boardId: BOARD_ID, fromId: 'card-a-new', toId: 'card-b' });
+  });
+
+  it('undo of a multi-card deleteSelected waits for every card before re-creating the connector between them', async () => {
+    store.init(BOARD_ID);
+    await flushInitRequests();
+    store.cards.set([makeCard('card-a'), makeCard('card-b')]);
+    store.connections.set([makeConnection('conn-1', 'card-a', 'card-b')]);
+    store.selectCards(new Set(['card-a', 'card-b']));
+
+    store.deleteSelected();
+    transport.trigger('card:deleted', 'card-a');
+    transport.trigger('card:deleted', 'card-b');
+
+    store.undo();
+    // First card back: emitting now would bind the connector to a card id that does not exist yet.
+    transport.trigger('card:created', makeCard('card-a-new'));
+    expect(transport.emitted.some((e) => e.type === 'connection:create')).toBe(false);
+
+    transport.trigger('card:created', makeCard('card-b-new'));
+    const created = transport.emitted.filter((e) => e.type === 'connection:create');
+    expect(created).toHaveLength(1);
+    expect(created[0].data).toEqual({ boardId: BOARD_ID, fromId: 'card-a-new', toId: 'card-b-new' });
+  });
+
+  it('redo after that undo re-deletes the restored card by its new id', async () => {
+    store.init(BOARD_ID);
+    await flushInitRequests();
+    store.cards.set([makeCard('card-a'), makeCard('card-b')]);
+    store.connections.set([makeConnection('conn-1', 'card-a', 'card-b')]);
+    store.selectCards(new Set(['card-a', 'conn-1']));
+
+    store.deleteSelected();
+    transport.trigger('card:deleted', 'card-a');
+    transport.trigger('connection:deleted', 'conn-1');
+    store.undo();
+    transport.trigger('card:created', makeCard('card-a-new'));
+    transport.trigger('connection:created', makeConnection('conn-2', 'card-a-new', 'card-b'));
+
+    store.redo();
+
+    const deletes = transport.emitted.filter((e) => e.type === 'card:delete');
+    expect(deletes.at(-1)!.data).toEqual({ id: 'card-a-new', boardId: BOARD_ID });
+    const connDeletes = transport.emitted.filter((e) => e.type === 'connection:delete');
+    expect(connDeletes.at(-1)!.data).toEqual({ id: 'conn-2', boardId: BOARD_ID });
   });
 
   it('updateConnection supports undo/redo of a restyle', async () => {

@@ -358,7 +358,21 @@ export class StructuredCanvasComponent {
     // buttons (z-order, magnet, delete) and title live inside it — starting a drag here captures
     // the pointer on the surface, so the `click`/`dblclick` never reaches the control and it looks
     // dead. Bail out before any gesture so the control gets its event.
-    if (target.closest('button, input, textarea, select, [contenteditable="true"]')) {
+    const controlEl = target.closest<HTMLElement>('button, input, textarea, select, [contenteditable="true"]');
+    // …with one exception: a card's own inline text editor. While a TEXT/LABEL card is being
+    // edited its `.wb-card__edit` textarea covers 100% of the card and the handles are hidden, so
+    // there was no grabbable pixel left: the bail-out above swallowed the `pointerdown`, the
+    // `drag-card` gesture was never armed, `onPointerMove` fell through to `default:` and
+    // `onPointerUp` had nothing to commit — the card moved neither locally nor for the other
+    // participants. Only `textarea`/`contenteditable` *inside a card* is let through; `button`,
+    // `input` and `select` still bail out, which is what keeps the frame rename input
+    // (`[data-frame-title]` → `<input>`), the card vote buttons and every panel/toolbar control
+    // receiving their own `click`/`dblclick`.
+    const cardTextEditor =
+      controlEl && (controlEl.tagName === 'TEXTAREA' || controlEl.getAttribute('contenteditable') === 'true') && controlEl.closest('[data-card-id]')
+        ? controlEl
+        : null;
+    if (controlEl && !cardTextEditor) {
       return;
     }
     // A connector owns its own pointer story: selection on `click`, label edit on `dblclick`. No
@@ -446,6 +460,13 @@ export class StructuredCanvasComponent {
       if (!card) {
         return;
       }
+      // Miro/FigJam behaviour: grabbing a card that is being edited commits the text first, then
+      // drags. The blur is explicit rather than left to the native focus change — `pointerdown`
+      // fires before `mousedown`, and `setPointerCapture` (just above) retargets the compat mouse
+      // events to the surface, so whether the textarea loses focus on its own is not something to
+      // depend on. `board-card` commits on `(blur)` and `commitEdit()` no-ops once `editing` is
+      // false, so a native blur firing first costs nothing.
+      cardTextEditor?.blur();
       this.selectItem(id, event.shiftKey);
       if (!readOnly && !card.locked) {
         this.store.startDragCard(id);
