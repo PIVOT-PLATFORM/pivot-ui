@@ -21,6 +21,7 @@ const FR_TRANSLATIONS = {
         retry: 'Réessayer',
       },
       previewAlt: 'Aperçu du modèle {{name}}',
+      blank: { name: 'Aucun template', description: 'Démarrer avec un tableau vierge.' },
       brainstorm: { name: 'Brainstorm', description: 'Idées libres sur des post-its.' },
       retrospective: { name: 'Rétrospective', description: 'Ce qui a bien fonctionné, ce qui peut s\'améliorer.' },
       userStoryMap: { name: 'User Story Map', description: 'Parcours utilisateur et priorisation.' },
@@ -74,61 +75,62 @@ describe('TemplateGalleryComponent', () => {
     httpMock.expectOne(BASE).flush(makeTemplates());
   });
 
-  it('renders cards with name, description and descriptive alt after successful load', () => {
-    httpMock.expectOne(BASE).flush(makeTemplates());
-    fixture.detectChanges();
-
-    const el: HTMLElement = fixture.nativeElement;
-    const cards = el.querySelectorAll('.template-gallery__card');
-    expect(cards.length).toBe(3);
-    expect(el.textContent).toContain('Brainstorm');
-    expect(el.textContent).toContain('Rétrospective');
-    expect(el.textContent).toContain('User Story Map');
-
-    const brainstormImg = Array.from(el.querySelectorAll<HTMLImageElement>('.template-gallery__preview'))
-      .find(img => img.alt.includes('Brainstorm'));
-    expect(brainstormImg).toBeTruthy();
-    expect(brainstormImg?.alt).toBe('Aperçu du modèle Brainstorm');
-  });
-
-  it('selects "Brainstorm" by default and marks it aria-selected', () => {
+  it('renders cards with name, description and descriptive alt after successful load, with the blank card first', () => {
     httpMock.expectOne(BASE).flush(makeTemplates());
     fixture.detectChanges();
 
     const el: HTMLElement = fixture.nativeElement;
     const cards = Array.from(el.querySelectorAll<HTMLButtonElement>('.template-gallery__card'));
-    const brainstormCard = cards.find(c => c.textContent?.includes('Brainstorm'));
-    expect(brainstormCard?.getAttribute('aria-selected')).toBe('true');
-    expect(brainstormCard?.tabIndex).toBe(0);
+    expect(cards.length).toBe(4);
+    expect(cards[0].textContent).toContain('Aucun template');
+    expect(el.textContent).toContain('Brainstorm');
+    expect(el.textContent).toContain('Rétrospective');
+    expect(el.textContent).toContain('User Story Map');
 
-    const others = cards.filter(c => c !== brainstormCard);
+    const brainstormImg = Array.from(el.querySelectorAll<HTMLImageElement>('.template-gallery__preview'))
+      .find(img => img.alt?.includes('Brainstorm'));
+    expect(brainstormImg).toBeTruthy();
+    expect(brainstormImg?.alt).toBe('Aperçu du modèle Brainstorm');
+  });
+
+  it('selects the blank card by default and marks it aria-selected', () => {
+    httpMock.expectOne(BASE).flush(makeTemplates());
+    fixture.detectChanges();
+
+    const el: HTMLElement = fixture.nativeElement;
+    const cards = Array.from(el.querySelectorAll<HTMLButtonElement>('.template-gallery__card'));
+    const blankCard = cards.find(c => c.textContent?.includes('Aucun template'));
+    expect(blankCard?.getAttribute('aria-selected')).toBe('true');
+    expect(blankCard?.tabIndex).toBe(0);
+
+    const others = cards.filter(c => c !== blankCard);
     others.forEach(c => {
       expect(c.getAttribute('aria-selected')).toBe('false');
       expect(c.tabIndex).toBe(-1);
     });
   });
 
-  it('falls back to the first template when Brainstorm is absent from the list', () => {
+  it('keeps the blank card selected regardless of the returned template list', () => {
     const templates = makeTemplates().filter(t => t.code !== 'BRAINSTORM');
     httpMock.expectOne(BASE).flush(templates);
     fixture.detectChanges();
 
     const el: HTMLElement = fixture.nativeElement;
-    const firstCard = el.querySelector('.template-gallery__card') as HTMLButtonElement;
-    expect(firstCard.getAttribute('aria-selected')).toBe('true');
+    const blankCard = el.querySelector('.template-gallery__card--blank') as HTMLButtonElement;
+    expect(blankCard.getAttribute('aria-selected')).toBe('true');
   });
 
-  it('emits selectionChange with the default template id once loaded', () => {
+  it('emits selectionChange with null (blank) once loaded', () => {
     const emitted: (string | null)[] = [];
     fixture.componentInstance.selectionChange.subscribe(id => emitted.push(id));
 
     httpMock.expectOne(BASE).flush(makeTemplates());
     fixture.detectChanges();
 
-    expect(emitted).toEqual(['tpl-brainstorm']);
+    expect(emitted).toEqual([null]);
   });
 
-  it('clicking a card selects it and emits its id', () => {
+  it('clicking a card selects it, emits its id and clears the blank selection', () => {
     const emitted: (string | null)[] = [];
     httpMock.expectOne(BASE).flush(makeTemplates());
     fixture.detectChanges();
@@ -137,11 +139,34 @@ describe('TemplateGalleryComponent', () => {
     const el: HTMLElement = fixture.nativeElement;
     const cards = Array.from(el.querySelectorAll<HTMLButtonElement>('.template-gallery__card'));
     const retroCard = cards.find(c => c.textContent?.includes('Rétrospective'))!;
+    const blankCard = cards.find(c => c.classList.contains('template-gallery__card--blank'))!;
     retroCard.click();
     fixture.detectChanges();
 
     expect(emitted).toEqual(['tpl-retro']);
     expect(retroCard.getAttribute('aria-selected')).toBe('true');
+    expect(blankCard.getAttribute('aria-selected')).toBe('false');
+  });
+
+  it('clicking the blank card after selecting a template re-emits null', () => {
+    const emitted: (string | null)[] = [];
+    httpMock.expectOne(BASE).flush(makeTemplates());
+    fixture.detectChanges();
+
+    const el: HTMLElement = fixture.nativeElement;
+    const cards = Array.from(el.querySelectorAll<HTMLButtonElement>('.template-gallery__card'));
+    const retroCard = cards.find(c => c.textContent?.includes('Rétrospective'))!;
+    retroCard.click();
+    fixture.detectChanges();
+
+    fixture.componentInstance.selectionChange.subscribe(id => emitted.push(id));
+    const blankCard = el.querySelector('.template-gallery__card--blank') as HTMLButtonElement;
+    blankCard.click();
+    fixture.detectChanges();
+
+    expect(emitted).toEqual([null]);
+    expect(blankCard.getAttribute('aria-selected')).toBe('true');
+    expect(retroCard.getAttribute('aria-selected')).toBe('false');
   });
 
   it('ArrowRight moves DOM focus to the next card without changing selection', () => {
@@ -195,12 +220,13 @@ describe('TemplateGalleryComponent', () => {
 
     const el: HTMLElement = fixture.nativeElement;
     const cards = Array.from(el.querySelectorAll<HTMLButtonElement>('.template-gallery__card'));
-    // cards[0] is the "Rétrospective" card (tpl-retro) — see makeTemplates() ordering.
-    cards[0].dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true }));
+    // cards[0] is the blank card, cards[1] is the "Rétrospective" card (tpl-retro) — see
+    // makeTemplates() ordering and the unified keyboard index space (0 = blank, i + 1 = template i).
+    cards[1].dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true }));
     fixture.detectChanges();
 
     expect(emitted).toEqual(['tpl-retro']);
-    expect(cards[0].getAttribute('aria-selected')).toBe('true');
+    expect(cards[1].getAttribute('aria-selected')).toBe('true');
   });
 
   it('Home key moves focus to the first card, End key to the last', () => {
@@ -235,7 +261,7 @@ describe('TemplateGalleryComponent', () => {
     expect(emitted).toEqual([]);
   });
 
-  it('falls back to blank selection when the backend returns an empty template list', () => {
+  it('falls back to blank selection when the backend returns an empty template list, keeping the blank card visible', () => {
     const emitted: (string | null)[] = [];
     fixture.componentInstance.selectionChange.subscribe(id => emitted.push(id));
 
@@ -243,7 +269,9 @@ describe('TemplateGalleryComponent', () => {
     fixture.detectChanges();
 
     expect(emitted).toEqual([null]);
-    expect(fixture.nativeElement.querySelectorAll('.template-gallery__card').length).toBe(0);
+    const cards = fixture.nativeElement.querySelectorAll('.template-gallery__card');
+    expect(cards.length).toBe(1);
+    expect(cards[0].textContent).toContain('Aucun template');
   });
 
   it('shows error state with role=alert and a retry button on HTTP failure', () => {
@@ -276,6 +304,6 @@ describe('TemplateGalleryComponent', () => {
     httpMock.expectOne(BASE).flush(makeTemplates());
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelectorAll('.template-gallery__card').length).toBe(3);
+    expect(fixture.nativeElement.querySelectorAll('.template-gallery__card').length).toBe(4);
   });
 });

@@ -188,9 +188,9 @@ describe('BoardListComponent', () => {
 
   /**
    * Opens the "Nouveau tableau" modal via the given trigger selector and flushes the
-   * template gallery's GET request it fires on init (default: 3 templates, "Brainstorm"
-   * selected by default). Pass `templates: []` and rely on the caller to flush an error
-   * response instead when testing the gallery's error state.
+   * template gallery's GET request it fires on init (default: 3 templates, the blank
+   * "Aucun template" card selected by default). Pass `templates: []` and rely on the
+   * caller to flush an error response instead when testing the gallery's error state.
    */
   function openCreateModal(
     triggerSelector = '.board-list__create-btn',
@@ -320,8 +320,9 @@ describe('BoardListComponent', () => {
 
     const createReq = httpMock.expectOne(r => r.url === BASE && r.method === 'POST');
     expect(createReq.request.body).toEqual({ title: 'Nouveau test' });
-    // "Brainstorm" is selected by default once the gallery loads (see openCreateModal()).
-    expect(createReq.request.params.get('templateId')).toBe('tpl-brainstorm');
+    // The blank ("Aucun template") card is selected by default once the gallery loads
+    // (see openCreateModal()) — no templateId param is sent.
+    expect(createReq.request.params.has('templateId')).toBe(false);
     createReq.flush(makeBoard({ id: 'new-id', title: 'Nouveau test' }));
     fixture.detectChanges();
 

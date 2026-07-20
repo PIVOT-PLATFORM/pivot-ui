@@ -11,19 +11,18 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { TemplateService } from '../../core/whiteboard/template.service';
 import { WhiteboardTemplate } from '../../core/whiteboard/board.model';
 
-/** Template whose code is pre-selected by default when the gallery finishes loading. */
-const DEFAULT_TEMPLATE_CODE: WhiteboardTemplate['code'] = 'BRAINSTORM';
-
 /**
  * Template gallery embedded in the "Nouveau tableau" modal (US08.4.1).
  *
- * Fetches the global template catalog (`GET /whiteboard/templates`), renders it as a
- * single-select `listbox` of cards (name, visual preview, description), and emits the
- * selected template id — `null` when no selection is possible (initial/erroring state),
- * meaning the parent falls back to blank ("Vierge") board creation.
+ * Fetches the global template catalog (`GET /whiteboard/templates`) and renders it as a
+ * single-select `listbox` of cards (name, visual preview, description) preceded by an
+ * explicit "Aucun template" (blank) card. The blank card is the default selection once
+ * loading settles — the user must actively pick a template to move away from it — and
+ * emits `null`, meaning the parent falls back to blank ("Vierge") board creation.
  *
  * Keyboard support: arrow keys move focus between cards (roving tabindex), Enter/Space
- * select the focused card (native `<button>` activation).
+ * select the focused card (native `<button>` activation). The blank card occupies index
+ * `0` of the unified keyboard index space; template cards occupy `i + 1`.
  */
 @Component({
   selector: 'app-template-gallery',
@@ -59,16 +58,21 @@ export class TemplateGalleryComponent implements OnInit {
     this.selectionChange.emit(templateId);
   }
 
+  /** Selects the "Aucun template" card — emits `null` for a blank ("Vierge") board. */
+  protected selectBlank(): void {
+    this.selectedId.set(null);
+    this.selectionChange.emit(null);
+  }
+
   protected onKeydown(event: KeyboardEvent, index: number): void {
-    const templates = this.templates();
-    const count = templates.length;
-    if (count === 0) return;
+    // Unified index space: 0 = blank card, i + 1 = templates()[i].
+    const count = this.templates().length + 1;
 
     if (event.key === 'Enter' || event.key === ' ') {
       // Explicit handling (rather than relying on native button activation) keeps
       // selection behavior deterministic across browsers and test environments.
       event.preventDefault();
-      this.select(templates[index].id);
+      this.selectByIndex(index);
       return;
     }
 
@@ -95,10 +99,16 @@ export class TemplateGalleryComponent implements OnInit {
     this.focusCardAt(nextIndex);
   }
 
-  protected tabIndexFor(templateId: string): number {
-    const selected = this.selectedId();
-    const reference = selected ?? this.templates()[0]?.id;
-    return reference === templateId ? 0 : -1;
+  protected optionTabIndex(key: string | null): number {
+    return this.selectedId() === key ? 0 : -1;
+  }
+
+  private selectByIndex(index: number): void {
+    if (index === 0) {
+      this.selectBlank();
+      return;
+    }
+    this.select(this.templates()[index - 1].id);
   }
 
   protected templateName(code: WhiteboardTemplate['code']): string {
@@ -121,25 +131,14 @@ export class TemplateGalleryComponent implements OnInit {
       next: (templates) => {
         this.templates.set(templates);
         this.status.set('loaded');
-        const defaultTemplate =
-          templates.find((t) => t.code === DEFAULT_TEMPLATE_CODE) ?? templates[0] ?? null;
-        if (defaultTemplate) {
-          this.select(defaultTemplate.id);
-        } else {
-          this.fallbackToBlank();
-        }
+        // Blank ("Aucun template") is the default selection — the user opts into a template.
+        this.selectBlank();
       },
       error: () => {
         this.status.set('error');
-        this.fallbackToBlank();
+        this.selectBlank();
       },
     });
-  }
-
-  /** No usable template — notify the parent so it falls back to a blank board. */
-  private fallbackToBlank(): void {
-    this.selectedId.set(null);
-    this.selectionChange.emit(null);
   }
 
   private focusCardAt(index: number): void {
