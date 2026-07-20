@@ -1796,3 +1796,214 @@ describe('StructuredCanvasComponent — line tool', () => {
     expect(component['linePreview']()).toBeNull();
   });
 });
+
+/**
+ * A card being edited is fully covered by its `.wb-card__edit` textarea (the handles are hidden
+ * while editing), so the "a control is not a canvas gesture" bail-out in `onPointerDown` left no
+ * grabbable pixel at all: the `drag-card` gesture was never armed and the card could not be moved,
+ * locally or for the other participants. The bug looked intermittent only because `pointerdown`
+ * fires before `mousedown` — the first gesture was swallowed but ended the edit, so the second
+ * one worked.
+ *
+ * The same bail-out is what keeps buttons and the frame rename input clickable, so both halves are
+ * pinned here.
+ */
+describe('StructuredCanvasComponent — pointer-down on a card being edited (drag not swallowed)', () => {
+  let fixture: ComponentFixture<StructuredCanvasComponent>;
+  let component: StructuredCanvasComponent;
+  let moveCard: ReturnType<typeof vi.fn>;
+  let startDragCard: ReturnType<typeof vi.fn>;
+  let startDragFrame: ReturnType<typeof vi.fn>;
+  let selectCards: ReturnType<typeof vi.fn>;
+
+  beforeEach(async () => {
+    moveCard = vi.fn();
+    startDragCard = vi.fn();
+    startDragFrame = vi.fn();
+    selectCards = vi.fn();
+    const storeStub = {
+      isReadonly: () => false,
+      frames: () => [{ id: 'frame-1', posX: 0, posY: 0, width: 400, height: 300, active: false }],
+      cards: () => [{ id: 'card-1', posX: 100, posY: 100, width: 200, height: 120, type: 'TEXT', content: '' }],
+      connections: () => [],
+      fields: () => [],
+      selectedIds: () => new Set<string>(),
+      remoteEditors: () => new Map<string, { name: string }>(),
+      autoEditCardId: () => null,
+      activeVoteSession: () => null,
+      voteTallyByCard: () => new Map<string, number>(),
+      myVoteTallyByCard: () => new Map<string, number>(),
+      voteBudgetRemaining: () => null,
+      emitCursor: vi.fn(),
+      selectCards,
+      startDragCard,
+      startDragFrame,
+      moveCard,
+      castVote: vi.fn(),
+      uncastVote: vi.fn(),
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [
+        StructuredCanvasComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { fr: FR_TRANSLATIONS },
+          translocoConfig: { defaultLang: 'fr', availableLangs: ['fr'] },
+          preloadLangs: true,
+        }),
+      ],
+      providers: [{ provide: BoardStore, useValue: storeStub }],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(StructuredCanvasComponent);
+    fixture.detectChanges();
+    component = fixture.componentInstance;
+  });
+
+  /** The surface, with a 1:1 unscrolled viewport so canvas coordinates equal client coordinates. */
+  function surface(): HTMLElement {
+    const el = fixture.nativeElement.querySelector('.wb-surface') as HTMLElement;
+    el.getBoundingClientRect = vi
+      .fn()
+      .mockReturnValue({ left: 0, top: 0, width: 800, height: 600, right: 800, bottom: 600 }) as unknown as typeof el.getBoundingClientRect;
+    return el;
+  }
+
+  /** A card in edit mode: the textarea covers the whole card, so it is what the pointer lands on. */
+  function editingCard(): { cardEl: HTMLElement; textarea: HTMLTextAreaElement } {
+    const cardEl = document.createElement('div');
+    cardEl.setAttribute('data-card-id', 'card-1');
+    const textarea = document.createElement('textarea');
+    textarea.className = 'wb-card__edit';
+    cardEl.appendChild(textarea);
+    // Attached to the document so `focus()`/`blur()` behave like the real thing.
+    document.body.appendChild(cardEl);
+    return { cardEl, textarea };
+  }
+
+  afterEach(() => {
+    document.body.querySelectorAll('[data-card-id]').forEach((el) => el.remove());
+  });
+
+  it('arms the drag-card gesture and moves the card when the pointer lands on its inline editor', () => {
+    const surfaceEl = surface();
+    const capture = vi.fn();
+    (surfaceEl as unknown as { setPointerCapture: (id: number) => void }).setPointerCapture = capture;
+    const { textarea } = editingCard();
+
+    component['onPointerDown']({
+      button: 0,
+      target: textarea,
+      currentTarget: surfaceEl,
+      clientX: 150,
+      clientY: 150,
+      pointerId: 1,
+      shiftKey: false,
+    } as unknown as PointerEvent);
+
+    expect(capture).toHaveBeenCalledWith(1);
+    expect(selectCards).toHaveBeenCalledWith(new Set(['card-1']));
+    expect(startDragCard).toHaveBeenCalledWith('card-1');
+    expect(component['gesture']).toMatchObject({ kind: 'drag-card', id: 'card-1' });
+
+    // …and the move actually reaches the store, which is what syncs it to the other participants.
+    component['onPointerMove']({ clientX: 190, clientY: 175, pointerId: 1 } as unknown as PointerEvent);
+
+    expect(moveCard).toHaveBeenCalledWith('card-1', 140, 125);
+  });
+
+  it('commits the in-progress edit before dragging, by blurring the editor', () => {
+    const surfaceEl = surface();
+    (surfaceEl as unknown as { setPointerCapture: (id: number) => void }).setPointerCapture = vi.fn();
+    const { textarea } = editingCard();
+    textarea.focus();
+    const blurred = vi.fn();
+    textarea.addEventListener('blur', blurred);
+
+    component['onPointerDown']({
+      button: 0,
+      target: textarea,
+      currentTarget: surfaceEl,
+      clientX: 150,
+      clientY: 150,
+      pointerId: 1,
+      shiftKey: false,
+    } as unknown as PointerEvent);
+
+    // `board-card` binds `(blur)="commitEdit()"` — the blur is the commit.
+    expect(blurred).toHaveBeenCalledTimes(1);
+    expect(component['gesture']).toMatchObject({ kind: 'drag-card', id: 'card-1' });
+  });
+
+  it('still swallows the pointer-down on a button, so its click is not stolen by a gesture', () => {
+    const surfaceEl = surface();
+    const capture = vi.fn();
+    (surfaceEl as unknown as { setPointerCapture: (id: number) => void }).setPointerCapture = capture;
+    const headerEl = fixture.nativeElement.querySelector('[data-frame-drag]') as HTMLElement;
+    const button = document.createElement('button');
+    headerEl.appendChild(button);
+
+    component['onPointerDown']({
+      button: 0,
+      target: button,
+      currentTarget: surfaceEl,
+      clientX: 40,
+      clientY: 10,
+      pointerId: 1,
+      shiftKey: false,
+    } as unknown as PointerEvent);
+
+    expect(capture).not.toHaveBeenCalled();
+    expect(startDragFrame).not.toHaveBeenCalled();
+    expect(selectCards).not.toHaveBeenCalled();
+    expect(component['gesture']).toEqual({ kind: 'none' });
+  });
+
+  it('still swallows the pointer-down on the frame rename input, so the frame stays renamable', () => {
+    const surfaceEl = surface();
+    const capture = vi.fn();
+    (surfaceEl as unknown as { setPointerCapture: (id: number) => void }).setPointerCapture = capture;
+    const headerEl = fixture.nativeElement.querySelector('[data-frame-drag]') as HTMLElement;
+    // Frame rename mode replaces the `[data-frame-title]` span with this input (frame-item).
+    const input = document.createElement('input');
+    input.className = 'wb-frame__title-edit';
+    headerEl.appendChild(input);
+
+    component['onPointerDown']({
+      button: 0,
+      target: input,
+      currentTarget: surfaceEl,
+      clientX: 40,
+      clientY: 10,
+      pointerId: 1,
+      shiftKey: false,
+    } as unknown as PointerEvent);
+
+    expect(capture).not.toHaveBeenCalled();
+    expect(startDragFrame).not.toHaveBeenCalled();
+    expect(component['gesture']).toEqual({ kind: 'none' });
+  });
+
+  /** A textarea that is *not* inside a card (a panel, a modal) keeps its original protection. */
+  it('still swallows the pointer-down on a textarea that does not belong to a card', () => {
+    const surfaceEl = surface();
+    const capture = vi.fn();
+    (surfaceEl as unknown as { setPointerCapture: (id: number) => void }).setPointerCapture = capture;
+    const panelTextarea = document.createElement('textarea');
+    document.body.appendChild(panelTextarea);
+
+    component['onPointerDown']({
+      button: 0,
+      target: panelTextarea,
+      currentTarget: surfaceEl,
+      clientX: 40,
+      clientY: 40,
+      pointerId: 1,
+      shiftKey: false,
+    } as unknown as PointerEvent);
+
+    panelTextarea.remove();
+    expect(capture).not.toHaveBeenCalled();
+    expect(component['gesture']).toEqual({ kind: 'none' });
+  });
+});

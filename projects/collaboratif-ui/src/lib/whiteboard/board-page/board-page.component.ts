@@ -456,7 +456,27 @@ export class BoardPageComponent implements OnInit, OnDestroy {
     this.store.updateConnection(connectionId, patch);
   }
 
-  /** Board-level keyboard shortcuts (ignored while typing in an input/textarea). */
+  /**
+   * Board-level keyboard shortcuts — all suppressed while the caret sits in an
+   * `<input>`/`<textarea>`/`contenteditable`, **including undo/redo**.
+   *
+   * <p><strong>Deliberate divergence from US08.11.5, decided by the maintainer (2026-07-20).</strong>
+   * The AC reads "l'undo/redo canvas s'exécute quand même (contrairement à la plupart des autres
+   * raccourcis qui sont ignorés en champ éditable)", and a first implementation honoured it. The
+   * maintainer overruled it: while typing in a post-it, `Ctrl+Z` must stay the browser's **native
+   * text undo**, because correcting a typo is the far more frequent intent and it is the most
+   * ingrained reflex. Routing the keystroke to the board there would silently cost the user their
+   * text-undo.
+   *
+   * <p>Bailing out early (no {@code preventDefault}) is what hands the event back to the browser,
+   * so the native undo runs. Board history remains reachable the moment focus leaves the editor.
+   *
+   * <p>US08.11.5 must be amended to record this decision — left as-is, the AC still claims the
+   * opposite and the next reader would "fix" it straight back.
+   *
+   * <p>Every other shortcut is suppressed while typing for the same reason as before: `v` would
+   * swap the active tool mid-sentence, `Delete` would erase the card instead of a character.
+   */
   @HostListener('document:keydown', ['$event'])
   protected onKeydown(event: KeyboardEvent): void {
     const el = event.target as HTMLElement;

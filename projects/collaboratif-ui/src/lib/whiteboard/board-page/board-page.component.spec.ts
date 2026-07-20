@@ -938,3 +938,191 @@ describe('BoardPageComponent — contextual tool hint', () => {
     expect(getComputedStyle(hint).pointerEvents).toBe('none');
   });
 });
+
+/**
+ * US08.11.5 — undo/redo must survive an editable focus, every other shortcut must not.
+ *
+ * AC: « Given le focus dans un `<input>`/`<textarea>`, when j'appuie `Ctrl/Cmd+Z` (undo) ou
+ * `Ctrl/Cmd+Y` / `Ctrl/Cmd+Shift+Z` (redo), then l'undo/redo canvas **s'exécute quand même**
+ * (contrairement à la plupart des autres raccourcis qui sont ignorés en champ éditable) ».
+ */
+/**
+ * Maintainer decision (2026-07-20), overriding US08.11.5's AC: while the caret is inside a card's
+ * editor, `Ctrl+Z` stays the browser's **native text undo**. Correcting a typo is the far more
+ * frequent intent and the most ingrained reflex; routing the keystroke to the board there would
+ * silently take that away. Board history is reachable again as soon as focus leaves the editor.
+ * The US must be amended to record this — the AC currently states the opposite.
+ */
+describe('BoardPageComponent — shortcuts while the caret is in an editable field', () => {
+  interface ShortcutApi {
+    onKeydown(event: KeyboardEvent): void;
+    tool: { (): ToolMode; set(v: ToolMode): void };
+  }
+
+  function create() {
+    const fixture = TestBed.createComponent(BoardPageComponent);
+    const store = fixture.debugElement.injector.get(BoardStore);
+    return { cmp: fixture.componentInstance as unknown as ShortcutApi, store };
+  }
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [BoardPageComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        { provide: COLLABORATIF_API_URL, useValue: TEST_API_URL },
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { paramMap: new Map([['boardId', 'board-1']]) } },
+        },
+      ],
+    }).overrideComponent(BoardPageComponent, {
+      set: { providers: [BoardStore, { provide: BoardTransport, useClass: NoopKeyTransport }] },
+    });
+  });
+
+  afterEach(() => TestBed.resetTestingModule());
+
+  /** A keydown whose target is a card's edit `<textarea>` — the real-world case: the caret stays
+   *  in the post-it after typing, and `Ctrl+Z` used to be swallowed wholesale. */
+  function keyInTextarea(k: string, init: KeyboardEventInit = {}): KeyboardEvent {
+    const event = new KeyboardEvent('keydown', { key: k, ...init });
+    Object.defineProperty(event, 'target', { value: document.createElement('textarea') });
+    return event;
+  }
+
+  /** Same, targeting a `contentEditable` host — the third branch of the editable-focus guard. */
+  function keyInContentEditable(k: string, init: KeyboardEventInit = {}): KeyboardEvent {
+    const host = document.createElement('div');
+    host.contentEditable = 'true';
+    Object.defineProperty(host, 'isContentEditable', { value: true });
+    const event = new KeyboardEvent('keydown', { key: k, ...init });
+    Object.defineProperty(event, 'target', { value: host });
+    return event;
+  }
+
+  it('Ctrl+Z in a textarea leaves the native text undo alone (no board undo)', () => {
+    const { cmp, store } = create();
+    const undo = vi.spyOn(store, 'undo');
+
+    cmp.onKeydown(keyInTextarea('z', { ctrlKey: true }));
+
+    expect(undo).not.toHaveBeenCalled();
+  });
+
+  it('Cmd+Z in a textarea leaves the native text undo alone (macOS)', () => {
+    const { cmp, store } = create();
+    const undo = vi.spyOn(store, 'undo');
+
+    cmp.onKeydown(keyInTextarea('z', { metaKey: true }));
+
+    expect(undo).not.toHaveBeenCalled();
+  });
+
+  it('Ctrl+Shift+Z in a textarea does not trigger the board redo', () => {
+    const { cmp, store } = create();
+    const redo = vi.spyOn(store, 'redo');
+
+    cmp.onKeydown(keyInTextarea('z', { ctrlKey: true, shiftKey: true }));
+
+    expect(redo).not.toHaveBeenCalled();
+  });
+
+  it('Ctrl+Y in a textarea does not trigger the board redo', () => {
+    const { cmp, store } = create();
+    const redo = vi.spyOn(store, 'redo');
+
+    cmp.onKeydown(keyInTextarea('y', { ctrlKey: true }));
+
+    expect(redo).not.toHaveBeenCalled();
+  });
+
+  it('Ctrl+Z in a contentEditable host leaves the native text undo alone', () => {
+    const { cmp, store } = create();
+    const undo = vi.spyOn(store, 'undo');
+
+    cmp.onKeydown(keyInContentEditable('z', { ctrlKey: true }));
+
+    expect(undo).not.toHaveBeenCalled();
+  });
+
+  /**
+   * The handler must NOT call `preventDefault()` here — that is precisely what hands the event
+   * back to the browser so the native text undo runs. Asserting it explicitly: a future change
+   * that starts routing this keystroke to the board would silently cost the user their
+   * correct-a-typo reflex, which is the behaviour the maintainer chose to protect.
+   */
+  it('does not preventDefault, so the browser performs its native text undo', () => {
+    const { cmp, store } = create();
+    vi.spyOn(store, 'undo');
+    const event = keyInTextarea('z', { ctrlKey: true });
+    const preventDefault = vi.spyOn(event, 'preventDefault');
+
+    cmp.onKeydown(event);
+
+    expect(preventDefault).not.toHaveBeenCalled();
+  });
+
+  it('board undo still works once the focus has left the editor', () => {
+    const { cmp, store } = create();
+    const undo = vi.spyOn(store, 'undo');
+    const event = new KeyboardEvent('keydown', { key: 'z', ctrlKey: true });
+    Object.defineProperty(event, 'target', { value: document.createElement('div') });
+
+    cmp.onKeydown(event);
+
+    expect(undo).toHaveBeenCalledTimes(1);
+  });
+
+  // --- Non-regression: everything else stays suppressed while typing ---------------------
+
+  it('a bare tool letter typed in a textarea does not switch the tool', () => {
+    const { cmp } = create();
+    cmp.tool.set('select');
+
+    cmp.onKeydown(keyInTextarea('v'));
+    cmp.onKeydown(keyInTextarea('n'));
+
+    expect(cmp.tool()).toBe('select');
+  });
+
+  it('Delete in a textarea does not delete the selection', () => {
+    const { cmp, store } = create();
+    const deleteSelected = vi.spyOn(store, 'deleteSelected');
+    store.selectCards(new Set(['card-1']));
+
+    cmp.onKeydown(keyInTextarea('Delete'));
+    cmp.onKeydown(keyInTextarea('Backspace'));
+
+    expect(deleteSelected).not.toHaveBeenCalled();
+  });
+
+  it('Ctrl+A in a textarea does not select every card on the board', () => {
+    const { cmp, store } = create();
+    const selectCards = vi.spyOn(store, 'selectCards');
+
+    cmp.onKeydown(keyInTextarea('a', { ctrlKey: true }));
+
+    expect(selectCards).not.toHaveBeenCalled();
+  });
+
+  it('Ctrl+V in a textarea pastes text, not the board clipboard', () => {
+    const { cmp, store } = create();
+    const paste = vi.spyOn(store, 'pasteFromClipboard');
+
+    cmp.onKeydown(keyInTextarea('v', { ctrlKey: true }));
+
+    expect(paste).not.toHaveBeenCalled();
+  });
+
+  it('Escape in a textarea does not clear the board selection', () => {
+    const { cmp, store } = create();
+    store.selectCards(new Set(['card-1']));
+
+    cmp.onKeydown(keyInTextarea('Escape'));
+
+    expect(store.selectedIds().size).toBe(1);
+  });
+});
