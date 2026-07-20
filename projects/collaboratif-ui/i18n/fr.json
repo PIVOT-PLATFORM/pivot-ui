@@ -678,6 +678,7 @@
         "noBrainstormData": "Archive .klx invalide : _brainstorm_data.json introuvable à l’intérieur.",
         "corrupted": "Impossible de lire l’archive .klx. Vérifiez que le fichier n’est pas corrompu.",
         "importFailed": "Erreur lors de l’import.",
+        "tooLarge": "Fichier trop volumineux pour l’import (images incluses). Réduisez le nombre ou la taille des médias, puis réessayez.",
         "undoFailed": "Impossible d’annuler l’import."
       }
     }

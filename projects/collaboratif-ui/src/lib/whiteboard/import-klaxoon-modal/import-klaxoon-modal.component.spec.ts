@@ -51,6 +51,7 @@ const FR: Record<string, unknown> = {
         noBrainstormData: 'Archive .klx invalide : _brainstorm_data.json introuvable.',
         corrupted: "Impossible de lire l'archive .klx.",
         importFailed: "Erreur lors de l'import.",
+        tooLarge: 'Fichier trop volumineux pour l’import (images incluses).',
         undoFailed: "Impossible d'annuler l'import.",
       },
     },
@@ -248,6 +249,32 @@ describe('ImportKlaxoonModalComponent', () => {
     const status = fixture.nativeElement.querySelector('[role="status"]');
     expect(status).toBeTruthy();
     expect(status.textContent).toContain('2');
+  });
+
+  it('maps a 413 (payload too large) to a distinct "too large" error, not the generic one', async () => {
+    const file = await buildKlxFile({
+      '_brainstorm_data.json': {
+        colors: [{ id: 'c1', hexa: '#FFEB3B' }],
+        ideas: [makeIdea('idea-1')],
+        state: [],
+        links: [],
+        groups: [],
+      },
+    });
+    await api.handleFile(file);
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector('.klx-import__btn--primary') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    httpMock.expectOne(r => r.url === IMPORT_URL && r.method === 'POST')
+      .flush(null, { status: 413, statusText: 'Payload Too Large' });
+    fixture.detectChanges();
+
+    expect(api.step()).toBe('error');
+    expect(fixture.nativeElement.querySelector('[role="alert"]').textContent).toContain(
+      'trop volumineux',
+    );
   });
 
   // ── Annuler l'import — replays undo with the exact memorized id lists ──
