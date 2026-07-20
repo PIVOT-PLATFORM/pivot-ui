@@ -66,6 +66,25 @@
       }
     </div>
 
+    <!-- Group 1b — grid snap (US08.11.1). A display preference, not a tool: it has its own group
+         so it never reads as a member of the mutually exclusive pointer-tool set. -->
+    <div class="wb-toolbar__group">
+      <button
+        type="button"
+        class="wb-toolbar__btn"
+        [class.wb-toolbar__btn--active]="snapEnabled()"
+        [disabled]="disabled()"
+        [attr.aria-pressed]="snapEnabled()"
+        [attr.aria-label]="'whiteboard.toolbar.snapToGrid' | transloco"
+        [wbTooltip]="'whiteboard.toolbar.snapToGrid' | transloco"
+        (click)="snapToggle.emit()"
+      >
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M3 9h18M3 15h18M9 3v18M15 3v18" />
+        </svg>
+      </button>
+    </div>
+
     <!-- Group 2 — content tools + image import -->
     <div class="wb-toolbar__group">
       @for (t of contentTools; track t.mode) {

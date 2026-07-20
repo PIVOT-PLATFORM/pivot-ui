@@ -56,6 +56,7 @@ import {
   MIN_ZOOM,
   MAX_ZOOM,
   DOT_SPACING,
+  snapToGrid,
   DEFAULT_CARD_W,
   DEFAULT_CARD_H,
   LINK_CARD_W,
@@ -159,6 +160,13 @@ export class StructuredCanvasComponent {
 
   /** Active tool (owned by the container/toolbar). */
   readonly tool = input<ToolMode>('select');
+
+  /**
+   * Whether grid snapping is on (US08.11.1). Owned by the board page, which shares it with the
+   * toolbar and persists it — a display preference, never a board mutation: no STOMP message is
+   * emitted and nothing is written server-side, so a second participant is unaffected.
+   */
+  readonly snapEnabled = input<boolean>(false);
   /** Active drawing colour (SHAPE stroke colour). */
   readonly color = input<string>(DEFAULT_SHAPE_COLOR);
   /**
@@ -485,6 +493,26 @@ export class StructuredCanvasComponent {
     this.gesture = { kind: 'marquee', startX: pt.x, startY: pt.y };
   }
 
+  /**
+   * Rounds a canvas point to the grid when the snap is active (US08.11.1), otherwise returns it
+   * untouched.
+   *
+   * <p>Single choke point for the §5.9 mutual exclusion with the alignment guides: while the grid
+   * is on, guide computation must be short-circuited (grid wins). Those guides are not implemented
+   * yet in this canvas — when US08.11.4 adds them, their computation belongs in the `else` branch
+   * here so only one mechanism can ever act at a time.
+   *
+   * @param x raw canvas X
+   * @param y raw canvas Y
+   * @returns the snapped point, or the input point when the grid is off
+   */
+  private applySnap(x: number, y: number): { x: number; y: number } {
+    if (!this.snapEnabled()) {
+      return { x, y };
+    }
+    return { x: snapToGrid(x), y: snapToGrid(y) };
+  }
+
   protected onPointerMove(event: PointerEvent): void {
     const pt = this.toCanvas(event.clientX, event.clientY);
     this.lastPointerCanvas = pt;
@@ -494,9 +522,15 @@ export class StructuredCanvasComponent {
       case 'pan':
         this.viewport.set({ ...this.viewport(), x: g.vpX + (event.clientX - g.startX), y: g.vpY + (event.clientY - g.startY) });
         break;
-      case 'drag-card':
-        this.store.moveCard(g.id, g.startPos.x + (pt.x - g.startX), g.startPos.y + (pt.y - g.startY));
+      case 'drag-card': {
+        // US08.11.1 — snap applied during the gesture, not only on commit: the card visibly
+        // sticks to the grid while dragging, and the position the commit emits is already
+        // rounded. `applySnap` is the single choke point where the grid short-circuits the
+        // alignment guides (§5.9) once those land with US08.11.4.
+        const next = this.applySnap(g.startPos.x + (pt.x - g.startX), g.startPos.y + (pt.y - g.startY));
+        this.store.moveCard(g.id, next.x, next.y);
         break;
+      }
       case 'resize-card':
         this.applyCardResize(g, pt.x, pt.y, this.resizeOpts(event));
         break;
@@ -634,7 +668,16 @@ export class StructuredCanvasComponent {
     }
     const min = this.minSizeFor(g.id);
     const box = this.resizeRect(g.start, g.dir, x - g.startX, y - g.startY, min, min, opts);
-    this.store.resizeCardBox(g.id, { posX: box.x, posY: box.y, width: box.width, height: box.height });
+    // US08.11.1 — the AC covers resize as well as move: snap the origin *and* the far edge, so a
+    // snapped box keeps both of its edges on the grid rather than only its top-left corner.
+    const origin = this.applySnap(box.x, box.y);
+    const far = this.applySnap(box.x + box.width, box.y + box.height);
+    this.store.resizeCardBox(g.id, {
+      posX: origin.x,
+      posY: origin.y,
+      width: Math.max(min, far.x - origin.x),
+      height: Math.max(min, far.y - origin.y),
+    });
   }
 
   /**

@@ -21,6 +21,15 @@
   &--pan {
     cursor: grab;
   }
+
+  // US08.11.1 — grid snap on: the dotted pattern becomes a ruled one. Purely decorative (the
+  // surface's own background), so it changes neither tab order nor any label; the active state is
+  // carried by the toolbar button's `aria-pressed`, never by colour alone.
+  &--grid {
+    background-image:
+      linear-gradient(to right, var(--wb-grid-dot) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--wb-grid-dot) 1px, transparent 1px);
+  }
 }
 
 .wb-layer {

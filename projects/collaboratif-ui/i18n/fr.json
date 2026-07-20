@@ -390,7 +390,8 @@
         "both": "Flèches aux deux bouts"
       },
       "labelAdd": "Ajouter une étiquette",
-      "labelEdit": "Modifier l'étiquette"
+      "labelEdit": "Modifier l'étiquette",
+      "snapToGrid": "Aimantation à la grille"
     },
     "card": {
       "editText": "Modifier le texte",

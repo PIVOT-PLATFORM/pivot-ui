@@ -59,3 +59,66 @@ export const DEFAULT_CARD_H = 140;
 /** Default dimensions for a new LINK card (US08.6.5) — wider than a sticky to fit an OG preview. */
 export const LINK_CARD_W = 280;
 export const LINK_CARD_H = 170;
+
+/**
+ * `localStorage` key backing the grid-snap toggle (US08.11.1).
+ *
+ * The `klx_` prefix is inherited from the PouetPouet reference POC, whose key name the spec
+ * pins verbatim so an existing user preference survives the re-platforming.
+ */
+export const GRID_STORAGE_KEY = 'klx_board_grid';
+
+/**
+ * Rounds a canvas coordinate to the nearest {@link DOT_SPACING} multiple (US08.11.1).
+ *
+ * Hard snap, deliberately without a tolerance radius: the spec requires the rounding to apply
+ * systematically while the grid is on, not only near a grid line. `Math.round` puts the midpoint
+ * on the upper multiple (12 -> 24, 11 -> 0, 36 -> 24, 37 -> 48).
+ *
+ * @param coord the raw canvas coordinate
+ * @returns the coordinate rounded to the nearest grid multiple
+ */
+export function snapToGrid(coord: number): number {
+  return Math.round(coord / DOT_SPACING) * DOT_SPACING;
+}
+
+/**
+ * Reads the persisted grid-snap preference (US08.11.1).
+ *
+ * Off by default. Any value other than `'1'` — absent key, corrupted content, or a key forged by
+ * hand — falls back silently to off: the stored string is only ever compared, never injected into
+ * the DOM nor evaluated, so a crafted value carries no injection surface.
+ *
+ * @returns `true` when the grid snap is enabled, `false` otherwise
+ */
+export function readGridPreference(): boolean {
+  if (typeof localStorage === 'undefined') {
+    return false;
+  }
+  try {
+    return localStorage.getItem(GRID_STORAGE_KEY) === '1';
+  } catch {
+    // Private-browsing quotas or a disabled storage must not break canvas init.
+    return false;
+  }
+}
+
+/**
+ * Persists the grid-snap preference (US08.11.1).
+ *
+ * Client-only preference: no STOMP message, no server write — a second participant on the same
+ * board is unaffected. Storage failures are swallowed for the same reason as in
+ * {@link readGridPreference}: a display preference must never break the canvas.
+ *
+ * @param enabled the state to persist
+ */
+export function writeGridPreference(enabled: boolean): void {
+  if (typeof localStorage === 'undefined') {
+    return;
+  }
+  try {
+    localStorage.setItem(GRID_STORAGE_KEY, enabled ? '1' : '0');
+  } catch {
+    // Ignored on purpose — see readGridPreference.
+  }
+}
