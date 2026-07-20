@@ -13,7 +13,10 @@
 import { test, expect, type Page } from '@playwright/test';
 
 const API = 'http://localhost:8080/api';
-const COLLABORATIF_API = 'http://localhost:8083/api/collaboratif';
+// EN53.4 (ADR-030) — the shell configures `collaboratifApiUrl: '/api/collaboratif'`, a relative
+// same-origin path proxied by nginx. Requests therefore hit the served origin (:4200), not a
+// standalone backend host — so match origin-agnostically with a `**/` glob prefix.
+const COLLABORATIF_API = '**/api/collaboratif';
 const HOME_URL = '/home';
 
 const AUTH_RESPONSE = {
