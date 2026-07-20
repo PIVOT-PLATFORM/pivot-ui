@@ -472,6 +472,10 @@
     padding: 1.5rem;
     width: 100%;
     max-width: 400px;
+    // Never let the dialog exceed the viewport — on short screens (or with the
+    // template gallery expanded) the whole modal scrolls instead of overflowing.
+    max-height: 90vh;
+    overflow-y: auto;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   }
 
