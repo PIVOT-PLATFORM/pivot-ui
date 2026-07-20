@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240" viewBox="0 0 400 240" role="img" aria-label="Aperçu du modèle Management visuel">
+  <rect width="400" height="240" rx="8" fill="#F8FAFC"/>
+  <rect x="24" y="24" width="82" height="60" rx="8" fill="#FEF9C3"/>
+  <rect x="112" y="24" width="82" height="60" rx="8" fill="#DBEAFE"/>
+  <rect x="200" y="24" width="82" height="60" rx="8" fill="#FEE2E2"/>
+  <rect x="288" y="24" width="82" height="60" rx="8" fill="#DCFCE7"/>
+  <rect x="24" y="106" width="82" height="68" rx="8" fill="#F1F5F9"/>
+  <rect x="112" y="106" width="82" height="68" rx="8" fill="#DBEAFE"/>
+  <rect x="200" y="106" width="82" height="68" rx="8" fill="#FEE2E2"/>
+  <rect x="288" y="106" width="82" height="68" rx="8" fill="#DCFCE7"/>
+  <text x="200" y="222" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#1F2937">Management visuel</text>
+</svg>

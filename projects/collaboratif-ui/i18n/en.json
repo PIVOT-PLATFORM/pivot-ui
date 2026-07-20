@@ -267,6 +267,34 @@
       "userStoryMap": {
         "name": "User Story Map",
         "description": "Map out the user journey and prioritize user stories by release."
+      },
+      "retroStartStopContinue": {
+        "name": "Retrospective — Start / Stop / Continue",
+        "description": "Start, Stop, Continue columns for a team retrospective."
+      },
+      "retroMadSadGlad": {
+        "name": "Retrospective — Mad / Sad / Glad",
+        "description": "Mad, Sad, Glad columns to explore how the team feels."
+      },
+      "retro_4l": {
+        "name": "Retrospective — 4L",
+        "description": "Liked, Learned, Lacked, Longed for columns."
+      },
+      "retroSpeedboat": {
+        "name": "Retrospective — Speedboat",
+        "description": "The sailboat metaphor: wind, anchor, rocks, island — visualize accelerators and blockers."
+      },
+      "riskAnalysis": {
+        "name": "Risk analysis",
+        "description": "Probability x impact matrix with a vote-list-vote-place workflow."
+      },
+      "mindmap": {
+        "name": "Mindmap",
+        "description": "A central node and branches linked by connectors to organize ideas."
+      },
+      "visualManagement": {
+        "name": "Visual management",
+        "description": "Team obeya: weather, key metrics, blockers, actions, and a Kanban band."
       }
     },
     "join": {
