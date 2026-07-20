@@ -252,6 +252,10 @@
       },
       "createError": "Unable to create the board. Please try again.",
       "previewAlt": "Preview of the {{name}} template",
+      "blank": {
+        "name": "No template",
+        "description": "Start from a blank board."
+      },
       "brainstorm": {
         "name": "Brainstorm",
         "description": "Freely collect ideas on sticky notes before organizing them."

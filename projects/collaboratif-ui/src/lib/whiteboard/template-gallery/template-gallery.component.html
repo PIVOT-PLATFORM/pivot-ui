@@ -28,6 +28,20 @@
       role="listbox"
       [attr.aria-label]="'whiteboard.template.gallery.label' | transloco"
     >
+      <button
+        class="template-gallery__card template-gallery__card--blank"
+        [class.template-gallery__card--selected]="selectedId() === null"
+        type="button"
+        role="option"
+        [attr.aria-selected]="selectedId() === null"
+        [tabindex]="optionTabIndex(null)"
+        (click)="selectBlank()"
+        (keydown)="onKeydown($event, 0)"
+      >
+        <span class="template-gallery__preview template-gallery__preview--blank" aria-hidden="true">∅</span>
+        <span class="template-gallery__name">{{ 'whiteboard.template.blank.name' | transloco }}</span>
+        <span class="template-gallery__description">{{ 'whiteboard.template.blank.description' | transloco }}</span>
+      </button>
       @for (template of templates(); track template.id; let i = $index) {
         <button
           class="template-gallery__card"
@@ -35,9 +49,9 @@
           type="button"
           role="option"
           [attr.aria-selected]="selectedId() === template.id"
-          [tabindex]="tabIndexFor(template.id)"
+          [tabindex]="optionTabIndex(template.id)"
           (click)="select(template.id)"
-          (keydown)="onKeydown($event, i)"
+          (keydown)="onKeydown($event, i + 1)"
         >
           <img
             class="template-gallery__preview"

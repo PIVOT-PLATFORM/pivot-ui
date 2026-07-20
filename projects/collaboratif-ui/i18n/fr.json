@@ -252,6 +252,10 @@
       },
       "createError": "Impossible de créer le tableau. Veuillez réessayer.",
       "previewAlt": "Aperçu du modèle {{name}}",
+      "blank": {
+        "name": "Aucun template",
+        "description": "Démarrer avec un tableau vierge."
+      },
       "brainstorm": {
         "name": "Brainstorm",
         "description": "Collectez librement des idées sur des post-its avant de les organiser."
