@@ -44,6 +44,13 @@ server {
     root /usr/share/nginx/html;
     index index.html;
 
+    # KLX (Klaxoon) whiteboard imports POST a JSON payload with inlined base64
+    # images — routinely several MB. Align nginx with the backend import cap
+    # (ImportBodySizeLimitFilter = 50 MB) so nginx does not 413 a body the app
+    # would accept; nginx's 1 MB default otherwise rejects the import before it
+    # ever reaches pivot-core (observed on recette: /import/klaxoon → 413).
+    client_max_body_size 50m;
+
     # Cloud Run has no embedded DNS — use a public resolver so *.run.app upstream
     # hostnames resolve at request time (paired with `set $var` below).
     resolver 8.8.8.8 1.1.1.1 ipv6=off valid=30s;
