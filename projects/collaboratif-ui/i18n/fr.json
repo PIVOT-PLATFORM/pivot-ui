@@ -267,6 +267,34 @@
       "userStoryMap": {
         "name": "User Story Map",
         "description": "Cartographiez le parcours utilisateur et priorisez les user stories par release."
+      },
+      "retroStartStopContinue": {
+        "name": "Rétrospective — Start / Stop / Continue",
+        "description": "Colonnes Commencer, Arrêter, Continuer pour une rétrospective d'équipe."
+      },
+      "retroMadSadGlad": {
+        "name": "Rétrospective — Mad / Sad / Glad",
+        "description": "Colonnes Fâché, Triste, Content pour explorer le ressenti de l'équipe."
+      },
+      "retro_4l": {
+        "name": "Rétrospective — 4L",
+        "description": "Colonnes Liked, Learned, Lacked, Longed for."
+      },
+      "retroSpeedboat": {
+        "name": "Rétrospective — Bateau (Speedboat)",
+        "description": "Métaphore du voilier : vent, ancre, rochers, île, pour visualiser accélérateurs et freins."
+      },
+      "riskAnalysis": {
+        "name": "Analyse de risques",
+        "description": "Matrice probabilité x impact avec déroulé voter les types, lister, voter les risques, placer."
+      },
+      "mindmap": {
+        "name": "Carte mentale",
+        "description": "Nœud central et branches reliées par connecteurs pour organiser des idées."
+      },
+      "visualManagement": {
+        "name": "Management visuel",
+        "description": "Obeya d'équipe : météo, indicateurs, obstacles, actions, et bande Kanban."
       }
     },
     "join": {

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240" viewBox="0 0 400 240" role="img" aria-label="Aperçu du modèle Rétrospective 4L">
+  <rect width="400" height="240" rx="8" fill="#F8FAFC"/>
+  <rect x="20" y="24" width="84" height="150" rx="10" fill="#DCFCE7"/>
+  <rect x="112" y="24" width="84" height="150" rx="10" fill="#FEF9C3"/>
+  <rect x="204" y="24" width="84" height="150" rx="10" fill="#FEE2E2"/>
+  <rect x="296" y="24" width="84" height="150" rx="10" fill="#E0E7FF"/>
+  <text x="200" y="222" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#1F2937">4L</text>
+</svg>

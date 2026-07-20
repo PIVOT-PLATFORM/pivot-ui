@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240" viewBox="0 0 400 240" role="img" aria-label="Aperçu du modèle Analyse de risques">
+  <rect width="400" height="240" rx="8" fill="#F8FAFC"/>
+  <rect x="90" y="24" width="140" height="72" rx="8" fill="#DCFCE7"/>
+  <rect x="238" y="24" width="140" height="72" rx="8" fill="#FEF08A"/>
+  <rect x="90" y="102" width="140" height="72" rx="8" fill="#FED7AA"/>
+  <rect x="238" y="102" width="140" height="72" rx="8" fill="#FECACA"/>
+  <line x1="80" y1="24" x2="80" y2="174" stroke="#94A3B8" stroke-width="2"/>
+  <line x1="80" y1="174" x2="380" y2="174" stroke="#94A3B8" stroke-width="2"/>
+  <text x="200" y="222" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#1F2937">Analyse de risques</text>
+</svg>

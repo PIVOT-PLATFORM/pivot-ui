@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240" viewBox="0 0 400 240" role="img" aria-label="Aperçu du modèle Carte mentale">
+  <rect width="400" height="240" rx="8" fill="#F8FAFC"/>
+  <line x1="200" y1="97" x2="110" y2="55" stroke="#A5B4FC" stroke-width="3"/>
+  <line x1="200" y1="97" x2="290" y2="55" stroke="#A5B4FC" stroke-width="3"/>
+  <line x1="200" y1="97" x2="110" y2="139" stroke="#A5B4FC" stroke-width="3"/>
+  <line x1="200" y1="97" x2="290" y2="139" stroke="#A5B4FC" stroke-width="3"/>
+  <circle cx="110" cy="55" r="26" fill="#FEF08A"/>
+  <circle cx="290" cy="55" r="26" fill="#FEF08A"/>
+  <circle cx="110" cy="139" r="26" fill="#FEF08A"/>
+  <circle cx="290" cy="139" r="26" fill="#FEF08A"/>
+  <rect x="160" y="72" width="80" height="50" rx="12" fill="#C7D2FE"/>
+  <text x="200" y="222" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#1F2937">Carte mentale</text>
+</svg>

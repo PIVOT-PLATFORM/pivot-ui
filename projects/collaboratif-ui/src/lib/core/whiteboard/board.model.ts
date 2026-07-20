@@ -135,16 +135,31 @@ export interface TemplateResponse {
 
 /**
  * A global, tenant-agnostic board template as returned by GET /whiteboard/templates
- * (US08.4.1). The "Vierge" (blank) template is not part of this list — blank creation
- * is covered by omitting `templateId` on POST /whiteboard/boards (US08.1.1).
+ * (US08.4.1, catalog widened by EN08.x). The "Vierge" (blank) template is not part of this
+ * list — blank creation is covered by omitting `templateId` on POST /whiteboard/boards
+ * (US08.1.1).
  *
  * `code` is a stable machine key used to resolve the localized name/description via
  * `whiteboard.template.{code}.*` i18n keys — names and descriptions are never sent
- * pre-localized by the backend.
+ * pre-localized by the backend. The union is exhaustive over the global templates seeded in
+ * `V1__schema_init.sql` + `V7__whiteboard_template_replatform.sql` (pivot-core); an
+ * unrecognised code from the backend narrows to `never` at the call site rather than causing a
+ * runtime error, since content is always rendered server-side onto the live board (this type is
+ * consumed only for i18n key resolution in the gallery, see `TemplateGalleryComponent`).
  */
 export interface WhiteboardTemplate {
   id: string;
-  code: 'BRAINSTORM' | 'RETROSPECTIVE' | 'USER_STORY_MAP';
+  code:
+    | 'BRAINSTORM'
+    | 'RETROSPECTIVE'
+    | 'USER_STORY_MAP'
+    | 'RETRO_START_STOP_CONTINUE'
+    | 'RETRO_MAD_SAD_GLAD'
+    | 'RETRO_4L'
+    | 'RETRO_SPEEDBOAT'
+    | 'RISK_ANALYSIS'
+    | 'MINDMAP'
+    | 'VISUAL_MANAGEMENT';
   thumbnailUrl: string;
 }
 
