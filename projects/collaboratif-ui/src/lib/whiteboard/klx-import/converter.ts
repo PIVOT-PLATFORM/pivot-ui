@@ -581,20 +581,22 @@ export function convertKlaxoon(data: KlxRawData, imageMap?: Map<string, string>,
         if (bb) rect = { x: bb.minX, y: bb.minY, w: bb.maxX - bb.minX, h: bb.maxY - bb.minY };
       }
       if (rect) {
-        const sw = item.stroke_width ?? 4;
-        const strokeSize = sw <= 2 ? 'thin' : sw >= 6 ? 'thick' : 'medium';
         const hasFill = !!item.fill_color;
         const fillOpacity = item.fill_color_opacity ?? 1;
-        // PouetPouet shapes have a single color for stroke + fill. When the
-        // Klaxoon rect is filled, the fill is the dominant visual — use it.
-        const color = hasFill ? cColor(item.fill_color ?? '')
-          : item.color ? cColor(item.color) : '#374151';
+        // SHAPE content is `kind|stroke|fill|opacity` where stroke/fill are CSS
+        // colours (see model/shape.ts parseShape). Klaxoon's `color` is the
+        // stroke, `fill_color` the fill (absent = unfilled outline → 'none').
+        // The old code wrote `rect|<strokeSize keyword>|<hasFill bool>|…`, so
+        // parseShape read fill="true"/"false" — invalid SVG values that fall back
+        // to the default black fill, rendering every imported rect solid black.
+        const stroke = item.color ? cColor(item.color) : '#A5B4FC';
+        const fill = hasFill ? cColor(item.fill_color ?? '') : 'none';
 
         cards.push({
           klxId: item.uuid,
           type: 'SHAPE',
-          content: `rect|${strokeSize}|${hasFill}|${fillOpacity}`,
-          color,
+          content: `rect|${stroke}|${fill}|${fillOpacity}`,
+          color: stroke,
           // coords anchors the path's local origin (0,0) — a shape drawn
           // bottom-right → top-left has a negative local min to add back.
           posX: Math.round((px !== undefined ? px + rect.x : rect.x) - ox),

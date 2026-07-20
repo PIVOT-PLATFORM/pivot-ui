@@ -630,6 +630,42 @@ describe('convertKlaxoon', () => {
     expect(stats.shapes).toBe(1);
   });
 
+  it('encodes SHAPE stroke/fill as CSS colours so the rect does not render black', () => {
+    const path = JSON.stringify([
+      { type: 2, x: 0, y: 0 }, { type: 16, x: 100, y: 0 },
+      { type: 16, x: 100, y: 50 }, { type: 16, x: 0, y: 50 }, { type: 16, x: 0, y: 0 }, { type: 1 },
+    ]);
+    const data: KlxRawData = {
+      colors: [], ideas: [],
+      state: [{
+        uuid: 'filled', is_active: true, board_object_type: 'pen', shape_type: 'rectangle',
+        path_commands: path, coords: { left: 0, top: 0 },
+        color: 'c3', fill_color: 'c5', fill_color_opacity: 1, stroke_width: 4, z_index: 0,
+      }],
+      links: [], groups: [],
+    };
+    const { cards } = convertKlaxoon(data);
+    // content = kind|stroke|fill|opacity with CSS colours: c3→#ef4444, c5→#eab308.
+    expect(cards[0].content).toBe('rect|#ef4444|#eab308|1');
+  });
+
+  it('emits fill "none" for an unfilled SHAPE rectangle (no black SVG fallback)', () => {
+    const path = JSON.stringify([
+      { type: 2, x: 0, y: 0 }, { type: 16, x: 100, y: 0 },
+      { type: 16, x: 100, y: 50 }, { type: 16, x: 0, y: 50 }, { type: 16, x: 0, y: 0 }, { type: 1 },
+    ]);
+    const data: KlxRawData = {
+      colors: [], ideas: [],
+      state: [{
+        uuid: 'outline', is_active: true, board_object_type: 'pen', shape_type: 'rectangle',
+        path_commands: path, coords: { left: 0, top: 0 }, color: 'c3', stroke_width: 4, z_index: 0,
+      }],
+      links: [], groups: [],
+    };
+    const { cards } = convertKlaxoon(data);
+    expect(cards[0].content).toBe('rect|#ef4444|none|1');
+  });
+
   // ── Liaisons vers des objets manquants ──────────────────────────────────────
 
   it('skips links whose endpoints were not imported', () => {
