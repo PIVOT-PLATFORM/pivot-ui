@@ -10,6 +10,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import JSZip from 'jszip';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { BoardService } from '../../core/whiteboard/board.service';
@@ -151,7 +152,8 @@ export class ImportKlaxoonModalComponent {
       }
       this.activities.set(found);
       this.step.set('choose');
-    } catch {
+    } catch (err) {
+      console.error('[klx-import] failed to read/decompress the .klx archive', err);
       this.fail('whiteboard.import.error.corrupted');
     }
   }
@@ -183,7 +185,8 @@ export class ImportKlaxoonModalComponent {
       this.pending = { cards, connections, frames, fields };
       this.stats.set(stats);
       this.step.set('preview');
-    } catch {
+    } catch (err) {
+      console.error('[klx-import] failed to parse/convert _brainstorm_data.json', err);
       this.fail('whiteboard.import.error.corrupted');
     }
   }
@@ -200,7 +203,17 @@ export class ImportKlaxoonModalComponent {
         this.result.set(res);
         this.step.set('done');
       },
-      error: () => this.fail('whiteboard.import.error.importFailed'),
+      error: (err: HttpErrorResponse) => {
+        console.error('[klx-import] import request failed', err.status, err);
+        // 413 = the payload was rejected on size (nginx reverse proxy or the
+        // backend ImportBodySizeLimitFilter) — surface a distinct, actionable
+        // message instead of the generic one.
+        this.fail(
+          err.status === 413
+            ? 'whiteboard.import.error.tooLarge'
+            : 'whiteboard.import.error.importFailed',
+        );
+      },
     });
   }
 
