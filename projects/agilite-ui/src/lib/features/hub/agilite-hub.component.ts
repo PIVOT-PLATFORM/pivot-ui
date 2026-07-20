@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import {
   HubTab,
@@ -15,9 +16,10 @@ const SPIN_MS = 3450;
 
 /**
  * Agilité module landing hub — the aggregated dashboard mounted at the module's `''` route
- * (the shell's `/agilite`, previously empty). Three tabs: **Daily** (standup board + sprint tasks +
+ * (the shell's `/agilite`, previously empty). Four tabs: **Daily** (standup board + sprint tasks +
  * history), **Roue d'équipe** (weighted random draw wheel), **Capacity** (velocity + charge vs
- * capacity).
+ * capacity), and **Planning Poker** (entry point linking to the real create/join-room screens —
+ * the only nav path to that feature, whose routes were otherwise unreachable).
  *
  * **Data status.** Only the wheel/retro/poker sub-features have a real backend
  * (`pivot-agilite-core`) today; Daily & Capacity have none yet (documented schema gap). This hub
@@ -33,7 +35,7 @@ const SPIN_MS = 3450;
   selector: 'app-agilite-hub',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe],
+  imports: [RouterLink, TranslocoPipe],
   templateUrl: './agilite-hub.component.html',
   styleUrl: './agilite-hub.component.scss',
 })

@@ -382,4 +382,10 @@
       color: var(--color-gray-400);
     }
   }
+  &__poker-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 16px;
+  }
 }

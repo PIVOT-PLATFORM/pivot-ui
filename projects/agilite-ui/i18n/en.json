@@ -4,11 +4,12 @@
   },
   "hub": {
     "title": "Agility",
-    "subtitle": "Daily, team draw and capacity.",
+    "subtitle": "Daily, team draw, capacity and planning poker.",
     "tabs": {
       "daily": "Daily",
       "wheel": "Team wheel",
-      "capacity": "Capacity"
+      "capacity": "Capacity",
+      "poker": "Planning Poker"
     },
     "daily": {
       "todayTitle": "Today’s daily",
@@ -30,6 +31,12 @@
       "legendBalanced": "Balanced",
       "legendUnder": "Underloaded",
       "days": "{{charge}}d / {{capacity}}d"
+    },
+    "poker": {
+      "title": "Planning Poker",
+      "description": "Create an estimation room and share the invite code with your team, or join an existing room with its code.",
+      "create": "Create a room",
+      "join": "Join a room"
     }
   },
   "wheels": {

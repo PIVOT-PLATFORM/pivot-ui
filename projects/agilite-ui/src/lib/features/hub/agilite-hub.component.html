@@ -35,6 +35,16 @@
     >
       {{ 'hub.tabs.capacity' | transloco }}
     </button>
+    <button
+      type="button"
+      role="tab"
+      class="agh__tab"
+      [class.agh__tab--active]="tab() === 'poker'"
+      [attr.aria-selected]="tab() === 'poker'"
+      (click)="select('poker')"
+    >
+      {{ 'hub.tabs.poker' | transloco }}
+    </button>
   </div>
 
   <!-- ===== DAILY ===== -->
@@ -172,6 +182,24 @@
             <span class="agh__cap-ratio" [class]="'agh__cap-ratio--' + c.kind">{{ c.ratioLabel }}</span>
           </div>
         }
+      </div>
+    </div>
+  }
+
+  <!-- ===== PLANNING POKER ===== -->
+  @if (tab() === 'poker') {
+    <div class="agh__stack">
+      <div class="pv-card agh__card">
+        <div class="agh__card-title agh__card-title--block">{{ 'hub.poker.title' | transloco }}</div>
+        <p class="agh__row-note">{{ 'hub.poker.description' | transloco }}</p>
+        <div class="agh__poker-actions">
+          <a class="btn btn-primary" routerLink="scrum-poker/rooms/new">
+            {{ 'hub.poker.create' | transloco }}
+          </a>
+          <a class="btn btn-secondary" routerLink="scrum-poker/rooms/join">
+            {{ 'hub.poker.join' | transloco }}
+          </a>
+        </div>
       </div>
     </div>
   }

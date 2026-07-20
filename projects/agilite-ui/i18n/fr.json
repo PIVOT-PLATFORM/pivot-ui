@@ -4,11 +4,12 @@
   },
   "hub": {
     "title": "Agilité",
-    "subtitle": "Daily, tirage au sort et capacité de l’équipe.",
+    "subtitle": "Daily, tirage au sort, capacité de l’équipe et planning poker.",
     "tabs": {
       "daily": "Daily",
       "wheel": "Roue d’équipe",
-      "capacity": "Capacity"
+      "capacity": "Capacity",
+      "poker": "Planning Poker"
     },
     "daily": {
       "todayTitle": "Daily du jour",
@@ -30,6 +31,12 @@
       "legendBalanced": "Équilibré",
       "legendUnder": "Sous-charge",
       "days": "{{charge}}j / {{capacity}}j"
+    },
+    "poker": {
+      "title": "Planning Poker",
+      "description": "Créez une room d’estimation et partagez le code d’invitation avec votre équipe, ou rejoignez une room existante avec son code.",
+      "create": "Créer une room",
+      "join": "Rejoindre une room"
     }
   },
   "wheels": {
