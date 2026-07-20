@@ -53,10 +53,7 @@ export class SharePanelComponent implements OnInit {
   protected readonly updatingRoleForUserId = signal<string | null>(null);
   protected readonly removingMemberId = signal<string | null>(null);
 
-  protected readonly shareLink = computed(() => {
-    const t = this.shareToken();
-    return t ? `${window.location.origin}/whiteboard/join?token=${t.token}` : null;
-  });
+  protected readonly shareLink = computed(() => this.shareToken()?.shareLink ?? null);
 
   ngOnInit(): void {
     this.loadMembers();

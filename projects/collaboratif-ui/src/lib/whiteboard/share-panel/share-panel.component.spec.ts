@@ -63,10 +63,10 @@ const EDITOR: BoardMember = {
 };
 
 const TOKEN: ShareToken = {
-  id: 'tok-1',
-  token: 'abc123def456',
+  tokenId: 'tok-1',
+  boardId: 'board-1',
+  shareLink: 'https://recette.pivot-platform.fr/whiteboard/join?token=abc123def456',
   role: 'EDITOR',
-  maxUses: 10,
   expiresAt: '2026-08-01T00:00:00Z',
 };
 
@@ -170,7 +170,7 @@ describe('SharePanelComponent', () => {
     req.flush(TOKEN);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain(TOKEN.token);
+    expect(fixture.nativeElement.textContent).toContain(TOKEN.shareLink);
   });
 
   // ── Generate link error ──
@@ -231,7 +231,7 @@ describe('SharePanelComponent', () => {
     const input = fixture.nativeElement.querySelector('.share-panel__link-input') as HTMLInputElement;
     expect(input).toBeTruthy();
     expect(input.readOnly).toBe(true);
-    expect(input.value).toContain(TOKEN.token);
+    expect(input.value).toContain(TOKEN.shareLink);
   });
 
   // ── Role change ──
