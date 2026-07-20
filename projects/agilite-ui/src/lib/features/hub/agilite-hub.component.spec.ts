@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TEAM } from './agilite-hub.model';
@@ -7,6 +8,7 @@ import { AgiliteHubComponent } from './agilite-hub.component';
 function create(): ComponentFixture<AgiliteHubComponent> {
   TestBed.configureTestingModule({
     imports: [AgiliteHubComponent, TranslocoTestingModule.forRoot({ langs: { fr: {}, en: {} } })],
+    providers: [provideRouter([])],
   });
   const fixture = TestBed.createComponent(AgiliteHubComponent);
   fixture.detectChanges();
@@ -19,7 +21,7 @@ interface HubApi {
   resultId(): string | null;
   wheelRotation(): number;
   result(): { name: string } | null;
-  select(t: 'daily' | 'wheel' | 'capacity'): void;
+  select(t: 'daily' | 'wheel' | 'capacity' | 'poker'): void;
   spin(): void;
 }
 
@@ -41,6 +43,21 @@ describe('AgiliteHubComponent', () => {
     fixture.detectChanges();
     expect(cmp.tab()).toBe('capacity');
     expect((fixture.nativeElement as HTMLElement).querySelector('.agh__velocity')).not.toBeNull();
+  });
+
+  it('l\'onglet Planning Poker expose les liens vers créer et rejoindre une room', () => {
+    const fixture = create();
+    const cmp = fixture.componentInstance as unknown as HubApi;
+    cmp.select('poker');
+    fixture.detectChanges();
+    expect(cmp.tab()).toBe('poker');
+
+    const links = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('.agh__poker-actions a[href]'),
+    ).map(a => a.getAttribute('href'));
+    // Deux points d'entrée reachable vers la feature poker (routes autrement orphelines).
+    expect(links.some(h => h?.includes('scrum-poker/rooms/new'))).toBe(true);
+    expect(links.some(h => h?.includes('scrum-poker/rooms/join'))).toBe(true);
   });
 
   it('le tirage tourne la roue puis désigne un membre après le délai', () => {
