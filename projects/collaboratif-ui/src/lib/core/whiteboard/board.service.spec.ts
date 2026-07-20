@@ -267,7 +267,13 @@ describe('BoardService', () => {
   // ── generateShareToken ──
   it('generateShareToken() sends POST with role in body', () => {
     const boardId = 'board-s1';
-    const response: ShareToken = { id: 'tok-1', token: 'secret', role: 'EDITOR', maxUses: 5, expiresAt: '2026-08-01T00:00:00Z' };
+    const response: ShareToken = {
+      tokenId: 'tok-1',
+      boardId,
+      shareLink: 'https://recette.pivot-platform.fr/whiteboard/join?token=secret',
+      role: 'EDITOR',
+      expiresAt: '2026-08-01T00:00:00Z',
+    };
 
     let result: ShareToken | undefined;
     service.generateShareToken(boardId, 'EDITOR').subscribe(r => { result = r; });

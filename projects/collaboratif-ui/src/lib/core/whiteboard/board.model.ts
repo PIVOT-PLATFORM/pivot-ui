@@ -7,12 +7,18 @@ export interface BoardMember {
   joinedAt: string;
 }
 
-/** Share token response from POST /whiteboard/boards/{boardId}/share. */
+/**
+ * Share token response from POST /whiteboard/boards/{boardId}/share.
+ *
+ * `shareLink` is the full, already-composed invitation URL (backend builds it from its own
+ * configured base URL) — the plain token itself is never returned separately, so it must not be
+ * reconstructed client-side.
+ */
 export interface ShareToken {
-  id: string;
-  token: string;
+  tokenId: string;
+  boardId: string;
+  shareLink: string;
   role: 'EDITOR' | 'VIEWER';
-  maxUses: number;
   expiresAt: string;
 }
 
