@@ -188,6 +188,20 @@ export class BoardService {
     );
   }
 
+  /**
+   * Invites a user by e-mail, upserting their membership (OWNER only, US08.2.5).
+   *
+   * Re-inviting an already-present member changes their role (or is a no-op if the role is
+   * unchanged) rather than creating a duplicate membership — the response reflects whichever
+   * happened.
+   */
+  inviteMember(boardId: string, email: string, role: 'EDITOR' | 'VIEWER'): Observable<BoardMember> {
+    return this.http.post<BoardMember>(
+      `${this.apiUrl}/whiteboard/boards/${boardId}/members`,
+      { email, role },
+    );
+  }
+
   /** Generates a share invitation token (OWNER only). */
   generateShareToken(boardId: string, role: 'EDITOR' | 'VIEWER'): Observable<ShareToken> {
     return this.http.post<ShareToken>(

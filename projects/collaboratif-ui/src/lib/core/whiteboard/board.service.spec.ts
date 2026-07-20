@@ -264,6 +264,28 @@ describe('BoardService', () => {
     expect(caught).toBe(true);
   });
 
+  // ── inviteMember ──
+  it('inviteMember() sends POST with email and role in body', () => {
+    const boardId = 'board-m1';
+    const member: BoardMember = { userId: 'user-3', role: 'VIEWER', joinedAt: '2026-07-10T00:00:00Z' };
+
+    let result: BoardMember | undefined;
+    service.inviteMember(boardId, 'someone@pivot.invalid', 'VIEWER').subscribe(r => { result = r; });
+
+    const req = httpMock.expectOne(`${BASE}/${boardId}/members`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ email: 'someone@pivot.invalid', role: 'VIEWER' });
+    req.flush(member);
+    expect(result).toEqual(member);
+  });
+
+  it('inviteMember() propagates HTTP errors', () => {
+    let caught = false;
+    service.inviteMember('bid', 'x@pivot.invalid', 'EDITOR').subscribe({ error: () => { caught = true; } });
+    httpMock.expectOne(`${BASE}/bid/members`).flush('', { status: 404, statusText: 'Not Found' });
+    expect(caught).toBe(true);
+  });
+
   // ── generateShareToken ──
   it('generateShareToken() sends POST with role in body', () => {
     const boardId = 'board-s1';
