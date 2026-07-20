@@ -1,12 +1,22 @@
 /**
+ * A planning poker deck identifier (E09 — classic parity, deck choice). Server-owned: the caller
+ * may only name one of these three, never supply arbitrary card values.
+ */
+export type PokerDeck = 'FIBONACCI' | 'FIBONACCI_SIMPLE' | 'TSHIRT';
+
+/**
  * Request body for `POST /api/agilite/poker/rooms` (US09.1.1).
  *
  * `expirationHours` is intentionally omitted from this minimal UI — the backend applies its
  * configured default (24h) when absent; the field exists server-side (1-168h) for a future US
- * to surface, not this one.
+ * to surface, not this one. `deck`/`facilitatorVotes`/`facilitatorName` (E09) are all optional —
+ * the backend defaults to `FIBONACCI`, `true`, and a generated name respectively when absent.
  */
 export interface CreateRoomRequest {
   readonly name: string;
+  readonly deck?: PokerDeck;
+  readonly facilitatorVotes?: boolean;
+  readonly facilitatorName?: string;
 }
 
 /**
@@ -20,6 +30,8 @@ export interface RoomResponse {
   readonly sequence: string;
   readonly cardValues: readonly string[];
   readonly facilitatorUserId: number;
+  /** Whether the facilitator also casts a vote in this room (E09). */
+  readonly facilitatorVotes: boolean;
   readonly active: boolean;
   readonly createdAt: string;
   readonly expiresAt: string;
@@ -78,6 +90,8 @@ export interface JoinRoomResponse {
   readonly name: string;
   readonly sequence: string;
   readonly cardValues: readonly string[];
+  /** Whether the facilitator also casts a vote in this room (E09). */
+  readonly facilitatorVotes: boolean;
   readonly active: boolean;
   readonly expiresAt: string;
   /** STOMP destination to subscribe to on `/ws/agilite` once joined (ADR-026 §2). */

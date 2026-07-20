@@ -23,11 +23,32 @@
             {{ 'scrumPoker.createRoom.copyButton' | transloco }}
           </button>
         </dd>
+
+        <dt id="share-url-label">{{ 'scrumPoker.createRoom.shareUrlLabel' | transloco }}</dt>
+        <dd>
+          <span class="create-room__share-url" aria-labelledby="share-url-label">
+            {{ shareUrl() }}
+          </span>
+          <button
+            type="button"
+            class="create-room__copy"
+            [attr.aria-label]="'scrumPoker.createRoom.copyShareUrlButton' | transloco"
+            (click)="copyShareUrl()"
+          >
+            {{ 'scrumPoker.createRoom.copyShareUrlButton' | transloco }}
+          </button>
+        </dd>
       </dl>
 
       @if (copyAnnouncementKey(); as copyKey) {
         <p class="create-room__copy-announcement" role="status" aria-live="polite">
           {{ copyKey | transloco }}
+        </p>
+      }
+
+      @if (shareUrlCopyAnnouncementKey(); as shareCopyKey) {
+        <p class="create-room__copy-announcement" role="status" aria-live="polite">
+          {{ shareCopyKey | transloco }}
         </p>
       }
 
@@ -66,6 +87,38 @@
             }
           </p>
         }
+      </div>
+
+      <div class="create-room__field">
+        <label class="create-room__label" for="room-facilitator-name">
+          {{ 'scrumPoker.createRoom.facilitatorNameLabel' | transloco }}
+          <span class="create-room__optional">{{ 'scrumPoker.joinRoom.optional' | transloco }}</span>
+        </label>
+        <input
+          id="room-facilitator-name"
+          class="create-room__input"
+          type="text"
+          formControlName="facilitatorName"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="create-room__field">
+        <label class="create-room__label" for="room-deck">
+          {{ 'scrumPoker.createRoom.deckLabel' | transloco }}
+        </label>
+        <select id="room-deck" class="create-room__input" formControlName="deck">
+          <option value="FIBONACCI">{{ 'scrumPoker.createRoom.deckFibonacci' | transloco }}</option>
+          <option value="FIBONACCI_SIMPLE">{{ 'scrumPoker.createRoom.deckFibonacciSimple' | transloco }}</option>
+          <option value="TSHIRT">{{ 'scrumPoker.createRoom.deckTshirt' | transloco }}</option>
+        </select>
+      </div>
+
+      <div class="create-room__field create-room__field--checkbox">
+        <label class="create-room__checkbox-label" for="room-facilitator-votes">
+          <input id="room-facilitator-votes" type="checkbox" formControlName="facilitatorVotes" />
+          {{ 'scrumPoker.createRoom.facilitatorVotesLabel' | transloco }}
+        </label>
       </div>
 
       <button
