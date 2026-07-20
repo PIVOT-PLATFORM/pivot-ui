@@ -380,6 +380,8 @@
       "createTicket": "Créer le ticket",
       "creatingTicket": "Création en cours…",
       "cardsLabel": "Cartes de vote",
+      "validate": "Valider",
+      "validated": "Vote validé — en attente de la révélation.",
       "votedCounter": "{{voted}}/{{total}} ont voté",
       "rosterHeading": "Participants ({{count}})",
       "roleVisiteur": "Visiteur",

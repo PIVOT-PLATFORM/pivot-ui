@@ -28,6 +28,8 @@ type BoardHarness = {
   totalParticipants: () => number;
   selectedValue: () => string | null;
   selectCard: (value: string) => void;
+  hasValidated: () => boolean;
+  validateVote: () => void;
   revealVotes: () => void;
   revealing: () => boolean;
   revealErrorKey: () => string | null;
@@ -207,7 +209,7 @@ describe('RoomBoardComponent', () => {
     expect(cards).toHaveLength(CARD_VALUES.length);
   });
 
-  it('selectCard() highlights the chosen card locally and submits the vote over STOMP', () => {
+  it('selectCard() highlights the chosen card locally WITHOUT submitting anything (E09 — pick-then-Valider)', () => {
     getCurrentTicketSpy.mockReturnValue(of(mockTicket));
     const fixture = createHost();
     const b = board(fixture);
@@ -216,13 +218,13 @@ describe('RoomBoardComponent', () => {
     fixture.detectChanges();
 
     expect(b.selectedValue()).toBe('5');
-    expect(submitVoteSpy).toHaveBeenCalledWith({ ticketId: 'ticket-1', value: '5' });
+    expect(submitVoteSpy).not.toHaveBeenCalled();
     const selectedButton = fixture.nativeElement.querySelector('.room-board__card--selected');
     expect(selectedButton?.textContent?.trim()).toBe('5');
     expect(selectedButton?.getAttribute('aria-pressed')).toBe('true');
   });
 
-  it('selectCard() a second time changes the local selection and re-submits the new value', () => {
+  it('selectCard() a second time changes the local selection, still without submitting', () => {
     getCurrentTicketSpy.mockReturnValue(of(mockTicket));
     const fixture = createHost();
     const b = board(fixture);
@@ -232,7 +234,7 @@ describe('RoomBoardComponent', () => {
     fixture.detectChanges();
 
     expect(b.selectedValue()).toBe('8');
-    expect(submitVoteSpy).toHaveBeenNthCalledWith(2, { ticketId: 'ticket-1', value: '8' });
+    expect(submitVoteSpy).not.toHaveBeenCalled();
   });
 
   it('selectCard() no-ops when no ticket is currently active', () => {
@@ -241,6 +243,75 @@ describe('RoomBoardComponent', () => {
     board(fixture).selectCard('5');
 
     expect(submitVoteSpy).not.toHaveBeenCalled();
+  });
+
+  // ── Valider (E09 — pick-then-Valider) ──
+
+  it('validateVote() submits the selected card over STOMP and locks further card changes', () => {
+    getCurrentTicketSpy.mockReturnValue(of(mockTicket));
+    const fixture = createHost();
+    const b = board(fixture);
+
+    b.selectCard('5');
+    b.validateVote();
+    fixture.detectChanges();
+
+    expect(submitVoteSpy).toHaveBeenCalledExactlyOnceWith({ ticketId: 'ticket-1', value: '5' });
+    expect(b.hasValidated()).toBe(true);
+
+    // Locked: a further card click is a no-op, no second submission.
+    b.selectCard('8');
+    fixture.detectChanges();
+    expect(b.selectedValue()).toBe('5');
+    expect(submitVoteSpy).toHaveBeenCalledOnce();
+
+    const cards = fixture.nativeElement.querySelectorAll('.room-board__card');
+    cards.forEach((card: HTMLButtonElement) => expect(card.disabled).toBe(true));
+    expect(fixture.nativeElement.querySelector('.room-board__validate')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.room-board__validated')).not.toBeNull();
+  });
+
+  it('validateVote() no-ops when no card is selected yet', () => {
+    getCurrentTicketSpy.mockReturnValue(of(mockTicket));
+    const fixture = createHost();
+    const b = board(fixture);
+
+    b.validateVote();
+
+    expect(submitVoteSpy).not.toHaveBeenCalled();
+    expect(b.hasValidated()).toBe(false);
+  });
+
+  it('validateVote() no-ops when no ticket is currently active', () => {
+    const fixture = createHost();
+
+    board(fixture).validateVote();
+
+    expect(submitVoteSpy).not.toHaveBeenCalled();
+  });
+
+  it('a new TICKET_CREATED event resets hasValidated so the next ticket starts unlocked', () => {
+    getCurrentTicketSpy.mockReturnValue(of(mockTicket));
+    const fixture = createHost();
+    const b = board(fixture);
+
+    b.selectCard('5');
+    b.validateVote();
+    expect(b.hasValidated()).toBe(true);
+
+    messages$.next(
+      JSON.stringify({
+        type: 'TICKET_CREATED',
+        roomId: ROOM_ID,
+        ticketId: 'ticket-2',
+        title: 'Next ticket',
+        createdAt: '2026-07-10T11:00:00Z',
+      }),
+    );
+    fixture.detectChanges();
+
+    expect(b.hasValidated()).toBe(false);
+    expect(b.selectedValue()).toBeNull();
   });
 
   // ── Realtime events (messages$) ──

@@ -247,3 +247,30 @@
   border-color: var(--color-success);
   background: rgba(0, 0, 0, 0.03);
 }
+
+.room-board__validate {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  border: 1px solid transparent;
+  font-size: 1rem;
+  cursor: pointer;
+  background: #0b5fff;
+  color: #fff;
+
+  &[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #0b5fff;
+    outline-offset: 1px;
+  }
+}
+
+.room-board__validated {
+  margin-top: 1rem;
+  font-weight: 600;
+  color: var(--color-success);
+}

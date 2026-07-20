@@ -25,8 +25,8 @@ import { TicketService } from '../ticket.service';
 const TITLE_MAX_LENGTH = 200;
 
 /**
- * Realtime planning poker "board" (US09.2.1): facilitator-only ticket creation, the fixed
- * Fibonacci deck as clickable cards, and a live masked "X/Y have voted" counter.
+ * Realtime planning poker "board" (US09.2.1): facilitator-only ticket creation, the room's deck
+ * (E09) as clickable cards, a live masked "X/Y have voted" counter, and the named roster.
  *
  * Mounted by both {@link CreateRoomComponent} (facilitator) and {@link JoinRoomComponent}
  * (authenticated participant and anonymous guest, US09.1.2/US09.3.1) once each has already
@@ -34,6 +34,15 @@ const TITLE_MAX_LENGTH = 200;
  * or disconnects the socket itself, only subscribes to {@link RoomWsService.messages$} and calls
  * {@link RoomWsService.submitVote}. No business logic beyond orchestration: {@link TicketService}
  * owns every HTTP call.
+ *
+ * **Pick-then-Valider (E09 — classic parity).** Clicking a card ({@link selectCard}) only
+ * highlights it locally — nothing is sent to the server. The chosen card is freely changeable
+ * until {@link validateVote} is called (the "Valider" button), which is the ONLY point a vote is
+ * actually submitted over STOMP; once validated, the cards lock ({@link hasValidated}) until the
+ * next ticket. This mirrors the classic physical/`agile-tools.fr` flow ("il peut le modifier à
+ * volonté tant qu'il n'a pas cliqué sur le bouton «Valider»") and, as a side effect, means the
+ * server (and therefore the roster's masked "has voted" square) only ever learns about a
+ * participant's vote once they have validated it — never a mid-deliberation pick.
  *
  * **Masked-until-reveal (AC):** {@link votedCount}/{@link totalParticipants} are the only
  * server-driven state derived from `VOTE_CAST` events — {@link selectedValue} (the participant's
@@ -89,6 +98,13 @@ export class RoomBoardComponent implements OnInit {
 
   /** The caller's own selected card — purely local state, never sent back by the server. */
   protected readonly selectedValue = signal<string | null>(null);
+
+  /**
+   * Whether the caller has clicked "Valider" for the current ticket (E09) — the only point
+   * {@link selectedValue} is actually submitted to the server. Locks the cards until the next
+   * ticket ({@link applyNewTicket} resets it).
+   */
+  protected readonly hasValidated = signal(false);
 
   /** Reactive form holding the new ticket's title (facilitator only). */
   protected readonly titleForm = this.formBuilder.nonNullable.group({
@@ -146,18 +162,35 @@ export class RoomBoardComponent implements OnInit {
   }
 
   /**
-   * Selects (or changes to) a card for the current ticket — highlights it locally and submits
-   * the vote over STOMP. No-ops if no ticket is currently open.
+   * Selects (or changes to) a card for the current ticket — purely local, highlights it without
+   * submitting anything to the server (E09 — pick-then-Valider). No-ops if no ticket is currently
+   * open, the ticket is not `VOTING`, or the caller has already {@link validateVote validated}
+   * their vote for this ticket (cards lock after Valider).
    *
    * @param value the chosen card value
    */
   protected selectCard(value: string): void {
     const ticket = this.currentTicket();
-    if (!ticket || ticket.status !== 'VOTING') {
+    if (!ticket || ticket.status !== 'VOTING' || this.hasValidated()) {
       return;
     }
     this.selectedValue.set(value);
+  }
+
+  /**
+   * Submits the currently selected card as the caller's final vote for this ticket (E09 —
+   * "Valider" button) and locks further card changes ({@link hasValidated}) until the next
+   * ticket. No-ops if no ticket is open, it is not `VOTING`, no card is selected yet, or a vote
+   * was already validated for this ticket.
+   */
+  protected validateVote(): void {
+    const ticket = this.currentTicket();
+    const value = this.selectedValue();
+    if (!ticket || ticket.status !== 'VOTING' || value === null || this.hasValidated()) {
+      return;
+    }
     this.roomWs.submitVote({ ticketId: ticket.id, value });
+    this.hasValidated.set(true);
   }
 
   /**
@@ -209,6 +242,7 @@ export class RoomBoardComponent implements OnInit {
     this.currentTicket.set(ticket);
     this.votedCount.set(0);
     this.selectedValue.set(null);
+    this.hasValidated.set(false);
     this.revealedValues.set(null);
     this.consensus.set(null);
     this.revealErrorKey.set(null);

@@ -109,8 +109,12 @@ export interface VotesRevealedEvent {
 /**
  * One entry of a room's live named roster (E09 — classic parity). `hasVoted` is the only
  * vote-related signal exposed while a ticket is open (masked-until-reveal is preserved — the
- * chosen card value is never carried here). Always `false` for a `VISITEUR` and when no ticket
- * is open. Mirrors the backend `RosterParticipant`; identity (token/hash) is never included.
+ * chosen card value is never carried here). Because the board only ever submits a vote once the
+ * participant clicks "Valider" (see `RoomBoardComponent#validateVote`) — never on a mid-
+ * deliberation card pick — this effectively reflects "has validated their vote", matching the
+ * classic tool's empty-square-until-Valider square. Always `false` for a `VISITEUR` and when no
+ * ticket is open. Mirrors the backend `RosterParticipant`; identity (token/hash) is never
+ * included.
  */
 export interface RosterParticipant {
   readonly name: string;
