@@ -521,6 +521,35 @@ describe('convertKlaxoon', () => {
     expect(cards[0].height).toBe(5980); // 2990 × 2
   });
 
+  it('anchors an imageboard image by its centre (Klaxoon centre coords), unlike top-left objects', () => {
+    const imageMap = new Map([['mediabundle/aa/t.png', 'data:image/png;base64,CCC']]);
+    const data: KlxRawData = {
+      colors: [], ideas: [],
+      state: [
+        // Text: coords are the top-left.
+        {
+          uuid: 'txt', is_active: true, board_object_type: 'text',
+          coords: { left: 1000, top: 0 }, content_html: '<span style="font-size:16px">x</span>',
+          scale: { scale_x: 1 }, z_index: 0,
+        },
+        // Image centred on the SAME point, 400×200 → its top-left is half its size up/left.
+        {
+          uuid: 'img', is_active: true, board_object_type: 'imageboard',
+          path: 'mediabundle/aa/t.png', width: 400, height: 200,
+          scale: { scale_x: 1, scale_y: 1 }, coords: { left: 1000, top: 0 }, z_index: 0,
+        },
+      ],
+      links: [], groups: [],
+    };
+    const { cards } = convertKlaxoon(data, imageMap);
+    const txt = cards.find((c) => c.type === 'LABEL')!;
+    const img = cards.find((c) => c.type === 'IMAGE')!;
+    // Same centre point, but the image top-left is half its size (200×100) to the up-left
+    // of the text top-left — offset-independent proof of the centre anchoring.
+    expect(img.posX).toBe(txt.posX - 200);
+    expect(img.posY).toBe(txt.posY - 100);
+  });
+
   // ── Textes : font-size html × scale, gras, couleur ─────────────────────────
 
   it('derives label size from the content_html font-size times the scale, uncapped', () => {

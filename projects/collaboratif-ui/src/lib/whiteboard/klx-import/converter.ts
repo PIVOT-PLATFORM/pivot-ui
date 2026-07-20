@@ -427,9 +427,17 @@ export function convertKlaxoon(data: KlxRawData, imageMap?: Map<string, string>,
     // position — path coordinates live in a local drawing space. Zones frame
     // the whole board and often define its true top-left corner.
     const t = item.board_object_type;
-    if (t === 'text' || t === 'pen' || t === 'brush' || t === 'imageboard' || t === 'zone') {
+    if (t === 'text' || t === 'pen' || t === 'brush' || t === 'zone') {
       minX = Math.min(minX, item.coords?.left ?? 0);
       minY = Math.min(minY, item.coords?.top ?? 0);
+    } else if (t === 'imageboard') {
+      // imageboard coords are the CENTRE of the image (unlike every other
+      // object, whose coords are the top-left) — use the true top-left edge so
+      // the global margin accounts for a wide image's real extent.
+      const w = (item.width ?? 200) * (item.scale?.scale_x ?? 1);
+      const h = (item.height ?? 150) * (item.scale?.scale_y ?? 1);
+      minX = Math.min(minX, (item.coords?.left ?? 0) - w / 2);
+      minY = Math.min(minY, (item.coords?.top ?? 0) - h / 2);
     }
   }
   if (!isFinite(minX)) minX = 0;
@@ -705,8 +713,12 @@ export function convertKlaxoon(data: KlxRawData, imageMap?: Map<string, string>,
         type: 'IMAGE',
         content: dataUrl,
         color: 'transparent',
-        posX: Math.round((item.coords?.left ?? 0) - ox),
-        posY: Math.round((item.coords?.top ?? 0) - oy),
+        // imageboard coords are the CENTRE of the image — convert to the card's
+        // top-left. Treating them as top-left shifted images right/down by half
+        // their size (invisible on small icons, but a wide title image landed
+        // ~half its width too far right, overlapping neighbouring content).
+        posX: Math.round((item.coords?.left ?? 0) - cardW / 2 - ox),
+        posY: Math.round((item.coords?.top ?? 0) - cardH / 2 - oy),
         width: cardW,
         height: cardH,
         zIndex: item.z_index ?? 0,
