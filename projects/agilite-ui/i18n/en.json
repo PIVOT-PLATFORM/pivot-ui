@@ -380,6 +380,8 @@
       "createTicket": "Create ticket",
       "creatingTicket": "Creating…",
       "cardsLabel": "Voting cards",
+      "validate": "Confirm",
+      "validated": "Vote confirmed — waiting for the reveal.",
       "votedCounter": "{{voted}}/{{total}} have voted",
       "rosterHeading": "Participants ({{count}})",
       "roleVisiteur": "Visitor",

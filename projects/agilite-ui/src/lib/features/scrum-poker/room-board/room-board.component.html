@@ -91,13 +91,30 @@
             class="room-board__card"
             [class.room-board__card--selected]="selectedValue() === value"
             [attr.aria-pressed]="selectedValue() === value"
-            [disabled]="ticket.status === 'REVEALED'"
+            [disabled]="ticket.status === 'REVEALED' || hasValidated()"
             (click)="selectCard(value)"
           >
             {{ value }}
           </button>
         }
       </div>
+
+      @if (ticket.status === 'VOTING') {
+        @if (!hasValidated()) {
+          <button
+            type="button"
+            class="room-board__validate"
+            [disabled]="selectedValue() === null"
+            (click)="validateVote()"
+          >
+            {{ 'scrumPoker.roomBoard.validate' | transloco }}
+          </button>
+        } @else {
+          <p class="room-board__validated" role="status" aria-live="polite">
+            {{ 'scrumPoker.roomBoard.validated' | transloco }}
+          </p>
+        }
+      }
 
       <p class="room-board__counter" role="status" aria-live="polite">
         {{ 'scrumPoker.roomBoard.votedCounter' | transloco: counterParams() }}
