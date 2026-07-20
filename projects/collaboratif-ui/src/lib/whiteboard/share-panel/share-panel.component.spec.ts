@@ -63,14 +63,16 @@ const FR: Record<string, unknown> = {
   },
 };
 
+// userId est un number : le backend sérialise public.users.id (Long). Des fixtures en UUID
+// string rendaient `slice:0:8` valide en test alors qu'il jette NG02100 en production.
 const OWNER: BoardMember = {
-  userId: 'user-owner-aaaa-aaaa-aaaaaaaaaaaa',
+  userId: 101,
   role: 'OWNER',
   joinedAt: '2026-07-01T00:00:00Z',
 };
 
 const EDITOR: BoardMember = {
-  userId: 'user-edit-bbbb-bbbb-bbbbbbbbbbbb',
+  userId: 202,
   role: 'EDITOR',
   joinedAt: '2026-07-02T00:00:00Z',
 };
@@ -139,6 +141,21 @@ describe('SharePanelComponent', () => {
     expect(fixture.nativeElement.querySelector(`#role-${EDITOR.userId}`)).toBeTruthy();
   });
 
+  // ── Non-régression : identifiant numérique rendu tel quel ──
+  // Le backend renvoie `public.users.id` (Long) : la cellule identifiant appliquait `slice:0:8`
+  // dessus, ce qui jette NG02100 InvalidPipeArgument et vide TOUTE la ligne. Le bug était
+  // invisible en test parce que les fixtures utilisaient des UUID string, sur lesquels `slice`
+  // est valide. Ce test échoue si le pipe est réintroduit.
+  it('renders a numeric member id without piping it through slice (NG02100 regression)', () => {
+    fixture.detectChanges();
+    httpMock.expectOne(MEMBERS_URL).flush([OWNER]);
+    fixture.detectChanges();
+
+    const idCell: HTMLElement = fixture.nativeElement.querySelector('.share-panel__td--id');
+    expect(idCell).toBeTruthy();
+    expect(idCell.textContent?.trim()).toBe(String(OWNER.userId));
+  });
+
   // ── Error loading members ──
   it('shows error message when member list fails to load', () => {
     fixture.detectChanges();
@@ -190,7 +207,7 @@ describe('SharePanelComponent', () => {
     expect(req.request.body).toEqual({ email: 'new@pivot.invalid', role: 'VIEWER' });
 
     const newMember: BoardMember = {
-      userId: 'user-new-cccc-cccc-cccccccccccc',
+      userId: 303,
       role: 'VIEWER',
       joinedAt: '2026-07-10T00:00:00Z',
     };
@@ -199,7 +216,7 @@ describe('SharePanelComponent', () => {
 
     expect(toastSpy).toHaveBeenCalledWith('whiteboard.share.panel.invite.success', 'success');
     expect((fixture.nativeElement.querySelector('#invite-email-input') as HTMLInputElement).value).toBe('');
-    expect(fixture.nativeElement.textContent).toContain('user-new');
+    expect(fixture.nativeElement.textContent).toContain(String(newMember.userId));
   });
 
   // ── Invite by e-mail — success (re-invite updates existing member) ──

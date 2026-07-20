@@ -1,8 +1,16 @@
 import type { KlxCard, KlxConnection, KlxField, KlxFrame } from '../../whiteboard/klx-import/converter';
 
-/** A board member as returned by GET /whiteboard/boards/{boardId}/members. */
+/**
+ * A board member as returned by GET /whiteboard/boards/{boardId}/members.
+ *
+ * `userId` is a **number**: the backend serialises `public.users.id`, a `Long`
+ * (`MemberResponse(Long userId, ...)`), so the JSON payload carries a numeric literal — not the
+ * UUID string this interface used to declare. Typing it `string` made the template apply
+ * `slice:0:8` to a number, which throws `NG02100 InvalidPipeArgument` and blanks the whole
+ * members table.
+ */
 export interface BoardMember {
-  userId: string;
+  userId: number;
   role: 'OWNER' | 'EDITOR' | 'VIEWER';
   joinedAt: string;
 }

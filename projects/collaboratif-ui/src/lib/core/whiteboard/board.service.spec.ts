@@ -244,8 +244,8 @@ describe('BoardService', () => {
   it('listMembers() sends GET to /boards/{boardId}/members', () => {
     const boardId = 'board-m1';
     const members: BoardMember[] = [
-      { userId: 'user-1', role: 'OWNER', joinedAt: '2026-07-01T00:00:00Z' },
-      { userId: 'user-2', role: 'EDITOR', joinedAt: '2026-07-02T00:00:00Z' },
+      { userId: 1, role: 'OWNER', joinedAt: '2026-07-01T00:00:00Z' },
+      { userId: 2, role: 'EDITOR', joinedAt: '2026-07-02T00:00:00Z' },
     ];
 
     let result: BoardMember[] | undefined;
@@ -267,7 +267,7 @@ describe('BoardService', () => {
   // ── inviteMember ──
   it('inviteMember() sends POST with email and role in body', () => {
     const boardId = 'board-m1';
-    const member: BoardMember = { userId: 'user-3', role: 'VIEWER', joinedAt: '2026-07-10T00:00:00Z' };
+    const member: BoardMember = { userId: 3, role: 'VIEWER', joinedAt: '2026-07-10T00:00:00Z' };
 
     let result: BoardMember | undefined;
     service.inviteMember(boardId, 'someone@pivot.invalid', 'VIEWER').subscribe(r => { result = r; });
@@ -361,7 +361,7 @@ describe('BoardService', () => {
   // ── updateMemberRole ──
   it('updateMemberRole() sends PATCH with role in body', () => {
     const boardId = 'board-u1';
-    const userId = 'user-u1';
+    const userId = 11;
     const updated: BoardMember = { userId, role: 'VIEWER', joinedAt: '2026-07-01T00:00:00Z' };
 
     let result: BoardMember | undefined;
@@ -376,15 +376,15 @@ describe('BoardService', () => {
 
   it('updateMemberRole() propagates HTTP errors', () => {
     let caught = false;
-    service.updateMemberRole('bid', 'uid', 'EDITOR').subscribe({ error: () => { caught = true; } });
-    httpMock.expectOne(`${BASE}/bid/members/uid/role`).flush('', { status: 400, statusText: 'Bad Request' });
+    service.updateMemberRole('bid', 42, 'EDITOR').subscribe({ error: () => { caught = true; } });
+    httpMock.expectOne(`${BASE}/bid/members/42/role`).flush('', { status: 400, statusText: 'Bad Request' });
     expect(caught).toBe(true);
   });
 
   // ── removeMember ──
   it('removeMember() sends DELETE to /boards/{boardId}/members/{userId}', () => {
     const boardId = 'board-rm1';
-    const userId = 'user-rm1';
+    const userId = 12;
     let completed = false;
 
     service.removeMember(boardId, userId).subscribe({ complete: () => { completed = true; } });
@@ -397,8 +397,8 @@ describe('BoardService', () => {
 
   it('removeMember() propagates HTTP errors', () => {
     let caught = false;
-    service.removeMember('bid', 'uid').subscribe({ error: () => { caught = true; } });
-    httpMock.expectOne(`${BASE}/bid/members/uid`).flush('', { status: 403, statusText: 'Forbidden' });
+    service.removeMember('bid', 42).subscribe({ error: () => { caught = true; } });
+    httpMock.expectOne(`${BASE}/bid/members/42`).flush('', { status: 403, statusText: 'Forbidden' });
     expect(caught).toBe(true);
   });
 
