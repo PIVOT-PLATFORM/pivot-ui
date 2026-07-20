@@ -17,6 +17,7 @@ describe('CreateRoomComponent', () => {
     sequence: 'FIBONACCI',
     cardValues: ['0', '1', '2', '3', '5', '8', '13', '21', '34', '55', '89', '?'],
     facilitatorUserId: 7,
+    facilitatorVotes: true,
     active: true,
     createdAt: '2026-07-10T10:00:00Z',
     expiresAt: '2026-07-11T10:00:00Z',
@@ -111,7 +112,8 @@ describe('CreateRoomComponent', () => {
 
   /**
    * Given a valid room name, when the form is submitted, then RoomService.createRoom() is
-   * called with that name and, on success, the created room becomes visible.
+   * called with that name plus the default deck (FIBONACCI) and facilitatorVotes (true) and, on
+   * success, the created room becomes visible.
    */
   it('submits a valid name and displays the created room', () => {
     const fixture = TestBed.createComponent(CreateRoomComponent);
@@ -126,8 +128,46 @@ describe('CreateRoomComponent', () => {
     component.onSubmit();
     fixture.detectChanges();
 
-    expect(createRoomSpy).toHaveBeenCalledWith({ name: 'Sprint 8 estimation' });
+    expect(createRoomSpy).toHaveBeenCalledWith({
+      name: 'Sprint 8 estimation',
+      deck: 'FIBONACCI',
+      facilitatorVotes: true,
+    });
     expect(component.createdRoom()).toEqual(mockRoom);
+  });
+
+  /**
+   * Given a chosen deck, a facilitator name, and the facilitator-votes toggle turned off, when
+   * submitted, then RoomService.createRoom() is called with all of them (E09 — deck choice).
+   */
+  it('submits the chosen deck, facilitatorVotes=false, and a trimmed facilitator name', () => {
+    const fixture = TestBed.createComponent(CreateRoomComponent);
+    fixture.detectChanges();
+    const component = fixture.componentInstance as unknown as {
+      form: {
+        controls: {
+          name: { setValue: (v: string) => void };
+          deck: { setValue: (v: string) => void };
+          facilitatorVotes: { setValue: (v: boolean) => void };
+          facilitatorName: { setValue: (v: string) => void };
+        };
+      };
+      onSubmit: () => void;
+    };
+
+    component.form.controls.name.setValue('Room');
+    component.form.controls.deck.setValue('TSHIRT');
+    component.form.controls.facilitatorVotes.setValue(false);
+    component.form.controls.facilitatorName.setValue('  Alex  ');
+    component.onSubmit();
+    fixture.detectChanges();
+
+    expect(createRoomSpy).toHaveBeenCalledWith({
+      name: 'Room',
+      deck: 'TSHIRT',
+      facilitatorVotes: false,
+      facilitatorName: 'Alex',
+    });
   });
 
   /**
@@ -300,6 +340,99 @@ describe('CreateRoomComponent', () => {
 
     expect(writeText).toHaveBeenCalledWith('K7M2XQ');
     expect(component.copyAnnouncementKey()).toBe('scrumPoker.createRoom.copySuccess');
+  });
+
+  // ── Shareable room URL (E09 — classic parity) ──
+
+  /**
+   * Given no room created yet, when copyShareUrl() is called, then it no-ops (no clipboard call,
+   * no announcement) rather than throwing.
+   */
+  it('copyShareUrl() no-ops when no room was created', () => {
+    const writeText = vi.fn();
+    Object.assign(navigator, { clipboard: { writeText } });
+
+    const fixture = TestBed.createComponent(CreateRoomComponent);
+    fixture.detectChanges();
+    const component = fixture.componentInstance as unknown as {
+      copyShareUrl: () => void;
+      shareUrlCopyAnnouncementKey: () => string | null;
+      shareUrl: () => string | null;
+    };
+
+    expect(component.shareUrl()).toBeNull();
+    component.copyShareUrl();
+
+    expect(writeText).not.toHaveBeenCalled();
+    expect(component.shareUrlCopyAnnouncementKey()).toBeNull();
+  });
+
+  /**
+   * Given a created room, then the computed shareUrl carries the join screen's path (sibling of
+   * this page, `.../new` swapped for `.../join`) with the invite code as a `?code=` query
+   * parameter — and copying it announces success (for screen reader users).
+   */
+  it('computes the shareable join URL and announces success after copying it', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+    // Explicitly control the page URL (rather than relying on jsdom's default) — this component
+    // is only ever rendered at the "…/rooms/new" route in the real app.
+    window.history.pushState({}, '', '/agilite/scrum-poker/rooms/new');
+
+    const fixture = TestBed.createComponent(CreateRoomComponent);
+    fixture.detectChanges();
+    const component = fixture.componentInstance as unknown as {
+      form: { controls: { name: { setValue: (v: string) => void } } };
+      onSubmit: () => void;
+      copyShareUrl: () => void;
+      shareUrl: () => string | null;
+      shareUrlCopyAnnouncementKey: () => string | null;
+    };
+
+    component.form.controls.name.setValue('Room');
+    component.onSubmit();
+    fixture.detectChanges();
+
+    const url = component.shareUrl();
+    expect(url).not.toBeNull();
+    expect(url).toContain('code=K7M2XQ');
+    expect(url).toContain('/join?');
+    expect(url).not.toContain('/new');
+
+    component.copyShareUrl();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(writeText).toHaveBeenCalledWith(url);
+    expect(component.shareUrlCopyAnnouncementKey()).toBe('scrumPoker.createRoom.shareUrlCopySuccess');
+  });
+
+  /**
+   * Given a created room, when copyShareUrl() is called and the clipboard write fails, then the
+   * share-url copy-error announcement key is set instead of throwing.
+   */
+  it('announces an error when copying the share URL fails', async () => {
+    const writeText = vi.fn().mockRejectedValue(new Error('denied'));
+    Object.assign(navigator, { clipboard: { writeText } });
+
+    const fixture = TestBed.createComponent(CreateRoomComponent);
+    fixture.detectChanges();
+    const component = fixture.componentInstance as unknown as {
+      form: { controls: { name: { setValue: (v: string) => void } } };
+      onSubmit: () => void;
+      copyShareUrl: () => void;
+      shareUrlCopyAnnouncementKey: () => string | null;
+    };
+
+    component.form.controls.name.setValue('Room');
+    component.onSubmit();
+    fixture.detectChanges();
+
+    component.copyShareUrl();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(component.shareUrlCopyAnnouncementKey()).toBe('scrumPoker.createRoom.shareUrlCopyError');
   });
 
   /**
