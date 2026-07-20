@@ -181,7 +181,7 @@
           @for (member of members(); track member.userId) {
             <tr class="share-panel__tr">
               <td class="share-panel__td share-panel__td--id">
-                {{ member.userId | slice:0:8 }}…
+                {{ member.userId }}
               </td>
               <td class="share-panel__td">
                 @if (member.role === 'OWNER') {

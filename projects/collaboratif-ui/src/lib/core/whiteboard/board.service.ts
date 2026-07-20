@@ -227,7 +227,7 @@ export class BoardService {
   }
 
   /** Updates a member's role (OWNER only — EDITOR or VIEWER). */
-  updateMemberRole(boardId: string, userId: string, role: 'EDITOR' | 'VIEWER'): Observable<BoardMember> {
+  updateMemberRole(boardId: string, userId: number, role: 'EDITOR' | 'VIEWER'): Observable<BoardMember> {
     return this.http.patch<BoardMember>(
       `${this.apiUrl}/whiteboard/boards/${boardId}/members/${userId}/role`,
       { role },
@@ -235,7 +235,7 @@ export class BoardService {
   }
 
   /** Removes a member from a board (OWNER only). */
-  removeMember(boardId: string, userId: string): Observable<void> {
+  removeMember(boardId: string, userId: number): Observable<void> {
     return this.http.delete<void>(
       `${this.apiUrl}/whiteboard/boards/${boardId}/members/${userId}`,
     );

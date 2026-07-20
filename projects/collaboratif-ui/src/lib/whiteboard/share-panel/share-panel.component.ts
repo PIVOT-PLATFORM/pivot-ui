@@ -52,8 +52,8 @@ export class SharePanelComponent implements OnInit {
   protected readonly linkCopied = signal(false);
   protected readonly clipboardFailed = signal(false);
   protected readonly confirmRemoveMember = signal<BoardMember | null>(null);
-  protected readonly updatingRoleForUserId = signal<string | null>(null);
-  protected readonly removingMemberId = signal<string | null>(null);
+  protected readonly updatingRoleForUserId = signal<number | null>(null);
+  protected readonly removingMemberId = signal<number | null>(null);
   protected readonly inviteEmail = signal('');
   protected readonly inviteRole = signal<'EDITOR' | 'VIEWER'>('EDITOR');
   protected readonly inviteStatus = signal<'idle' | 'sending' | 'error'>('idle');
