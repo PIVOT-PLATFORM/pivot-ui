@@ -47,12 +47,23 @@ export interface ProblemDetailResponse {
 }
 
 /**
+ * A participant's role in a room (E09 — classic parity). Only a `JOUEUR` casts votes; a
+ * `VISITEUR` watches (present in the roster, never counted as a voter). Mirrors the backend
+ * `ParticipantRole`; the server defaults to `JOUEUR` when absent/unknown.
+ */
+export type ParticipantRole = 'JOUEUR' | 'VISITEUR';
+
+/**
  * Request body for `POST /api/agilite/poker/rooms/join` (US09.1.2). The code is uppercased
  * client-side before sending — the backend does not normalize case, and the existing
- * `InviteCodeGenerator` alphabet is uppercase-only.
+ * `InviteCodeGenerator` alphabet is uppercase-only. `displayName`/`role` (E09) name the
+ * participant in the room's live roster; both are optional (the backend substitutes a default
+ * name and `JOUEUR`).
  */
 export interface JoinRoomRequest {
   readonly code: string;
+  readonly displayName?: string;
+  readonly role?: ParticipantRole;
 }
 
 /**
@@ -83,6 +94,7 @@ export interface JoinRoomResponse {
 export interface AnonymousJoinRequest {
   readonly code: string;
   readonly pseudonym?: string;
+  readonly role?: ParticipantRole;
 }
 
 /**

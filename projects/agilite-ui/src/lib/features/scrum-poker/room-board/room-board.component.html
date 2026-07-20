@@ -1,6 +1,40 @@
 <section class="room-board" aria-labelledby="room-board-heading">
   <h2 id="room-board-heading">{{ 'scrumPoker.roomBoard.heading' | transloco }}</h2>
 
+  @if (roster().length > 0) {
+    <aside class="room-board__roster" aria-labelledby="roster-heading">
+      <h3 id="roster-heading" class="room-board__roster-heading">
+        {{ 'scrumPoker.roomBoard.rosterHeading' | transloco: { count: roster().length } }}
+      </h3>
+      <ul class="room-board__roster-list">
+        @for (participant of roster(); track $index) {
+          <li class="room-board__roster-item">
+            <span class="room-board__roster-avatar" aria-hidden="true">{{ participant.name.charAt(0) }}</span>
+            <span class="room-board__roster-name">{{ participant.name }}</span>
+            @if (participant.role === 'JOUEUR') {
+              <span
+                class="room-board__vote-square"
+                [class.room-board__vote-square--voted]="participant.hasVoted"
+                [attr.aria-label]="
+                  (participant.hasVoted ? 'scrumPoker.roomBoard.hasVoted' : 'scrumPoker.roomBoard.notVoted')
+                    | transloco
+                "
+              >
+                @if (participant.hasVoted) {
+                  <span aria-hidden="true">✓</span>
+                }
+              </span>
+            } @else {
+              <span class="room-board__roster-role">
+                {{ 'scrumPoker.roomBoard.roleVisiteur' | transloco }}
+              </span>
+            }
+          </li>
+        }
+      </ul>
+    </aside>
+  }
+
   @if (isFacilitator() && (!currentTicket() || currentTicket()?.status === 'REVEALED')) {
     <form class="room-board__create-ticket" [formGroup]="titleForm" (ngSubmit)="createTicket()" novalidate>
       <div class="room-board__field">

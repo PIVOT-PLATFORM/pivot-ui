@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { Subject, of, throwError } from 'rxjs';
 import { RoomWsService } from '../room-ws.service';
@@ -68,6 +69,7 @@ describe('JoinRoomComponent', () => {
           },
         },
         { provide: TicketService, useValue: { createTicket: vi.fn(), getCurrentTicket: vi.fn().mockReturnValue(of(null)) } },
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: { get: (): string | null => null } } } },
       ],
     }).compileComponents();
   });
@@ -75,6 +77,21 @@ describe('JoinRoomComponent', () => {
   it('should create', () => {
     const fixture = TestBed.createComponent(JoinRoomComponent);
     expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  it('pre-fills (and uppercases) the invite code from a ?code= query parameter — shared link join', () => {
+    TestBed.overrideProvider(ActivatedRoute, {
+      useValue: { snapshot: { queryParamMap: { get: (k: string): string | null => (k === 'code' ? 'abc234' : null) } } },
+    });
+    const fixture = TestBed.createComponent(JoinRoomComponent);
+    fixture.detectChanges();
+    const component = fixture.componentInstance as unknown as {
+      form: { controls: { code: { value: string } } };
+      anonymousForm: { controls: { code: { value: string } } };
+    };
+
+    expect(component.form.controls.code.value).toBe('ABC234');
+    expect(component.anonymousForm.controls.code.value).toBe('ABC234');
   });
 
   /**
@@ -161,7 +178,7 @@ describe('JoinRoomComponent', () => {
     component.onSubmit();
     fixture.detectChanges();
 
-    expect(joinRoomSpy).toHaveBeenCalledWith({ code: 'K7M2XQ' });
+    expect(joinRoomSpy).toHaveBeenCalledWith({ code: 'K7M2XQ', role: 'JOUEUR' });
     expect(component.joinedRoom()).toEqual(mockRoom);
     expect(wsConnectSpy).toHaveBeenCalledWith(mockRoom.wsTopic, mockRoom.accessToken, mockRoom.roomId);
   });
@@ -464,7 +481,7 @@ describe('JoinRoomComponent', () => {
     component.onSubmitAnonymous();
     fixture.detectChanges();
 
-    expect(joinAnonymousSpy).toHaveBeenCalledWith({ code: 'K7M2XQ' });
+    expect(joinAnonymousSpy).toHaveBeenCalledWith({ code: 'K7M2XQ', role: 'JOUEUR' });
     expect(component.joinedAnonymousRoom()).toEqual(mockAnonymousRoom);
     expect(wsConnectSpy).toHaveBeenCalledWith(
       mockAnonymousRoom.wsTopic,
@@ -488,7 +505,7 @@ describe('JoinRoomComponent', () => {
     component.anonymousForm.controls.pseudonym.setValue('  Alex  ');
     component.onSubmitAnonymous();
 
-    expect(joinAnonymousSpy).toHaveBeenCalledWith({ code: 'K7M2XQ', pseudonym: 'Alex' });
+    expect(joinAnonymousSpy).toHaveBeenCalledWith({ code: 'K7M2XQ', pseudonym: 'Alex', role: 'JOUEUR' });
   });
 
   /**

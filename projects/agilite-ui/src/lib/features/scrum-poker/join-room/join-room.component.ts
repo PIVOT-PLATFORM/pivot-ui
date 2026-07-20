@@ -1,11 +1,17 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, OnDestroy, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { Subscription, interval, switchMap } from 'rxjs';
 import { RoomBoardComponent } from '../room-board/room-board.component';
 import { RoomWsService } from '../room-ws.service';
-import { AnonymousJoinResponse, JoinRoomResponse, ProblemDetailResponse } from '../room.model';
+import {
+  AnonymousJoinResponse,
+  JoinRoomResponse,
+  ParticipantRole,
+  ProblemDetailResponse,
+} from '../room.model';
 import { RoomService } from '../room.service';
 
 /** Exact invite code length accepted by the backend (US09.1.1's `InviteCodeGenerator`). */
@@ -13,6 +19,9 @@ const CODE_LENGTH = 6;
 
 /** Maximum pseudonym length accepted by the backend for anonymous participation (US09.3.1). */
 const PSEUDONYM_MAX_LENGTH = 40;
+
+/** Maximum display name length accepted by the backend for the roster (E09). */
+const DISPLAY_NAME_MAX_LENGTH = 40;
 
 /**
  * Interval between guest-session heartbeats (US09.3.1) — well under the backend's 2h-inactivity
@@ -41,24 +50,28 @@ export type JoinMode = 'authenticated' | 'anonymous';
   templateUrl: './join-room.component.html',
   styleUrl: './join-room.component.scss',
 })
-export class JoinRoomComponent implements OnDestroy {
+export class JoinRoomComponent implements OnInit, OnDestroy {
   private readonly roomService = inject(RoomService);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
   /** Injected (not wrapped) — its `status` signal is read directly from the template. */
   protected readonly roomWs = inject(RoomWsService);
 
   /** Which join flow is currently shown — toggled while no room is joined yet. */
   protected readonly mode = signal<JoinMode>('authenticated');
 
-  /** Reactive form holding the room invite code (authenticated join, US09.1.2). */
+  /** Reactive form holding the invite code, display name and role (authenticated join, US09.1.2). */
   protected readonly form = this.formBuilder.nonNullable.group({
     code: ['', [Validators.required, Validators.minLength(CODE_LENGTH), Validators.maxLength(CODE_LENGTH)]],
+    displayName: ['', [Validators.maxLength(DISPLAY_NAME_MAX_LENGTH)]],
+    role: ['JOUEUR' as ParticipantRole],
   });
 
-  /** Reactive form holding the invite code and optional pseudonym (anonymous join, US09.3.1). */
+  /** Reactive form holding the invite code, pseudonym and role (anonymous join, US09.3.1). */
   protected readonly anonymousForm = this.formBuilder.nonNullable.group({
     code: ['', [Validators.required, Validators.minLength(CODE_LENGTH), Validators.maxLength(CODE_LENGTH)]],
     pseudonym: ['', [Validators.maxLength(PSEUDONYM_MAX_LENGTH)]],
+    role: ['JOUEUR' as ParticipantRole],
   });
 
   /** True while the join request is in flight — disables the submit button. */
@@ -81,6 +94,20 @@ export class JoinRoomComponent implements OnDestroy {
 
   /** Active guest-session heartbeat subscription, or `null` when no anonymous session is open. */
   private heartbeatSubscription: Subscription | null = null;
+
+  /**
+   * Pre-fills the invite code from a `?code=` query parameter, so a shared room link
+   * (`…/scrum-poker/rooms/join?code=ABC234`) lands the participant on the join form with the code
+   * already filled — they only add their name and pick a role (E09 shareable-link join).
+   */
+  ngOnInit(): void {
+    const code = this.route.snapshot.queryParamMap.get('code');
+    if (code) {
+      const normalized = code.trim().toUpperCase().slice(0, CODE_LENGTH);
+      this.form.controls.code.setValue(normalized);
+      this.anonymousForm.controls.code.setValue(normalized);
+    }
+  }
 
   ngOnDestroy(): void {
     this.roomWs.disconnect();
@@ -112,8 +139,15 @@ export class JoinRoomComponent implements OnDestroy {
     this.submitting.set(true);
     this.errorMessageKey.set(null);
 
-    const code = this.form.getRawValue().code.trim().toUpperCase();
-    this.roomService.joinRoom({ code }).subscribe({
+    const { code, displayName, role } = this.form.getRawValue();
+    const trimmedName = displayName.trim();
+    this.roomService
+      .joinRoom({
+        code: code.trim().toUpperCase(),
+        ...(trimmedName ? { displayName: trimmedName } : {}),
+        role,
+      })
+      .subscribe({
       next: (room) => {
         this.submitting.set(false);
         this.joinedRoom.set(room);
@@ -141,12 +175,13 @@ export class JoinRoomComponent implements OnDestroy {
     this.anonymousSubmitting.set(true);
     this.anonymousErrorMessageKey.set(null);
 
-    const { code, pseudonym } = this.anonymousForm.getRawValue();
+    const { code, pseudonym, role } = this.anonymousForm.getRawValue();
     const trimmedPseudonym = pseudonym.trim();
     this.roomService
       .joinAnonymous({
         code: code.trim().toUpperCase(),
         ...(trimmedPseudonym ? { pseudonym: trimmedPseudonym } : {}),
+        role,
       })
       .subscribe({
         next: (room) => {

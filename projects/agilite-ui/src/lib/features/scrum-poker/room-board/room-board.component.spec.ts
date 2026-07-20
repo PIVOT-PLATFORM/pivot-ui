@@ -33,6 +33,7 @@ type BoardHarness = {
   revealErrorKey: () => string | null;
   revealedValues: () => readonly string[] | null;
   consensus: () => ConsensusResponse | null;
+  roster: () => readonly { name: string; role: string; hasVoted: boolean }[];
 };
 
 /** Host component so `roomId`/`cardValues`/`isFacilitator` inputs can be exercised. */
@@ -268,6 +269,35 @@ describe('RoomBoardComponent', () => {
     });
     expect(b.votedCount()).toBe(0);
     expect(b.selectedValue()).toBeNull();
+  });
+
+  it('applies a ROSTER_UPDATED event: renders each named participant with a masked vote square', () => {
+    const fixture = createHost();
+    const b = board(fixture);
+
+    messages$.next(
+      JSON.stringify({
+        type: 'ROSTER_UPDATED',
+        roomId: ROOM_ID,
+        participants: [
+          { name: 'Alice', role: 'JOUEUR', hasVoted: true },
+          { name: 'Bob', role: 'JOUEUR', hasVoted: false },
+          { name: 'Carol', role: 'VISITEUR', hasVoted: false },
+        ],
+      }),
+    );
+    fixture.detectChanges();
+
+    expect(b.roster().length).toBe(3);
+    const names = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('.room-board__roster-name'),
+    ).map((el) => el.textContent?.trim());
+    expect(names).toEqual(['Alice', 'Bob', 'Carol']);
+    // Only the two JOUEURs get a vote square; Alice (voted) is marked, Bob (not voted) is not.
+    const squares = (fixture.nativeElement as HTMLElement).querySelectorAll('.room-board__vote-square');
+    expect(squares.length).toBe(2);
+    expect(squares[0].classList.contains('room-board__vote-square--voted')).toBe(true);
+    expect(squares[1].classList.contains('room-board__vote-square--voted')).toBe(false);
   });
 
   it('applies a VOTE_CAST event: updates the masked counters, never a card value', () => {
