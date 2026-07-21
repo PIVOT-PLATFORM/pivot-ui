@@ -63,7 +63,19 @@ const FR_TRANSLATIONS = {
       backToList: 'Retour à la liste des tableaux',
     },
     share: { panel: { title: 'Partager' } },
-    activities: { open: 'Activités', title: 'Activités', close: 'Fermer', recentSection: '', items: {} },
+    activities: {
+      open: 'Activités',
+      title: 'Activités',
+      close: 'Fermer',
+      recentSection: '',
+      soon: 'Bientôt disponible',
+      items: {},
+      templates: {
+        brainstorming: { ideas: 'Brainstorming — vos idées' },
+        icebreaker: { question: 'Icebreaker — la question du jour' },
+        retro: { wentWell: 'Ce qui a bien marché', toImprove: 'À améliorer', actions: "Plan d'action" },
+      },
+    },
     groups: { title: 'Groupes' },
     voteResults: { title: 'Résultats' },
     connector: {
@@ -123,7 +135,14 @@ describe('BoardPageComponent — activities panel wiring', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [BoardPageComponent],
+      imports: [
+        BoardPageComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { fr: FR_TRANSLATIONS },
+          translocoConfig: { defaultLang: 'fr', availableLangs: ['fr'] },
+          preloadLangs: true,
+        }),
+      ],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
@@ -145,7 +164,7 @@ describe('BoardPageComponent — activities panel wiring', () => {
     expect(create().showActivities()).toBe(false);
   });
 
-  it('closes the activities panel when an activity is launched (WIP placeholder)', () => {
+  it('closes the activities panel when an activity is launched', () => {
     const cmp = create();
     (cmp as unknown as { showActivities: { set(v: boolean): void } }).showActivities.set(true);
     expect(cmp.showActivities()).toBe(true);
@@ -153,6 +172,130 @@ describe('BoardPageComponent — activities panel wiring', () => {
     cmp.onLaunchActivity('poll');
 
     expect(cmp.showActivities()).toBe(false);
+  });
+});
+
+/**
+ * Template-only activities (brainstorming / icebreaker / retro): they own no server entity, so
+ * launching one seeds the canvas with titled frames through the ordinary `frame:create` +
+ * `frame:update` events rather than through a dedicated activity API.
+ */
+describe('BoardPageComponent — activity template seeding', () => {
+  interface Emitted {
+    type: string;
+    payload: Record<string, unknown>;
+  }
+
+  /**
+   * Transport that records what the board sends. No inbound echo is replayed: these tests never
+   * call `store.init()`, so the store's broadcast handlers are not registered — server-echo
+   * reconciliation (frame titling) is covered in `board.store.spec.ts` instead.
+   */
+  class RecordingTransport extends BoardTransport {
+    readonly sent: Emitted[] = [];
+
+    connect(): void {}
+    disconnect(): void {}
+    emit(type: string, payload: Record<string, unknown>): void {
+      this.sent.push({ type, payload });
+    }
+    on<T = unknown>(_type: string, _handler: (data: T) => void): () => void {
+      return () => {};
+    }
+    onReconnect(_handler: () => void): () => void {
+      return () => {};
+    }
+    getSessionId(): string {
+      return 'recording-session';
+    }
+  }
+
+  let transport: RecordingTransport;
+
+  interface TemplateApi extends BoardPageApi {
+    tool(): string;
+    store: { userRole: { set(v: string): void } };
+  }
+
+  function create(): TemplateApi {
+    const fixture = TestBed.createComponent(BoardPageComponent);
+    return fixture.componentInstance as unknown as TemplateApi;
+  }
+
+  beforeEach(() => {
+    transport = new RecordingTransport();
+    TestBed.configureTestingModule({
+      imports: [
+        BoardPageComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { fr: FR_TRANSLATIONS },
+          translocoConfig: { defaultLang: 'fr', availableLangs: ['fr'] },
+          preloadLangs: true,
+        }),
+      ],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        { provide: COLLABORATIF_API_URL, useValue: 'http://localhost:8083/api/collaboratif' },
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { paramMap: new Map([['boardId', 'board-1']]) } },
+        },
+      ],
+    }).overrideComponent(BoardPageComponent, {
+      set: { providers: [BoardStore, { provide: BoardTransport, useValue: transport }] },
+    });
+  });
+
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('seeds three frames laid out as a row for the retrospective', () => {
+    const cmp = create();
+
+    cmp.onLaunchActivity('retro');
+
+    // Titling happens on the server echo and is covered in `board.store.spec.ts`; this suite
+    // asserts the wiring — that launching the activity creates the right frames.
+    const created = transport.sent.filter((e) => e.type === 'frame:create');
+    expect(created).toHaveLength(3);
+    expect(new Set(created.map((e) => e.payload['posX'])).size).toBe(3);
+    expect(new Set(created.map((e) => e.payload['posY'])).size).toBe(1);
+  });
+
+  it('seeds a single frame and preselects the sticky tool for brainstorming', () => {
+    const cmp = create();
+
+    cmp.onLaunchActivity('brainstorming');
+
+    expect(transport.sent.filter((e) => e.type === 'frame:create')).toHaveLength(1);
+    expect(cmp.tool()).toBe('sticky');
+  });
+
+  it('seeds a single frame for the icebreaker', () => {
+    const cmp = create();
+
+    cmp.onLaunchActivity('icebreaker');
+
+    expect(transport.sent.filter((e) => e.type === 'frame:create')).toHaveLength(1);
+  });
+
+  it('creates nothing on a read-only board', () => {
+    const cmp = create();
+    cmp.store.userRole.set('VIEWER');
+
+    cmp.onLaunchActivity('retro');
+
+    expect(transport.sent).toEqual([]);
+  });
+
+  it('creates nothing for an activity that has no template', () => {
+    const cmp = create();
+
+    cmp.onLaunchActivity('poll');
+    cmp.onLaunchActivity('does-not-exist');
+
+    expect(transport.sent).toEqual([]);
   });
 });
 
@@ -202,7 +345,14 @@ describe('BoardPageComponent — quiz activity wiring (Lot C3)', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [BoardPageComponent],
+      imports: [
+        BoardPageComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { fr: FR_TRANSLATIONS },
+          translocoConfig: { defaultLang: 'fr', availableLangs: ['fr'] },
+          preloadLangs: true,
+        }),
+      ],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
@@ -579,7 +729,14 @@ describe('BoardPageComponent — US08.7.1 keyboard delete of a selected connecto
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [BoardPageComponent],
+      imports: [
+        BoardPageComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { fr: FR_TRANSLATIONS },
+          translocoConfig: { defaultLang: 'fr', availableLangs: ['fr'] },
+          preloadLangs: true,
+        }),
+      ],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
@@ -864,7 +1021,14 @@ describe('BoardPageComponent — tool keyboard shortcuts', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [BoardPageComponent],
+      imports: [
+        BoardPageComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { fr: FR_TRANSLATIONS },
+          translocoConfig: { defaultLang: 'fr', availableLangs: ['fr'] },
+          preloadLangs: true,
+        }),
+      ],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
@@ -1086,7 +1250,14 @@ describe('BoardPageComponent — shortcuts while the caret is in an editable fie
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [BoardPageComponent],
+      imports: [
+        BoardPageComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { fr: FR_TRANSLATIONS },
+          translocoConfig: { defaultLang: 'fr', availableLangs: ['fr'] },
+          preloadLangs: true,
+        }),
+      ],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),

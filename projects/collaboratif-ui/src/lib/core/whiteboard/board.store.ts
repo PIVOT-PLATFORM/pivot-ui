@@ -280,6 +280,11 @@ export class BoardStore {
   private readonly pendingCardHistory: Array<(card: Card) => void> = [];
   private readonly pendingConnHistory: Array<(conn: Connection) => void> = [];
   private readonly pendingFrameHistory: Array<(frame: Frame) => void> = [];
+  /**
+   * Titles awaiting their `frame:created` echo, keyed by the position the create was sent with —
+   * see {@link addFrame} for why this is not a FIFO queue.
+   */
+  private readonly pendingFrameTitles: Array<{ posX: number; posY: number; title: string }> = [];
   private readonly pendingGroupHistory: Array<(groupId: string) => void> = [];
 
   private cardDragStart: Map<string, { posX: number; posY: number }> | null = null;
@@ -753,6 +758,7 @@ export class BoardStore {
 
     this.on<Frame>('frame:created', (frame) => {
       this.pendingFrameHistory.shift()?.(frame);
+      this.applyPendingFrameTitle(frame);
       // Idempotent append: the `frame:created` broadcast is emitter-included, so the creator also
       // receives its own echo — and a reconnect can replay it after `board:state` already carried
       // the frame. Dedup by id (same convention as `connection:created`/`boardfield:created`) so a
@@ -1771,19 +1777,59 @@ export class BoardStore {
   }
 
   // ── Frames ─────────────────────────────────────────────────────────────────
-  addFrame(posX: number, posY: number): void {
+  /**
+   * Creates a frame, optionally titled.
+   *
+   * `frame:create` carries no title (the server applies `Frame.java` defaults — 400×300, empty
+   * title), so a titled frame is a create followed by a `frame:update` on the **authoritative**
+   * id, issued once the `frame:created` echo arrives. The title is not applied optimistically:
+   * the `frame:updated` broadcast is the single source of truth, consistent with the rest of the
+   * frame lifecycle. Used by the activity templates (brainstorming / icebreaker / retro).
+   *
+   * Pending titles are matched to their echo **by position, not by arrival order**: a template
+   * fires several `frame:create` back to back and the server's echoes are not guaranteed to come
+   * back in the order they were sent, so FIFO matching mislabelled the frames (observed on the
+   * retro template: three frames, titles rotated).
+   *
+   * @param posX top-left corner, canvas units
+   * @param posY top-left corner, canvas units
+   * @param title optional frame title; omitted or empty leaves the server default
+   */
+  addFrame(posX: number, posY: number, title?: string): void {
     const emitParams = { boardId: this.boardId, posX, posY };
+    if (title) {
+      this.pendingFrameTitles.push({ posX, posY, title });
+    }
     this.pendingFrameHistory.push((frame: Frame) => {
       let trackedId = frame.id;
       this.pushHistory({
         undo: () => this.transport.emit('frame:delete', { id: trackedId, boardId: this.boardId }),
         redo: () => {
           this.transport.emit('frame:create', emitParams);
+          if (title) {
+            this.pendingFrameTitles.push({ posX, posY, title });
+          }
           this.pendingFrameHistory.push((newFrame: Frame) => (trackedId = newFrame.id));
         },
       });
     });
     this.transport.emit('frame:create', emitParams);
+  }
+
+  /**
+   * Applies the pending title whose requested position matches this freshly created frame, if any.
+   * Matching on position rather than arrival order keeps multi-frame templates correct whatever
+   * order the server echoes them back.
+   *
+   * @param frame the frame carried by the `frame:created` echo
+   */
+  private applyPendingFrameTitle(frame: Frame): void {
+    const i = this.pendingFrameTitles.findIndex((p) => p.posX === frame.posX && p.posY === frame.posY);
+    if (i === -1) {
+      return;
+    }
+    const [{ title }] = this.pendingFrameTitles.splice(i, 1);
+    this.transport.emit('frame:update', { id: frame.id, boardId: this.boardId, title });
   }
 
   moveFrame(

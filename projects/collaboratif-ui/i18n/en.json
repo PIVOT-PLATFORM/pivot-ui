@@ -656,6 +656,20 @@
           "name": "Retrospective",
           "desc": "Ready-made 3-column template"
         }
+      },
+      "soon": "Coming soon",
+      "templates": {
+        "brainstorming": {
+          "ideas": "Brainstorming — your ideas"
+        },
+        "icebreaker": {
+          "question": "Icebreaker — question of the day"
+        },
+        "retro": {
+          "wentWell": "What went well",
+          "toImprove": "To improve",
+          "actions": "Action plan"
+        }
       }
     },
     "shortcuts": {

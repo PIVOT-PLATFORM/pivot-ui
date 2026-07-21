@@ -213,6 +213,71 @@ describe('BoardStore — card:moved/card:resized sender exclusion (fix/EN08.4)',
     expect(store.frames().filter((f) => f.id === 'frame-1')).toHaveLength(1);
   });
 
+  it('titles a frame on the authoritative id carried by the frame:created echo', () => {
+    // `frame:create` carries no title (the server applies its defaults), so a titled frame — used
+    // by the activity templates — is a create followed by an update once the real id is known.
+    store.addFrame(10, 20, 'Ce qui a bien marché');
+
+    expect(transport.emitted.filter((e) => e.type === 'frame:update')).toEqual([]);
+
+    transport.dispatch('frame:created', {
+      id: 'frame-srv-1',
+      boardId: BOARD_ID,
+      title: '',
+      posX: 10,
+      posY: 20,
+      width: 400,
+      height: 300,
+      layer: 1,
+    } as Frame);
+
+    expect(transport.emitted.filter((e) => e.type === 'frame:update')).toEqual([
+      { type: 'frame:update', data: { id: 'frame-srv-1', boardId: BOARD_ID, title: 'Ce qui a bien marché' }, guaranteed: undefined },
+    ]);
+  });
+
+  it('matches titles to frames by position when the echoes come back out of order', () => {
+    // Regression (found in recette): the retro template fires three creates back to back and the
+    // server does not guarantee echo ordering. FIFO matching rotated the titles across frames.
+    const frame = (id: string, posX: number) =>
+      ({ id, boardId: BOARD_ID, title: '', posX, posY: 0, width: 400, height: 300, layer: 1 }) as Frame;
+
+    store.addFrame(-640, 0, 'Ce qui a bien marché');
+    store.addFrame(-200, 0, 'À améliorer');
+    store.addFrame(240, 0, "Plan d'action");
+
+    // Echoes arrive in reverse order.
+    transport.dispatch('frame:created', frame('f-3', 240));
+    transport.dispatch('frame:created', frame('f-1', -640));
+    transport.dispatch('frame:created', frame('f-2', -200));
+
+    const updates = transport.emitted
+      .filter((e) => e.type === 'frame:update')
+      .map((e) => e.data as { id: string; title: string });
+    expect(updates).toEqual([
+      { id: 'f-3', boardId: BOARD_ID, title: "Plan d'action" },
+      { id: 'f-1', boardId: BOARD_ID, title: 'Ce qui a bien marché' },
+      { id: 'f-2', boardId: BOARD_ID, title: 'À améliorer' },
+    ]);
+  });
+
+  it('leaves an untitled frame alone — no spurious frame:update', () => {
+    store.addFrame(10, 20);
+
+    transport.dispatch('frame:created', {
+      id: 'frame-srv-2',
+      boardId: BOARD_ID,
+      title: '',
+      posX: 10,
+      posY: 20,
+      width: 400,
+      height: 300,
+      layer: 1,
+    } as Frame);
+
+    expect(transport.emitted.filter((e) => e.type === 'frame:update')).toEqual([]);
+  });
+
   it('never leaks senderSessionId into the stored card state', () => {
     transport.dispatch('card:moved', { ...baseCard(), posX: 10, posY: 20, senderSessionId: 'other-conn' });
 
