@@ -587,6 +587,41 @@
       "voteCount": "{{count}} votes",
       "empty": "No votes recorded"
     },
+    "quiz": {
+      "config": {
+        "title": "Build a quiz",
+        "cancel": "Cancel",
+        "hint": "Add multiple-choice questions, tick the correct answer(s).",
+        "questionLabel": "Question {{n}}",
+        "questionText": "Question text",
+        "addQuestion": "Add a question",
+        "removeQuestion": "Remove question",
+        "choiceText": "Choice {{n}}",
+        "addChoice": "Add a choice",
+        "removeChoice": "Remove choice",
+        "correctLabel": "Correct answer",
+        "start": "Start the quiz",
+        "errorNoCorrect": "Mark at least one correct answer",
+        "errorMinChoices": "Add at least two choices"
+      },
+      "overlay": {
+        "questionProgress": "Question {{index}} of {{total}}",
+        "chooseAnswer": "Choose your answer",
+        "answered": "Answer recorded",
+        "waiting": "Waiting for the next question…"
+      },
+      "results": {
+        "title": "Quiz results",
+        "responders": "{{n}} participants answered",
+        "reveal": "Reveal the answer",
+        "next": "Next question",
+        "stop": "End the quiz",
+        "leaderboard": "Leaderboard",
+        "rank": "{{rank}}. {{name}} — {{score}} pts",
+        "empty": "No answers yet"
+      },
+      "close": "Close quiz"
+    },
     "activities": {
       "title": "Activities",
       "open": "Activities",

@@ -32,6 +32,8 @@ import type {
   PresenceUser,
   FieldValue,
   VoteSession,
+  QuizSession,
+  QuizQuestionDraft,
   ClipboardCard,
 } from '../../whiteboard/model/board.types';
 
@@ -140,6 +142,18 @@ export class BoardStore {
   readonly timerEndsAt = signal<number | null>(null);
   readonly activeVoteSession = signal<VoteSession | null>(null);
   readonly lastVoteSession = signal<VoteSession | null>(null);
+  /** Quiz activity (Lot A2) — the board's currently `ACTIVE` quiz session, or `null`. */
+  readonly activeQuizSession = signal<QuizSession | null>(null);
+  /** Quiz activity (Lot A2) — the last `CLOSED` quiz session, for post-hoc results display. */
+  readonly lastQuizSession = signal<QuizSession | null>(null);
+  /**
+   * Quiz activity (Lot A2) — local echo of the current user's own answer per question id. The
+   * server payload (`QuizSession`/`QuizQuestion`) never attributes answers back to a user (only
+   * the anonymous `answeredCount`, and post-reveal per-choice `count`), so the front tracks its
+   * own selection client-side to drive the "already answered" / selected-choice UI. Reset when a
+   * new quiz session starts.
+   */
+  private readonly myQuizAnswers = signal<ReadonlyMap<string, string>>(new Map());
   /**
    * US08.12.2 — the current user's own {@code public.users.id}, fetched from
    * {@code GET /whiteboard/me}. The realtime channel never carries a self identity, so the
@@ -216,6 +230,30 @@ export class BoardStore {
     return Math.max(0, session.votesPerPerson - this.myVotesUsed());
   });
 
+  /**
+   * Quiz activity (Lot A2) — the current user's own selected choice id for the quiz's current
+   * question, if any (local echo, see {@link myQuizAnswers} — the server never attributes
+   * answers to a user).
+   */
+  readonly myAnswer = computed<string | null>(() => {
+    const question = this.activeQuizSession()?.currentQuestion;
+    if (!question) {
+      return null;
+    }
+    return this.myQuizAnswers().get(question.id) ?? null;
+  });
+
+  /**
+   * Quiz activity (Lot A2) — whether the current user has already answered the current question
+   * (consumed by {@link QuizParticipantOverlayComponent} via its `hasAnswered` input, so the
+   * "already answered" state survives a remount/reconnect instead of being tracked locally —
+   * `answeredCount`/`leaderboard` are deliberately *not* mirrored here: `answeredCount` and the
+   * leaderboard are read straight off the `QuizSession`/`QuizQuestion` the host already passes to
+   * `QuizResultsPanelComponent` via its `session` input, so a store-level echo would be a second,
+   * unconsumed source of the same data).
+   */
+  readonly hasAnswered = computed<boolean>(() => this.myAnswer() !== null);
+
   /** Cards copied via {@link copySelected}, portable across boards (also mirrored to localStorage). */
   readonly clipboard = signal<ClipboardCard[]>([]);
   /** True when the clipboard holds at least one card — gates the paste affordance. */
@@ -284,6 +322,8 @@ export class BoardStore {
     void this.loadMembers();
     void this.loadVote('current', this.activeVoteSession);
     void this.loadVote('last', this.lastVoteSession);
+    void this.loadQuiz('current', this.activeQuizSession);
+    void this.loadQuiz('last', this.lastQuizSession);
     this.transport.connect(boardId);
     // F3 — announce our presence identity on join so other participants see our real name/avatar
     // (the backend defaults an empty `displayName` to "Anonymous"). Re-sent verbatim on every
@@ -399,6 +439,24 @@ export class BoardStore {
         target.set(session);
         if (which === 'current') {
           // Rejoining an already-active vote — resolve our own id so the UI can attribute votes.
+          void this.ensureSelfUserId();
+        }
+      }
+    } catch {
+      /* no session yet (404) — nothing to restore */
+    }
+  }
+
+  /** Quiz activity (Lot A2) — rehydration of `current`/`last` quiz session, calque {@link loadVote}. */
+  private async loadQuiz(which: 'current' | 'last', target: typeof this.activeQuizSession): Promise<void> {
+    try {
+      const session = await firstValueFrom(
+        this.http.get<QuizSession | null>(`${this.apiUrl}/whiteboard/boards/${this.boardId}/quiz/${which}`),
+      );
+      if (session) {
+        target.set(session);
+        if (which === 'current') {
+          // Rejoining an already-active quiz — resolve our own id (score attribution, US-Q4).
           void this.ensureSelfUserId();
         }
       }
@@ -546,6 +604,22 @@ export class BoardStore {
     this.on<VoteSession>('vote:session:closed', (s) => {
       this.activeVoteSession.set(null);
       this.lastVoteSession.set(s);
+    });
+
+    // Quiz activity (Lot A2) — calque the vote handlers above. The server payload is the sole
+    // authority on masking (§2.4): the store only ever mirrors whatever `QuizSession` it receives,
+    // it never adds or infers a `correct`/`count` field itself.
+    this.on<QuizSession>('quiz:session:started', (s) => {
+      this.myQuizAnswers.set(new Map());
+      this.activeQuizSession.set(s);
+      // A quiz just started room-wide — resolve our own id so we can attribute our answers/score.
+      void this.ensureSelfUserId();
+    });
+    this.on<QuizSession>('quiz:updated', (s) => this.activeQuizSession.set(s));
+    this.on<QuizSession>('quiz:session:closed', (s) => {
+      this.activeQuizSession.set(null);
+      this.lastQuizSession.set(s);
+      this.myQuizAnswers.set(new Map());
     });
 
     this.on<{ ids: string[]; locked: boolean }>('cards:locked', ({ ids, locked }) =>
@@ -2016,6 +2090,56 @@ export class BoardStore {
       return;
     }
     this.transport.emit('vote:extend', { sessionId: s.id, boardId: this.boardId, extraSeconds });
+  }
+
+  // ── Quiz (Lot A2, calque vote) ───────────────────────────────────────────────
+  /** Facilitator-only (server-enforced) — composes and launches a quiz session (§5.1 `quiz:start`). */
+  startQuiz(questions: QuizQuestionDraft[]): void {
+    this.transport.emit('quiz:start', { boardId: this.boardId, questions });
+  }
+  /** Upserts the current user's answer to the quiz's current question (§5.1 `quiz:answer`). */
+  answerQuiz(choiceId: string): void {
+    const s = this.activeQuizSession();
+    const question = s?.currentQuestion;
+    if (!s || !question) {
+      return;
+    }
+    // Optimistic local echo — the server never attributes answers back to a user.
+    this.myQuizAnswers.update((prev) => {
+      const next = new Map(prev);
+      next.set(question.id, choiceId);
+      return next;
+    });
+    this.transport.emit('quiz:answer', {
+      sessionId: s.id,
+      boardId: this.boardId,
+      questionId: question.id,
+      choiceId,
+    });
+  }
+  /** Facilitator-only — closes the current question and opens the next one (§5.1 `quiz:next`). */
+  nextQuestion(): void {
+    const s = this.activeQuizSession();
+    if (!s) {
+      return;
+    }
+    this.transport.emit('quiz:next', { sessionId: s.id, boardId: this.boardId });
+  }
+  /** Facilitator-only — reveals correct answers + distribution + scores (§5.1 `quiz:reveal`). */
+  revealQuestion(): void {
+    const s = this.activeQuizSession();
+    if (!s) {
+      return;
+    }
+    this.transport.emit('quiz:reveal', { sessionId: s.id, boardId: this.boardId });
+  }
+  /** Facilitator-only — closes the quiz session and broadcasts the final leaderboard (§5.1 `quiz:stop`). */
+  stopQuiz(): void {
+    const s = this.activeQuizSession();
+    if (!s) {
+      return;
+    }
+    this.transport.emit('quiz:stop', { sessionId: s.id, boardId: this.boardId });
   }
 
   // ── Board info ─────────────────────────────────────────────────────────────

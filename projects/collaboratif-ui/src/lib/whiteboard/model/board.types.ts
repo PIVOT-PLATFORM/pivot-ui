@@ -217,6 +217,65 @@ export interface VoteSession {
   closedAt: string | null;
 }
 
+/** Lifecycle status of a quiz session (US-Q, quiz activity — calque `VoteSession.status`). */
+export type QuizStatus = 'ACTIVE' | 'CLOSED';
+
+/** State of the quiz's current question — masked (`OPEN`) or demasked (`REVEALED`, §2.4). */
+export type QuestionState = 'OPEN' | 'REVEALED';
+
+/**
+ * A single choice within a quiz question. `correct`/`count` are present **only** once the
+ * question has been revealed (§2.4 masking) — the server never sends them beforehand, and the
+ * front never fabricates them.
+ */
+export interface QuizChoice {
+  id: string;
+  text: string;
+  position: number;
+  correct?: boolean;
+  count?: number;
+}
+
+/** A single question within a quiz session, with its current (possibly masked) choices. */
+export interface QuizQuestion {
+  id: string;
+  position: number;
+  text: string;
+  state: QuestionState;
+  choices: QuizChoice[];
+  answeredCount: number;
+}
+
+/** An entry of a quiz's cumulative (active) or final (closed) leaderboard. */
+export interface QuizLeaderboardEntry {
+  userId: string;
+  score: number;
+  rank: number;
+}
+
+/** A facilitator-driven QCM quiz session over the board (analogue of {@link VoteSession}). */
+export interface QuizSession {
+  id: string;
+  boardId: string;
+  status: QuizStatus;
+  currentQuestionIndex: number | null;
+  currentQuestion: QuizQuestion | null;
+  leaderboard: QuizLeaderboardEntry[];
+  createdAt: string;
+  closedAt: string | null;
+}
+
+/**
+ * Draft shape accepted by `BoardStore.startQuiz()` — mirrors the `quiz:start` wire payload's
+ * `questions[]` (§5.1 of the design doc). Not part of the server-facing model above: this is the
+ * facilitator's local composition (it legitimately carries `correct`, since the facilitator is
+ * authoring the quiz — the masking rule only applies to what the *server broadcasts back*).
+ */
+export interface QuizQuestionDraft {
+  text: string;
+  choices: { text: string; correct: boolean }[];
+}
+
 /** Card payload copied to the clipboard (localStorage), portable across boards. */
 export interface ClipboardCard {
   type: string;

@@ -587,6 +587,41 @@
       "voteCount": "{{count}} votes",
       "empty": "Aucun vote enregistré"
     },
+    "quiz": {
+      "config": {
+        "title": "Composer un quiz",
+        "cancel": "Annuler",
+        "hint": "Ajoutez des questions à choix multiples, cochez la ou les bonnes réponses.",
+        "questionLabel": "Question {{n}}",
+        "questionText": "Texte de la question",
+        "addQuestion": "Ajouter une question",
+        "removeQuestion": "Supprimer la question",
+        "choiceText": "Choix {{n}}",
+        "addChoice": "Ajouter un choix",
+        "removeChoice": "Supprimer le choix",
+        "correctLabel": "Bonne réponse",
+        "start": "Lancer le quiz",
+        "errorNoCorrect": "Marquez au moins une bonne réponse",
+        "errorMinChoices": "Ajoutez au moins deux choix"
+      },
+      "overlay": {
+        "questionProgress": "Question {{index}} / {{total}}",
+        "chooseAnswer": "Choisissez votre réponse",
+        "answered": "Réponse enregistrée",
+        "waiting": "En attente de la prochaine question…"
+      },
+      "results": {
+        "title": "Résultats du quiz",
+        "responders": "{{n}} participant·e·s ont répondu",
+        "reveal": "Révéler la réponse",
+        "next": "Question suivante",
+        "stop": "Terminer le quiz",
+        "leaderboard": "Classement",
+        "rank": "{{rank}}. {{name}} — {{score}} pts",
+        "empty": "Aucune réponse pour l'instant"
+      },
+      "close": "Fermer le quiz"
+    },
     "activities": {
       "title": "Activités",
       "open": "Activités",

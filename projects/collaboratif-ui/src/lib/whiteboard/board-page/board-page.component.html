@@ -66,6 +66,17 @@
         </button>
       }
 
+      @if (isOwner() && (store.lastQuizSession() || store.activeQuizSession())) {
+        <button type="button" class="wb-page__btn wb-page__btn--icon" [class.wb-page__btn--on]="showQuizResults()"
+          (click)="showQuizResults.set(!showQuizResults())" [attr.aria-pressed]="showQuizResults()"
+          [attr.aria-label]="'whiteboard.quiz.results.title' | transloco" [title]="'whiteboard.quiz.results.title' | transloco">
+          <svg class="wb-page__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2m0 14v2m9-9h-2M5 12H3" />
+          </svg>
+        </button>
+      }
+
       <span class="wb-page__sep" aria-hidden="true"></span>
 
       <button type="button" class="wb-page__btn wb-page__btn--icon" [disabled]="!store.canUndo()" (click)="store.undo()"
@@ -243,6 +254,24 @@
         </aside>
       }
     }
+
+    <!-- Quiz activity (Lot C3) — facilitator piloting panel, calque the vote results panel above.
+         `wb-quiz-results-panel` doubles as the animator console (next/reveal/stop, §4.1); only
+         mounted for the owner, gated by `showQuizResults` like `showVoteResults`. -->
+    @if (isOwner() && showQuizResults()) {
+      @if (store.activeQuizSession() || store.lastQuizSession(); as quizSession) {
+        <aside class="wb-page__panel wb-page__panel--quiz" [attr.aria-label]="'whiteboard.quiz.results.title' | transloco">
+          <wb-quiz-results-panel
+            [session]="quizSession"
+            [isOwner]="isOwner()"
+            (next)="onQuizNext()"
+            (reveal)="onQuizReveal()"
+            (stop)="onQuizStop()"
+            (close)="showQuizResults.set(false)"
+          ></wb-quiz-results-panel>
+        </aside>
+      }
+    }
   </div>
 
   @if (selectionCount() > 0) {
@@ -283,6 +312,27 @@
       (start)="onStartVote($event)"
       (close)="showVoteConfig.set(false)"
     ></wb-vote-config-dialog>
+  }
+
+  @if (showQuizConfig()) {
+    <wb-quiz-config-dialog
+      (start)="onStartQuiz($event)"
+      (close)="showQuizConfig.set(false)"
+    ></wb-quiz-config-dialog>
+  }
+
+  <!-- Quiz activity (Lot C3) — participant view of the quiz's currently OPEN question. Mounted
+       only for non-owners while a question is OPEN (`showQuizOverlay`, §4.4); the facilitator
+       instead pilots via the results panel above, never sees this overlay. -->
+  @if (showQuizOverlay()) {
+    @if (store.activeQuizSession(); as quizSession) {
+      <wb-quiz-overlay
+        [session]="quizSession"
+        [hasAnswered]="store.hasAnswered()"
+        [myAnswerId]="store.myAnswer()"
+        (answer)="onQuizAnswer($event)"
+      ></wb-quiz-overlay>
+    }
   }
 
   @if (showShortcuts()) {

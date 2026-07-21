@@ -6,7 +6,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { BoardStore } from './board.store';
 import { BoardTransport } from './board-transport';
 import { COLLABORATIF_API_URL, COLLABORATIF_CURRENT_USER } from './config/tokens';
-import type { BoardField, BoardVote, Card, Connection, Frame, VoteSession } from '../../whiteboard/model/board.types';
+import type {
+  BoardField,
+  BoardVote,
+  Card,
+  Connection,
+  Frame,
+  VoteSession,
+  QuizSession,
+  QuizQuestionDraft,
+} from '../../whiteboard/model/board.types';
 
 const TEST_API_URL = 'http://localhost:8083/api/collaboratif';
 const BOARD_ID = 'board-1';
@@ -105,6 +114,12 @@ describe('BoardStore — card:moved/card:resized sender exclusion (fix/EN08.4)',
       .flush('', { status: 404, statusText: 'Not Found' });
     httpMock
       .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/vote/last`)
+      .flush('', { status: 404, statusText: 'Not Found' });
+    httpMock
+      .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/quiz/current`)
+      .flush('', { status: 404, statusText: 'Not Found' });
+    httpMock
+      .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/quiz/last`)
       .flush('', { status: 404, statusText: 'Not Found' });
     // loadBoard()/loadMembers()/loadVote() await firstValueFrom() — flush() resolves the
     // observable synchronously but the continuation runs a microtask later.
@@ -638,6 +653,12 @@ describe('BoardStore — connections (US08.7.1)', () => {
     httpMock
       .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/vote/last`)
       .flush('', { status: 404, statusText: 'Not Found' });
+    httpMock
+      .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/quiz/current`)
+      .flush('', { status: 404, statusText: 'Not Found' });
+    httpMock
+      .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/quiz/last`)
+      .flush('', { status: 404, statusText: 'Not Found' });
     await Promise.resolve();
     await Promise.resolve();
   }
@@ -1119,6 +1140,12 @@ describe('BoardStore — F1 optimistic card creation', () => {
     httpMock
       .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/vote/last`)
       .flush('', { status: 404, statusText: 'Not Found' });
+    httpMock
+      .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/quiz/current`)
+      .flush('', { status: 404, statusText: 'Not Found' });
+    httpMock
+      .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/quiz/last`)
+      .flush('', { status: 404, statusText: 'Not Found' });
     await Promise.resolve();
     await Promise.resolve();
   }
@@ -1289,6 +1316,10 @@ describe('BoardStore — F3 presence join payload', () => {
       .flush('', { status: 404, statusText: 'Not Found' });
     httpMock.expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/vote/last`)
       .flush('', { status: 404, statusText: 'Not Found' });
+    httpMock.expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/quiz/current`)
+      .flush('', { status: 404, statusText: 'Not Found' });
+    httpMock.expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/quiz/last`)
+      .flush('', { status: 404, statusText: 'Not Found' });
     await Promise.resolve();
     await Promise.resolve();
   }
@@ -1446,6 +1477,301 @@ describe('BoardStore — dot-vote tallies and budget (US08.12.2)', () => {
   });
 });
 
+/** Builder for a minimal, valid quiz session — calque of vote's `session()` helper above. */
+function quizSession(overrides: Partial<QuizSession> = {}): QuizSession {
+  return {
+    id: 'quiz-1',
+    boardId: BOARD_ID,
+    status: 'ACTIVE',
+    currentQuestionIndex: 0,
+    currentQuestion: {
+      id: 'q1',
+      position: 0,
+      text: 'What is 2+2?',
+      state: 'OPEN',
+      choices: [
+        { id: 'c1', text: '3', position: 0 },
+        { id: 'c2', text: '4', position: 1 },
+      ],
+      answeredCount: 0,
+    },
+    leaderboard: [],
+    createdAt: '',
+    closedAt: null,
+    ...overrides,
+  };
+}
+
+describe('BoardStore — quiz actions & handlers (Lot A2, calque dot-vote)', () => {
+  let store: BoardStore;
+  let transport: FakeTransport;
+  let httpMock: HttpTestingController;
+
+  /** Flushes the six read-only GETs that `BoardStore.init()` now fires (board/members/vote×2/quiz×2). */
+  async function flushInitRequests(): Promise<void> {
+    httpMock.expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}`).flush({
+      id: BOARD_ID,
+      title: 'Board',
+      role: 'OWNER',
+      description: null,
+      coverImage: null,
+      maxParticipants: null,
+      enabledActivities: [],
+    });
+    httpMock.expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/members`).flush([]);
+    httpMock
+      .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/vote/current`)
+      .flush('', { status: 404, statusText: 'Not Found' });
+    httpMock
+      .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/vote/last`)
+      .flush('', { status: 404, statusText: 'Not Found' });
+    httpMock
+      .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/quiz/current`)
+      .flush('', { status: 404, statusText: 'Not Found' });
+    httpMock
+      .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/quiz/last`)
+      .flush('', { status: 404, statusText: 'Not Found' });
+    await Promise.resolve();
+    await Promise.resolve();
+  }
+
+  /** Flushes the `ensureSelfUserId()` GET triggered by a `quiz:session:started` dispatch. */
+  function flushSelfUserId(): void {
+    httpMock.expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/me`).flush({ userId: 'me' });
+  }
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        BoardStore,
+        { provide: BoardTransport, useClass: FakeTransport },
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: Router, useValue: { navigateByUrl: vi.fn().mockResolvedValue(true) } },
+        { provide: COLLABORATIF_API_URL, useValue: TEST_API_URL },
+      ],
+    });
+    store = TestBed.inject(BoardStore);
+    transport = TestBed.inject(BoardTransport) as unknown as FakeTransport;
+    httpMock = TestBed.inject(HttpTestingController);
+    // Actions/handlers read `this.boardId`, only assigned by init() — a real precondition for
+    // every one of them being called in production (never invoked before the board is open).
+    store.init(BOARD_ID);
+    await flushInitRequests();
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  // ── Actions (outbound emits, §5.1) ────────────────────────────────────────
+
+  it('startQuiz emits quiz:start with boardId + the full question set', () => {
+    const questions: QuizQuestionDraft[] = [
+      { text: 'Q1?', choices: [{ text: 'A', correct: true }, { text: 'B', correct: false }] },
+    ];
+    store.startQuiz(questions);
+    const emitted = transport.emitted.find((e) => e.type === 'quiz:start');
+    expect(emitted).toBeDefined();
+    expect(emitted!.data).toEqual({ boardId: BOARD_ID, questions });
+  });
+
+  it('answerQuiz is a no-op without an active quiz session', () => {
+    store.answerQuiz('c1');
+    expect(transport.emitted.filter((e) => e.type === 'quiz:answer')).toHaveLength(0);
+  });
+
+  it('answerQuiz emits quiz:answer with sessionId/boardId/questionId/choiceId and records the local echo', () => {
+    store.activeQuizSession.set(quizSession());
+    store.answerQuiz('c2');
+    const emitted = transport.emitted.find((e) => e.type === 'quiz:answer');
+    expect(emitted).toBeDefined();
+    expect(emitted!.data).toEqual({ sessionId: 'quiz-1', boardId: BOARD_ID, questionId: 'q1', choiceId: 'c2' });
+    expect(store.myAnswer()).toBe('c2');
+    expect(store.hasAnswered()).toBe(true);
+  });
+
+  it('nextQuestion/revealQuestion/stopQuiz are no-ops without an active quiz session', () => {
+    store.nextQuestion();
+    store.revealQuestion();
+    store.stopQuiz();
+    expect(transport.emitted.filter((e) => e.type.startsWith('quiz:'))).toHaveLength(0);
+  });
+
+  it('nextQuestion emits quiz:next with sessionId/boardId', () => {
+    store.activeQuizSession.set(quizSession());
+    store.nextQuestion();
+    expect(transport.emitted.find((e) => e.type === 'quiz:next')!.data).toEqual({
+      sessionId: 'quiz-1',
+      boardId: BOARD_ID,
+    });
+  });
+
+  it('revealQuestion emits quiz:reveal with sessionId/boardId', () => {
+    store.activeQuizSession.set(quizSession());
+    store.revealQuestion();
+    expect(transport.emitted.find((e) => e.type === 'quiz:reveal')!.data).toEqual({
+      sessionId: 'quiz-1',
+      boardId: BOARD_ID,
+    });
+  });
+
+  it('stopQuiz emits quiz:stop with sessionId/boardId', () => {
+    store.activeQuizSession.set(quizSession());
+    store.stopQuiz();
+    expect(transport.emitted.find((e) => e.type === 'quiz:stop')!.data).toEqual({
+      sessionId: 'quiz-1',
+      boardId: BOARD_ID,
+    });
+  });
+
+  // ── Inbound handlers (§5.2) ────────────────────────────────────────────────
+
+  it('quiz:session:started sets activeQuizSession and resets the local answer echo', () => {
+    store.activeQuizSession.set(quizSession());
+    store.answerQuiz('c1'); // records a local answer for the current question (q1)
+    expect(store.hasAnswered()).toBe(true);
+
+    const started = quizSession();
+    transport.dispatch('quiz:session:started', started);
+    flushSelfUserId();
+    expect(store.activeQuizSession()).toEqual(started);
+    // A fresh session must not carry over a stale local answer echo from a previous one.
+    expect(store.hasAnswered()).toBe(false);
+  });
+
+  it('quiz:updated replaces activeQuizSession in place', () => {
+    store.activeQuizSession.set(quizSession());
+    const updated = quizSession({ currentQuestionIndex: 1 });
+    transport.dispatch('quiz:updated', updated);
+    expect(store.activeQuizSession()).toEqual(updated);
+  });
+
+  it('quiz:session:closed clears activeQuizSession and sets lastQuizSession to the final leaderboard', () => {
+    store.activeQuizSession.set(quizSession());
+    const closed = quizSession({
+      status: 'CLOSED',
+      closedAt: '2026-07-21T00:00:00Z',
+      currentQuestion: null,
+      leaderboard: [{ userId: 'u1', score: 3, rank: 1 }],
+    });
+    transport.dispatch('quiz:session:closed', closed);
+    expect(store.activeQuizSession()).toBeNull();
+    expect(store.lastQuizSession()).toEqual(closed);
+  });
+
+  // ── Masking (§2.4) — the store never fabricates `correct`/`count` itself ────
+
+  it('never exposes correct/count on an OPEN question round-tripped through a handler', () => {
+    transport.dispatch('quiz:session:started', quizSession()); // choices carry no correct/count
+    flushSelfUserId();
+    const choices = store.activeQuizSession()!.currentQuestion!.choices;
+    expect(choices).toHaveLength(2);
+    expect(choices.every((c) => !('correct' in c) && !('count' in c))).toBe(true);
+  });
+
+  it('faithfully mirrors a REVEALED question — masking is the server\'s responsibility, not fabricated client-side', () => {
+    const revealed = quizSession({
+      currentQuestion: {
+        id: 'q1',
+        position: 0,
+        text: 'What is 2+2?',
+        state: 'REVEALED',
+        answeredCount: 2,
+        choices: [
+          { id: 'c1', text: '3', position: 0, correct: false, count: 0 },
+          { id: 'c2', text: '4', position: 1, correct: true, count: 2 },
+        ],
+      },
+    });
+    transport.dispatch('quiz:updated', revealed);
+    expect(store.activeQuizSession()!.currentQuestion!.choices).toEqual(revealed.currentQuestion!.choices);
+  });
+});
+
+describe('BoardStore — quiz rehydration (Lot A2 loadQuiz, calque loadVote)', () => {
+  let httpMock: HttpTestingController;
+  let transport: FakeBoardTransport;
+  let store: BoardStore;
+
+  beforeEach(() => {
+    transport = new FakeBoardTransport();
+    TestBed.configureTestingModule({
+      providers: [
+        BoardStore,
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: Router, useValue: { navigateByUrl: vi.fn().mockResolvedValue(true) } },
+        { provide: COLLABORATIF_API_URL, useValue: TEST_API_URL },
+        { provide: BoardTransport, useValue: transport },
+      ],
+    });
+    httpMock = TestBed.inject(HttpTestingController);
+    store = TestBed.inject(BoardStore);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+    TestBed.resetTestingModule();
+  });
+
+  /** Flushes board/members/vote(404) so only the two quiz GETs remain for the test to control. */
+  function flushNonQuizInitRequests(): void {
+    httpMock.expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}`).flush({
+      id: BOARD_ID,
+      title: 'Board',
+      role: 'OWNER',
+      description: null,
+      coverImage: null,
+      maxParticipants: null,
+      enabledActivities: [],
+    });
+    httpMock.expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/members`).flush([]);
+    httpMock
+      .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/vote/current`)
+      .flush('', { status: 404, statusText: 'Not Found' });
+    httpMock
+      .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/vote/last`)
+      .flush('', { status: 404, statusText: 'Not Found' });
+  }
+
+  it('loadQuiz hydrates activeQuizSession/lastQuizSession from GET .../quiz/current and .../quiz/last', async () => {
+    store.init(BOARD_ID);
+    flushNonQuizInitRequests();
+
+    const active = quizSession();
+    const last = quizSession({ status: 'CLOSED', closedAt: '2026-07-20T00:00:00Z', currentQuestion: null });
+    httpMock.expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/quiz/current`).flush(active);
+    httpMock.expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/quiz/last`).flush(last);
+    await Promise.resolve();
+    await Promise.resolve();
+    // A truthy `current` session resolves our own id (score attribution, US-Q4) — flush it too.
+    httpMock.expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/me`).flush({ userId: 'me' });
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(store.activeQuizSession()).toEqual(active);
+    expect(store.lastQuizSession()).toEqual(last);
+  });
+
+  it('loadQuiz leaves both signals null on 404 (no quiz session yet)', async () => {
+    store.init(BOARD_ID);
+    flushNonQuizInitRequests();
+
+    httpMock
+      .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/quiz/current`)
+      .flush('', { status: 404, statusText: 'Not Found' });
+    httpMock
+      .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/quiz/last`)
+      .flush('', { status: 404, statusText: 'Not Found' });
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(store.activeQuizSession()).toBeNull();
+    expect(store.lastQuizSession()).toBeNull();
+  });
+});
+
 function makeFrame(id: string, overrides: Partial<Frame> = {}): Frame {
   return {
     id,
@@ -1483,6 +1809,12 @@ describe('BoardStore — z-order front/back (US08.9.3)', () => {
       .flush('', { status: 404, statusText: 'Not Found' });
     httpMock
       .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/vote/last`)
+      .flush('', { status: 404, statusText: 'Not Found' });
+    httpMock
+      .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/quiz/current`)
+      .flush('', { status: 404, statusText: 'Not Found' });
+    httpMock
+      .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/quiz/last`)
       .flush('', { status: 404, statusText: 'Not Found' });
     await Promise.resolve();
     await Promise.resolve();

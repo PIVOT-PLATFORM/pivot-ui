@@ -1,0 +1,60 @@
+<div
+  class="wb-quiz-overlay"
+  role="dialog"
+  aria-modal="true"
+  tabindex="-1"
+  [attr.aria-label]="'whiteboard.quiz.overlay.chooseAnswer' | transloco"
+>
+  <div class="wb-quiz-overlay__panel">
+    @if (answerableQuestion(); as q) {
+      <div class="wb-quiz-overlay__live" aria-live="polite">
+        @if (totalQuestions(); as total) {
+          <p class="wb-quiz-overlay__progress">
+            {{
+              'whiteboard.quiz.overlay.questionProgress'
+                | transloco: { index: progressIndex(), total }
+            }}
+          </p>
+        }
+        <h2 class="wb-quiz-overlay__question">{{ q.text }}</h2>
+      </div>
+
+      <p class="wb-quiz-overlay__hint">
+        {{ 'whiteboard.quiz.overlay.chooseAnswer' | transloco }}
+      </p>
+
+      <div
+        class="wb-quiz-overlay__choices"
+        role="radiogroup"
+        [attr.aria-label]="'whiteboard.quiz.overlay.chooseAnswer' | transloco"
+      >
+        @for (choice of q.choices; track choice.id; let i = $index) {
+          <button
+            #choiceBtn
+            type="button"
+            role="radio"
+            class="wb-quiz-overlay__choice"
+            [attr.aria-checked]="isChecked(choice.id)"
+            [tabindex]="i === focusedIndex() ? 0 : -1"
+            (click)="selectChoice(choice.id)"
+            (keydown)="onChoiceKeydown($event, i, q.choices.length)"
+          >
+            {{ choice.text }}
+          </button>
+        }
+      </div>
+    } @else if (hasAnswered()) {
+      <div class="wb-quiz-overlay__status" role="status" aria-live="polite">
+        <p class="wb-quiz-overlay__status-text">
+          {{ 'whiteboard.quiz.overlay.answered' | transloco }}
+        </p>
+      </div>
+    } @else {
+      <div class="wb-quiz-overlay__status" role="status" aria-live="polite">
+        <p class="wb-quiz-overlay__status-text">
+          {{ 'whiteboard.quiz.overlay.waiting' | transloco }}
+        </p>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,136 @@
+<div class="wb-quizcfg__backdrop" (click)="onClose()">
+  <div
+    #dialogEl
+    class="wb-quizcfg"
+    role="dialog"
+    aria-modal="true"
+    tabindex="-1"
+    [attr.aria-label]="'whiteboard.quiz.config.title' | transloco"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="wb-quizcfg__header">
+      <h2 class="wb-quizcfg__title">{{ 'whiteboard.quiz.config.title' | transloco }}</h2>
+      <button
+        type="button"
+        class="wb-quizcfg__close"
+        [attr.aria-label]="'whiteboard.quiz.config.cancel' | transloco"
+        (click)="onClose()"
+      >
+        ×
+      </button>
+    </header>
+
+    <p class="wb-quizcfg__hint">{{ 'whiteboard.quiz.config.hint' | transloco }}</p>
+
+    <div class="wb-quizcfg__body">
+      @for (q of questions(); track q.id; let qi = $index) {
+        <fieldset class="wb-quizcfg__question">
+          <div class="wb-quizcfg__question-head">
+            <legend class="wb-quizcfg__question-legend">
+              {{ 'whiteboard.quiz.config.questionLabel' | transloco: { n: qi + 1 } }}
+            </legend>
+            @if (questions().length > 1) {
+              <button
+                type="button"
+                class="wb-quizcfg__remove-question"
+                [attr.aria-label]="'whiteboard.quiz.config.removeQuestion' | transloco"
+                (click)="removeQuestion(q.id)"
+              >
+                ×
+              </button>
+            }
+          </div>
+
+          <label class="wb-quizcfg__field-label" [attr.for]="'wb-quizcfg-qtext-' + q.id">
+            {{ 'whiteboard.quiz.config.questionText' | transloco }}
+          </label>
+          <input
+            [id]="'wb-quizcfg-qtext-' + q.id"
+            type="text"
+            class="wb-quizcfg__input wb-quizcfg__input--question"
+            [value]="q.text"
+            [attr.maxlength]="maxQuestionTextLength"
+            [attr.aria-invalid]="q.text.trim().length === 0 ? 'true' : null"
+            (input)="onQuestionTextInput(q.id, $event)"
+          />
+
+          <div
+            class="wb-quizcfg__choices"
+            role="group"
+            [attr.aria-label]="'whiteboard.quiz.config.correctLabel' | transloco"
+          >
+            @for (c of q.choices; track c.id; let ci = $index) {
+              <div class="wb-quizcfg__choice">
+                <label class="wb-quizcfg__choice-correct">
+                  <input
+                    type="checkbox"
+                    [checked]="c.correct"
+                    [attr.aria-label]="'whiteboard.quiz.config.correctLabel' | transloco"
+                    (change)="onToggleCorrect(q.id, c.id, $event)"
+                  />
+                  <span>{{ 'whiteboard.quiz.config.correctLabel' | transloco }}</span>
+                </label>
+
+                <label class="wb-quizcfg__field-label wb-quizcfg__field-label--sr" [attr.for]="'wb-quizcfg-ctext-' + c.id">
+                  {{ 'whiteboard.quiz.config.choiceText' | transloco: { n: ci + 1 } }}
+                </label>
+                <input
+                  [id]="'wb-quizcfg-ctext-' + c.id"
+                  type="text"
+                  class="wb-quizcfg__input wb-quizcfg__input--choice"
+                  [value]="c.text"
+                  [attr.maxlength]="maxChoiceTextLength"
+                  [attr.aria-invalid]="c.text.trim().length === 0 ? 'true' : null"
+                  (input)="onChoiceTextInput(q.id, c.id, $event)"
+                />
+
+                @if (q.choices.length > minChoices) {
+                  <button
+                    type="button"
+                    class="wb-quizcfg__remove-choice"
+                    [attr.aria-label]="'whiteboard.quiz.config.removeChoice' | transloco"
+                    (click)="removeChoice(q.id, c.id)"
+                  >
+                    ×
+                  </button>
+                }
+              </div>
+            }
+          </div>
+
+          @if (q.choices.length < maxChoices) {
+            <button type="button" class="wb-quizcfg__add-choice" (click)="addChoice(q.id)">
+              {{ 'whiteboard.quiz.config.addChoice' | transloco }}
+            </button>
+          }
+
+          @if (attemptedStart() && formError()?.key === 'errorMinChoices' && formError()?.questionIndex === qi) {
+            <p class="wb-quizcfg__error" aria-live="polite">
+              {{ 'whiteboard.quiz.config.errorMinChoices' | transloco }}
+            </p>
+          }
+          @if (attemptedStart() && formError()?.key === 'errorNoCorrect' && formError()?.questionIndex === qi) {
+            <p class="wb-quizcfg__error" aria-live="polite">
+              {{ 'whiteboard.quiz.config.errorNoCorrect' | transloco }}
+            </p>
+          }
+        </fieldset>
+      }
+    </div>
+
+    @if (questions().length < maxQuestions) {
+      <button type="button" class="wb-quizcfg__add-question" (click)="addQuestion()">
+        {{ 'whiteboard.quiz.config.addQuestion' | transloco }}
+      </button>
+    }
+
+    <footer class="wb-quizcfg__footer">
+      <button type="button" class="wb-quizcfg__btn wb-quizcfg__btn--ghost" (click)="onClose()">
+        {{ 'whiteboard.quiz.config.cancel' | transloco }}
+      </button>
+      <button type="button" class="wb-quizcfg__btn wb-quizcfg__btn--primary" (click)="startQuiz()">
+        {{ 'whiteboard.quiz.config.start' | transloco }}
+      </button>
+    </footer>
+  </div>
+</div>
