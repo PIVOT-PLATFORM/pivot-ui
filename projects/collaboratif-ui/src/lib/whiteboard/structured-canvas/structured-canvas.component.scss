@@ -97,6 +97,14 @@
   pointer-events: none;
 }
 
+/* Locked-axis line (US08.11.8) — same rationale as above: the dash pattern is a repeating gradient
+   built in the component, because it carries the shared guide colour and a zoom-dependent dash
+   length that SCSS cannot express. */
+.wb-axis-lock {
+  position: absolute;
+  pointer-events: none;
+}
+
 /* US08.11.2 — content fades in once the opening auto-fit has framed it. `visibility` is left
    untouched on purpose: the layer must stay laid out so the fit can measure it. */
 .wb-layer {

@@ -2190,3 +2190,387 @@ describe('StructuredCanvasComponent — alignment guides (US08.11.4)', () => {
     expect(moveCard).toHaveBeenCalledWith('moving', 497, 0);
   });
 });
+
+/**
+ * US08.11.8 — axis lock at the component level. `decideFreeAxis`/`constrainToAxis` are covered as
+ * pure functions in `axis-lock.spec.ts`; what only exists here is the wiring: where the lock is
+ * captured, that it anchors on the *displayed* position rather than the gesture's start, how it
+ * layers over the grid and the guides, and its lifetime across a gesture.
+ *
+ * The store stub is mutable on purpose — `moveCard` really moves the card. A frozen stub would
+ * make every capture read the same starting position and silently pass the tests that matter most.
+ */
+describe('StructuredCanvasComponent — axis lock (US08.11.8)', () => {
+  let fixture: ComponentFixture<StructuredCanvasComponent>;
+  let component: StructuredCanvasComponent;
+  let cards: Card[];
+  let frames: { id: string; posX: number; posY: number; width: number; height: number; active: boolean; title: string }[];
+  let selected: Set<string>;
+  let selectCards: ReturnType<typeof vi.fn>;
+  let moveCard: ReturnType<typeof vi.fn>;
+  let commitDragCard: ReturnType<typeof vi.fn>;
+
+  const card = (id: string, posX: number, posY: number): Card =>
+    ({
+      id,
+      boardId: 'board-1',
+      type: 'TEXT',
+      content: '',
+      meta: null,
+      posX,
+      posY,
+      width: 100,
+      height: 100,
+      color: '#FFEB3B',
+      groupId: null,
+      groupColor: null,
+      locked: false,
+      layer: 1,
+      fieldValues: [],
+    }) as unknown as Card;
+
+  /** The anchor sits at x=500 so a drag can land on its left edge and raise a real guide. */
+  async function create(snapEnabled = false, alignGuidesEnabled = true): Promise<void> {
+    cards = [card('moving', 0, 0), card('anchor', 500, 300)];
+    frames = [{ id: 'frame-1', posX: 1000, posY: 1000, width: 400, height: 300, active: false, title: 'F' }];
+    selected = new Set(['moving']);
+    selectCards = vi.fn((next: Set<string>) => {
+      selected = next;
+    });
+    const storeStub = {
+      isReadonly: () => false,
+      frames: () => frames,
+      cards: () => cards,
+      connections: () => [],
+      fields: () => [],
+      selectedIds: () => selected,
+      remoteEditors: () => new Map<string, { name: string }>(),
+      autoEditCardId: () => null,
+      activeVoteSession: () => null,
+      voteTallyByCard: () => new Map<string, number>(),
+      myVoteTallyByCard: () => new Map<string, number>(),
+      voteBudgetRemaining: () => null,
+      emitCursor: vi.fn(),
+      selectCards,
+      castVote: vi.fn(),
+      uncastVote: vi.fn(),
+      startDragCard: vi.fn(),
+      // The whole point of the mutable stub: the lock captures where the card *is*.
+      // The fan-out mirrors the real store — followers move by the anchor's delta — so a
+      // multi-selection test can actually detect drift on the locked axis.
+      moveCard: (moveCard = vi.fn((id: string, x: number, y: number) => {
+        const anchor = cards.find((c) => c.id === id);
+        if (!anchor) {
+          return;
+        }
+        const dx = x - anchor.posX;
+        const dy = y - anchor.posY;
+        cards = cards.map((c) =>
+          c.id === id
+            ? ({ ...c, posX: x, posY: y } as Card)
+            : selected.has(c.id)
+              ? ({ ...c, posX: c.posX + dx, posY: c.posY + dy } as Card)
+              : c,
+        );
+      })),
+      commitDragCard: (commitDragCard = vi.fn()),
+      startDragFrame: vi.fn(),
+      commitDragFrame: vi.fn(),
+      moveFrame: vi.fn((id: string, x: number, y: number) => {
+        frames = frames.map((f) => (f.id === id ? { ...f, posX: x, posY: y } : f));
+      }),
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [
+        StructuredCanvasComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { fr: FR_TRANSLATIONS },
+          translocoConfig: { defaultLang: 'fr', availableLangs: ['fr'] },
+          preloadLangs: true,
+        }),
+      ],
+      providers: [{ provide: BoardStore, useValue: storeStub }],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(StructuredCanvasComponent);
+    fixture.componentRef.setInput('alignGuidesEnabled', alignGuidesEnabled);
+    fixture.componentRef.setInput('snapEnabled', snapEnabled);
+    fixture.detectChanges();
+    component = fixture.componentInstance;
+  }
+
+  afterEach(() => fixture.destroy());
+
+  function surface(): HTMLElement {
+    const el = fixture.nativeElement.querySelector('.wb-surface') as HTMLElement;
+    el.getBoundingClientRect = vi
+      .fn()
+      .mockReturnValue({ left: 0, top: 0, width: 800, height: 600, right: 800, bottom: 600 }) as unknown as typeof el.getBoundingClientRect;
+    (el as unknown as { setPointerCapture: (id: number) => void }).setPointerCapture = vi.fn();
+    (el as unknown as { releasePointerCapture: (id: number) => void }).releasePointerCapture = vi.fn();
+    return el;
+  }
+
+  let el: HTMLElement;
+
+  function down(id: string, x: number, y: number, shiftKey = false): void {
+    el = surface();
+    const cardEl = document.createElement('div');
+    cardEl.setAttribute('data-card-id', id);
+    component['onPointerDown']({
+      button: 0,
+      target: cardEl,
+      currentTarget: el,
+      clientX: x,
+      clientY: y,
+      pointerId: 1,
+      shiftKey,
+    } as unknown as PointerEvent);
+  }
+
+  function move(x: number, y: number, shiftKey = false): void {
+    component['onPointerMove']({ clientX: x, clientY: y, pointerId: 1, shiftKey } as unknown as PointerEvent);
+  }
+
+  function up(x: number, y: number): void {
+    component['onPointerUp']({ target: el, currentTarget: el, clientX: x, clientY: y, pointerId: 1 } as unknown as PointerEvent);
+  }
+
+  const moving = (): Card => cards.find((c) => c.id === 'moving') as Card;
+
+  it('pins X when Shift is held from the start and the drag goes down', async () => {
+    await create();
+    down('moving', 0, 0, true);
+    move(3, 200, true); // vertical dominates well past the 8px dead zone
+
+    expect(moving().posX).toBe(0);
+    expect(moving().posY).toBe(200);
+  });
+
+  it('pins Y when the drag goes sideways', async () => {
+    await create();
+    down('moving', 0, 0, true);
+    move(200, 3, true);
+
+    expect(moving().posY).toBe(0);
+    expect(moving().posX).toBe(200);
+  });
+
+  it('holds the position reached mid-gesture, not the one the drag started at — the variant-A regression', async () => {
+    await create();
+    down('moving', 0, 0);
+    move(497, 0); // free drag: the guide snaps the card onto the anchor edge at x=500
+    expect(moving().posX).toBe(500);
+
+    // Shift goes down here, then the pointer descends. The captured X must be 500 (where the card
+    // is), never 0 (where the drag began) — otherwise the alignment just obtained is destroyed.
+    move(497, 40, true);
+    move(497, 400, true);
+
+    expect(moving().posX).toBe(500);
+    expect(moving().posY).toBe(400);
+  });
+
+  it('measures dominance from the capture, not from the drag origin', async () => {
+    await create();
+    down('moving', 0, 0);
+    move(400, 0); // 400px of horizontal travel accumulated before Shift
+
+    // Dominance computed from the gesture origin would see |dx|=400 >> |dy| and free the horizontal
+    // axis, forbidding the very descent being asked for. From the capture, |dy| wins.
+    move(400, 0, true); // capture at (400, 0)
+    move(400, 300, true);
+
+    expect(moving().posY).toBe(300);
+    // And X is the one held — proof the vertical axis was the one freed.
+    expect(moving().posX).toBe(400);
+  });
+
+  it('leaves the drag free while the pointer stays inside the dead zone', async () => {
+    await create();
+    down('moving', 0, 0, true);
+    move(5, 5, true); // under 8px on both axes
+
+    expect(moving()).toMatchObject({ posX: 5, posY: 5 });
+    expect(component['lockLine']()).toBeNull();
+  });
+
+  it('resumes the free drag without a catch-up jump when Shift is released', async () => {
+    await create();
+    down('moving', 0, 0, true);
+    move(200, 300, true);
+    expect(moving().posX).toBe(0); // locked
+
+    move(200, 300, false);
+
+    // Straight back under the pointer — `raw` is recomputed from startPos every frame, so there is
+    // no accumulated drift to reconcile.
+    expect(moving()).toMatchObject({ posX: 200, posY: 300 });
+  });
+
+  it('captures a fresh lock when Shift is re-pressed within the same gesture', async () => {
+    await create();
+    down('moving', 0, 0, true);
+    move(0, 200, true); // vertical segment, X pinned at 0
+    move(0, 200, false); // release
+    move(300, 200, false); // travel sideways freely
+    move(300, 200, true); // press again — new capture at the current position
+    move(300, 400, true);
+
+    expect(moving().posX).toBe(300);
+    expect(moving().posY).toBe(400);
+  });
+
+  it('never rounds the locked axis to the grid, even when the grid is on', async () => {
+    await create(true);
+    down('moving', 0, 0);
+    move(7, 0); // grid rounds x to 0
+    move(7, 200, true);
+
+    // The free axis is rounded (200 -> 192 = round(200/24)*24), the locked one keeps its captured
+    // value untouched. Rounding it would jerk the card sideways at the exact moment the user asked
+    // it to hold still.
+    expect(moving().posY).toBe(192);
+    expect(moving().posX).toBe(0);
+  });
+
+  it('publishes a dashed line on the locked axis', async () => {
+    await create();
+    down('moving', 0, 0, true);
+    move(3, 200, true); // vertical free -> X locked -> vertical line
+
+    // Centred on the card: posX 0 + width 100 / 2.
+    expect(component['lockLine']()).toEqual({ v: 50, h: null });
+  });
+
+  it('withholds the dashed line where a solid guide already marks the axis', async () => {
+    await create();
+    down('moving', 0, 0);
+    move(497, 0); // solid vertical guide at 500
+    move(497, 50, true); // capture; still inside the dead zone
+    // Down to y=100, whose landmarks (100/150/200) clear the anchor's (300/350/400) by far — no
+    // horizontal guide can appear, so this asserts the vertical axis alone.
+    move(497, 100, true);
+
+    expect(component['alignGuides']()).toEqual({ v: 500, h: null });
+    expect(component['lockLine']()).toBeNull();
+  });
+
+  it('clears the lock on release so it cannot leak into the next drag', async () => {
+    await create();
+    down('moving', 0, 0, true);
+    move(3, 200, true);
+    expect(component['lockLine']()).not.toBeNull();
+
+    up(3, 200);
+
+    expect(component['lockLine']()).toBeNull();
+    expect(component['axisLock']).toBeNull();
+  });
+
+  it('keeps a Shift-clicked selected card selected when the click turns into a drag', async () => {
+    await create();
+    selected = new Set(['moving', 'anchor']);
+    down('moving', 0, 0, true);
+
+    // The toggle is deferred, so the card is still selected and draggable at this point.
+    expect(selectCards).not.toHaveBeenCalled();
+
+    move(3, 200, true);
+    up(3, 200);
+
+    // Past the click slop the gesture was a move, not a click — the deselection must not fire.
+    expect(selectCards).not.toHaveBeenCalled();
+  });
+
+  it('still toggles a Shift-clicked selected card out when the pointer does not move', async () => {
+    await create();
+    selected = new Set(['moving', 'anchor']);
+    down('moving', 0, 0, true);
+    up(0, 0);
+
+    expect(selectCards).toHaveBeenCalledWith(new Set(['anchor']));
+  });
+
+  it('locks the axis for a multi-selection — no follower drifts off it (AC multi-sélection)', async () => {
+    await create();
+    selected = new Set(['moving', 'anchor']);
+    down('moving', 0, 0, true);
+    move(3, 200, true);
+
+    // What the component owns is the anchor's position: it must emit the *constrained* one, so the
+    // delta the store fans out to the followers carries no sideways component. Asserting the
+    // followers' coordinates instead would only re-check the stub's own arithmetic.
+    expect(moveCard).toHaveBeenLastCalledWith('moving', 0, 200);
+    expect(moving().posX).toBe(0);
+  });
+
+  it('locks the axis when dragging a frame (AC cadres)', async () => {
+    await create();
+    const el2 = surface();
+    const frameEl = document.createElement('div');
+    frameEl.setAttribute('data-frame-id', 'frame-1');
+    frameEl.setAttribute('data-frame-drag', ''); // the handler keys off this attribute
+    component['onPointerDown']({
+      button: 0,
+      target: frameEl,
+      currentTarget: el2,
+      clientX: 1000,
+      clientY: 1000,
+      pointerId: 1,
+      shiftKey: true,
+    } as unknown as PointerEvent);
+    component['onPointerMove']({ clientX: 1003, clientY: 1200, pointerId: 1, shiftKey: true } as unknown as PointerEvent);
+
+    const frame = frames[0];
+    expect(frame.posX).toBe(1000); // locked
+    expect(frame.posY).toBe(1200); // free
+  });
+
+  it('drops the lock when the gesture is cancelled without a pointerup', async () => {
+    await create();
+    down('moving', 0, 0, true);
+    move(3, 200, true);
+    expect(component['lockLine']()).not.toBeNull();
+
+    // Releasing outside the window fires no pointerup — reachable for a frame dragged by its
+    // title, which deliberately skips setPointerCapture. Without this handler the dashed line
+    // stayed painted and a pending toggle resolved on the *next* gesture's release.
+    component['onPointerCancel']();
+
+    expect(component['lockLine']()).toBeNull();
+    expect(component['axisLock']).toBeNull();
+    expect(component['pendingToggle']).toBeNull();
+    // And the drag is committed, not merely dropped: `startDragCard` put the card under local
+    // control and only `commitDragCard` releases it. Skipping it would leave the card deaf to
+    // remote updates for the rest of the session — the desync class fixed in #225.
+    expect(commitDragCard).toHaveBeenCalledTimes(1);
+  });
+
+  it('adds an unselected card to the selection on Shift+click, without deferring', async () => {
+    await create();
+    selected = new Set(['anchor']);
+    down('moving', 0, 0, true);
+
+    // Additive click on a card that is *not* yet selected must land immediately — deferring it
+    // would leave the drag starting on an unselected card.
+    expect(selectCards).toHaveBeenCalledWith(new Set(['anchor', 'moving']));
+    expect(component['pendingToggle']).toBeNull();
+  });
+
+  it('keeps the solid guide on the locked axis for the whole run', async () => {
+    await create();
+    down('moving', 0, 0);
+    move(497, 0); // guide matches, card snaps onto x=500
+    expect(component['alignGuides']()).toEqual({ v: 500, h: null });
+
+    move(497, 50, true); // capture
+    move(470, 400, true); // pointer drifts far sideways while the card stays locked
+
+    // Guides are probed on the constrained position, so the match survives the sideways drift.
+    // Probing the raw point would drop it and make the line blink between solid and dashed.
+    expect(component['alignGuides']()?.v).toBe(500);
+    expect(moving().posX).toBe(500);
+  });
+});
