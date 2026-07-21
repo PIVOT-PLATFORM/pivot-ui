@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { Subject, of, throwError } from 'rxjs';
 import { RoomWsService } from '../room-ws.service';
-import { ConsensusResponse, RevealResponse, TicketResponse } from '../ticket.model';
+import { AttributedVote, ConsensusResponse, RevealResponse, TicketResponse } from '../ticket.model';
 import { TicketService } from '../ticket.service';
 import { RoomBoardComponent } from './room-board.component';
 
@@ -33,9 +33,18 @@ type BoardHarness = {
   revealVotes: () => void;
   revealing: () => boolean;
   revealErrorKey: () => string | null;
-  revealedValues: () => readonly string[] | null;
+  revealedVotes: () => readonly AttributedVote[] | null;
   consensus: () => ConsensusResponse | null;
   roster: () => readonly { name: string; role: string; hasVoted: boolean }[];
+  finalEstimate: () => string | null;
+  finalEstimateChoice: () => string;
+  resetCount: () => number;
+  resetting: () => boolean;
+  resetErrorKey: () => string | null;
+  resetVote: () => void;
+  finalizing: () => boolean;
+  finalizeErrorKey: () => string | null;
+  finalizeVote: () => void;
 };
 
 /** Host component so `roomId`/`cardValues`/`isFacilitator` inputs can be exercised. */
@@ -54,8 +63,16 @@ describe('RoomBoardComponent', () => {
   let createTicketSpy: ReturnType<typeof vi.fn>;
   let getCurrentTicketSpy: ReturnType<typeof vi.fn>;
   let revealTicketSpy: ReturnType<typeof vi.fn>;
+  let resetTicketSpy: ReturnType<typeof vi.fn>;
+  let finalizeTicketSpy: ReturnType<typeof vi.fn>;
   let submitVoteSpy: ReturnType<typeof vi.fn>;
   let messages$: Subject<string>;
+
+  const mockAttributedVotes: readonly AttributedVote[] = [
+    { name: 'Alice', value: '5' },
+    { name: 'Bob', value: '8' },
+    { name: 'Carol', value: '5' },
+  ];
 
   const mockReveal: RevealResponse = {
     id: 'ticket-1',
@@ -64,7 +81,7 @@ describe('RoomBoardComponent', () => {
     status: 'REVEALED',
     createdAt: '2026-07-10T10:00:00Z',
     revealedAt: '2026-07-10T10:05:00Z',
-    values: ['5', '8', '5'],
+    attributedVotes: mockAttributedVotes,
     consensus: { mean: 6, median: 5, majority: '5' },
   };
 
@@ -72,6 +89,12 @@ describe('RoomBoardComponent', () => {
     createTicketSpy = vi.fn().mockReturnValue(of(mockTicket));
     getCurrentTicketSpy = vi.fn().mockReturnValue(of(null));
     revealTicketSpy = vi.fn().mockReturnValue(of(mockReveal));
+    resetTicketSpy = vi.fn().mockReturnValue(
+      of({ id: 'ticket-1', roomId: ROOM_ID, title: 'Estimate JIRA-123', status: 'VOTING', createdAt: '2026-07-10T10:00:00Z', revealedAt: null }),
+    );
+    finalizeTicketSpy = vi.fn().mockReturnValue(
+      of({ id: 'ticket-1', roomId: ROOM_ID, title: 'Estimate JIRA-123', status: 'REVEALED', createdAt: '2026-07-10T10:00:00Z', revealedAt: '2026-07-10T10:05:00Z', finalEstimate: '5' }),
+    );
     submitVoteSpy = vi.fn();
     messages$ = new Subject<string>();
 
@@ -80,7 +103,13 @@ describe('RoomBoardComponent', () => {
       providers: [
         {
           provide: TicketService,
-          useValue: { createTicket: createTicketSpy, getCurrentTicket: getCurrentTicketSpy, revealTicket: revealTicketSpy },
+          useValue: {
+            createTicket: createTicketSpy,
+            getCurrentTicket: getCurrentTicketSpy,
+            revealTicket: revealTicketSpy,
+            resetTicket: resetTicketSpy,
+            finalizeTicket: finalizeTicketSpy,
+          },
         },
         { provide: RoomWsService, useValue: { messages$, submitVote: submitVoteSpy } },
       ],
@@ -429,7 +458,7 @@ describe('RoomBoardComponent', () => {
     expect(fixture.nativeElement.querySelector('.room-board__reveal')).toBeNull();
   });
 
-  it('revealVotes() calls the service and applies the revealed state (values + consensus)', () => {
+  it('revealVotes() calls the service and applies the revealed state (attributed votes + consensus)', () => {
     getCurrentTicketSpy.mockReturnValue(of(mockTicket));
     const fixture = createHost(host => (host.isFacilitator = true));
     const b = board(fixture);
@@ -439,9 +468,34 @@ describe('RoomBoardComponent', () => {
 
     expect(revealTicketSpy).toHaveBeenCalledWith(ROOM_ID, 'ticket-1');
     expect(b.currentTicket()?.status).toBe('REVEALED');
-    expect(b.revealedValues()).toEqual(['5', '8', '5']);
+    expect(b.revealedVotes()).toEqual(mockAttributedVotes);
     expect(b.consensus()).toEqual({ mean: 6, median: 5, majority: '5' });
     expect(b.revealing()).toBe(false);
+  });
+
+  it('revealVotes() pre-fills finalEstimateChoice with the consensus majority', () => {
+    getCurrentTicketSpy.mockReturnValue(of(mockTicket));
+    const fixture = createHost(host => (host.isFacilitator = true));
+    const b = board(fixture);
+
+    b.revealVotes();
+    fixture.detectChanges();
+
+    expect(b.finalEstimateChoice()).toBe('5');
+  });
+
+  it('revealVotes() leaves finalEstimateChoice empty when the majority is null', () => {
+    revealTicketSpy.mockReturnValue(
+      of({ ...mockReveal, attributedVotes: [], consensus: { mean: null, median: null, majority: null } }),
+    );
+    getCurrentTicketSpy.mockReturnValue(of(mockTicket));
+    const fixture = createHost(host => (host.isFacilitator = true));
+    const b = board(fixture);
+
+    b.revealVotes();
+    fixture.detectChanges();
+
+    expect(b.finalEstimateChoice()).toBe('');
   });
 
   it('revealVotes() no-ops when no ticket is active', () => {
@@ -462,7 +516,7 @@ describe('RoomBoardComponent', () => {
         type: 'VOTES_REVEALED',
         roomId: ROOM_ID,
         ticketId: 'ticket-1',
-        values: ['3', '5'],
+        attributedVotes: [{ name: 'Alice', value: '3' }, { name: 'Bob', value: '5' }],
         consensus: { mean: 4, median: 4, majority: null },
         revealedAt: '2026-07-10T10:05:00Z',
       }),
@@ -470,7 +524,7 @@ describe('RoomBoardComponent', () => {
     fixture.detectChanges();
 
     expect(b.currentTicket()?.status).toBe('REVEALED');
-    expect(b.revealedValues()).toEqual(['3', '5']);
+    expect(b.revealedVotes()).toEqual([{ name: 'Alice', value: '3' }, { name: 'Bob', value: '5' }]);
     expect(b.consensus()).toEqual({ mean: 4, median: 4, majority: null });
     expect(revealTicketSpy).not.toHaveBeenCalled();
   });
@@ -485,7 +539,7 @@ describe('RoomBoardComponent', () => {
         type: 'VOTES_REVEALED',
         roomId: ROOM_ID,
         ticketId: 'some-other-ticket',
-        values: ['3'],
+        attributedVotes: [{ name: 'Alice', value: '3' }],
         consensus: { mean: 3, median: 3, majority: '3' },
         revealedAt: '2026-07-10T10:05:00Z',
       }),
@@ -493,12 +547,12 @@ describe('RoomBoardComponent', () => {
     fixture.detectChanges();
 
     expect(b.currentTicket()?.status).toBe('VOTING');
-    expect(b.revealedValues()).toBeNull();
+    expect(b.revealedVotes()).toBeNull();
   });
 
   it('renders a null-fallback label when mean/median/majority are all null (e.g. zero votes cast)', () => {
     revealTicketSpy.mockReturnValue(
-      of({ ...mockReveal, values: [], consensus: { mean: null, median: null, majority: null } }),
+      of({ ...mockReveal, attributedVotes: [], consensus: { mean: null, median: null, majority: null } }),
     );
     getCurrentTicketSpy.mockReturnValue(of(mockTicket));
     const fixture = createHost(host => (host.isFacilitator = true));
@@ -561,20 +615,20 @@ describe('RoomBoardComponent', () => {
     expect(fixture.nativeElement.querySelector('#ticket-title')).not.toBeNull();
   });
 
-  it('creating a new ticket after a reveal resets the previous revealed values/consensus', () => {
+  it('creating a new ticket after a reveal resets the previous revealed votes/consensus', () => {
     getCurrentTicketSpy.mockReturnValue(of(mockTicket));
     const fixture = createHost(host => (host.isFacilitator = true));
     const b = board(fixture);
 
     b.revealVotes();
     fixture.detectChanges();
-    expect(b.revealedValues()).not.toBeNull();
+    expect(b.revealedVotes()).not.toBeNull();
 
     b.titleForm.controls.title.setValue('Next ticket');
     b.createTicket();
     fixture.detectChanges();
 
-    expect(b.revealedValues()).toBeNull();
+    expect(b.revealedVotes()).toBeNull();
     expect(b.consensus()).toBeNull();
   });
 
@@ -584,5 +638,281 @@ describe('RoomBoardComponent', () => {
 
     const firstCard = fixture.nativeElement.querySelector('.room-board__card');
     expect(firstCard.disabled).toBe(true);
+  });
+
+  // ── Reset & finalize (US09.2.3) ──
+
+  it('shows reset/finalize actions to the facilitator on a revealed, non-finalized ticket', () => {
+    getCurrentTicketSpy.mockReturnValue(of(mockTicket));
+    const fixture = createHost(host => (host.isFacilitator = true));
+    const b = board(fixture);
+
+    b.revealVotes();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.room-board__reset')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.room-board__finalize-submit')).not.toBeNull();
+  });
+
+  it('never shows reset/finalize actions to a non-facilitator participant', () => {
+    getCurrentTicketSpy.mockReturnValue(of(mockTicket));
+    const fixture = createHost(host => (host.isFacilitator = false));
+    const b = board(fixture);
+
+    messages$.next(
+      JSON.stringify({
+        type: 'VOTES_REVEALED',
+        roomId: ROOM_ID,
+        ticketId: 'ticket-1',
+        attributedVotes: [],
+        consensus: { mean: null, median: null, majority: null },
+        revealedAt: '2026-07-10T10:05:00Z',
+      }),
+    );
+    fixture.detectChanges();
+    void b;
+
+    expect(fixture.nativeElement.querySelector('.room-board__reset')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.room-board__finalize-submit')).toBeNull();
+  });
+
+  it('resetVote() calls the service and reverts the ticket to VOTING, clearing revealed state', () => {
+    getCurrentTicketSpy.mockReturnValue(of(mockTicket));
+    const fixture = createHost(host => (host.isFacilitator = true));
+    const b = board(fixture);
+
+    b.revealVotes();
+    fixture.detectChanges();
+    b.resetVote();
+    fixture.detectChanges();
+
+    expect(resetTicketSpy).toHaveBeenCalledWith(ROOM_ID, 'ticket-1');
+    expect(b.currentTicket()?.status).toBe('VOTING');
+    expect(b.revealedVotes()).toBeNull();
+    expect(b.consensus()).toBeNull();
+    expect(b.resetCount()).toBe(1);
+    expect(b.resetting()).toBe(false);
+  });
+
+  it('resetVote() no-ops when the ticket is still VOTING', () => {
+    getCurrentTicketSpy.mockReturnValue(of(mockTicket));
+    const fixture = createHost(host => (host.isFacilitator = true));
+
+    board(fixture).resetVote();
+
+    expect(resetTicketSpy).not.toHaveBeenCalled();
+  });
+
+  it('resetVote() no-ops once the ticket has been finalized', () => {
+    getCurrentTicketSpy.mockReturnValue(of(mockTicket));
+    const fixture = createHost(host => (host.isFacilitator = true));
+    const b = board(fixture);
+
+    b.revealVotes();
+    fixture.detectChanges();
+    b.finalizeVote();
+    fixture.detectChanges();
+    resetTicketSpy.mockClear();
+
+    b.resetVote();
+
+    expect(resetTicketSpy).not.toHaveBeenCalled();
+  });
+
+  it('a TICKET_RESET broadcast applies the same reset state for a non-facilitator participant', () => {
+    getCurrentTicketSpy.mockReturnValue(of({ ...mockTicket, status: 'REVEALED' as const }));
+    const fixture = createHost(host => (host.isFacilitator = false));
+    const b = board(fixture);
+
+    messages$.next(JSON.stringify({ type: 'TICKET_RESET', roomId: ROOM_ID, ticketId: 'ticket-1' }));
+    fixture.detectChanges();
+
+    expect(b.currentTicket()?.status).toBe('VOTING');
+    expect(resetTicketSpy).not.toHaveBeenCalled();
+  });
+
+  it('a TICKET_RESET broadcast for a different ticket than the one displayed is ignored', () => {
+    getCurrentTicketSpy.mockReturnValue(of({ ...mockTicket, status: 'REVEALED' as const }));
+    const fixture = createHost();
+    const b = board(fixture);
+
+    messages$.next(JSON.stringify({ type: 'TICKET_RESET', roomId: ROOM_ID, ticketId: 'some-other-ticket' }));
+    fixture.detectChanges();
+
+    expect(b.currentTicket()?.status).toBe('REVEALED');
+  });
+
+  it('maps a 409 TICKET_NOT_REVEALED reset response to the ticket-not-revealed error key', () => {
+    resetTicketSpy.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 409, error: { code: 'TICKET_NOT_REVEALED' } })),
+    );
+    getCurrentTicketSpy.mockReturnValue(of(mockTicket));
+    const fixture = createHost(host => (host.isFacilitator = true));
+    const b = board(fixture);
+
+    b.revealVotes();
+    fixture.detectChanges();
+    b.resetVote();
+    fixture.detectChanges();
+
+    expect(b.resetErrorKey()).toBe('scrumPoker.roomBoard.errors.ticketNotRevealed');
+  });
+
+  it('maps a 409 TICKET_ALREADY_FINALIZED reset response to the already-finalized error key', () => {
+    resetTicketSpy.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 409, error: { code: 'TICKET_ALREADY_FINALIZED' } })),
+    );
+    getCurrentTicketSpy.mockReturnValue(of(mockTicket));
+    const fixture = createHost(host => (host.isFacilitator = true));
+    const b = board(fixture);
+
+    b.revealVotes();
+    fixture.detectChanges();
+    b.resetVote();
+    fixture.detectChanges();
+
+    expect(b.resetErrorKey()).toBe('scrumPoker.roomBoard.errors.ticketAlreadyFinalized');
+  });
+
+  it('finalizeVote() calls the service with the chosen value and persists the final estimate', () => {
+    getCurrentTicketSpy.mockReturnValue(of(mockTicket));
+    const fixture = createHost(host => (host.isFacilitator = true));
+    const b = board(fixture);
+
+    b.revealVotes();
+    fixture.detectChanges();
+    b.finalizeVote();
+    fixture.detectChanges();
+
+    expect(finalizeTicketSpy).toHaveBeenCalledWith(ROOM_ID, 'ticket-1', '5');
+    expect(b.finalEstimate()).toBe('5');
+    expect(b.finalizing()).toBe(false);
+  });
+
+  it('finalizeVote() no-ops when no value has been chosen', () => {
+    finalizeTicketSpy.mockClear();
+    revealTicketSpy.mockReturnValue(
+      of({ ...mockReveal, attributedVotes: [], consensus: { mean: null, median: null, majority: null } }),
+    );
+    getCurrentTicketSpy.mockReturnValue(of(mockTicket));
+    const fixture = createHost(host => (host.isFacilitator = true));
+    const b = board(fixture);
+
+    b.revealVotes();
+    fixture.detectChanges();
+    b.finalizeVote();
+
+    expect(finalizeTicketSpy).not.toHaveBeenCalled();
+  });
+
+  it('finalizeVote() no-ops once the ticket has already been finalized', () => {
+    getCurrentTicketSpy.mockReturnValue(of(mockTicket));
+    const fixture = createHost(host => (host.isFacilitator = true));
+    const b = board(fixture);
+
+    b.revealVotes();
+    fixture.detectChanges();
+    b.finalizeVote();
+    fixture.detectChanges();
+    finalizeTicketSpy.mockClear();
+
+    b.finalizeVote();
+
+    expect(finalizeTicketSpy).not.toHaveBeenCalled();
+  });
+
+  it('hides reset/finalize actions and shows the final-estimate badge once finalized', () => {
+    getCurrentTicketSpy.mockReturnValue(of(mockTicket));
+    const fixture = createHost(host => (host.isFacilitator = true));
+    const b = board(fixture);
+
+    b.revealVotes();
+    fixture.detectChanges();
+    b.finalizeVote();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.room-board__reset')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.room-board__finalize-submit')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.room-board__final-badge')).not.toBeNull();
+  });
+
+  it('a TICKET_FINALIZED broadcast applies the same finalized state for a non-facilitator participant', () => {
+    getCurrentTicketSpy.mockReturnValue(of({ ...mockTicket, status: 'REVEALED' as const }));
+    const fixture = createHost(host => (host.isFacilitator = false));
+    const b = board(fixture);
+
+    messages$.next(
+      JSON.stringify({ type: 'TICKET_FINALIZED', roomId: ROOM_ID, ticketId: 'ticket-1', finalEstimate: '8' }),
+    );
+    fixture.detectChanges();
+
+    expect(b.finalEstimate()).toBe('8');
+  });
+
+  it('a TICKET_FINALIZED broadcast for a different ticket than the one displayed is ignored', () => {
+    getCurrentTicketSpy.mockReturnValue(of({ ...mockTicket, status: 'REVEALED' as const }));
+    const fixture = createHost();
+    const b = board(fixture);
+
+    messages$.next(
+      JSON.stringify({
+        type: 'TICKET_FINALIZED',
+        roomId: ROOM_ID,
+        ticketId: 'some-other-ticket',
+        finalEstimate: '8',
+      }),
+    );
+    fixture.detectChanges();
+
+    expect(b.finalEstimate()).toBeNull();
+  });
+
+  it('maps a 400 INVALID_FINAL_ESTIMATE finalize response to the required-value error key', () => {
+    finalizeTicketSpy.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 400, error: { code: 'INVALID_FINAL_ESTIMATE' } })),
+    );
+    getCurrentTicketSpy.mockReturnValue(of(mockTicket));
+    const fixture = createHost(host => (host.isFacilitator = true));
+    const b = board(fixture);
+
+    b.revealVotes();
+    fixture.detectChanges();
+    b.finalizeVote();
+    fixture.detectChanges();
+
+    expect(b.finalizeErrorKey()).toBe('scrumPoker.roomBoard.errors.invalidFinalEstimate');
+  });
+
+  it('maps a 400 out-of-deck finalize response to the invalid-value error key', () => {
+    finalizeTicketSpy.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 400, error: {} })));
+    getCurrentTicketSpy.mockReturnValue(of(mockTicket));
+    const fixture = createHost(host => (host.isFacilitator = true));
+    const b = board(fixture);
+
+    b.revealVotes();
+    fixture.detectChanges();
+    b.finalizeVote();
+    fixture.detectChanges();
+
+    expect(b.finalizeErrorKey()).toBe('scrumPoker.roomBoard.errors.invalidFinalEstimateValue');
+  });
+
+  it('creating a new ticket after finalization resets finalEstimate/resetCount', () => {
+    getCurrentTicketSpy.mockReturnValue(of(mockTicket));
+    const fixture = createHost(host => (host.isFacilitator = true));
+    const b = board(fixture);
+
+    b.revealVotes();
+    fixture.detectChanges();
+    b.finalizeVote();
+    fixture.detectChanges();
+    expect(b.finalEstimate()).not.toBeNull();
+
+    b.titleForm.controls.title.setValue('Next ticket');
+    b.createTicket();
+    fixture.detectChanges();
+
+    expect(b.finalEstimate()).toBeNull();
+    expect(b.resetCount()).toBe(0);
   });
 });

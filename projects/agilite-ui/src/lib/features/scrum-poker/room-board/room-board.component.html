@@ -140,9 +140,12 @@
         <div class="room-board__revealed" role="status" aria-live="polite">
           <h4 class="room-board__revealed-heading">{{ 'scrumPoker.roomBoard.revealedHeading' | transloco }}</h4>
 
-          <ul class="room-board__revealed-values" [attr.aria-label]="'scrumPoker.roomBoard.revealedValuesLabel' | transloco">
-            @for (value of revealedValues(); track $index) {
-              <li class="room-board__revealed-value">{{ value }}</li>
+          <ul class="room-board__revealed-votes" [attr.aria-label]="'scrumPoker.roomBoard.revealedValuesLabel' | transloco">
+            @for (vote of revealedVotes(); track $index) {
+              <li class="room-board__revealed-vote">
+                <span class="room-board__revealed-vote-value">{{ vote.value }}</span>
+                <span class="room-board__revealed-vote-name">{{ vote.name }}</span>
+              </li>
             }
           </ul>
 
@@ -155,6 +158,72 @@
               <dt>{{ 'scrumPoker.roomBoard.consensusMajority' | transloco }}</dt>
               <dd>{{ c.majority ?? ('scrumPoker.roomBoard.noNumericConsensus' | transloco) }}</dd>
             </dl>
+          }
+
+          @if (finalEstimate(); as estimate) {
+            <p class="room-board__final-badge">
+              {{ 'scrumPoker.roomBoard.finalEstimateBadge' | transloco: { value: estimate } }}
+            </p>
+          } @else if (isFacilitator()) {
+            <div
+              class="room-board__finalize"
+              role="group"
+              [attr.aria-label]="'scrumPoker.roomBoard.finalizeGroupLabel' | transloco"
+            >
+              <div class="room-board__field">
+                <label class="room-board__label" for="final-estimate-select">
+                  {{ 'scrumPoker.roomBoard.finalEstimateLabel' | transloco }}
+                </label>
+                <select
+                  id="final-estimate-select"
+                  class="room-board__select"
+                  [value]="finalEstimateChoice()"
+                  (change)="finalEstimateChoice.set($any($event.target).value)"
+                >
+                  <option value="" disabled>{{ 'scrumPoker.roomBoard.finalEstimatePlaceholder' | transloco }}</option>
+                  @for (value of cardValues(); track value) {
+                    <option [value]="value">{{ value }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="room-board__finalize-actions">
+                <button
+                  type="button"
+                  class="room-board__finalize-submit"
+                  [disabled]="!finalEstimateChoice() || finalizing()"
+                  [attr.aria-busy]="finalizing()"
+                  (click)="finalizeVote()"
+                >
+                  {{
+                    (finalizing() ? 'scrumPoker.roomBoard.finalizing' : 'scrumPoker.roomBoard.finalize')
+                      | transloco
+                  }}
+                </button>
+                <button
+                  type="button"
+                  class="room-board__reset"
+                  [disabled]="resetting()"
+                  [attr.aria-busy]="resetting()"
+                  (click)="resetVote()"
+                >
+                  {{ (resetting() ? 'scrumPoker.roomBoard.resetting' : 'scrumPoker.roomBoard.reset') | transloco }}
+                </button>
+              </div>
+
+              @if (resetCount() > 0) {
+                <p class="room-board__reset-count">
+                  {{ 'scrumPoker.roomBoard.resetCount' | transloco: { count: resetCount() } }}
+                </p>
+              }
+
+              @if (finalizeErrorKey(); as errorKey) {
+                <p class="room-board__error" role="alert">{{ errorKey | transloco }}</p>
+              }
+              @if (resetErrorKey(); as errorKey) {
+                <p class="room-board__error" role="alert">{{ errorKey | transloco }}</p>
+              }
+            </div>
           }
         </div>
       }

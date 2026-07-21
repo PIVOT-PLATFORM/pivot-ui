@@ -2,7 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { AGILITE_API_URL } from '../../core/config/tokens';
-import { CreateTicketRequest, RevealResponse, TicketResponse } from './ticket.model';
+import {
+  CreateTicketRequest,
+  FinalizeTicketRequest,
+  RevealResponse,
+  TicketFinalizedResponse,
+  TicketResetResponse,
+  TicketResponse,
+} from './ticket.model';
 
 /**
  * HTTP client for the planning poker ticket API (US09.2.1).
@@ -60,5 +67,39 @@ export class TicketService {
    */
   revealTicket(roomId: string, ticketId: string): Observable<RevealResponse> {
     return this.http.post<RevealResponse>(`${this.ticketsUrl(roomId)}/${ticketId}/reveal`, {});
+  }
+
+  /**
+   * Relaunches a round of voting on an already-revealed ticket (US09.2.3) — restricted
+   * server-side to that room's facilitator, permitted only on a `REVEALED`, non-finalized ticket.
+   *
+   * @param roomId   the target room
+   * @param ticketId the ticket to reset
+   * @returns an observable of the reset response (ticket back to `VOTING`, `revealedAt` cleared)
+   */
+  resetTicket(roomId: string, ticketId: string): Observable<TicketResetResponse> {
+    return this.http.post<TicketResetResponse>(`${this.ticketsUrl(roomId)}/${ticketId}/reset`, {});
+  }
+
+  /**
+   * Persists the facilitator's chosen final estimate on an already-revealed ticket (US09.2.3) —
+   * restricted server-side to that room's facilitator, permitted only on a `REVEALED`,
+   * non-finalized ticket. A terminal, one-time transition — the server rejects a second call.
+   *
+   * @param roomId        the target room
+   * @param ticketId      the ticket to finalize
+   * @param finalEstimate the chosen value, one of the room's own deck values
+   * @returns an observable of the finalize response (still `REVEALED`, with `finalEstimate` set)
+   */
+  finalizeTicket(
+    roomId: string,
+    ticketId: string,
+    finalEstimate: string,
+  ): Observable<TicketFinalizedResponse> {
+    const request: FinalizeTicketRequest = { finalEstimate };
+    return this.http.post<TicketFinalizedResponse>(
+      `${this.ticketsUrl(roomId)}/${ticketId}/finalize`,
+      request,
+    );
   }
 }

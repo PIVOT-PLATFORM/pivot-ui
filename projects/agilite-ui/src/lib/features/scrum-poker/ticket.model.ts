@@ -74,6 +74,17 @@ export interface ConsensusResponse {
   readonly majority: string | null;
 }
 
+/**
+ * A single participant's revealed vote, attributed to their roster display name (E09 — classic
+ * parity, attributed reveal). Replaces the pre-E09 anonymous `values: string[]` shape — masking
+ * is still preserved everywhere else (nobody, including the roster, learns any value before
+ * reveal).
+ */
+export interface AttributedVote {
+  readonly name: string;
+  readonly value: string;
+}
+
 /** Response body for `POST /api/agilite/poker/rooms/{roomId}/tickets/{ticketId}/reveal` (US09.2.2). */
 export interface RevealResponse {
   readonly id: string;
@@ -82,28 +93,75 @@ export interface RevealResponse {
   readonly status: 'REVEALED';
   readonly createdAt: string;
   readonly revealedAt: string;
-  /**
-   * Every cast vote's raw value, one entry per participant who voted — anonymous by design (no
-   * `participantKey`/identity anywhere in this shape or the event below), order carries no
-   * meaning.
-   */
-  readonly values: readonly string[];
+  /** Every cast vote, attributed to the voting participant's roster display name — no defined order. */
+  readonly attributedVotes: readonly AttributedVote[];
   readonly consensus: ConsensusResponse;
 }
 
 /**
  * `VOTES_REVEALED` event received on the room's regular topic when the facilitator reveals the
  * current ticket (US09.2.2) — broadcast to every subscriber simultaneously, never staggered.
- * Carries the exact same `values`/`consensus` as the REST reveal response, so a participant who
- * only sees the broadcast (never called the endpoint themselves) ends up with identical state.
+ * Carries the exact same `attributedVotes`/`consensus` as the REST reveal response, so a
+ * participant who only sees the broadcast (never called the endpoint themselves) ends up with
+ * identical state.
  */
 export interface VotesRevealedEvent {
   readonly type: 'VOTES_REVEALED';
   readonly roomId: string;
   readonly ticketId: string;
-  readonly values: readonly string[];
+  readonly attributedVotes: readonly AttributedVote[];
   readonly consensus: ConsensusResponse;
   readonly revealedAt: string;
+}
+
+/**
+ * `TICKET_RESET` event received on the room's regular topic (US09.2.3) when the facilitator
+ * relaunches a round of voting on an already-revealed ticket — every subscriber must locally
+ * clear any selected/displayed vote and revert to the "waiting to vote" state, identical
+ * treatment to a brand-new {@link TicketCreatedEvent} ticket.
+ */
+export interface TicketResetEvent {
+  readonly type: 'TICKET_RESET';
+  readonly roomId: string;
+  readonly ticketId: string;
+}
+
+/** Response body for `POST /api/agilite/poker/rooms/{roomId}/tickets/{ticketId}/reset` (US09.2.3). */
+export interface TicketResetResponse {
+  readonly id: string;
+  readonly roomId: string;
+  readonly title: string;
+  readonly status: 'VOTING';
+  readonly createdAt: string;
+  readonly revealedAt: null;
+}
+
+/** Request body for `POST /api/agilite/poker/rooms/{roomId}/tickets/{ticketId}/finalize` (US09.2.3). */
+export interface FinalizeTicketRequest {
+  readonly finalEstimate: string;
+}
+
+/** Response body for `POST /api/agilite/poker/rooms/{roomId}/tickets/{ticketId}/finalize` (US09.2.3). */
+export interface TicketFinalizedResponse {
+  readonly id: string;
+  readonly roomId: string;
+  readonly title: string;
+  readonly status: 'REVEALED';
+  readonly createdAt: string;
+  readonly revealedAt: string;
+  readonly finalEstimate: string;
+}
+
+/**
+ * `TICKET_FINALIZED` event received on the room's regular topic (US09.2.3) when the facilitator
+ * validates a ticket's final estimate — every subscriber should display the "final estimate"
+ * badge and, for the facilitator, retire the reset/finalize actions (terminal state).
+ */
+export interface TicketFinalizedEvent {
+  readonly type: 'TICKET_FINALIZED';
+  readonly roomId: string;
+  readonly ticketId: string;
+  readonly finalEstimate: string;
 }
 
 /**
@@ -139,7 +197,9 @@ export type RoomTopicEvent =
   | TicketCreatedEvent
   | VoteCastEvent
   | VotesRevealedEvent
-  | RosterUpdatedEvent;
+  | RosterUpdatedEvent
+  | TicketResetEvent
+  | TicketFinalizedEvent;
 
 /**
  * RFC 7807 `ProblemDetail` error shape returned by `pivot-agilite-core` for ticket endpoints, with
