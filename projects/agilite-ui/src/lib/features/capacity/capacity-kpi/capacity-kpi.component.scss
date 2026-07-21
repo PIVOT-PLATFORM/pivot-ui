@@ -1,0 +1,35 @@
+// Styles minimaux, auto-contenus (pas de tokens @pivot/design-system — EN17.2, repo pas
+// encore créé, voir CLAUDE.md). Contraste vérifié WCAG 2.1 AA (texte normal >= 4.5:1).
+
+.capacity-kpi {
+  margin: 1.5rem 0;
+}
+
+.capacity-kpi__cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+}
+
+.capacity-kpi__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 10rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid #d8dce1;
+  border-radius: 0.5rem;
+}
+
+.capacity-kpi__label {
+  font-size: 0.85rem;
+  color: #3c4450;
+}
+
+.capacity-kpi__value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}

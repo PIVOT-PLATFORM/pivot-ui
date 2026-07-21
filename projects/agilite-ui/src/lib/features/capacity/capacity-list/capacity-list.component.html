@@ -1,0 +1,99 @@
+<section class="capacity-list">
+  <h1>{{ 'capacity.list.title' | transloco }}</h1>
+
+  @if (teams().length === 0) {
+    <p>{{ 'capacity.list.noTeams' | transloco }}</p>
+  } @else {
+    <div class="capacity-list__controls">
+      <div class="capacity-list__field">
+        <label for="capacity-team-select">{{ 'capacity.list.selectTeam' | transloco }}</label>
+        <select id="capacity-team-select" [value]="selectedTeamId()" (change)="onTeamChange($event)">
+          @for (team of teams(); track team.id) {
+            <option [value]="team.id">{{ team.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="capacity-list__field">
+        <label for="capacity-type-select">{{ 'capacity.list.typeFilter' | transloco }}</label>
+        <select id="capacity-type-select" [value]="selectedType()" (change)="onTypeChange($event)">
+          <option value="">{{ 'capacity.list.typeFilterAll' | transloco }}</option>
+          @for (type of eventTypes; track type) {
+            <option [value]="type">{{ 'capacity.types.' + type | transloco }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="capacity-list__field">
+        <label for="capacity-status-select">{{ 'capacity.list.statusFilter' | transloco }}</label>
+        <select id="capacity-status-select" [value]="selectedStatus()" (change)="onStatusChange($event)">
+          <option value="">{{ 'capacity.list.statusFilterAll' | transloco }}</option>
+          @for (status of eventStatuses; track status) {
+            <option [value]="status">{{ 'capacity.statuses.' + status | transloco }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  }
+
+  @if (selectedTeamId() !== null) {
+    <a class="capacity-list__create" [routerLink]="['/capacity/new']" [queryParams]="{ teamId: selectedTeamId() }">
+      {{ 'capacity.list.create' | transloco }}
+    </a>
+
+    <app-capacity-kpi [eventId]="kpiAnchorEventId()" />
+
+    @if (loadError()) {
+      <div role="alert">
+        <p>{{ 'capacity.list.loadError' | transloco }}</p>
+        <button type="button" (click)="loadEvents()">{{ 'capacity.list.retry' | transloco }}</button>
+      </div>
+    } @else if (events().length === 0) {
+      <p>{{ 'capacity.list.empty' | transloco }}</p>
+    } @else {
+      <ul class="capacity-list__events">
+        @for (event of events(); track event.id) {
+          <li>
+            <a [routerLink]="['/capacity', event.id]">{{ event.name }}</a>
+            <span class="capacity-list__type">{{ 'capacity.types.' + event.type | transloco }}</span>
+            <span class="capacity-list__status">{{ 'capacity.statuses.' + event.status | transloco }}</span>
+            <span class="capacity-list__dates">{{ event.startDate }} – {{ event.endDate }}</span>
+            <a [routerLink]="['/capacity', event.id, 'edit']">{{ 'capacity.list.edit' | transloco }}</a>
+            <button type="button" (click)="requestDelete(event, $event)">
+              {{ 'capacity.list.delete' | transloco }}
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  }
+
+  @if (pendingDelete(); as event) {
+    <div class="dialog-backdrop">
+      <div
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="capacity-confirm-delete-title"
+        aria-describedby="capacity-confirm-delete-message"
+      >
+        <h2 id="capacity-confirm-delete-title">{{ 'capacity.confirmDelete.title' | transloco }}</h2>
+        <p id="capacity-confirm-delete-message">
+          {{ 'capacity.confirmDelete.message' | transloco : { name: event.name } }}
+        </p>
+        <button type="button" (click)="confirmDelete(event)">
+          {{ 'capacity.confirmDelete.confirm' | transloco }}
+        </button>
+        <button type="button" #cancelButton (click)="cancelDelete()">
+          {{ 'capacity.confirmDelete.cancel' | transloco }}
+        </button>
+      </div>
+    </div>
+  }
+
+  @for (t of toasts(); track t.id) {
+    <div [attr.role]="t.type === 'error' || t.type === 'warning' ? 'alert' : 'status'">
+      <span>{{ t.messageKey | transloco }}</span>
+      <button type="button" (click)="dismissToast(t.id)">{{ 'capacity.list.dismiss' | transloco }}</button>
+    </div>
+  }
+</section>
