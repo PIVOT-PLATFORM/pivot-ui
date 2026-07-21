@@ -30,9 +30,33 @@ export const LINE_HIT_WIDTH = 12;
 /** Minimum label width — deterministic box so resize handles stay aligned. */
 export const MIN_LABEL_W = 60;
 
-/** Viewport zoom bounds. */
+/**
+ * Viewport zoom bounds.
+ *
+ * {@link MIN_ZOOM} is the *default* floor only: US08.3.5 lowers it further on boards whose content
+ * would not otherwise fit — see `computeMinZoom` in `board-geometry.ts`, which is the value every
+ * zoom-out path must clamp against, never this constant alone.
+ */
 export const MIN_ZOOM = 0.1;
 export const MAX_ZOOM = 3;
+
+/**
+ * Margin (screen px) left around the content when fitting it to the viewport (US08.3.5, §4.1).
+ *
+ * Shared with the "fit to content" / "fit to selection" commands of US08.11.2 so a fitted board and
+ * a fully zoomed-out board frame their content with the same breathing room.
+ */
+export const FIT_PAD = 64;
+
+/**
+ * Fraction of the "everything just fits" zoom that {@link MIN_ZOOM}'s dynamic counterpart allows
+ * (US08.3.5).
+ *
+ * Below 1, so the user can always zoom out *past* the point where the board merely fits — landing
+ * exactly on the fit would leave the content flush against the viewport edges with no way to pull
+ * back and see it as a whole.
+ */
+export const MIN_ZOOM_HEADROOM = 0.6;
 
 /** Dotted-grid spacing (canvas pixels). */
 export const DOT_SPACING = 24;

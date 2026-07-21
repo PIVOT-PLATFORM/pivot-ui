@@ -4,6 +4,7 @@
  * the PouetPouet `board-canvas.tsx` / `connection-line.tsx`.
  */
 import type { Card, Frame } from './board.types';
+import { FIT_PAD, MIN_ZOOM, MIN_ZOOM_HEADROOM } from './board-constants';
 
 /** Canvas viewport: pan offset (screen px) + zoom factor. */
 export interface Viewport {
@@ -121,4 +122,44 @@ export function edgeAnchor(from: Rect, to: Rect): { x: number; y: number; side: 
   const horiz = Math.abs(dx) / (from.width / 2 || 1) >= Math.abs(dy) / (from.height / 2 || 1);
   const side: EdgeSide = horiz ? (dx >= 0 ? 'E' : 'W') : dy >= 0 ? 'S' : 'N';
   return { ...edgeAnchorPoint(from, side), side };
+}
+
+/**
+ * The lowest zoom the user may reach on this board (US08.3.5).
+ *
+ * The fixed {@link MIN_ZOOM} is a sensible floor for an ordinary board, but on a very large one it
+ * stops the user *above* the point where the whole content is visible — the board can never be
+ * taken in at a glance. This lowers the floor just for those boards: it computes the zoom at which
+ * everything would exactly fit ({@link FIT_PAD} of margin on each side), keeps a fraction of it as
+ * headroom ({@link MIN_ZOOM_HEADROOM}) so the user can still pull back past the bare fit, and
+ * returns whichever of that and {@link MIN_ZOOM} is lower.
+ *
+ * Taking the **minimum** is what makes this a pure extension: on a board whose content already fits
+ * comfortably, the computed value sits above {@link MIN_ZOOM} and the fixed floor keeps winning, so
+ * behaviour there is bit-for-bit unchanged. Only boards that need it get a lower floor.
+ *
+ * @param content bounding rects of every card and frame on the board; an empty array means an
+ *                empty board, for which there is nothing to fit
+ * @param viewportWidth  the canvas surface width in screen px
+ * @param viewportHeight the canvas surface height in screen px
+ * @returns the effective minimum zoom — always ≤ {@link MIN_ZOOM}, never zero, never `NaN`
+ */
+export function computeMinZoom(content: readonly Rect[], viewportWidth: number, viewportHeight: number): number {
+  const box = unionRect([...content]);
+  if (box === null || box.width <= 0 || box.height <= 0) {
+    // Empty board, or content collapsed to a point/line: nothing to fit, keep the fixed floor.
+    return MIN_ZOOM;
+  }
+  const availableW = viewportWidth - FIT_PAD * 2;
+  const availableH = viewportHeight - FIT_PAD * 2;
+  if (!(availableW > 0) || !(availableH > 0)) {
+    // Viewport smaller than the padding it would need (unmeasured surface, collapsed panel): a
+    // negative "available" space would invert the fit and yield a negative zoom.
+    return MIN_ZOOM;
+  }
+  const fitAll = Math.min(availableW / box.width, availableH / box.height);
+  if (!Number.isFinite(fitAll) || fitAll <= 0) {
+    return MIN_ZOOM;
+  }
+  return Math.min(MIN_ZOOM, fitAll * MIN_ZOOM_HEADROOM);
 }
