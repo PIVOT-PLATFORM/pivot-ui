@@ -99,7 +99,7 @@ describe('BoardStore — US08.6.1 TEXT card lifecycle', () => {
     TestBed.resetTestingModule();
   });
 
-  /** Flushes the four read-only GETs `BoardStore.init()` fires, same shape as board-page's spec. */
+  /** Flushes the six read-only GETs `BoardStore.init()` fires, same shape as board-page's spec. */
   async function initAndFlush(): Promise<void> {
     store.init(BOARD_ID);
     httpMock.expectOne(`${TEST_API_URL}/whiteboard/boards/${BOARD_ID}`).flush({
@@ -110,6 +110,10 @@ describe('BoardStore — US08.6.1 TEXT card lifecycle', () => {
     httpMock.expectOne(`${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/vote/current`)
       .flush('', { status: 404, statusText: 'Not Found' });
     httpMock.expectOne(`${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/vote/last`)
+      .flush('', { status: 404, statusText: 'Not Found' });
+    httpMock.expectOne(`${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/quiz/current`)
+      .flush('', { status: 404, statusText: 'Not Found' });
+    httpMock.expectOne(`${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/quiz/last`)
       .flush('', { status: 404, statusText: 'Not Found' });
     await Promise.resolve();
     await Promise.resolve();

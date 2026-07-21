@@ -9,7 +9,7 @@ import { BoardStore } from '../../core/whiteboard/board.store';
 import { BoardTransport } from '../../core/whiteboard/board-transport';
 import { ToastService } from '../../core/toast/toast.service';
 import { COLLABORATIF_API_URL } from '../../core/whiteboard/config/tokens';
-import type { Card } from '../model/board.types';
+import type { Card, QuizQuestionDraft } from '../model/board.types';
 import type { ToolMode } from '../model/tools';
 
 /** Inert transport for the shortcut suite — it never opens a room. */
@@ -156,6 +156,109 @@ describe('BoardPageComponent — activities panel wiring', () => {
   });
 });
 
+/**
+ * Quiz activity (Lot C3) — calque of the vote wiring (`onStartVote`/`showVoteConfig`/
+ * `showVoteResults`), per the design doc §4.4: `onLaunchActivity('quiz')` opens the composition
+ * dialog, and `onStartQuiz` cables `BoardStore.startQuiz` then swaps the config dialog for the
+ * facilitator results panel.
+ */
+describe('BoardPageComponent — quiz activity wiring (Lot C3)', () => {
+  /** Records every outbound `emit(type, data)` call — lets tests observe the `quiz:start` frame
+   *  without needing a full echo round-trip (same pattern as the connector-style suite above). */
+  class RecordingTransport extends BoardTransport {
+    readonly emitted: Array<{ type: string; data: unknown }> = [];
+    connect(): void {}
+    disconnect(): void {}
+    emit(type: string, data: unknown): void {
+      this.emitted.push({ type, data });
+    }
+    on<T = unknown>(_type: string, _handler: (data: T) => void): () => void {
+      return () => {};
+    }
+    onReconnect(): () => void {
+      return () => {};
+    }
+    getSessionId(): string {
+      return 'quiz-wiring-transport';
+    }
+  }
+
+  /** Protected surface exercised by this suite. */
+  interface QuizApi {
+    showActivities: { (): boolean; set(v: boolean): void };
+    showQuizConfig(): boolean;
+    showQuizResults(): boolean;
+    onLaunchActivity(id: string): void;
+    onStartQuiz(questions: QuizQuestionDraft[]): void;
+  }
+
+  function create() {
+    const fixture = TestBed.createComponent(BoardPageComponent);
+    const transport = fixture.debugElement.injector.get(BoardTransport) as RecordingTransport;
+    // No detectChanges(): same rationale as the sibling activities-panel suite — ngOnInit's HTTP
+    // calls stay dormant, this suite only exercises the protected signals/handlers directly.
+    return { cmp: fixture.componentInstance as unknown as QuizApi, transport };
+  }
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [BoardPageComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        { provide: COLLABORATIF_API_URL, useValue: TEST_API_URL },
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { paramMap: new Map([['boardId', 'board-1']]) } },
+        },
+      ],
+    }).overrideComponent(BoardPageComponent, {
+      set: { providers: [BoardStore, { provide: BoardTransport, useClass: RecordingTransport }] },
+    });
+  });
+
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('keeps the quiz config dialog and results panel closed by default', () => {
+    const { cmp } = create();
+    expect(cmp.showQuizConfig()).toBe(false);
+    expect(cmp.showQuizResults()).toBe(false);
+  });
+
+  it("onLaunchActivity('quiz') closes the activities panel and opens the quiz config dialog", () => {
+    const { cmp } = create();
+    cmp.showActivities.set(true);
+
+    cmp.onLaunchActivity('quiz');
+
+    expect(cmp.showActivities()).toBe(false);
+    expect(cmp.showQuizConfig()).toBe(true);
+  });
+
+  it('onStartQuiz emits quiz:start through the store and swaps the config dialog for the results panel', () => {
+    const { cmp, transport } = create();
+    cmp.onLaunchActivity('quiz');
+    const questions: QuizQuestionDraft[] = [
+      {
+        text: 'Capitale de la France ?',
+        choices: [
+          { text: 'Paris', correct: true },
+          { text: 'Lyon', correct: false },
+        ],
+      },
+    ];
+
+    cmp.onStartQuiz(questions);
+
+    const started = transport.emitted.find((e) => e.type === 'quiz:start');
+    expect(started).toBeTruthy();
+    expect((started?.data as { questions: QuizQuestionDraft[] }).questions).toEqual(questions);
+    expect(cmp.showQuizConfig()).toBe(false);
+    expect(cmp.showQuizResults()).toBe(true);
+  });
+});
+
 describe('BoardPageComponent — AC08.2.4 settings modal + reset wiring', () => {
   let httpMock: HttpTestingController;
   /** Fake `Router` provider (not `provideRouter()`+`vi.spyOn`) — avoids monkey-patching the
@@ -169,7 +272,8 @@ describe('BoardPageComponent — AC08.2.4 settings modal + reset wiring', () => 
     return { fixture, cmp: fixture.componentInstance as unknown as BoardPageApi, store };
   }
 
-  /** Flushes the four read-only GETs that `BoardStore.init()` fires from `ngOnInit()`. */
+  /** Flushes the six read-only GETs that `BoardStore.init()` fires from `ngOnInit()` — board,
+   *  members, vote current/last, and (Lot A2) quiz current/last. */
   async function flushInitRequests(): Promise<void> {
     httpMock.expectOne(r => r.url === `${TEST_API_URL}/whiteboard/boards/board-1`).flush({
       id: 'board-1', title: 'Mon tableau', description: null, coverImage: null,
@@ -180,9 +284,13 @@ describe('BoardPageComponent — AC08.2.4 settings modal + reset wiring', () => 
       .flush('', { status: 404, statusText: 'Not Found' });
     httpMock.expectOne(r => r.url === `${TEST_API_URL}/whiteboard/boards/board-1/vote/last`)
       .flush('', { status: 404, statusText: 'Not Found' });
-    // loadBoard()/loadMembers()/loadVote() are async functions awaiting firstValueFrom() --
-    // flush() resolves the observable synchronously but their  continuations (which
-    // call signal.set()) only run on a microtask tick after flush() returns.
+    httpMock.expectOne(r => r.url === `${TEST_API_URL}/whiteboard/boards/board-1/quiz/current`)
+      .flush('', { status: 404, statusText: 'Not Found' });
+    httpMock.expectOne(r => r.url === `${TEST_API_URL}/whiteboard/boards/board-1/quiz/last`)
+      .flush('', { status: 404, statusText: 'Not Found' });
+    // loadBoard()/loadMembers()/loadVote()/loadQuiz() are async functions awaiting
+    // firstValueFrom() -- flush() resolves the observable synchronously but their
+    // continuations (which call signal.set()) only run on a microtask tick after flush() returns.
     await Promise.resolve();
     await Promise.resolve();
   }
@@ -413,6 +521,12 @@ describe('BoardPageComponent — AC08.2.4 settings modal + reset wiring', () => 
       httpMock
         .expectOne(r => r.url === `${TEST_API_URL}/whiteboard/boards/board-1/vote/last`)
         .flush('', { status: 404, statusText: 'Not Found' });
+      httpMock
+        .expectOne(r => r.url === `${TEST_API_URL}/whiteboard/boards/board-1/quiz/current`)
+        .flush('', { status: 404, statusText: 'Not Found' });
+      httpMock
+        .expectOne(r => r.url === `${TEST_API_URL}/whiteboard/boards/board-1/quiz/last`)
+        .flush('', { status: 404, statusText: 'Not Found' });
       await vi.advanceTimersByTimeAsync(0);
       await vi.advanceTimersByTimeAsync(0);
 
@@ -603,7 +717,8 @@ describe('BoardPageComponent — connector style panel wiring (US08.7.2)', () =>
     return { fixture, store, transport };
   }
 
-  /** Flushes the four read-only GETs that `BoardStore.init()` fires from `ngOnInit()`. */
+  /** Flushes the six read-only GETs that `BoardStore.init()` fires from `ngOnInit()` — board,
+   *  members, vote current/last, and (Lot A2) quiz current/last. */
   async function flushInitRequests(): Promise<void> {
     httpMock.expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/board-1`).flush({
       id: 'board-1', title: 'Mon tableau', description: null, coverImage: null,
@@ -613,6 +728,10 @@ describe('BoardPageComponent — connector style panel wiring (US08.7.2)', () =>
     httpMock.expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/board-1/vote/current`)
       .flush('', { status: 404, statusText: 'Not Found' });
     httpMock.expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/board-1/vote/last`)
+      .flush('', { status: 404, statusText: 'Not Found' });
+    httpMock.expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/board-1/quiz/current`)
+      .flush('', { status: 404, statusText: 'Not Found' });
+    httpMock.expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/board-1/quiz/last`)
       .flush('', { status: 404, statusText: 'Not Found' });
     await Promise.resolve();
     await Promise.resolve();

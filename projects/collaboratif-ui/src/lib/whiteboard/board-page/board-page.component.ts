@@ -31,8 +31,11 @@ import { BoardSettingsModalComponent } from '../board-settings-modal/board-setti
 import { ShortcutsPanelComponent } from '../shortcuts-panel/shortcuts-panel.component';
 import { SelectionToolbarComponent } from '../selection-toolbar/selection-toolbar.component';
 import { ImportKlaxoonModalComponent } from '../import-klaxoon-modal/import-klaxoon-modal.component';
+import { QuizConfigDialogComponent } from '../quiz-config-dialog/quiz-config-dialog.component';
+import { QuizParticipantOverlayComponent } from '../quiz-overlay/quiz-overlay.component';
+import { QuizResultsPanelComponent } from '../quiz-results-panel/quiz-results-panel.component';
 import type { Board } from '../../core/whiteboard/board.model';
-import type { Card, Connection, ConnectionPatch } from '../model/board.types';
+import type { Card, Connection, ConnectionPatch, QuizQuestionDraft } from '../model/board.types';
 import { TOOL_SHORTCUTS, isShapeTool, type ToolMode } from '../model/tools';
 import { DEFAULT_SHAPE_COLOR } from '../model/colors';
 import { readGridPreference, writeGridPreference } from '../model/board-constants';
@@ -78,6 +81,9 @@ const RESET_CONFIRM_WINDOW_MS = 2000;
     ShortcutsPanelComponent,
     SelectionToolbarComponent,
     ImportKlaxoonModalComponent,
+    QuizConfigDialogComponent,
+    QuizParticipantOverlayComponent,
+    QuizResultsPanelComponent,
   ],
   providers: [BoardStore, { provide: BoardTransport, useClass: StompBoardTransport }],
   templateUrl: './board-page.component.html',
@@ -123,12 +129,27 @@ export class BoardPageComponent implements OnInit, OnDestroy {
   protected readonly showTimerConfig = signal(false);
   /** US08.12.2 — dot-vote configuration picker visibility (opened from the activities panel). */
   protected readonly showVoteConfig = signal(false);
+  /** Quiz activity (Lot C3) — question-composition dialog visibility (calque `showVoteConfig`). */
+  protected readonly showQuizConfig = signal(false);
+  /** Quiz activity (Lot C3) — facilitator results/leaderboard panel visibility (calque `showVoteResults`). */
+  protected readonly showQuizResults = signal(false);
   protected readonly showSettings = signal(false);
   /** US08.13.1 — Klaxoon import modal visibility. */
   protected readonly showImportKlaxoon = signal(false);
   protected readonly highlightedGroup = signal<string | null>(null);
 
   protected readonly isOwner = computed(() => this.store.userRole() === 'OWNER');
+
+  /**
+   * Quiz activity (Lot C3) — whether the participant overlay ({@link QuizParticipantOverlayComponent})
+   * should be mounted: non-owners only, and only while the active quiz's current question is
+   * `OPEN` (§4.4). The facilitator instead pilots via {@link showQuizResults} /
+   * `wb-quiz-results-panel`, never the participant view. `isOwner` here is UI convenience only —
+   * the real `canManage` gate lives server-side (§9 point 7 of the design doc).
+   */
+  protected readonly showQuizOverlay = computed(
+    () => !this.isOwner() && this.store.activeQuizSession()?.currentQuestion?.state === 'OPEN',
+  );
 
   /**
    * i18n key of the contextual hint: what the *active* tool does, or `null` on plain select.
@@ -388,6 +409,8 @@ export class BoardPageComponent implements OnInit, OnDestroy {
       this.showTimerConfig.set(true);
     } else if (activityId === 'dotvote') {
       this.showVoteConfig.set(true);
+    } else if (activityId === 'quiz') {
+      this.showQuizConfig.set(true);
     }
   }
 
@@ -406,6 +429,38 @@ export class BoardPageComponent implements OnInit, OnDestroy {
     this.store.startVote({ ...config, voterIds: [] });
     this.showVoteConfig.set(false);
     this.showVoteResults.set(true);
+  }
+
+  /**
+   * Starts a quiz (US-Q1) from the composed question set and switches straight to the
+   * facilitator results panel (calque {@link onStartVote}) — the panel doubles as the piloting
+   * console (`next`/`reveal`/`stop`), so there is no separate "quiz running" view for the owner.
+   */
+  protected onStartQuiz(questions: QuizQuestionDraft[]): void {
+    this.store.startQuiz(questions);
+    this.showQuizConfig.set(false);
+    this.showQuizResults.set(true);
+  }
+
+  /** Participant (US-Q2) — upserts the current user's answer to the quiz's current question. */
+  protected onQuizAnswer(choiceId: string): void {
+    this.store.answerQuiz(choiceId);
+  }
+
+  /** Facilitator (US-Q3) — closes the current question and opens the next one. */
+  protected onQuizNext(): void {
+    this.store.nextQuestion();
+  }
+
+  /** Facilitator (US-Q3) — reveals the current question's correct answer(s) + distribution. */
+  protected onQuizReveal(): void {
+    this.store.revealQuestion();
+  }
+
+  /** Facilitator (US-Q4) — ends the quiz session; the results panel stays open on the final
+   *  leaderboard (`BoardStore.lastQuizSession`) until the facilitator dismisses it. */
+  protected onQuizStop(): void {
+    this.store.stopQuiz();
   }
 
   protected dismissTimer(): void {

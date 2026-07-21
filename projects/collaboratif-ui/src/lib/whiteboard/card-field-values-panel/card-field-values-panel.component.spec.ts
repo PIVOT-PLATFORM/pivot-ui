@@ -121,6 +121,12 @@ describe('CardFieldValuesPanelComponent', () => {
     httpMock
       .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/vote/last`)
       .flush('', { status: 404, statusText: 'Not Found' });
+    httpMock
+      .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/quiz/current`)
+      .flush('', { status: 404, statusText: 'Not Found' });
+    httpMock
+      .expectOne((r) => r.url === `${TEST_API_URL}/whiteboard/boards/${BOARD_ID}/quiz/last`)
+      .flush('', { status: 404, statusText: 'Not Found' });
     await Promise.resolve();
     await Promise.resolve();
   }
