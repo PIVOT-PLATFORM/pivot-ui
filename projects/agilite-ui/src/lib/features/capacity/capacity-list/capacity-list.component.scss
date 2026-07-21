@@ -1,0 +1,80 @@
+// Styles minimaux, auto-contenus (pas de tokens @pivot/design-system — EN17.2, repo pas
+// encore créé, voir CLAUDE.md). Contraste vérifié WCAG 2.1 AA (texte normal >= 4.5:1).
+
+.capacity-list {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.capacity-list__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.capacity-list__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+
+  label {
+    font-weight: 600;
+  }
+
+  select {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #58606b;
+    border-radius: 0.25rem;
+    font-size: 0.9rem;
+
+    &:focus-visible {
+      outline: 2px solid #0b5fff;
+      outline-offset: 1px;
+    }
+  }
+}
+
+.capacity-list__create {
+  display: inline-block;
+  margin: 0.5rem 0 1rem;
+}
+
+.capacity-list__events {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid #d8dce1;
+  }
+}
+
+.capacity-list__type,
+.capacity-list__status,
+.capacity-list__dates {
+  font-size: 0.85rem;
+  color: #3c4450;
+}
+
+button {
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.25rem;
+  border: 1px solid #58606b;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.9rem;
+
+  &:focus-visible {
+    outline: 2px solid #0b5fff;
+    outline-offset: 1px;
+  }
+}
