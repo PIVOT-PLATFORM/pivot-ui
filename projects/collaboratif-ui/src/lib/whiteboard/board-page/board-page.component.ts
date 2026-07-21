@@ -11,7 +11,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { BoardStore } from '../../core/whiteboard/board.store';
 import { BoardService } from '../../core/whiteboard/board.service';
 import { ToastService } from '../../core/toast/toast.service';
@@ -26,6 +26,7 @@ import { VoteResultsPanelComponent } from '../vote-results-panel/vote-results-pa
 import { TimerOverlayComponent } from '../timer-overlay/timer-overlay.component';
 import { SharePanelComponent } from '../share-panel/share-panel.component';
 import { ActivitiesPanelComponent } from '../activities-panel/activities-panel.component';
+import { ACTIVITY_TEMPLATES, layoutActivityFrames } from '../activities-panel/activity-templates';
 import { TimerConfigDialogComponent } from '../timer-config-dialog/timer-config-dialog.component';
 import { VoteConfigDialogComponent, type VoteConfig } from '../vote-config-dialog/vote-config-dialog.component';
 import { BoardSettingsModalComponent } from '../board-settings-modal/board-settings-modal.component';
@@ -287,6 +288,8 @@ export class BoardPageComponent implements OnInit, OnDestroy {
 
   private readonly boardService = inject(BoardService);
   private readonly toast = inject(ToastService);
+  /** Resolves activity-template frame titles — they are i18n keys, never literals. */
+  private readonly transloco = inject(TranslocoService);
   private readonly hostRef = inject(ElementRef<HTMLElement>);
   protected settingsTriggerEl: HTMLElement | null = null;
 
@@ -427,6 +430,36 @@ export class BoardPageComponent implements OnInit, OnDestroy {
       this.showVoteConfig.set(true);
     } else if (activityId === 'quiz') {
       this.showQuizConfig.set(true);
+    } else {
+      this.seedActivityTemplate(activityId);
+    }
+  }
+
+  /**
+   * Seeds the canvas for a template-only activity (brainstorming / icebreaker / retro): titled
+   * frames centred on the current viewport, then the sticky tool preselected so the facilitator
+   * can write immediately.
+   *
+   * Read-only participants are not allowed to mutate the board, and an unknown id is a no-op —
+   * the panel disables anything not implemented, so neither path is reachable from the UI.
+   *
+   * @param activityId id emitted by the activities panel
+   */
+  private seedActivityTemplate(activityId: string): void {
+    const template = ACTIVITY_TEMPLATES[activityId];
+    if (!template || this.store.isReadonly()) {
+      return;
+    }
+    const centre = this.canvas()?.viewportCentre() ?? { x: 0, y: 0 };
+    this.store.addTitledFrames(
+      layoutActivityFrames(template, centre).map(({ posX, posY, titleKey }) => ({
+        posX,
+        posY,
+        title: this.transloco.translate(titleKey),
+      })),
+    );
+    if (template.tool) {
+      this.tool.set(template.tool);
     }
   }
 

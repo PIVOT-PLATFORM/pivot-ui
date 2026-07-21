@@ -656,6 +656,20 @@
           "name": "Rétrospective",
           "desc": "Modèle 3 colonnes prêt à l’emploi"
         }
+      },
+      "soon": "Bientôt disponible",
+      "templates": {
+        "brainstorming": {
+          "ideas": "Brainstorming — vos idées"
+        },
+        "icebreaker": {
+          "question": "Icebreaker — la question du jour"
+        },
+        "retro": {
+          "wentWell": "Ce qui a bien marché",
+          "toImprove": "À améliorer",
+          "actions": "Plan d'action"
+        }
       }
     },
     "shortcuts": {

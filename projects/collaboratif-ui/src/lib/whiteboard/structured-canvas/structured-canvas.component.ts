@@ -436,6 +436,19 @@ export class StructuredCanvasComponent implements OnDestroy {
   }
 
   // ── Coordinate mapping ────────────────────────────────────────────────────
+  /**
+   * Canvas-space coordinates of the viewport centre.
+   *
+   * Activity templates anchor their frames here rather than at the board origin, so a template
+   * launched after panning or zooming lands in view instead of off-screen.
+   *
+   * @returns the centre of the visible surface, in canvas units
+   */
+  viewportCentre(): { x: number; y: number } {
+    const rect = this.surface().nativeElement.getBoundingClientRect();
+    return screenToCanvas(rect.width / 2, rect.height / 2, this.viewport());
+  }
+
   private toCanvas(clientX: number, clientY: number): { x: number; y: number } {
     const rect = this.surface().nativeElement.getBoundingClientRect();
     return screenToCanvas(clientX - rect.left, clientY - rect.top, this.viewport());

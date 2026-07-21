@@ -109,7 +109,8 @@
     text-align: left;
     transition: border-color var(--transition-fast), background var(--transition-fast);
 
-    &:hover {
+    // `:not(:disabled)` — an unavailable activity must not offer an actionable affordance.
+    &:hover:not(:disabled) {
       border-color: var(--color-brand-300);
       background: var(--color-brand-50);
     }
@@ -117,6 +118,27 @@
       outline: 2px solid var(--color-brand-500);
       outline-offset: 1px;
     }
+  }
+  // Activité indisponible : `disabled` (donc hors parcours clavier), état signalé visuellement
+  // ici et textuellement par le badge `&__soon`. L'atténuation porte sur le glyphe et le libellé,
+  // jamais sur le badge — une opacité globale ferait passer son contraste sous 4,5:1 (SC 1.4.3).
+  &__item--soon {
+    cursor: not-allowed;
+
+    .pv-glyph,
+    .wb-act__item-body {
+      opacity: 0.55;
+    }
+  }
+  &__soon {
+    margin-left: auto;
+    flex-shrink: 0;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    background: var(--color-gray-100);
+    color: var(--color-gray-600);
+    font-size: var(--text-xs);
+    white-space: nowrap;
   }
   &__item-body {
     display: flex;

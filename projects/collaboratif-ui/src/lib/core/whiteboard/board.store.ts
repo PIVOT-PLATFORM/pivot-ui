@@ -69,6 +69,14 @@ const LOAD_BOARD_TIMEOUT_MS = 8_000;
 const OPTIMISTIC_CARD_TIMEOUT_MS = 10_000;
 
 /**
+ * Same last-resort net for a template frame awaiting its `frame:created` echo (see
+ * `addTitledFrames`). Without it a dropped create — the socket is down, or the server rejected
+ * it — would leave the run hanging forever, with the frames already created stuck outside the
+ * undo history.
+ */
+const FRAME_RUN_TIMEOUT_MS = 10_000;
+
+/**
  * Grace window (BUG 4 / BUG J) during which a card just released from a local drag/resize keeps
  * its optimistic geometry authoritative: inbound `card:moved`/`card:resized` echoes and room-wide
  * `board:state` snapshots for that card are ignored until it elapses. Covers the "snaps back
@@ -280,6 +288,14 @@ export class BoardStore {
   private readonly pendingCardHistory: Array<(card: Card) => void> = [];
   private readonly pendingConnHistory: Array<(conn: Connection) => void> = [];
   private readonly pendingFrameHistory: Array<(frame: Frame) => void> = [];
+  /**
+   * The single in-flight frame of an activity template run, or null — see
+   * {@link addTitledFrames}. At most one create is outstanding at a time, and it is identified by
+   * the position it was sent with rather than by arrival order.
+   */
+  private pendingFrameRun: { posX: number; posY: number; apply: (frame: Frame) => void } | null = null;
+  /** Deadline for the in-flight template frame — see {@link runTitledFrames}. */
+  private frameRunTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly pendingGroupHistory: Array<(groupId: string) => void> = [];
 
   private cardDragStart: Map<string, { posX: number; posY: number }> | null = null;
@@ -363,6 +379,10 @@ export class BoardStore {
       this.emitCoalescer.timer = null;
     }
     this.emitCoalescer.pending.clear();
+    // An unacknowledged template frame must not outlive the board: its continuation would emit
+    // onto a torn-down transport, and a stale entry could later claim an unrelated frame.
+    this.pendingFrameRun = null;
+    this.clearFrameRunTimer();
     this.optimisticCardTimers.forEach((t) => clearTimeout(t));
     this.optimisticCardTimers.clear();
     this.localControlGraceTimers.forEach((t) => clearTimeout(t));
@@ -752,7 +772,16 @@ export class BoardStore {
     );
 
     this.on<Frame>('frame:created', (frame) => {
-      this.pendingFrameHistory.shift()?.(frame);
+      // A template run owns this echo only if it is the frame it is waiting for (same position);
+      // anything else falls through to the plain single-frame path so a manual create issued
+      // during a run still gets its undo entry.
+      const run = this.pendingFrameRun;
+      if (run && run.posX === frame.posX && run.posY === frame.posY) {
+        this.pendingFrameRun = null;
+        run.apply(frame);
+      } else {
+        this.pendingFrameHistory.shift()?.(frame);
+      }
       // Idempotent append: the `frame:created` broadcast is emitter-included, so the creator also
       // receives its own echo — and a reconnect can replay it after `board:state` already carried
       // the frame. Dedup by id (same convention as `connection:created`/`boardfield:created`) so a
@@ -1784,6 +1813,112 @@ export class BoardStore {
       });
     });
     this.transport.emit('frame:create', emitParams);
+  }
+
+  /**
+   * Creates a run of titled frames — the canvas layout behind an activity template
+   * (brainstorming / icebreaker / retro).
+   *
+   * Creates are issued **one at a time**, each waiting for its own `frame:created` echo before
+   * the next goes out. `frame:create` carries no title (the server applies `Frame.java` defaults)
+   * and, unlike cards, round-trips no `clientTag` — so the echo is the only way to learn a
+   * frame's authoritative id, and firing the whole run at once left no reliable way to tell the
+   * echoes apart: the server does not broadcast them in send order, which rotated the titles
+   * across frames (seen in recette on the retro) *and* mismatched the FIFO undo/redo entries
+   * {@link addFrame} queues. Serialising costs one round trip per frame and removes the guesswork.
+   *
+   * The whole run is a single history entry: one undo removes the template, as the user expects
+   * of one click.
+   *
+   * @param specs frames to create, in layout order
+   */
+  addTitledFrames(specs: ReadonlyArray<{ posX: number; posY: number; title: string }>): void {
+    // One run at a time: `pendingFrameRun` holds a single in-flight create, so starting a second
+    // template mid-run would strand the first (its remaining echoes would fall through to the
+    // plain path and consume an unrelated undo entry). Relaunching is a click away, so dropping
+    // the second request is safer than interleaving two runs.
+    if (specs.length === 0 || this.pendingFrameRun) {
+      return;
+    }
+    // `createdIds` is shared with the history entry and refilled on replay, so undo always
+    // targets the frames that currently exist rather than the ids of the original run.
+    const createdIds: string[] = [];
+    const entry: HistoryEntry = {
+      undo: () => {
+        for (const id of createdIds) {
+          this.transport.emit('frame:delete', { id, boardId: this.boardId });
+        }
+      },
+      redo: () => this.runTitledFrames(specs, createdIds, true),
+    };
+    this.runTitledFrames(specs, createdIds, false, entry);
+  }
+
+  /**
+   * Drives one pass of a titled-frame run, one create at a time.
+   *
+   * @param specs frames to create, in layout order
+   * @param createdIds accumulator shared with the run's history entry — reset on every pass
+   * @param isReplay true when re-run by `redo()`, which has already restored the history entry
+   * @param entry history entry to push once the run completes (first pass only)
+   */
+  private runTitledFrames(
+    specs: ReadonlyArray<{ posX: number; posY: number; title: string }>,
+    createdIds: string[],
+    isReplay: boolean,
+    entry?: HistoryEntry,
+  ): void {
+    createdIds.length = 0;
+
+    const settle = (): void => {
+      this.clearFrameRunTimer();
+      this.pendingFrameRun = null;
+      // Nothing created (first create dropped) — no history entry, nothing to undo.
+      // On replay the entry is already back on the undo stack: pushing again would duplicate it
+      // *and* clear the redo stack (see `pushHistory`), swallowing a later Ctrl+Y.
+      if (isReplay || !entry || createdIds.length === 0) {
+        return;
+      }
+      this.pushHistory(entry);
+    };
+
+    const step = (i: number): void => {
+      if (i >= specs.length) {
+        settle();
+        return;
+      }
+      const { posX, posY, title } = specs[i];
+      // `frame:created` is broadcast to the whole room, so another participant's frame can land
+      // while ours is in flight. The awaited position discriminates ours from theirs; template
+      // positions are integers (see `layoutActivityFrames`), so the comparison is exact.
+      this.pendingFrameRun = {
+        posX,
+        posY,
+        apply: (frame: Frame) => {
+          createdIds.push(frame.id);
+          this.transport.emit('frame:update', { id: frame.id, boardId: this.boardId, title });
+          step(i + 1);
+        },
+      };
+      // A create issued while the socket is down is dropped silently (`frame:create` is neither
+      // a lifecycle nor a guaranteed action), and a server-side rejection sends nothing back —
+      // either way no echo ever arrives. Without this deadline the run would hang forever, the
+      // frames already created would have no undo entry, and the stale pending run would later
+      // claim an unrelated frame at the same position.
+      this.clearFrameRunTimer();
+      this.frameRunTimer = setTimeout(() => settle(), FRAME_RUN_TIMEOUT_MS);
+      this.transport.emit('frame:create', { boardId: this.boardId, posX, posY });
+    };
+
+    step(0);
+  }
+
+  /** Clears (and forgets) the in-flight template-frame deadline, if any. */
+  private clearFrameRunTimer(): void {
+    if (this.frameRunTimer != null) {
+      clearTimeout(this.frameRunTimer);
+      this.frameRunTimer = null;
+    }
   }
 
   moveFrame(

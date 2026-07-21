@@ -9,6 +9,7 @@ const FR: Record<string, unknown> = {
       title: 'Activités',
       close: 'Fermer',
       recentSection: 'Récemment utilisées',
+      soon: 'Bientôt disponible',
       items: {
         brainstorming: { name: 'Brainstorming', desc: 'Générez des idées' },
         poll: { name: 'Sondage', desc: 'Votez en direct' },
@@ -65,13 +66,56 @@ describe('ActivitiesPanelComponent', () => {
     expect(el.querySelector('.wb-act__section')?.textContent).toContain('Récemment utilisées');
   });
 
-  it('emits launch with the activity id when a list item is clicked', () => {
+  it('emits launch with the activity id when an available list item is clicked', () => {
     const emitted: string[] = [];
     fixture.componentInstance.launch.subscribe((id: string) => emitted.push(id));
 
-    (el.querySelectorAll('.wb-act__item')[1] as HTMLButtonElement).click();
+    // index 2 = dot-vote (index 1 is the poll, which is disabled — see below).
+    (el.querySelectorAll('.wb-act__item')[2] as HTMLButtonElement).click();
 
-    expect(emitted).toEqual(['poll']);
+    expect(emitted).toEqual(['dotvote']);
+  });
+
+  it('disables the activities that have no implementation and never emits launch for them', () => {
+    const emitted: string[] = [];
+    fixture.componentInstance.launch.subscribe((id: string) => emitted.push(id));
+    const poll = el.querySelectorAll('.wb-act__item')[1] as HTMLButtonElement;
+
+    expect(poll.disabled).toBe(true);
+    poll.click();
+
+    expect(emitted).toEqual([]);
+  });
+
+  it('labels an unavailable activity with a textual "coming soon" hint', () => {
+    const poll = el.querySelectorAll('.wb-act__item')[1] as HTMLButtonElement;
+
+    // The state must not rest on colour/opacity alone (WCAG 1.4.1): the hint is real text, and
+    // being inside the button it is part of its accessible name.
+    expect(poll.querySelector('.wb-act__soon')?.textContent).toContain('Bientôt disponible');
+    expect(poll.textContent).toContain('Bientôt disponible');
+  });
+
+  it('leaves exactly the implemented activities enabled', () => {
+    const names = [...el.querySelectorAll<HTMLButtonElement>('.wb-act__item')]
+      .filter((b) => !b.disabled)
+      .map((b) => b.querySelector('.wb-act__item-name')?.textContent?.trim());
+
+    expect(names).toEqual(['Brainstorming', 'Vote à points', 'Icebreaker', 'Quiz', 'Minuteur', 'Rétrospective']);
+  });
+
+  it('disables every activity on a read-only board — none of them can mutate it', () => {
+    fixture.componentRef.setInput('readOnly', true);
+    fixture.detectChanges();
+    const emitted: string[] = [];
+    fixture.componentInstance.launch.subscribe((id: string) => emitted.push(id));
+
+    const items = [...el.querySelectorAll<HTMLButtonElement>('.wb-act__item')];
+    expect(items.every((b) => b.disabled)).toBe(true);
+    expect([...el.querySelectorAll<HTMLButtonElement>('.wb-act__recent-card')].every((b) => b.disabled)).toBe(true);
+
+    items[0].click();
+    expect(emitted).toEqual([]);
   });
 
   it('emits launch from a recently-used shortcut', () => {
