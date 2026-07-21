@@ -41,6 +41,7 @@ import {
   frameRect,
   pointInRect,
   rectsIntersect,
+  computeMinZoom,
   screenToCanvas,
   type EdgeSide,
   type Rect,
@@ -53,7 +54,6 @@ import {
   LINE_MIN,
   LINE_SNAP_DEG,
   LINE_MIN_DRAG,
-  MIN_ZOOM,
   MAX_ZOOM,
   DOT_SPACING,
   snapToGrid,
@@ -357,6 +357,23 @@ export class StructuredCanvasComponent {
     }
   }
 
+  /**
+   * The board's effective minimum zoom (US08.3.5), for the given surface size.
+   *
+   * Recomputed per call rather than cached in a `computed()`: it depends on the surface's measured
+   * size, which is a DOM read rather than a signal, so a computed would go stale on resize without
+   * anything to invalidate it. The cost is a single pass over the cards and frames, on a gesture
+   * that already touches the DOM.
+   *
+   * @param surfaceWidth  measured surface width in screen px
+   * @param surfaceHeight measured surface height in screen px
+   * @returns the lowest reachable zoom — at most {@link MIN_ZOOM}
+   */
+  private minZoom(surfaceWidth: number, surfaceHeight: number): number {
+    const content = [...this.store.cards().map(cardRect), ...this.store.frames().map(frameRect)];
+    return computeMinZoom(content, surfaceWidth, surfaceHeight);
+  }
+
   // ── Wheel zoom / pan ──────────────────────────────────────────────────────
   protected onWheel(event: WheelEvent): void {
     event.preventDefault();
@@ -366,7 +383,10 @@ export class StructuredCanvasComponent {
       const px = event.clientX - rect.left;
       const py = event.clientY - rect.top;
       const factor = event.deltaY < 0 ? 1.1 : 1 / 1.1;
-      const zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, v.zoom * factor));
+      // US08.3.5 — clamp against the *dynamic* floor, never `MIN_ZOOM` alone: on a board larger
+      // than the fixed floor can show, the fixed value would stop the zoom-out while the content
+      // still overflows the viewport.
+      const zoom = Math.min(MAX_ZOOM, Math.max(this.minZoom(rect.width, rect.height), v.zoom * factor));
       // Zoom toward the cursor.
       const x = px - (px - v.x) * (zoom / v.zoom);
       const y = py - (py - v.y) * (zoom / v.zoom);
