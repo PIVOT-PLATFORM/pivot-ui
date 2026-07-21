@@ -1,0 +1,98 @@
+// Styles minimaux, auto-contenus (pas de tokens @pivot/design-system — voir CLAUDE.md).
+
+.summary-panel__totals {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.25rem 0.75rem;
+
+  dt {
+    font-weight: 600;
+  }
+
+  dd {
+    margin: 0;
+  }
+}
+
+.summary-panel__table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+
+  th,
+  td {
+    border: 1px solid #d7dbe0;
+    padding: 0.375rem 0.625rem;
+    text-align: left;
+  }
+}
+
+.summary-panel__consolidation {
+  margin: 1rem 0;
+
+  dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.25rem 0.75rem;
+  }
+
+  dt {
+    font-weight: 600;
+  }
+
+  dd {
+    margin: 0;
+  }
+}
+
+.summary-panel__gauge {
+  border: 1px solid #d7dbe0;
+  border-radius: 0.25rem;
+  padding: 1rem;
+
+  dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.25rem 0.75rem;
+  }
+
+  dt {
+    font-weight: 600;
+  }
+
+  dd {
+    margin: 0;
+  }
+}
+
+.summary-panel__gauge--over {
+  border-color: #b3261e;
+  background: #fdecea;
+}
+
+.summary-panel__gauge-bar {
+  height: 0.75rem;
+  border-radius: 0.375rem;
+  background: #e5e8eb;
+  overflow: hidden;
+  margin: 0.75rem 0;
+}
+
+.summary-panel__gauge-fill {
+  height: 100%;
+  background: #0b5fff;
+  transition: width 0.2s ease;
+}
+
+.summary-panel__gauge--over .summary-panel__gauge-fill {
+  background: #b3261e;
+}
+
+.summary-panel__gauge-alert {
+  color: #b3261e;
+  font-weight: 600;
+}
+
+.summary-panel__gauge-ok {
+  color: #1b7a3d;
+}

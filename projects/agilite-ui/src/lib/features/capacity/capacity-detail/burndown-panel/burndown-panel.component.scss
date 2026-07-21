@@ -1,0 +1,62 @@
+// Styles minimaux, auto-contenus (pas de tokens @pivot/design-system — voir CLAUDE.md).
+
+.burndown-panel__chart {
+  width: 100%;
+  max-width: 30rem;
+  height: auto;
+  border: 1px solid #d7dbe0;
+  border-radius: 0.25rem;
+}
+
+.burndown-panel__line {
+  fill: none;
+  stroke-width: 2;
+}
+
+.burndown-panel__line--real {
+  stroke: #0b5fff;
+}
+
+.burndown-panel__line--ideal {
+  stroke: #58606b;
+  stroke-dasharray: 4 3;
+}
+
+.burndown-panel__legend {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+  padding: 0;
+  margin: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.burndown-panel__legend-item::before {
+  content: '';
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-right: 0.375rem;
+  border-radius: 50%;
+}
+
+.burndown-panel__legend-item--real::before {
+  background: #0b5fff;
+}
+
+.burndown-panel__legend-item--ideal::before {
+  background: #58606b;
+}
+
+.burndown-panel__table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 0.75rem;
+
+  th,
+  td {
+    border: 1px solid #d7dbe0;
+    padding: 0.375rem 0.625rem;
+    text-align: left;
+  }
+}

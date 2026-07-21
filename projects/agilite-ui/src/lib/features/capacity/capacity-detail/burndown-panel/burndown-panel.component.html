@@ -1,0 +1,47 @@
+<section class="burndown-panel" aria-labelledby="burndown-panel-heading">
+  <h2 id="burndown-panel-heading">{{ 'capacity.burndown.title' | transloco }}</h2>
+
+  @if (loadError()) {
+    <div role="alert">
+      <p>{{ 'capacity.burndown.loadError' | transloco }}</p>
+      <button type="button" (click)="loadBurndown()">{{ 'capacity.common.confirm' | transloco }}</button>
+    </div>
+  } @else if (real().length === 0 && ideal().length === 0) {
+    <p>{{ 'capacity.burndown.empty' | transloco }}</p>
+  } @else {
+    <svg
+      class="burndown-panel__chart"
+      [attr.viewBox]="'0 0 ' + chartWidth + ' ' + chartHeight"
+      role="img"
+      [attr.aria-label]="'capacity.burndown.title' | transloco"
+    >
+      <polyline class="burndown-panel__line burndown-panel__line--ideal" [attr.points]="idealPolylinePoints()" />
+      <polyline class="burndown-panel__line burndown-panel__line--real" [attr.points]="realPolylinePoints()" />
+    </svg>
+
+    <ul class="burndown-panel__legend">
+      <li class="burndown-panel__legend-item burndown-panel__legend-item--real">{{ 'capacity.burndown.real' | transloco }}</li>
+      <li class="burndown-panel__legend-item burndown-panel__legend-item--ideal">{{ 'capacity.burndown.ideal' | transloco }}</li>
+    </ul>
+
+    <table class="burndown-panel__table">
+      <caption>{{ 'capacity.burndown.title' | transloco }}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'capacity.absences.startDateLabel' | transloco }}</th>
+          <th scope="col">{{ 'capacity.burndown.real' | transloco }}</th>
+          <th scope="col">{{ 'capacity.burndown.ideal' | transloco }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (point of real(); track point.date; let i = $index) {
+          <tr>
+            <td>{{ point.date }}</td>
+            <td>{{ point.pointsRestants }}</td>
+            <td>{{ ideal()[i] ? ideal()[i].pointsRestants : '—' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>
