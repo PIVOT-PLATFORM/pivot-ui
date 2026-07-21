@@ -250,17 +250,19 @@ describe('BoardPageComponent — activity template seeding', () => {
 
   afterEach(() => TestBed.resetTestingModule());
 
-  it('seeds three frames laid out as a row for the retrospective', () => {
+  it('starts the retrospective template on whole-number coordinates', () => {
     const cmp = create();
 
     cmp.onLaunchActivity('retro');
 
-    // Titling happens on the server echo and is covered in `board.store.spec.ts`; this suite
-    // asserts the wiring — that launching the activity creates the right frames.
+    // Frames are created one at a time (`addTitledFrames`), so only the first is on the wire
+    // until its echo returns — the full run and its titling are covered in `board.store.spec.ts`.
     const created = transport.sent.filter((e) => e.type === 'frame:create');
-    expect(created).toHaveLength(3);
-    expect(new Set(created.map((e) => e.payload['posX'])).size).toBe(3);
-    expect(new Set(created.map((e) => e.payload['posY'])).size).toBe(1);
+    expect(created).toHaveLength(1);
+    // The store identifies an in-flight template frame by an exact position comparison, so the
+    // layout must never emit fractional coordinates.
+    expect(Number.isInteger(created[0].payload['posX'])).toBe(true);
+    expect(Number.isInteger(created[0].payload['posY'])).toBe(true);
   });
 
   it('seeds a single frame and preselects the sticky tool for brainstorming', () => {

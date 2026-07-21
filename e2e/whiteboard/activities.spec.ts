@@ -2,10 +2,10 @@
  * Activities panel — template activities and unavailable-activity state (issue #254).
  *
  * Covers what the panel promises for the activities that own no server entity:
- *   1. Retrospective seeds three titled frames — asserted on the **wire**, since the frames are
- *      created through the ordinary `frame:create` + `frame:update` events. The titles must land
- *      on the right frames even though the server echoes come back out of order (the regression
- *      that the manual recette surfaced).
+ *   1. Retrospective seeds three titled frames, one create at a time — the regression the manual
+ *      recette surfaced was titles rotating across frames, because the server does not echo
+ *      creates back in send order. A frame from another participant is interleaved to prove it
+ *      cannot claim a pending title.
  *   2. Brainstorming seeds one frame and preselects the sticky tool.
  *   3. The poll — the one activity with no implementation — is rendered disabled with a textual
  *      "coming soon" hint and never launches anything.
@@ -102,7 +102,7 @@ test.describe('Activities panel — template activities (#254)', () => {
     await stubBoardApi(page);
   });
 
-  test('the retrospective seeds three frames and titles each one correctly, whatever the echo order', async ({
+  test('the retrospective seeds its three frames one at a time, each titled on its own echo', async ({
     page,
   }) => {
     const mock = new StompMock();
@@ -112,22 +112,37 @@ test.describe('Activities panel — template activities (#254)', () => {
     await page.getByRole('button', { name: 'Activités' }).click();
     await page.locator('button.wb-act__item', { hasText: 'Rétrospective' }).click();
 
-    // Three creates, laid out as a row (distinct x, shared y).
-    await expect.poll(() => sentOf(mock, 'frame:create').length, { timeout: 10_000 }).toBe(3);
-    const creates = sentOf(mock, 'frame:create').map((m) => m as { posX: number; posY: number });
-    expect(new Set(creates.map((c) => c.posX)).size).toBe(3);
-    expect(new Set(creates.map((c) => c.posY)).size).toBe(1);
+    const expected = [
+      { title: 'Ce qui a bien marché', id: 'frame-left' },
+      { title: 'À améliorer', id: 'frame-middle' },
+      { title: "Plan d'action", id: 'frame-right' },
+    ];
 
-    // Echo them back **in reverse order** — titles must still follow their own frame.
-    const ordered = [...creates].sort((a, b) => a.posX - b.posX);
-    const ids = ['frame-left', 'frame-middle', 'frame-right'];
-    for (let i = ordered.length - 1; i >= 0; i--) {
+    // Serialised: exactly one create is in flight at a time. Acknowledge each in turn, and
+    // interleave a frame from *another* participant to prove it cannot steal a pending title.
+    for (let i = 0; i < expected.length; i++) {
+      await expect.poll(() => sentOf(mock, 'frame:create').length, { timeout: 10_000 }).toBe(i + 1);
+      const create = sentOf(mock, 'frame:create')[i] as { posX: number; posY: number };
+      expect(Number.isInteger(create.posX)).toBe(true);
+
       mock.broadcast(BOARD_ID, 'frame:created', {
-        id: ids[i],
+        id: 'someone-elses-frame',
         boardId: BOARD_ID,
         title: '',
-        posX: ordered[i].posX,
-        posY: ordered[i].posY,
+        posX: 9999,
+        posY: 9999,
+        width: 400,
+        height: 300,
+        color: '#94A3B8',
+        active: false,
+        layer: 1,
+      });
+      mock.broadcast(BOARD_ID, 'frame:created', {
+        id: expected[i].id,
+        boardId: BOARD_ID,
+        title: '',
+        posX: create.posX,
+        posY: create.posY,
         width: 400,
         height: 300,
         color: '#94A3B8',
@@ -137,15 +152,12 @@ test.describe('Activities panel — template activities (#254)', () => {
     }
 
     await expect.poll(() => sentOf(mock, 'frame:update').length, { timeout: 10_000 }).toBe(3);
-    const titleById = new Map(
+    expect(
       sentOf(mock, 'frame:update').map((m) => {
         const u = m as { id: string; title: string };
         return [u.id, u.title];
       }),
-    );
-    expect(titleById.get('frame-left')).toBe('Ce qui a bien marché');
-    expect(titleById.get('frame-middle')).toBe('À améliorer');
-    expect(titleById.get('frame-right')).toBe("Plan d'action");
+    ).toEqual(expected.map((e) => [e.id, e.title]));
   });
 
   test('brainstorming seeds one frame and preselects the sticky tool', async ({ page }) => {

@@ -76,9 +76,12 @@ export function layoutActivityFrames(
   const count = template.frameTitleKeys.length;
   const rowWidth = count * FRAME_WIDTH + (count - 1) * FRAME_GAP;
   const startX = centre.x - rowWidth / 2;
-  const posY = centre.y - FRAME_HEIGHT / 2;
+  // Rounded: the viewport centre is fractional once the board has been zoomed, and the store
+  // identifies an in-flight template frame by comparing the position it sent with the one the
+  // server echoes back (`addTitledFrames`) — an exact comparison, so whole numbers only.
+  const posY = Math.round(centre.y - FRAME_HEIGHT / 2);
   return template.frameTitleKeys.map((titleKey, i) => ({
-    posX: startX + i * (FRAME_WIDTH + FRAME_GAP),
+    posX: Math.round(startX + i * (FRAME_WIDTH + FRAME_GAP)),
     posY,
     titleKey,
   }));

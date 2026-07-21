@@ -451,9 +451,13 @@ export class BoardPageComponent implements OnInit, OnDestroy {
       return;
     }
     const centre = this.canvas()?.viewportCentre() ?? { x: 0, y: 0 };
-    for (const frame of layoutActivityFrames(template, centre)) {
-      this.store.addFrame(frame.posX, frame.posY, this.transloco.translate(frame.titleKey));
-    }
+    this.store.addTitledFrames(
+      layoutActivityFrames(template, centre).map(({ posX, posY, titleKey }) => ({
+        posX,
+        posY,
+        title: this.transloco.translate(titleKey),
+      })),
+    );
     if (template.tool) {
       this.tool.set(template.tool);
     }

@@ -281,10 +281,11 @@ export class BoardStore {
   private readonly pendingConnHistory: Array<(conn: Connection) => void> = [];
   private readonly pendingFrameHistory: Array<(frame: Frame) => void> = [];
   /**
-   * Titles awaiting their `frame:created` echo, keyed by the position the create was sent with —
-   * see {@link addFrame} for why this is not a FIFO queue.
+   * The single in-flight frame of an activity template run, or null — see
+   * {@link addTitledFrames}. At most one create is outstanding at a time, and it is identified by
+   * the position it was sent with rather than by arrival order.
    */
-  private readonly pendingFrameTitles: Array<{ posX: number; posY: number; title: string }> = [];
+  private pendingFrameRun: { posX: number; posY: number; apply: (frame: Frame) => void } | null = null;
   private readonly pendingGroupHistory: Array<(groupId: string) => void> = [];
 
   private cardDragStart: Map<string, { posX: number; posY: number }> | null = null;
@@ -368,6 +369,9 @@ export class BoardStore {
       this.emitCoalescer.timer = null;
     }
     this.emitCoalescer.pending.clear();
+    // An unacknowledged template frame must not outlive the board: its continuation would emit
+    // onto a torn-down transport, and a stale entry could later claim an unrelated frame.
+    this.pendingFrameRun = null;
     this.optimisticCardTimers.forEach((t) => clearTimeout(t));
     this.optimisticCardTimers.clear();
     this.localControlGraceTimers.forEach((t) => clearTimeout(t));
@@ -757,8 +761,16 @@ export class BoardStore {
     );
 
     this.on<Frame>('frame:created', (frame) => {
-      this.pendingFrameHistory.shift()?.(frame);
-      this.applyPendingFrameTitle(frame);
+      // A template run owns this echo only if it is the frame it is waiting for (same position);
+      // anything else falls through to the plain single-frame path so a manual create issued
+      // during a run still gets its undo entry.
+      const run = this.pendingFrameRun;
+      if (run && run.posX === frame.posX && run.posY === frame.posY) {
+        this.pendingFrameRun = null;
+        run.apply(frame);
+      } else {
+        this.pendingFrameHistory.shift()?.(frame);
+      }
       // Idempotent append: the `frame:created` broadcast is emitter-included, so the creator also
       // receives its own echo — and a reconnect can replay it after `board:state` already carried
       // the frame. Dedup by id (same convention as `connection:created`/`boardfield:created`) so a
@@ -1777,38 +1789,14 @@ export class BoardStore {
   }
 
   // ── Frames ─────────────────────────────────────────────────────────────────
-  /**
-   * Creates a frame, optionally titled.
-   *
-   * `frame:create` carries no title (the server applies `Frame.java` defaults — 400×300, empty
-   * title), so a titled frame is a create followed by a `frame:update` on the **authoritative**
-   * id, issued once the `frame:created` echo arrives. The title is not applied optimistically:
-   * the `frame:updated` broadcast is the single source of truth, consistent with the rest of the
-   * frame lifecycle. Used by the activity templates (brainstorming / icebreaker / retro).
-   *
-   * Pending titles are matched to their echo **by position, not by arrival order**: a template
-   * fires several `frame:create` back to back and the server's echoes are not guaranteed to come
-   * back in the order they were sent, so FIFO matching mislabelled the frames (observed on the
-   * retro template: three frames, titles rotated).
-   *
-   * @param posX top-left corner, canvas units
-   * @param posY top-left corner, canvas units
-   * @param title optional frame title; omitted or empty leaves the server default
-   */
-  addFrame(posX: number, posY: number, title?: string): void {
+  addFrame(posX: number, posY: number): void {
     const emitParams = { boardId: this.boardId, posX, posY };
-    if (title) {
-      this.pendingFrameTitles.push({ posX, posY, title });
-    }
     this.pendingFrameHistory.push((frame: Frame) => {
       let trackedId = frame.id;
       this.pushHistory({
         undo: () => this.transport.emit('frame:delete', { id: trackedId, boardId: this.boardId }),
         redo: () => {
           this.transport.emit('frame:create', emitParams);
-          if (title) {
-            this.pendingFrameTitles.push({ posX, posY, title });
-          }
           this.pendingFrameHistory.push((newFrame: Frame) => (trackedId = newFrame.id));
         },
       });
@@ -1817,19 +1805,64 @@ export class BoardStore {
   }
 
   /**
-   * Applies the pending title whose requested position matches this freshly created frame, if any.
-   * Matching on position rather than arrival order keeps multi-frame templates correct whatever
-   * order the server echoes them back.
+   * Creates a run of titled frames — the canvas layout behind an activity template
+   * (brainstorming / icebreaker / retro).
    *
-   * @param frame the frame carried by the `frame:created` echo
+   * Creates are issued **one at a time**, each waiting for its own `frame:created` echo before
+   * the next goes out. `frame:create` carries no title (the server applies `Frame.java` defaults)
+   * and, unlike cards, round-trips no `clientTag` — so the echo is the only way to learn a
+   * frame's authoritative id, and firing the whole run at once left no reliable way to tell the
+   * echoes apart: the server does not broadcast them in send order, which rotated the titles
+   * across frames (seen in recette on the retro) *and* mismatched the FIFO undo/redo entries
+   * {@link addFrame} queues. Serialising costs one round trip per frame and removes the guesswork.
+   *
+   * The whole run is a single history entry: one undo removes the template, as the user expects
+   * of one click.
+   *
+   * @param specs frames to create, in layout order
    */
-  private applyPendingFrameTitle(frame: Frame): void {
-    const i = this.pendingFrameTitles.findIndex((p) => p.posX === frame.posX && p.posY === frame.posY);
-    if (i === -1) {
+  addTitledFrames(specs: ReadonlyArray<{ posX: number; posY: number; title: string }>): void {
+    if (specs.length === 0) {
       return;
     }
-    const [{ title }] = this.pendingFrameTitles.splice(i, 1);
-    this.transport.emit('frame:update', { id: frame.id, boardId: this.boardId, title });
+    const createdIds: string[] = [];
+    const undo = () => {
+      for (const id of createdIds) {
+        this.transport.emit('frame:delete', { id, boardId: this.boardId });
+      }
+    };
+
+    const step = (i: number): void => {
+      if (i >= specs.length) {
+        // Whole run acknowledged — one entry for one user action. `redo` replays the same run;
+        // the ids are refreshed as the new echoes come in, so a second undo still targets the
+        // frames that actually exist.
+        this.pushHistory({
+          undo,
+          redo: () => {
+            createdIds.length = 0;
+            step(0);
+          },
+        });
+        return;
+      }
+      const { posX, posY, title } = specs[i];
+      // `frame:created` is broadcast to the whole room, so another participant's frame can land
+      // while ours is in flight. The awaited position discriminates ours from theirs; template
+      // positions are integers (see `layoutActivityFrames`), so the comparison is exact.
+      this.pendingFrameRun = {
+        posX,
+        posY,
+        apply: (frame: Frame) => {
+          createdIds.push(frame.id);
+          this.transport.emit('frame:update', { id: frame.id, boardId: this.boardId, title });
+          step(i + 1);
+        },
+      };
+      this.transport.emit('frame:create', { boardId: this.boardId, posX, posY });
+    };
+
+    step(0);
   }
 
   moveFrame(
