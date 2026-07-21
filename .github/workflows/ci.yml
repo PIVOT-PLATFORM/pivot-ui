@@ -182,6 +182,17 @@ jobs:
           name: frontend-coverage
           path: coverage/
 
+      - name: Setup Java 21 (scanner runtime)
+        # `npx sonar-scanner` est un simple wrapper : il exécute le scanner sur le JDK par défaut
+        # du runner, qui est Java 17 sur `ubuntu-latest`. SonarQube Cloud a cessé de supporter
+        # Java 17 — sans cette étape le scan échoue avant même d'analyser quoi que ce soit
+        # (« The version of Java (17) used to run this analysis is deprecated »), sur toutes les PR.
+        # Ce JDK ne sert qu'au scanner : le projet reste un projet Node, rien n'est compilé en Java.
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
       - name: SonarCloud Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
