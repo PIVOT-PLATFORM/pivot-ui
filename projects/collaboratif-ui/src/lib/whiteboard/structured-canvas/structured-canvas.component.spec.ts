@@ -2007,3 +2007,186 @@ describe('StructuredCanvasComponent — pointer-down on a card being edited (dra
     expect(component['gesture']).toEqual({ kind: 'none' });
   });
 });
+
+/**
+ * US08.11.4 — alignment guides at the component level. `computeAlignGuides` itself (pure function,
+ * see `align-guides.spec.ts`) cannot exercise these three ACs: they live in the pointer state
+ * machine wiring — the gesture's start position, the §5.9 grid/guide mutual exclusion, the
+ * multi-selection bail-out, and the one-shot cleanup on release — all in `onPointerMove`/
+ * `onPointerUp`, not in the geometry helper.
+ */
+describe('StructuredCanvasComponent — alignment guides (US08.11.4)', () => {
+  let fixture: ComponentFixture<StructuredCanvasComponent>;
+  let component: StructuredCanvasComponent;
+  let moveCard: ReturnType<typeof vi.fn>;
+  let commitDragCard: ReturnType<typeof vi.fn>;
+  let selected: Set<string>;
+
+  /**
+   * The dragged card starts flush at the origin; the anchor sits 500px to its right, so a drag
+   * landing within `ALIGN_SNAP_PX` (6 canvas px at zoom 1) of the anchor's left edge (x=500)
+   * triggers exactly one vertical guide. The anchor's Y (300) is far enough from the moving card's
+   * Y (always 0 here, since the drag below never moves vertically) that no horizontal landmark
+   * ever matches — keeping every assertion single-axis and unambiguous.
+   */
+  const MOVING = {
+    id: 'moving',
+    boardId: 'board-1',
+    type: 'TEXT',
+    content: '',
+    meta: null,
+    posX: 0,
+    posY: 0,
+    width: 100,
+    height: 100,
+    color: '#FFEB3B',
+    groupId: null,
+    groupColor: null,
+    locked: false,
+    layer: 1,
+    fieldValues: [],
+  } as unknown as Card;
+  const ANCHOR = {
+    id: 'anchor',
+    boardId: 'board-1',
+    type: 'TEXT',
+    content: '',
+    meta: null,
+    posX: 500,
+    posY: 300,
+    width: 100,
+    height: 100,
+    color: '#FFEB3B',
+    groupId: null,
+    groupColor: null,
+    locked: false,
+    layer: 1,
+    fieldValues: [],
+  } as unknown as Card;
+
+  async function create(alignGuidesEnabled: boolean, snapEnabled: boolean): Promise<void> {
+    moveCard = vi.fn();
+    commitDragCard = vi.fn();
+    selected = new Set(['moving']);
+    const storeStub = {
+      isReadonly: () => false,
+      frames: () => [],
+      cards: () => [MOVING, ANCHOR],
+      connections: () => [],
+      fields: () => [],
+      selectedIds: () => selected,
+      remoteEditors: () => new Map<string, { name: string }>(),
+      autoEditCardId: () => null,
+      activeVoteSession: () => null,
+      voteTallyByCard: () => new Map<string, number>(),
+      myVoteTallyByCard: () => new Map<string, number>(),
+      voteBudgetRemaining: () => null,
+      emitCursor: vi.fn(),
+      selectCards: vi.fn(),
+      castVote: vi.fn(),
+      uncastVote: vi.fn(),
+      startDragCard: vi.fn(),
+      moveCard,
+      commitDragCard,
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [
+        StructuredCanvasComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { fr: FR_TRANSLATIONS },
+          translocoConfig: { defaultLang: 'fr', availableLangs: ['fr'] },
+          preloadLangs: true,
+        }),
+      ],
+      providers: [{ provide: BoardStore, useValue: storeStub }],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(StructuredCanvasComponent);
+    fixture.componentRef.setInput('alignGuidesEnabled', alignGuidesEnabled);
+    fixture.componentRef.setInput('snapEnabled', snapEnabled);
+    fixture.detectChanges();
+    component = fixture.componentInstance;
+  }
+
+  afterEach(() => fixture.destroy());
+
+  function surface(): HTMLElement {
+    const el = fixture.nativeElement.querySelector('.wb-surface') as HTMLElement;
+    el.getBoundingClientRect = vi
+      .fn()
+      .mockReturnValue({ left: 0, top: 0, width: 800, height: 600, right: 800, bottom: 600 }) as unknown as typeof el.getBoundingClientRect;
+    (el as unknown as { setPointerCapture: (id: number) => void }).setPointerCapture = vi.fn();
+    (el as unknown as { releasePointerCapture: (id: number) => void }).releasePointerCapture = vi.fn();
+    return el;
+  }
+
+  /**
+   * Starts a drag on the `moving` card, then moves the pointer to `(x, 0)`. `clientX` doubles as
+   * the raw canvas X in every scenario here — the viewport stays untransformed (pan 0, zoom 1).
+   */
+  function dragMovingCardTo(x: number): HTMLElement {
+    const el = surface();
+    const cardEl = document.createElement('div');
+    cardEl.setAttribute('data-card-id', 'moving');
+    component['onPointerDown']({
+      button: 0,
+      target: cardEl,
+      currentTarget: el,
+      clientX: 0,
+      clientY: 0,
+      pointerId: 1,
+      shiftKey: false,
+    } as unknown as PointerEvent);
+    component['onPointerMove']({ clientX: x, clientY: 0, pointerId: 1 } as unknown as PointerEvent);
+    return el;
+  }
+
+  it('draws a vertical guide and snaps onto the anchor edge — nominal case (guides on, grid off, single selection)', async () => {
+    await create(true, false);
+    // 3px short of the anchor's left edge (500) — well within the 6px tolerance.
+    dragMovingCardTo(497);
+
+    expect(component['alignGuides']()).toEqual({ v: 500, h: null });
+    expect(moveCard).toHaveBeenCalledWith('moving', 500, 0);
+  });
+
+  it('clears the guide on pointerup — a drag affordance that must never outlive the gesture', async () => {
+    await create(true, false);
+    const el = dragMovingCardTo(497);
+    expect(component['alignGuides']()).not.toBeNull();
+
+    component['onPointerUp']({ target: el, currentTarget: el, clientX: 497, clientY: 0, pointerId: 1 } as unknown as PointerEvent);
+
+    expect(component['alignGuides']()).toBeNull();
+    expect(commitDragCard).toHaveBeenCalledTimes(1);
+  });
+
+  it('a multi-selection disables guides entirely — no guide, no position correction (§4.3: no single set of landmarks to align on)', async () => {
+    await create(true, false);
+    selected = new Set(['moving', 'anchor']); // size > 1 before the drag starts.
+    dragMovingCardTo(497);
+
+    expect(component['alignGuides']()).toBeNull();
+    // The raw drag position lands untouched — not the 500 an alignment correction would produce.
+    expect(moveCard).toHaveBeenCalledWith('moving', 497, 0);
+  });
+
+  it('the grid wins when both are on (§5.9) — position rounds to the grid, no guide is computed', async () => {
+    await create(true, true);
+    dragMovingCardTo(497);
+
+    expect(component['alignGuides']()).toBeNull();
+    // snapToGrid(497) = round(497/24)*24 = 504 — neither the raw 497 nor the aligned 500, proving
+    // the grid short-circuited the alignment branch rather than merely landing on the same value.
+    expect(moveCard).toHaveBeenCalledWith('moving', 504, 0);
+  });
+
+  it('alignGuidesEnabled=false disables guides even with a single selection and the grid off', async () => {
+    await create(false, false);
+    dragMovingCardTo(497);
+
+    expect(component['alignGuides']()).toBeNull();
+    expect(moveCard).toHaveBeenCalledWith('moving', 497, 0);
+  });
+});

@@ -83,6 +83,25 @@
           <path d="M3 9h18M3 15h18M9 3v18M15 3v18" />
         </svg>
       </button>
+
+      <!-- Alignment guides (US08.11.4). Shares the grid's group: both are display preferences, and
+           §5.9 makes them mutually exclusive, so sitting them side by side reads correctly. -->
+      <button
+        type="button"
+        class="wb-toolbar__btn"
+        [class.wb-toolbar__btn--active]="alignGuidesEnabled()"
+        [disabled]="disabled()"
+        [attr.aria-pressed]="alignGuidesEnabled()"
+        [attr.aria-label]="'whiteboard.toolbar.alignGuides' | transloco"
+        [wbTooltip]="'whiteboard.toolbar.alignGuides' | transloco"
+        (click)="alignGuidesToggle.emit()"
+      >
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M12 3v18" stroke-dasharray="3 2" />
+          <rect x="4" y="7" width="8" height="4" rx="1" />
+          <rect x="12" y="13" width="8" height="4" rx="1" />
+        </svg>
+      </button>
     </div>
 
     <!-- Group 2 — content tools + image import -->
