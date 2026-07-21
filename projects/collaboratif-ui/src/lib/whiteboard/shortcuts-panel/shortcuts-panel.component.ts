@@ -57,6 +57,7 @@ const CANVAS_ROWS: readonly ShortcutRow[] = [
   { labelKey: 'whiteboard.shortcuts.move', keys: ['←', '↑', '↓', '→'] },
   { labelKey: 'whiteboard.shortcuts.moveFast', keys: [SHIFT, '←'] },
   { labelKey: 'whiteboard.shortcuts.multiSelect', keys: [SHIFT, { i18n: 'whiteboard.shortcuts.keys.click' }] },
+  { labelKey: 'whiteboard.shortcuts.axisLock', keys: [SHIFT, DRAG] },
   { labelKey: 'whiteboard.shortcuts.ratio', keys: [SHIFT, DRAG] },
   { labelKey: 'whiteboard.shortcuts.fromCenter', keys: [ALT, DRAG] },
   { labelKey: 'whiteboard.shortcuts.panGesture', keys: [{ i18n: 'whiteboard.shortcuts.keys.space' }, DRAG] },

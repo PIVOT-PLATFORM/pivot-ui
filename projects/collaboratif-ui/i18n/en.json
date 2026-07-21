@@ -661,6 +661,7 @@
     "shortcuts": {
       "close": "Close shortcuts",
       "copy": "Copy",
+      "axisLock": "Constrain movement to one axis",
       "cut": "Cut",
       "delete": "Delete selection",
       "duplicate": "Duplicate",

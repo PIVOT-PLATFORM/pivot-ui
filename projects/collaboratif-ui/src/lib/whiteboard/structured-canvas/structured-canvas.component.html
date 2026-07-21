@@ -157,6 +157,37 @@
       }
     }
 
+    <!-- Locked-axis line (US08.11.8) — dashed, same colour token as the guides above. Decorative,
+         hence aria-hidden: the constraint is already conveyed by the item refusing to drift. Only
+         rendered on an axis that carries no solid guide, so dashed reads as "locked" and solid as
+         "locked and actually aligned with a neighbour". -->
+    @if (lockLine(); as ll) {
+      @if (ll.v !== null) {
+        <div
+          class="wb-axis-lock wb-axis-lock--v"
+          aria-hidden="true"
+          [style.left.px]="ll.v"
+          [style.top.px]="-GUIDE_SPAN / 2"
+          [style.height.px]="GUIDE_SPAN"
+          [style.width.px]="guideThickness()"
+          [style.background]="lockDashV()"
+          [style.z-index]="guideZIndex"
+        ></div>
+      }
+      @if (ll.h !== null) {
+        <div
+          class="wb-axis-lock wb-axis-lock--h"
+          aria-hidden="true"
+          [style.top.px]="ll.h"
+          [style.left.px]="-GUIDE_SPAN / 2"
+          [style.width.px]="GUIDE_SPAN"
+          [style.height.px]="guideThickness()"
+          [style.background]="lockDashH()"
+          [style.z-index]="guideZIndex"
+        ></div>
+      }
+    }
+
     <!-- Marquee selection -->
     @if (marquee(); as m) {
       <div
