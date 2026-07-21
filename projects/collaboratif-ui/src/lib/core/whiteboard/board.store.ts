@@ -243,25 +243,16 @@ export class BoardStore {
     return this.myQuizAnswers().get(question.id) ?? null;
   });
 
-  /** Quiz activity (Lot A2) — whether the current user has already answered the current question. */
+  /**
+   * Quiz activity (Lot A2) — whether the current user has already answered the current question
+   * (consumed by {@link QuizParticipantOverlayComponent} via its `hasAnswered` input, so the
+   * "already answered" state survives a remount/reconnect instead of being tracked locally —
+   * `answeredCount`/`leaderboard` are deliberately *not* mirrored here: `answeredCount` and the
+   * leaderboard are read straight off the `QuizSession`/`QuizQuestion` the host already passes to
+   * `QuizResultsPanelComponent` via its `session` input, so a store-level echo would be a second,
+   * unconsumed source of the same data).
+   */
   readonly hasAnswered = computed<boolean>(() => this.myAnswer() !== null);
-
-  /**
-   * Quiz activity (Lot A2) — number of participants who answered the current question so far.
-   * Server-authoritative (`QuizQuestion.answeredCount`); never the per-choice distribution before
-   * reveal (§2.4 masking) — that only appears in `QuizChoice.count` once `state === 'REVEALED'`.
-   */
-  readonly answeredCount = computed<number>(
-    () => this.activeQuizSession()?.currentQuestion?.answeredCount ?? 0,
-  );
-
-  /**
-   * Quiz activity (Lot A2) — cumulative leaderboard of the active quiz, falling back to the last
-   * closed quiz's final leaderboard once the session has ended.
-   */
-  readonly leaderboard = computed(
-    () => this.activeQuizSession()?.leaderboard ?? this.lastQuizSession()?.leaderboard ?? [],
-  );
 
   /** Cards copied via {@link copySelected}, portable across boards (also mirrored to localStorage). */
   readonly clipboard = signal<ClipboardCard[]>([]);

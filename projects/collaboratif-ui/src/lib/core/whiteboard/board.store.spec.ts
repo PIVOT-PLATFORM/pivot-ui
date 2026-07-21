@@ -1660,22 +1660,6 @@ describe('BoardStore — quiz actions & handlers (Lot A2, calque dot-vote)', () 
     expect(store.lastQuizSession()).toEqual(closed);
   });
 
-  // ── Computed ───────────────────────────────────────────────────────────────
-
-  it('answeredCount mirrors the current question answeredCount (never the per-choice distribution)', () => {
-    const question = quizSession().currentQuestion!;
-    store.activeQuizSession.set(quizSession({ currentQuestion: { ...question, answeredCount: 4 } }));
-    expect(store.answeredCount()).toBe(4);
-  });
-
-  it('leaderboard prefers the active session and falls back to the last closed one', () => {
-    expect(store.leaderboard()).toEqual([]);
-    store.lastQuizSession.set(quizSession({ leaderboard: [{ userId: 'u1', score: 5, rank: 1 }] }));
-    expect(store.leaderboard()).toEqual([{ userId: 'u1', score: 5, rank: 1 }]);
-    store.activeQuizSession.set(quizSession({ leaderboard: [{ userId: 'u2', score: 2, rank: 1 }] }));
-    expect(store.leaderboard()).toEqual([{ userId: 'u2', score: 2, rank: 1 }]);
-  });
-
   // ── Masking (§2.4) — the store never fabricates `correct`/`count` itself ────
 
   it('never exposes correct/count on an OPEN question round-tripped through a handler', () => {

@@ -20,6 +20,12 @@ import { QuizQuestion, QuizSession } from '../model/board.types';
  *
  * WIP: the host (`board-page`, Lot C3) owns visibility — it mounts this overlay only while a quiz
  * is active for a non-owner participant and tears it down once the quiz session closes.
+ *
+ * "Already answered" state is driven entirely by the {@link hasAnswered}/{@link myAnswerId}
+ * inputs — the host binds them to `BoardStore.hasAnswered`/`BoardStore.myAnswer`, the single
+ * source of truth for the current user's own answer (Gate 4 F2: this component used to track a
+ * local `answeredIds` set instead, a second, divergent copy of the same state that would reset to
+ * empty on every remount — e.g. a reconnect — while the store's echo survives it).
  */
 @Component({
   selector: 'wb-quiz-overlay',
@@ -48,11 +54,17 @@ export class QuizParticipantOverlayComponent {
   /** Emitted with the selected choice id as soon as the participant picks an answer. */
   readonly answer = output<string>();
 
-  /** Ids of questions this participant has already answered during this component's lifetime. */
-  private readonly answeredIds = signal<ReadonlySet<string>>(new Set());
+  /**
+   * Whether the current user has already answered the quiz's current question — bound by the
+   * host to `BoardStore.hasAnswered` (single source of truth, see class doc).
+   */
+  readonly hasAnswered = input<boolean>(false);
 
-  /** The choice id last submitted for the current question, if any (drives `aria-checked`). */
-  private readonly checkedChoiceId = signal<string | null>(null);
+  /**
+   * The current user's own selected choice id for the current question, if any — bound by the
+   * host to `BoardStore.myAnswer`. Drives `aria-checked` while the radiogroup is still rendered.
+   */
+  readonly myAnswerId = input<string | null>(null);
 
   /** Roving-tabindex focus index within the radiogroup (WAI-ARIA APG "Radio Group" pattern). */
   protected readonly focusedIndex = signal(0);
@@ -66,20 +78,15 @@ export class QuizParticipantOverlayComponent {
     return q ? q.position + 1 : null;
   });
 
-  /** Whether the current question has already been answered by this participant. */
-  protected readonly hasAnsweredCurrent = computed<boolean>(() => {
-    const q = this.session().currentQuestion;
-    return q !== null && this.answeredIds().has(q.id);
-  });
-
   /**
    * The question to render a live radiogroup for — `null` whenever there is nothing to answer
-   * right now (no current question, already `REVEALED`, or already answered), in which case the
-   * template falls back to the "answered" / "waiting" status views.
+   * right now (no current question, already `REVEALED`, or already answered per the
+   * {@link hasAnswered} input), in which case the template falls back to the "answered" /
+   * "waiting" status views.
    */
   protected readonly answerableQuestion = computed<QuizQuestion | null>(() => {
     const q = this.session().currentQuestion;
-    if (!q || q.state !== 'OPEN' || this.hasAnsweredCurrent()) {
+    if (!q || q.state !== 'OPEN' || this.hasAnswered()) {
       return null;
     }
     return q;
@@ -87,21 +94,19 @@ export class QuizParticipantOverlayComponent {
 
   /** Whether a given choice is the one this participant currently has checked. */
   protected isChecked(choiceId: string): boolean {
-    return this.checkedChoiceId() === choiceId;
+    return this.myAnswerId() === choiceId;
   }
 
-  /** Records the participant's answer and switches the view to the "recorded" state. */
+  /**
+   * Emits the participant's answer. The "already answered" switch to the recorded-state view is
+   * not decided here — it follows once the host relays the answer to `BoardStore.answerQuiz`,
+   * which flips `hasAnswered`/`myAnswer` back down through this component's inputs.
+   */
   protected selectChoice(choiceId: string): void {
     const q = this.session().currentQuestion;
     if (!q || q.state !== 'OPEN') {
       return;
     }
-    this.checkedChoiceId.set(choiceId);
-    this.answeredIds.update((prev) => {
-      const next = new Set(prev);
-      next.add(q.id);
-      return next;
-    });
     this.focusedIndex.set(0);
     this.answer.emit(choiceId);
   }

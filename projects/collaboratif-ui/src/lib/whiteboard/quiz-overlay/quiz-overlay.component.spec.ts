@@ -125,7 +125,10 @@ describe('QuizParticipantOverlayComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Question 1 / 5');
   });
 
-  it('emits answer(choiceId) on click and switches to the "answered" state', () => {
+  it('emits answer(choiceId) on click — the "answered" state itself follows the hasAnswered input, not the click', () => {
+    // F2 (Gate 4): "already answered" is no longer tracked locally — it is driven entirely by the
+    // hasAnswered/myAnswerId inputs, which the host binds to BoardStore.hasAnswered/myAnswer once
+    // it relays the emitted answer to BoardStore.answerQuiz (single source of truth).
     fixture.componentRef.setInput('session', baseSession());
     fixture.detectChanges();
 
@@ -136,8 +139,38 @@ describe('QuizParticipantOverlayComponent', () => {
     fixture.detectChanges();
 
     expect(emitted).toBe('c-2');
+    // Nothing switches on its own — the radiogroup is still showing until the host reflects the
+    // store's hasAnswered back down through the input.
+    expect(q('[role="radiogroup"]')).not.toBeNull();
+
+    fixture.componentRef.setInput('hasAnswered', true);
+    fixture.detectChanges();
+
     expect(fixture.nativeElement.textContent).toContain('Réponse enregistrée');
     expect(q('[role="radiogroup"]')).toBeNull();
+  });
+
+  it('shows the "answered" state immediately when hasAnswered is true on mount (e.g. after a remount/reconnect)', () => {
+    // The whole point of sourcing this from the store instead of a local Set: a fresh mount (this
+    // component is destroyed/recreated whenever showQuizOverlay toggles) must not forget that the
+    // current user already answered this question.
+    fixture.componentRef.setInput('session', baseSession());
+    fixture.componentRef.setInput('hasAnswered', true);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Réponse enregistrée');
+    expect(q('[role="radiogroup"]')).toBeNull();
+  });
+
+  it('reflects the myAnswerId input via aria-checked on the matching choice', () => {
+    fixture.componentRef.setInput('session', baseSession());
+    fixture.componentRef.setInput('myAnswerId', 'c-2');
+    fixture.detectChanges();
+
+    const radios = qAll<HTMLButtonElement>('[role="radio"]');
+    expect(radios[0].getAttribute('aria-checked')).toBe('false');
+    expect(radios[1].getAttribute('aria-checked')).toBe('true');
+    expect(radios[2].getAttribute('aria-checked')).toBe('false');
   });
 
   it('never renders the correct-answer or per-choice count fields, even if present on the input', () => {

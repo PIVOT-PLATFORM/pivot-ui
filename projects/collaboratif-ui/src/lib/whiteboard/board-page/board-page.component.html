@@ -310,6 +310,8 @@
     @if (store.activeQuizSession(); as quizSession) {
       <wb-quiz-overlay
         [session]="quizSession"
+        [hasAnswered]="store.hasAnswered()"
+        [myAnswerId]="store.myAnswer()"
         (answer)="onQuizAnswer($event)"
       ></wb-quiz-overlay>
     }

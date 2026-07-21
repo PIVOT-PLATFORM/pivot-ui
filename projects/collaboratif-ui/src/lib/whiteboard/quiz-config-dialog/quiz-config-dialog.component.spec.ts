@@ -253,4 +253,27 @@ describe('QuizConfigDialogComponent', () => {
     fixture.nativeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     expect(closed).toEqual([true]);
   });
+
+  // ── F1 (Gate 4) — focus-trap ─────────────────────────────────────────────
+  it('traps focus in the dialog and moves initial focus to the first tabbable field on open', async () => {
+    await Promise.resolve(); // flush the queueMicrotask scheduled by ngAfterViewInit
+    expect(dialog().contains(document.activeElement)).toBe(true);
+    expect(document.activeElement).toBe(questionTextInput(0));
+  });
+
+  it('restores focus to the previously focused element once the dialog is destroyed', async () => {
+    const trigger = document.createElement('button');
+    document.body.appendChild(trigger);
+    trigger.focus();
+
+    const triggerFixture = TestBed.createComponent(QuizConfigDialogComponent);
+    triggerFixture.detectChanges();
+    await Promise.resolve();
+    expect(document.activeElement).not.toBe(trigger);
+
+    triggerFixture.destroy();
+    expect(document.activeElement).toBe(trigger);
+
+    trigger.remove();
+  });
 });

@@ -1,4 +1,17 @@
-import { ChangeDetectionStrategy, Component, HostListener, output, signal, computed } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  ViewChild,
+  computed,
+  inject,
+  output,
+  signal,
+} from '@angular/core';
+import { FocusTrap, FocusTrapFactory } from '@angular/cdk/a11y';
 import { TranslocoPipe } from '@jsverse/transloco';
 import type { QuizQuestionDraft } from '../model/board.types';
 
@@ -43,6 +56,16 @@ interface QuizConfigFormError {
  *
  * `role="dialog" aria-modal="true"` with Escape-to-close, modelled on
  * `vote-config-dialog.component.ts`.
+ *
+ * Focus-trap (a11y AC, US-Q1): mirrors the CDK `FocusTrapFactory` pattern already used by
+ * `design-system`'s `ConfirmDialogComponent` — trapped on view init (this dialog is only ever
+ * mounted via the host's `@if`, so "mounted" and "open" are the same event, unlike the
+ * `@Input open` + `ngOnChanges` shape of the design-system dialog); initial focus is moved
+ * explicitly onto the first question's text field rather than relying on
+ * `FocusTrap.focusInitialElement()`'s own heuristic (same reasoning as `ConfirmDialogComponent`'s
+ * explicit fallback `.focus()` call — see `ngAfterViewInit`); focus is restored to the triggering
+ * element on destroy (Escape / backdrop / close button / Start all unmount the component via the
+ * host's `@if`, so `ngOnDestroy` is the single point that covers every path).
  */
 @Component({
   selector: 'wb-quiz-config-dialog',
@@ -52,11 +75,17 @@ interface QuizConfigFormError {
   templateUrl: './quiz-config-dialog.component.html',
   styleUrl: './quiz-config-dialog.component.scss',
 })
-export class QuizConfigDialogComponent {
+export class QuizConfigDialogComponent implements AfterViewInit, OnDestroy {
   /** Emits the fully composed question set, ready for `quiz:start.data.questions`. */
   readonly start = output<QuizQuestionDraft[]>();
   /** Emits when the dialog is dismissed without starting. */
   readonly close = output<void>();
+
+  private readonly focusTrapFactory = inject(FocusTrapFactory);
+  private focusTrap?: FocusTrap;
+  private previouslyFocused: HTMLElement | null = null;
+
+  @ViewChild('dialogEl') private readonly dialogEl?: ElementRef<HTMLElement>;
 
   protected readonly maxQuestions = MAX_QUESTIONS;
   protected readonly maxChoices = MAX_CHOICES;
@@ -195,5 +224,28 @@ export class QuizConfigDialogComponent {
   protected onEscape(event: Event): void {
     event.preventDefault();
     this.onClose();
+  }
+
+  ngAfterViewInit(): void {
+    this.previouslyFocused = document.activeElement as HTMLElement | null;
+    queueMicrotask(() => {
+      const dialogEl = this.dialogEl?.nativeElement;
+      if (!dialogEl) {
+        return;
+      }
+      this.focusTrap = this.focusTrapFactory.create(dialogEl);
+      // Deterministic initial-focus target — the first question's text field — rather than
+      // relying on `FocusTrap.focusInitialElement()`'s own DOM-order-first-tabbable heuristic
+      // (which would land on the header's close button) or its geometry-gated visibility check
+      // (a silent no-op under a layout-less DOM, e.g. jsdom in this project's unit tests — the
+      // same gap `ConfirmDialogComponent`, design-system, works around with its own explicit
+      // fallback `.focus()` call).
+      dialogEl.querySelector<HTMLElement>('.wb-quizcfg__input--question')?.focus();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.focusTrap?.destroy();
+    this.previouslyFocused?.focus();
   }
 }

@@ -1,8 +1,10 @@
 <div class="wb-quizcfg__backdrop" (click)="onClose()">
   <div
+    #dialogEl
     class="wb-quizcfg"
     role="dialog"
     aria-modal="true"
+    tabindex="-1"
     [attr.aria-label]="'whiteboard.quiz.config.title' | transloco"
     (click)="$event.stopPropagation()"
   >
