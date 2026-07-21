@@ -1,0 +1,288 @@
+<section class="capacity-form">
+  <h1 class="capacity-form__title">{{ (isEdit ? 'capacity.form.editTitle' : 'capacity.form.createTitle') | transloco }}</h1>
+
+  @if (loadError()) {
+    <div class="capacity-form__error" role="alert">
+      <p>{{ 'capacity.form.loadError' | transloco }}</p>
+      <a routerLink="/capacity">{{ 'capacity.list.title' | transloco }}</a>
+    </div>
+  } @else {
+    @if (saveNetworkError()) {
+      <div class="capacity-form__error" role="alert">
+        <p>{{ 'capacity.form.saveError' | transloco }}</p>
+        <button type="button" (click)="submit()">{{ 'capacity.form.retry' | transloco }}</button>
+      </div>
+    }
+    @if (errorKey(); as key) {
+      <p class="capacity-form__error capacity-form__error--submit" role="alert">{{ key | transloco }}</p>
+    }
+
+    <form class="capacity-form__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      @if (form.controls.teamId.value !== null) {
+        <p class="capacity-form__hint">{{ 'capacity.form.teamLabel' | transloco }} : {{ form.controls.teamId.value }}</p>
+      }
+
+      <div class="capacity-form__field">
+        <label class="capacity-form__label" for="capacity-type">{{ 'capacity.form.typeLabel' | transloco }}</label>
+        <select
+          id="capacity-type"
+          class="capacity-form__input"
+          formControlName="type"
+          [attr.aria-invalid]="form.controls.type.invalid && form.controls.type.touched"
+        >
+          <option value=""></option>
+          @for (type of eventTypes; track type) {
+            <option [value]="type">{{ 'capacity.types.' + type | transloco }}</option>
+          }
+        </select>
+        @if (form.controls.type.invalid && form.controls.type.touched) {
+          <p class="capacity-form__error" role="alert">{{ 'capacity.form.errors.INVALID_TYPE' | transloco }}</p>
+        }
+      </div>
+
+      <div class="capacity-form__field">
+        <label class="capacity-form__label" for="capacity-name">{{ 'capacity.form.nameLabel' | transloco }}</label>
+        <input
+          id="capacity-name"
+          type="text"
+          class="capacity-form__input"
+          formControlName="name"
+          maxlength="200"
+          [attr.aria-invalid]="form.controls.name.invalid && form.controls.name.touched"
+        />
+        @if (form.controls.name.invalid && form.controls.name.touched) {
+          <p class="capacity-form__error" role="alert">{{ 'capacity.form.errors.INVALID_NAME' | transloco }}</p>
+        }
+      </div>
+
+      <div class="capacity-form__field">
+        <label class="capacity-form__label" for="capacity-start-date">{{ 'capacity.form.startDateLabel' | transloco }}</label>
+        <input
+          id="capacity-start-date"
+          type="date"
+          class="capacity-form__input"
+          formControlName="startDate"
+          [attr.aria-invalid]="form.controls.startDate.invalid && form.controls.startDate.touched"
+        />
+        @if (form.controls.startDate.invalid && form.controls.startDate.touched) {
+          <p class="capacity-form__error" role="alert">{{ 'capacity.form.errors.INVALID_START_DATE' | transloco }}</p>
+        }
+      </div>
+
+      <div class="capacity-form__field">
+        <label class="capacity-form__label" for="capacity-end-date">{{ 'capacity.form.endDateLabel' | transloco }}</label>
+        <input
+          id="capacity-end-date"
+          type="date"
+          class="capacity-form__input"
+          formControlName="endDate"
+          [attr.aria-invalid]="(form.controls.endDate.invalid || isDateRangeInvalid()) && form.controls.endDate.touched"
+        />
+        @if (form.controls.endDate.touched && (form.controls.endDate.hasError('required') || isDateRangeInvalid())) {
+          <p class="capacity-form__error" role="alert">{{ 'capacity.form.errors.INVALID_END_DATE' | transloco }}</p>
+        }
+      </div>
+
+      <div class="capacity-form__field">
+        <label class="capacity-form__label" for="capacity-parent">{{ 'capacity.form.parentLabel' | transloco }}</label>
+        <select id="capacity-parent" class="capacity-form__input" formControlName="parentId">
+          <option [value]="null">{{ 'capacity.form.parentNone' | transloco }}</option>
+          @for (candidate of parentCandidates(); track candidate.id) {
+            <option [value]="candidate.id">{{ candidate.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="capacity-form__field">
+        <label class="capacity-form__label" for="capacity-maturity">{{ 'capacity.form.maturityLabel' | transloco }}</label>
+        <select id="capacity-maturity" class="capacity-form__input" formControlName="maturityLevel">
+          <option value="">{{ 'capacity.maturity.none' | transloco }}</option>
+          @for (level of maturityLevels; track level) {
+            <option [value]="level">{{ 'capacity.maturity.' + level | transloco }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="capacity-form__field">
+        <label class="capacity-form__label" for="capacity-focus-factor">{{ 'capacity.form.focusFactorLabel' | transloco }}</label>
+        <input
+          id="capacity-focus-factor"
+          type="number"
+          step="0.01"
+          min="0"
+          max="1"
+          class="capacity-form__input"
+          formControlName="focusFactor"
+          [attr.aria-invalid]="form.controls.focusFactor.invalid && form.controls.focusFactor.touched"
+        />
+        @if (form.controls.focusFactor.invalid && form.controls.focusFactor.touched) {
+          <p class="capacity-form__error" role="alert">{{ 'capacity.form.errors.INVALID_FOCUS_FACTOR' | transloco }}</p>
+        }
+      </div>
+
+      <div class="capacity-form__field">
+        <label class="capacity-form__label" for="capacity-marge-securite">{{ 'capacity.form.margeSecuriteLabel' | transloco }}</label>
+        <input
+          id="capacity-marge-securite"
+          type="number"
+          step="0.01"
+          min="0"
+          max="1"
+          class="capacity-form__input"
+          formControlName="margeSecurite"
+          [attr.aria-invalid]="form.controls.margeSecurite.invalid && form.controls.margeSecurite.touched"
+        />
+        @if (form.controls.margeSecurite.invalid && form.controls.margeSecurite.touched) {
+          <p class="capacity-form__error" role="alert">{{ 'capacity.form.errors.INVALID_MARGE_SECURITE' | transloco }}</p>
+        }
+      </div>
+
+      <div class="capacity-form__field">
+        <label class="capacity-form__label" for="capacity-points-per-day">{{ 'capacity.form.pointsPerDayLabel' | transloco }}</label>
+        <input
+          id="capacity-points-per-day"
+          type="number"
+          step="0.1"
+          min="0"
+          class="capacity-form__input"
+          formControlName="pointsPerDay"
+        />
+      </div>
+
+      <div class="capacity-form__field">
+        <label class="capacity-form__label" for="capacity-committed-points">{{ 'capacity.form.committedPointsLabel' | transloco }}</label>
+        <input
+          id="capacity-committed-points"
+          type="number"
+          step="0.1"
+          min="0"
+          class="capacity-form__input"
+          formControlName="committedPoints"
+        />
+      </div>
+
+      <fieldset class="capacity-form__fieldset">
+        <legend>{{ 'capacity.form.workingDaysLabel' | transloco }}</legend>
+        @for (day of weekdayValues; track day) {
+          <label class="capacity-form__checkbox-label" [for]="'capacity-working-day-' + day">
+            <input
+              type="checkbox"
+              [id]="'capacity-working-day-' + day"
+              [checked]="workingDays().includes(day)"
+              (change)="toggleWorkingDay(day, $any($event.target).checked)"
+            />
+            {{ 'capacity.form.weekdays.' + day | transloco }}
+          </label>
+        }
+      </fieldset>
+
+      <div class="capacity-form__field">
+        <label class="capacity-form__label" for="capacity-notes">{{ 'capacity.form.notesLabel' | transloco }}</label>
+        <textarea id="capacity-notes" class="capacity-form__input" formControlName="notes"></textarea>
+      </div>
+
+      @if (isEdit) {
+        <div class="capacity-form__field">
+          <label class="capacity-form__label" for="capacity-status">{{ 'capacity.form.statusLabel' | transloco }}</label>
+          <select id="capacity-status" class="capacity-form__input" formControlName="status">
+            @for (status of eventStatuses; track status) {
+              <option [value]="status">{{ 'capacity.statuses.' + status | transloco }}</option>
+            }
+          </select>
+        </div>
+      }
+
+      <button type="submit" class="capacity-form__submit" [disabled]="saving()">
+        {{ (saving() ? 'capacity.form.saving' : 'capacity.form.save') | transloco }}
+      </button>
+    </form>
+
+    @if (isEdit && form.controls.type.value === 'PI_PLANNING') {
+      <section class="capacity-form__cadence" aria-labelledby="capacity-cadence-title">
+        <h2 id="capacity-cadence-title">{{ 'capacity.form.cadence.title' | transloco }}</h2>
+
+        <form [formGroup]="cadenceForm" (ngSubmit)="generateCadence()" novalidate>
+          <fieldset class="capacity-form__fieldset">
+            <legend>{{ 'capacity.form.cadence.sprintLengthMode' | transloco }}</legend>
+            <label class="capacity-form__radio-label">
+              <input type="radio" formControlName="sprintLengthMode" value="days" />
+              {{ 'capacity.form.cadence.sprintLengthDays' | transloco }}
+            </label>
+            <label class="capacity-form__radio-label">
+              <input type="radio" formControlName="sprintLengthMode" value="weeks" />
+              {{ 'capacity.form.cadence.sprintLengthWeeks' | transloco }}
+            </label>
+          </fieldset>
+
+          <div class="capacity-form__field">
+            <label class="capacity-form__label" for="capacity-cadence-length">{{
+              'capacity.form.cadence.sprintLengthValue' | transloco
+            }}</label>
+            <input
+              id="capacity-cadence-length"
+              type="number"
+              min="1"
+              class="capacity-form__input"
+              formControlName="sprintLengthValue"
+              [attr.aria-invalid]="cadenceForm.controls.sprintLengthValue.invalid && cadenceForm.controls.sprintLengthValue.touched"
+            />
+            @if (cadenceForm.controls.sprintLengthValue.invalid && cadenceForm.controls.sprintLengthValue.touched) {
+              <p class="capacity-form__error" role="alert">{{ 'capacity.form.errors.INVALID_CADENCE' | transloco }}</p>
+            }
+          </div>
+
+          <div class="capacity-form__field">
+            <label class="capacity-form__label" for="capacity-cadence-count">{{
+              'capacity.form.cadence.sprintCount' | transloco
+            }}</label>
+            <input
+              id="capacity-cadence-count"
+              type="number"
+              min="1"
+              class="capacity-form__input"
+              formControlName="sprintCount"
+              [attr.aria-invalid]="cadenceForm.controls.sprintCount.invalid && cadenceForm.controls.sprintCount.touched"
+            />
+          </div>
+
+          <label class="capacity-form__checkbox-label" for="capacity-cadence-ip-sprint">
+            <input id="capacity-cadence-ip-sprint" type="checkbox" formControlName="includeIpSprint" />
+            {{ 'capacity.form.cadence.includeIpSprint' | transloco }}
+          </label>
+
+          <div class="capacity-form__field">
+            <label class="capacity-form__label" for="capacity-cadence-prefix">{{
+              'capacity.form.cadence.namePrefix' | transloco
+            }}</label>
+            <input
+              id="capacity-cadence-prefix"
+              type="text"
+              maxlength="100"
+              class="capacity-form__input"
+              formControlName="namePrefix"
+            />
+          </div>
+
+          @if (cadenceErrorKey(); as key) {
+            <p class="capacity-form__error" role="alert">{{ key | transloco }}</p>
+          }
+
+          <button type="submit" class="capacity-form__submit" [disabled]="cadenceGenerating()">
+            {{ (cadenceGenerating() ? 'capacity.form.cadence.generating' : 'capacity.form.cadence.generate') | transloco }}
+          </button>
+        </form>
+
+        @if (cadenceResult(); as sprints) {
+          <div role="status" class="capacity-form__cadence-result">
+            <p>{{ 'capacity.form.cadence.success' | transloco }}</p>
+            <ul>
+              @for (sprint of sprints; track sprint.id) {
+                <li>{{ sprint.name }} — {{ sprint.startDate }} → {{ sprint.endDate }}</li>
+              }
+            </ul>
+          </div>
+        }
+      </section>
+    }
+  }
+</section>
