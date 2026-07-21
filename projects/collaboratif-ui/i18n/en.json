@@ -659,9 +659,9 @@
       }
     },
     "shortcuts": {
+      "axisLock": "Constrain movement to one axis (drag an item)",
       "close": "Close shortcuts",
       "copy": "Copy",
-      "axisLock": "Constrain movement to one axis",
       "cut": "Cut",
       "delete": "Delete selection",
       "duplicate": "Duplicate",
@@ -676,7 +676,7 @@
       "open": "Show keyboard shortcuts",
       "panGesture": "Move the board",
       "paste": "Paste",
-      "ratio": "Keep the ratio while resizing",
+      "ratio": "Keep the ratio (drag a handle)",
       "redo": "Redo",
       "selectAll": "Select all",
       "shortcuts": "Show these shortcuts",

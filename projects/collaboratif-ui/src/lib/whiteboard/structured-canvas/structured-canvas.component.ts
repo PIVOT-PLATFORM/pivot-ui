@@ -30,7 +30,7 @@ import {
   looksLikeImageFilename,
   readAsDataUrl,
 } from '../model/image-card';
-import { type AxisLock, constrainToAxis, decideFreeAxis } from '../model/axis-lock';
+import { type AxisLock, axisLockDash, constrainToAxis, decideFreeAxis } from '../model/axis-lock';
 import { parseShape, serializeShape, type ShapeDiag, type ShapeKind } from '../model/shape';
 import { serializeTable } from '../model/table';
 import { decideTablePaste } from '../model/table-clipboard';
@@ -324,12 +324,8 @@ export class StructuredCanvasComponent implements OnDestroy {
    * into a solid bar when zoomed in. `border-style: dashed` is not an option: these are filled
    * divs, not bordered boxes.
    */
-  private readonly lockDash = computed(() => {
-    const d = 4 / this.viewport().zoom;
-    return (to: string) => `repeating-linear-gradient(${to}, ${ALIGN_GUIDE_COLOR} 0 ${d}px, transparent ${d}px ${d * 2}px)`;
-  });
-  protected readonly lockDashV = computed(() => this.lockDash()('to bottom'));
-  protected readonly lockDashH = computed(() => this.lockDash()('to right'));
+  protected readonly lockDashV = computed(() => axisLockDash('to bottom', ALIGN_GUIDE_COLOR, this.viewport().zoom));
+  protected readonly lockDashH = computed(() => axisLockDash('to right', ALIGN_GUIDE_COLOR, this.viewport().zoom));
 
   protected readonly gridSize = computed(() => {
     const d = DOT_SPACING * this.viewport().zoom;
@@ -396,14 +392,14 @@ export class StructuredCanvasComponent implements OnDestroy {
    * multi-selection untouched when the item is already part of it, so dragging a group keeps it
    * together.
    */
-  private selectItem(id: string, additive: boolean, at?: { x: number; y: number }): void {
+  private selectItem(id: string, additive: boolean, at: { x: number; y: number }): void {
     if (additive) {
       if (this.isSelected(id)) {
         // Deferred to `pointerup` (US08.11.8): removing the item here would deselect the very card
         // the user is about to drag with Shift held for the axis lock, so the gesture would start
         // on an unselected item. Standard behaviour in Figma, Miro and file explorers alike — the
         // toggle only lands if the pointer is released without dragging.
-        this.pendingToggle = at ? { id, x: at.x, y: at.y } : null;
+        this.pendingToggle = { id, x: at.x, y: at.y };
         return;
       }
       this.store.selectCards(new Set([...this.store.selectedIds(), id]));
@@ -629,6 +625,9 @@ export class StructuredCanvasComponent implements OnDestroy {
 
   // ── Pointer state machine ─────────────────────────────────────────────────
   protected onPointerDown(event: PointerEvent): void {
+    // Unconditional safety net: whatever path ended the previous gesture — including one that
+    // never produced a `pointerup` — no lock or pending toggle may leak into this one (US08.11.8).
+    this.resetGestureState();
     // ITEM H — the middle mouse button (wheel click) pans the canvas exactly like space+drag or
     // the pan tool, whatever the active tool is. Routed first, before any card/placement/marquee
     // logic, and `preventDefault`-ed to suppress the browser's default middle-click autoscroll.
@@ -844,13 +843,13 @@ export class StructuredCanvasComponent implements OnDestroy {
    * @param pos its candidate position before alignment
    * @returns the position corrected onto the matched edges, or `pos` unchanged when none matched
    */
-  private applyAlignGuides(id: string, pos: { x: number; y: number }): { x: number; y: number } {
+  private applyAlignGuides(id: string, pos: { x: number; y: number }, resolved?: Card): { x: number; y: number } {
     if (!this.alignGuidesEnabled() || this.store.selectedIds().size > 1) {
       this.alignGuides.set(null);
       return pos;
     }
     const cards = this.store.cards();
-    const moving = cards.find((c) => c.id === id);
+    const moving = resolved ?? cards.find((c) => c.id === id);
     if (!moving) {
       this.alignGuides.set(null);
       return pos;
@@ -933,9 +932,13 @@ export class StructuredCanvasComponent implements OnDestroy {
         // US08.11.8 — the lock anchors on where the card *is*, so pressing Shift after landing on
         // a guide keeps that alignment instead of snapping back to where the drag began.
         const lock = this.updateAxisLock(event.shiftKey, pt, { x: card?.posX ?? raw.x, y: card?.posY ?? raw.y });
-        const snapped = this.applySnap(raw.x, raw.y);
-        const assisted = this.snapEnabled() ? snapped : this.applyAlignGuides(g.id, snapped);
-        // Applied last, on purpose: `applyAlignGuides` adds its dx/dy unconditionally, so a guide
+        // Constrained *before* the assistance so the guides are probed on the position the card
+        // actually occupies: probing the raw point would drop the guide as soon as the pointer
+        // drifted sideways, making the solid line blink during a perfectly straight locked run.
+        const locked = constrainToAxis(lock, raw);
+        const snapped = this.applySnap(locked.x, locked.y);
+        const assisted = this.snapEnabled() ? snapped : this.applyAlignGuides(g.id, snapped, card);
+        // And re-imposed after: `applyAlignGuides` adds its dx/dy unconditionally, so a guide
         // matching on the locked axis would otherwise pull the card off the axis it must hold.
         const next = constrainToAxis(lock, assisted);
         this.publishLockLine(lock, { ...next, width: card?.width ?? 0, height: card?.height ?? 0 });
@@ -977,14 +980,44 @@ export class StructuredCanvasComponent implements OnDestroy {
     }
   }
 
+  /**
+   * Drops every piece of gesture-scoped state (US08.11.8).
+   *
+   * The axis lock, its line and a pending Shift+click toggle all belong to one gesture. Left
+   * behind, the lock line stays painted over the board and the pending toggle resolves on the
+   * *next* gesture's release — deselecting a card that had nothing to do with it.
+   */
+  private resetGestureState(): void {
+    this.axisLock = null;
+    this.pendingToggle = null;
+    this.lockLine.set(null);
+    this.alignGuides.set(null);
+  }
+
+  /**
+   * Aborts a gesture that ends without a `pointerup` (US08.11.8).
+   *
+   * Reachable in practice: dragging a frame by its title deliberately skips `setPointerCapture`,
+   * so releasing outside the window never fires `pointerup` on the surface. Bound to both
+   * `pointercancel` and `lostpointercapture`.
+   */
+  protected onPointerCancel(): void {
+    if (this.gesture.kind === 'none') {
+      // `lostpointercapture` also fires on the normal release, right after `onPointerUp` has
+      // already cleaned up. Bailing keeps this a strict no-op on that path.
+      return;
+    }
+    this.resetGestureState();
+    this.gesture = { kind: 'none' };
+  }
+
   protected onPointerUp(event: PointerEvent): void {
     const g = this.gesture;
     (event.currentTarget as HTMLElement).releasePointerCapture?.(event.pointerId);
-    // The axis lock is gesture-scoped like the guides: a lock surviving the release would apply to
-    // the next drag, which never asked for it (US08.11.8).
+    const pendingAt = this.toCanvas(event.clientX, event.clientY);
     this.axisLock = null;
     this.lockLine.set(null);
-    this.resolvePendingToggle(this.toCanvas(event.clientX, event.clientY));
+    this.resolvePendingToggle(pendingAt);
     switch (g.kind) {
       case 'drag-card':
         // The guides are a drag affordance only — they must not outlive the gesture (US08.11.4).
@@ -1143,7 +1176,7 @@ export class StructuredCanvasComponent implements OnDestroy {
    * Unlike cards this path has neither grid snap nor alignment guides, so the lock is the only
    * correction applied.
    */
-  private applyFrameDrag(g: Extract<Gesture, { kind: 'drag-frame' }>, x: number, y: number, shift = false): void {
+  private applyFrameDrag(g: Extract<Gesture, { kind: 'drag-frame' }>, x: number, y: number, shift: boolean): void {
     const frame = this.store.frames().find((f) => f.id === g.id);
     const lock = this.updateAxisLock(shift, { x, y }, { x: frame?.posX ?? g.startPos.x, y: frame?.posY ?? g.startPos.y });
     const moved = constrainToAxis(lock, { x: g.startPos.x + (x - g.startX), y: g.startPos.y + (y - g.startY) });

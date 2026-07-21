@@ -659,9 +659,9 @@
       }
     },
     "shortcuts": {
+      "axisLock": "Contraindre le déplacement à un axe (glisser un élément)",
       "close": "Fermer les raccourcis",
       "copy": "Copier",
-      "axisLock": "Contraindre le déplacement à un axe",
       "cut": "Couper",
       "delete": "Supprimer la sélection",
       "duplicate": "Dupliquer",
@@ -676,7 +676,7 @@
       "open": "Afficher les raccourcis clavier",
       "panGesture": "Déplacer le tableau",
       "paste": "Coller",
-      "ratio": "Conserver le ratio au redimensionnement",
+      "ratio": "Conserver le ratio (glisser une poignée)",
       "redo": "Rétablir",
       "selectAll": "Tout sélectionner",
       "shortcuts": "Afficher ces raccourcis",

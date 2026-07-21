@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  AXIS_LOCK_HYSTERESIS,
+  AXIS_LOCK_DASH_PX,
+  AXIS_LOCK_HYSTERESIS_PX,
   AXIS_LOCK_THRESHOLD_PX,
   type AxisLock,
+  axisLockDash,
   constrainToAxis,
   decideFreeAxis,
 } from './axis-lock';
@@ -53,22 +55,35 @@ describe('decideFreeAxis — dominance', () => {
 
 describe('decideFreeAxis — hysteresis', () => {
   it('does not flip while the challenger only just leads', () => {
-    // 30 vs 25: vertical leads but by less than x1.5, so the horizontal choice holds. This is the
-    // anti-flicker guarantee — without it the axis would oscillate along the diagonal.
+    // 30 vs 25: vertical leads, but by less than the 12px margin, so the horizontal choice holds.
+    // This is the anti-flicker guarantee — without it the axis oscillates along the diagonal.
     expect(decideFreeAxis('x', 25, 30, 1)).toBe('x');
   });
 
-  it('does not flip exactly at the hysteresis ratio', () => {
-    // Strictly greater than, so 20 * 1.5 = 30 is not enough.
-    expect(decideFreeAxis('x', 20, 20 * AXIS_LOCK_HYSTERESIS, 1)).toBe('x');
+  it('does not flip exactly at the hysteresis margin', () => {
+    // Strictly greater than, so leading by exactly 12 is not enough.
+    expect(decideFreeAxis('x', 20, 20 + AXIS_LOCK_HYSTERESIS_PX, 1)).toBe('x');
   });
 
-  it('flips once the challenger clearly dominates', () => {
+  it('flips once the challenger clearly leads', () => {
     expect(decideFreeAxis('x', 20, 40, 1)).toBe('y');
   });
 
   it('flips symmetrically from vertical to horizontal', () => {
     expect(decideFreeAxis('y', 40, 20, 1)).toBe('x');
+  });
+
+  it('stays escapable after a long run along the free axis', () => {
+    // The reason the margin is absolute rather than a ratio: deltas are measured from the capture
+    // and grow without bound. A x1.5 rule would demand 600px here, trapping the user on the axis
+    // for the rest of the gesture — on a long column run, the very case this feature exists for.
+    expect(decideFreeAxis('x', 400, 413, 1)).toBe('y');
+  });
+
+  it('scales the margin with zoom', () => {
+    // At 4x, the 12px screen margin is only 3 canvas px.
+    expect(decideFreeAxis('x', 100, 102, 4)).toBe('x');
+    expect(decideFreeAxis('x', 100, 104, 4)).toBe('y');
   });
 });
 
@@ -124,11 +139,22 @@ describe('constrainToAxis', () => {
     const once = constrainToAxis(lockOn('y'), { x: 123, y: 456 });
     expect(constrainToAxis(lockOn('y'), once)).toEqual(once);
   });
+});
 
-  it('holds the captured position, not the drag origin', () => {
-    // The regression that variant A would introduce: the card was carried to x=500 by a guide
-    // before Shift went down, so the lock must hold 500 — never the position the drag started at.
-    const lock: AxisLock = { cardPos: { x: 500, y: 300 }, pointerOrig: { x: 0, y: 0 }, freeAxis: 'y' };
-    expect(constrainToAxis(lock, { x: 100, y: 700 }).x).toBe(500);
+describe('axisLockDash', () => {
+  it('builds a repeating gradient in the requested direction', () => {
+    expect(axisLockDash('to bottom', '#ec4899', 1)).toBe(
+      `repeating-linear-gradient(to bottom, #ec4899 0 ${AXIS_LOCK_DASH_PX}px, transparent ${AXIS_LOCK_DASH_PX}px ${AXIS_LOCK_DASH_PX * 2}px)`,
+    );
+  });
+
+  it('shortens the dash as the zoom grows so it stays 4 screen px', () => {
+    // The canvas layer scales the value back up by `zoom`; a fixed canvas length would stretch
+    // into a solid bar when zoomed in, which is exactly what must not happen.
+    expect(axisLockDash('to right', '#ec4899', 4)).toContain('0 1px');
+  });
+
+  it.each([0, -1, NaN, Infinity])('falls back to zoom 1 on a degenerate zoom (%s)', (zoom) => {
+    expect(axisLockDash('to right', '#ec4899', zoom)).toContain(`0 ${AXIS_LOCK_DASH_PX}px`);
   });
 });

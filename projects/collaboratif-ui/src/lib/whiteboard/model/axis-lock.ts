@@ -17,14 +17,23 @@
 export const AXIS_LOCK_THRESHOLD_PX = 8;
 
 /**
- * How much the other axis must dominate before an already-chosen axis flips.
+ * How far ahead, in **screen** pixels, the other axis must be before an already-chosen axis flips.
  *
  * A naive `|dx| > |dy|` test re-evaluated every frame makes the card flicker between horizontal
- * and vertical whenever the pointer travels near the diagonal — the documented reason Miro's
- * implementation is perceived as unreliable. Requiring the challenger to win by half again makes
- * the choice sticky, so a wobbling hand cannot flip it.
+ * and vertical whenever the pointer travels near the diagonal — the documented reason some
+ * implementations are perceived as unreliable. A margin makes the choice sticky, so a wobbling
+ * hand cannot flip it.
+ *
+ * Deliberately an absolute margin rather than a ratio: the deltas are measured from the capture
+ * and therefore grow without bound. A ratio would make the lock progressively harder to escape —
+ * after 400 px along the free axis, a x1.5 rule would demand 600 px on the other one, effectively
+ * trapping the user on a long column run, which is this feature's main use case. A fixed margin
+ * keeps the flip reachable at any distance while still absorbing tremor.
  */
-export const AXIS_LOCK_HYSTERESIS = 1.5;
+export const AXIS_LOCK_HYSTERESIS_PX = 12;
+
+/** Dash and gap length of the locked-axis line, in screen pixels. */
+export const AXIS_LOCK_DASH_PX = 4;
 
 /**
  * The axis the card is still free to move along — the *locked* axis is the other one.
@@ -81,10 +90,11 @@ export function decideFreeAxis(current: FreeAxis, dx: number, dy: number, zoom: 
     // rare and the hysteresis below settles anything close to it.
     return ax >= ay ? 'x' : 'y';
   }
-  if (current === 'x' && ay > ax * AXIS_LOCK_HYSTERESIS) {
+  const margin = AXIS_LOCK_HYSTERESIS_PX / zoom;
+  if (current === 'x' && ay > ax + margin) {
     return 'y';
   }
-  if (current === 'y' && ax > ay * AXIS_LOCK_HYSTERESIS) {
+  if (current === 'y' && ax > ay + margin) {
     return 'x';
   }
   return current;
@@ -107,4 +117,23 @@ export function constrainToAxis(lock: AxisLock | null, pos: { x: number; y: numb
     return pos;
   }
   return lock.freeAxis === 'x' ? { x: pos.x, y: lock.cardPos.y } : { x: lock.cardPos.x, y: pos.y };
+}
+
+/**
+ * Builds the dashed stroke used to paint the locked axis, as a repeating gradient.
+ *
+ * A gradient rather than `border-style: dashed` because these are filled `div`s, not bordered
+ * boxes; and computed here rather than written in SCSS because the dash length is divided by the
+ * zoom — the canvas layer scales it back up, so a fixed canvas length would stretch into a solid
+ * bar once zoomed in.
+ *
+ * @param direction gradient axis: `to bottom` for a vertical line, `to right` for a horizontal one
+ * @param color the guide colour, shared with the solid alignment guides
+ * @param zoom current viewport zoom; non-finite or non-positive falls back to 1
+ * @returns a CSS `repeating-linear-gradient` value
+ */
+export function axisLockDash(direction: 'to bottom' | 'to right', color: string, zoom: number): string {
+  const safeZoom = Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
+  const d = AXIS_LOCK_DASH_PX / safeZoom;
+  return `repeating-linear-gradient(${direction}, ${color} 0 ${d}px, transparent ${d}px ${d * 2}px)`;
 }
