@@ -395,7 +395,11 @@
         "invalidRequest": "La demande est invalide. Vérifiez le titre du ticket.",
         "generic": "Une erreur est survenue. Veuillez réessayer.",
         "ticketNotFound": "Ce ticket est introuvable.",
-        "ticketAlreadyRevealed": "Ce ticket a déjà été révélé."
+        "ticketAlreadyRevealed": "Ce ticket a déjà été révélé.",
+        "ticketNotRevealed": "Ce ticket n'a pas encore été révélé.",
+        "ticketAlreadyFinalized": "Ce ticket a déjà une estimation finale — action impossible.",
+        "invalidFinalEstimate": "L'estimation finale est requise.",
+        "invalidFinalEstimateValue": "Cette valeur n'appartient pas au jeu de cartes de la room."
       },
       "reveal": "Révéler les votes",
       "revealing": "Révélation en cours…",
@@ -404,7 +408,16 @@
       "consensusMean": "Moyenne",
       "consensusMedian": "Médiane",
       "consensusMajority": "Valeur majoritaire",
-      "noNumericConsensus": "Pas de consensus numérique"
+      "noNumericConsensus": "Pas de consensus numérique",
+      "finalEstimateBadge": "Estimation finale : {{value}}",
+      "finalizeGroupLabel": "Relancer un vote ou valider l'estimation finale",
+      "finalEstimateLabel": "Estimation finale",
+      "finalEstimatePlaceholder": "Choisir une valeur…",
+      "finalize": "Valider l'estimation finale",
+      "finalizing": "Validation en cours…",
+      "reset": "Relancer un vote",
+      "resetting": "Relance en cours…",
+      "resetCount": "Ce ticket a été resetté {{count}} fois."
     }
   },
   "teamActions": {

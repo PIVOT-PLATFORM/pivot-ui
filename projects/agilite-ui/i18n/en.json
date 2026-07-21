@@ -395,7 +395,11 @@
         "invalidRequest": "The request is invalid. Check the ticket title.",
         "generic": "Something went wrong. Please try again.",
         "ticketNotFound": "This ticket could not be found.",
-        "ticketAlreadyRevealed": "This ticket has already been revealed."
+        "ticketAlreadyRevealed": "This ticket has already been revealed.",
+        "ticketNotRevealed": "This ticket has not been revealed yet.",
+        "ticketAlreadyFinalized": "This ticket already has a final estimate — action not possible.",
+        "invalidFinalEstimate": "The final estimate is required.",
+        "invalidFinalEstimateValue": "This value is not part of the room's card deck."
       },
       "reveal": "Reveal votes",
       "revealing": "Revealing…",
@@ -404,7 +408,16 @@
       "consensusMean": "Mean",
       "consensusMedian": "Median",
       "consensusMajority": "Majority value",
-      "noNumericConsensus": "No numeric consensus"
+      "noNumericConsensus": "No numeric consensus",
+      "finalEstimateBadge": "Final estimate: {{value}}",
+      "finalizeGroupLabel": "Reset the vote or confirm the final estimate",
+      "finalEstimateLabel": "Final estimate",
+      "finalEstimatePlaceholder": "Choose a value…",
+      "finalize": "Confirm final estimate",
+      "finalizing": "Confirming…",
+      "reset": "Reset vote",
+      "resetting": "Resetting…",
+      "resetCount": "This ticket has been reset {{count}} times."
     }
   },
   "teamActions": {

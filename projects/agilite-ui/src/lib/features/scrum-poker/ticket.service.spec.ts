@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../environments/environment';
-import { RevealResponse, TicketResponse } from './ticket.model';
+import { RevealResponse, TicketFinalizedResponse, TicketResetResponse, TicketResponse } from './ticket.model';
 import { TicketService } from './ticket.service';
 
 describe('TicketService', () => {
@@ -124,7 +124,11 @@ describe('TicketService', () => {
       status: 'REVEALED',
       createdAt: '2026-07-10T10:00:00Z',
       revealedAt: '2026-07-10T10:05:00Z',
-      values: ['5', '8', '5'],
+      attributedVotes: [
+        { name: 'Alice', value: '5' },
+        { name: 'Bob', value: '8' },
+        { name: 'Carol', value: '5' },
+      ],
       consensus: { mean: 6, median: 5, majority: '5' },
     };
     let result: RevealResponse | undefined;
@@ -151,5 +155,86 @@ describe('TicketService', () => {
 
     expect(error?.status).toBe(409);
     expect((error?.error as { code?: string })?.code).toBe('TICKET_ALREADY_REVEALED');
+  });
+
+  /**
+   * Given a room id and ticket id, when resetTicket() is called (US09.2.3), then it POSTs to
+   * poker/rooms/{roomId}/tickets/{ticketId}/reset with no body and resolves with the ticket back
+   * to `VOTING`, `revealedAt` cleared.
+   */
+  it('resetTicket() posts to poker/rooms/{roomId}/tickets/{ticketId}/reset', () => {
+    const mockReset: TicketResetResponse = {
+      id: 'ticket-1',
+      roomId: ROOM_ID,
+      title: 'Estimate JIRA-123',
+      status: 'VOTING',
+      createdAt: '2026-07-10T10:00:00Z',
+      revealedAt: null,
+    };
+    let result: TicketResetResponse | undefined;
+    service.resetTicket(ROOM_ID, 'ticket-1').subscribe(r => (result = r));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/poker/rooms/${ROOM_ID}/tickets/ticket-1/reset`);
+    expect(req.request.method).toBe('POST');
+    req.flush(mockReset);
+
+    expect(result).toEqual(mockReset);
+  });
+
+  /**
+   * Error case: given the backend rejects with 409 (not yet revealed), when resetTicket() is
+   * called, then the observable errors with a 409 status and the TICKET_NOT_REVEALED code.
+   */
+  it('resetTicket() propagates a 409 TICKET_NOT_REVEALED error', () => {
+    let error: { status?: number; error?: unknown } | undefined;
+    service.resetTicket(ROOM_ID, 'ticket-1').subscribe({ error: err => (error = err) });
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/poker/rooms/${ROOM_ID}/tickets/ticket-1/reset`);
+    req.flush({ code: 'TICKET_NOT_REVEALED' }, { status: 409, statusText: 'Conflict' });
+
+    expect(error?.status).toBe(409);
+    expect((error?.error as { code?: string })?.code).toBe('TICKET_NOT_REVEALED');
+  });
+
+  /**
+   * Given a room id, ticket id and chosen value, when finalizeTicket() is called (US09.2.3),
+   * then it POSTs to poker/rooms/{roomId}/tickets/{ticketId}/finalize with the value in the body
+   * and resolves with the finalized ticket (still `REVEALED`, `finalEstimate` set).
+   */
+  it('finalizeTicket() posts to poker/rooms/{roomId}/tickets/{ticketId}/finalize with the chosen value', () => {
+    const mockFinalized: TicketFinalizedResponse = {
+      id: 'ticket-1',
+      roomId: ROOM_ID,
+      title: 'Estimate JIRA-123',
+      status: 'REVEALED',
+      createdAt: '2026-07-10T10:00:00Z',
+      revealedAt: '2026-07-10T10:05:00Z',
+      finalEstimate: '5',
+    };
+    let result: TicketFinalizedResponse | undefined;
+    service.finalizeTicket(ROOM_ID, 'ticket-1', '5').subscribe(r => (result = r));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/poker/rooms/${ROOM_ID}/tickets/ticket-1/finalize`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ finalEstimate: '5' });
+    req.flush(mockFinalized);
+
+    expect(result).toEqual(mockFinalized);
+  });
+
+  /**
+   * Error case: given the backend rejects with 409 (already finalized), when finalizeTicket()
+   * is called, then the observable errors with a 409 status and the TICKET_ALREADY_FINALIZED
+   * code.
+   */
+  it('finalizeTicket() propagates a 409 TICKET_ALREADY_FINALIZED error', () => {
+    let error: { status?: number; error?: unknown } | undefined;
+    service.finalizeTicket(ROOM_ID, 'ticket-1', '5').subscribe({ error: err => (error = err) });
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/poker/rooms/${ROOM_ID}/tickets/ticket-1/finalize`);
+    req.flush({ code: 'TICKET_ALREADY_FINALIZED' }, { status: 409, statusText: 'Conflict' });
+
+    expect(error?.status).toBe(409);
+    expect((error?.error as { code?: string })?.code).toBe('TICKET_ALREADY_FINALIZED');
   });
 });

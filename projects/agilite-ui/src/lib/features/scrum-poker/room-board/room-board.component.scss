@@ -145,7 +145,7 @@
   font-size: 1rem;
 }
 
-.room-board__revealed-values {
+.room-board__revealed-votes {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -154,13 +154,32 @@
   list-style: none;
 }
 
-.room-board__revealed-value {
-  min-width: 2.5rem;
-  padding: 0.5rem;
-  border: 2px solid #58606b;
-  border-radius: 0.375rem;
+.room-board__revealed-vote {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 3rem;
+  padding: 0.5rem 0.625rem;
+  border: 2px solid var(--color-brand-300);
+  border-radius: var(--radius-md);
+  background: var(--color-brand-50);
   text-align: center;
-  font-weight: 600;
+}
+
+.room-board__revealed-vote-value {
+  font-weight: 700;
+  font-size: var(--text-lg);
+  color: var(--color-brand-700);
+}
+
+.room-board__revealed-vote-name {
+  font-size: var(--text-xs);
+  color: var(--color-gray-500);
+  max-width: 5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .room-board__consensus {
@@ -273,4 +292,90 @@
   margin-top: 1rem;
   font-weight: 600;
   color: var(--color-success);
+}
+
+.room-board__final-badge {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--radius-md);
+  background: var(--color-success-light);
+  border: 1px solid var(--color-success-border);
+  color: var(--color-success-dark);
+  font-weight: 700;
+}
+
+.room-board__finalize {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-gray-200);
+}
+
+.room-board__select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-gray-400);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  background: var(--surface-card);
+  color: var(--color-navy-900, inherit);
+
+  &:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 1px;
+  }
+}
+
+.room-board__finalize-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.room-board__finalize-submit {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  font-size: var(--text-base);
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--color-success);
+  color: #fff;
+
+  &[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-success);
+    outline-offset: 1px;
+  }
+}
+
+.room-board__reset {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-gray-400);
+  font-size: var(--text-base);
+  cursor: pointer;
+  background: var(--surface-card);
+  color: var(--color-gray-700);
+
+  &[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 1px;
+  }
+}
+
+.room-board__reset-count {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-gray-500);
 }
