@@ -235,6 +235,7 @@
     @if (showActivities()) {
       <aside class="wb-page__panel wb-page__panel--activities" [attr.aria-label]="'whiteboard.activities.title' | transloco">
         <wb-activities-panel
+          [readOnly]="store.isReadonly()"
           (launch)="onLaunchActivity($event)"
           (close)="showActivities.set(false)"
         ></wb-activities-panel>

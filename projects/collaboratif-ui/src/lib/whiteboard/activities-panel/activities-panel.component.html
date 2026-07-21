@@ -12,7 +12,7 @@
   <div class="wb-act__section">{{ 'whiteboard.activities.recentSection' | transloco }}</div>
   <div class="wb-act__recent">
     @for (a of recent; track a.id) {
-      <button type="button" class="wb-act__recent-card" (click)="launch.emit(a.id)">
+      <button type="button" class="wb-act__recent-card" [disabled]="!launchable(a)" (click)="launch.emit(a.id)">
         <span class="pv-glyph" [class]="'pv-tone-' + a.kind">{{ a.glyph }}</span>
         <span class="wb-act__recent-name">{{ 'whiteboard.activities.items.' + a.id + '.name' | transloco }}</span>
       </button>
@@ -24,9 +24,8 @@
       <button
         type="button"
         class="wb-act__item"
-        [class.wb-act__item--soon]="!a.available"
-        [disabled]="!a.available"
-        [attr.aria-describedby]="a.available ? null : 'wb-act-soon-' + a.id"
+        [class.wb-act__item--soon]="!launchable(a)"
+        [disabled]="!launchable(a)"
         (click)="launch.emit(a.id)"
       >
         <span class="pv-glyph pv-glyph--lg" [class]="'pv-tone-' + a.kind">{{ a.glyph }}</span>
@@ -35,7 +34,7 @@
           <span class="wb-act__item-desc">{{ 'whiteboard.activities.items.' + a.id + '.desc' | transloco }}</span>
         </span>
         @if (!a.available) {
-          <span class="wb-act__soon" [id]="'wb-act-soon-' + a.id">{{ 'whiteboard.activities.soon' | transloco }}</span>
+          <span class="wb-act__soon">{{ 'whiteboard.activities.soon' | transloco }}</span>
         }
       </button>
     }

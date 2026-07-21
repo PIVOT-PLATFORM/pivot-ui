@@ -119,11 +119,16 @@
       outline-offset: 1px;
     }
   }
-  // Activité pas encore implémentée : `disabled` (donc hors parcours clavier), état signalé
-  // visuellement ici et textuellement par le badge `&__soon`.
+  // Activité indisponible : `disabled` (donc hors parcours clavier), état signalé visuellement
+  // ici et textuellement par le badge `&__soon`. L'atténuation porte sur le glyphe et le libellé,
+  // jamais sur le badge — une opacité globale ferait passer son contraste sous 4,5:1 (SC 1.4.3).
   &__item--soon {
     cursor: not-allowed;
-    opacity: 0.55;
+
+    .pv-glyph,
+    .wb-act__item-body {
+      opacity: 0.55;
+    }
   }
   &__soon {
     margin-left: auto;

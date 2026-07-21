@@ -87,21 +87,35 @@ describe('ActivitiesPanelComponent', () => {
     expect(emitted).toEqual([]);
   });
 
-  it('labels an unavailable activity with a textual "coming soon" hint bound by aria-describedby', () => {
+  it('labels an unavailable activity with a textual "coming soon" hint', () => {
     const poll = el.querySelectorAll('.wb-act__item')[1] as HTMLButtonElement;
-    const hint = poll.querySelector('.wb-act__soon');
 
-    expect(hint?.textContent).toContain('Bientôt disponible');
-    // The state must not rest on colour/opacity alone (WCAG 1.4.1).
-    expect(poll.getAttribute('aria-describedby')).toBe(hint?.id);
-    expect(hint?.id).toBeTruthy();
+    // The state must not rest on colour/opacity alone (WCAG 1.4.1): the hint is real text, and
+    // being inside the button it is part of its accessible name.
+    expect(poll.querySelector('.wb-act__soon')?.textContent).toContain('Bientôt disponible');
+    expect(poll.textContent).toContain('Bientôt disponible');
   });
 
-  it('leaves every implemented activity enabled', () => {
-    const items = [...el.querySelectorAll<HTMLButtonElement>('.wb-act__item')];
-    const enabled = items.filter((b) => !b.disabled).length;
+  it('leaves exactly the implemented activities enabled', () => {
+    const names = [...el.querySelectorAll<HTMLButtonElement>('.wb-act__item')]
+      .filter((b) => !b.disabled)
+      .map((b) => b.querySelector('.wb-act__item-name')?.textContent?.trim());
 
-    expect(enabled).toBe(6);
+    expect(names).toEqual(['Brainstorming', 'Vote à points', 'Icebreaker', 'Quiz', 'Minuteur', 'Rétrospective']);
+  });
+
+  it('disables every activity on a read-only board — none of them can mutate it', () => {
+    fixture.componentRef.setInput('readOnly', true);
+    fixture.detectChanges();
+    const emitted: string[] = [];
+    fixture.componentInstance.launch.subscribe((id: string) => emitted.push(id));
+
+    const items = [...el.querySelectorAll<HTMLButtonElement>('.wb-act__item')];
+    expect(items.every((b) => b.disabled)).toBe(true);
+    expect([...el.querySelectorAll<HTMLButtonElement>('.wb-act__recent-card')].every((b) => b.disabled)).toBe(true);
+
+    items[0].click();
+    expect(emitted).toEqual([]);
   });
 
   it('emits launch from a recently-used shortcut', () => {

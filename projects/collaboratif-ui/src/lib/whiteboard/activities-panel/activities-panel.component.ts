@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Output, input } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 
 /**
@@ -60,6 +60,18 @@ export class ActivitiesPanelComponent {
   @Output() readonly close = new EventEmitter<void>();
   @Output() readonly launch = new EventEmitter<string>();
 
+  /**
+   * True on a board the viewer cannot edit. Every activity mutates the board, so a read-only
+   * participant gets the same disabled treatment as an unimplemented activity rather than
+   * affordances that would silently do nothing.
+   */
+  readonly readOnly = input(false);
+
   protected readonly activities = ACTIVITIES;
   protected readonly recent: readonly WbActivity[] = [ACTIVITIES[0], ACTIVITIES[6]];
+
+  /** Whether an activity can be launched right now. */
+  protected launchable(activity: WbActivity): boolean {
+    return activity.available && !this.readOnly();
+  }
 }
