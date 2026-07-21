@@ -997,15 +997,50 @@ export class StructuredCanvasComponent implements OnDestroy {
   /**
    * Aborts a gesture that ends without a `pointerup` (US08.11.8).
    *
-   * Reachable in practice: dragging a frame by its title deliberately skips `setPointerCapture`,
-   * so releasing outside the window never fires `pointerup` on the surface. Bound to both
-   * `pointercancel` and `lostpointercapture`.
+   * Bound to `pointercancel` only. `lostpointercapture` was tried and dropped: it cannot fire on
+   * the case that motivated this handler — dragging a frame by its title deliberately skips
+   * `setPointerCapture`, and without a capture there is nothing to lose — while it *does* bubble
+   * from the card to the surface when `setPointerCapture` retargets an implicit touch capture,
+   * which would kill a live drag on its first move. The unconditional reset at the top of
+   * {@link onPointerDown} is what actually covers the no-pointerup case.
    */
   protected onPointerCancel(): void {
-    if (this.gesture.kind === 'none') {
-      // `lostpointercapture` also fires on the normal release, right after `onPointerUp` has
-      // already cleaned up. Bailing keeps this a strict no-op on that path.
+    const g = this.gesture;
+    if (g.kind === 'none') {
       return;
+    }
+    // Committing rather than merely dropping the gesture: `startDragCard`/`startResizeCard`/
+    // `startDragFrame` each call `markLocalControl`, and only the matching `commit*` releases it.
+    // Skipping them would leave the item under local control forever, deaf to remote updates —
+    // the desync class fixed in #225. The item keeps the position it had reached, which is what a
+    // cancelled drag should leave behind anyway.
+    switch (g.kind) {
+      case 'drag-card':
+        this.store.commitDragCard();
+        break;
+      case 'resize-card':
+        this.store.commitResizeCard(g.id);
+        break;
+      case 'drag-frame':
+        this.store.commitDragFrame(g.id);
+        break;
+      case 'resize-frame':
+        this.store.commitResizeFrame(g.id);
+        break;
+      case 'draw':
+        this.drawPreview.set(null);
+        break;
+      case 'draw-line':
+        this.linePreview.set(null);
+        break;
+      case 'connect':
+        this.connectGhost.set(null);
+        break;
+      case 'marquee':
+        this.marquee.set(null);
+        break;
+      default:
+        break;
     }
     this.resetGestureState();
     this.gesture = { kind: 'none' };

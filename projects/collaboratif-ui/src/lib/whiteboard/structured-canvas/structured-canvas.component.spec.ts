@@ -2207,6 +2207,8 @@ describe('StructuredCanvasComponent — axis lock (US08.11.8)', () => {
   let frames: { id: string; posX: number; posY: number; width: number; height: number; active: boolean; title: string }[];
   let selected: Set<string>;
   let selectCards: ReturnType<typeof vi.fn>;
+  let moveCard: ReturnType<typeof vi.fn>;
+  let commitDragCard: ReturnType<typeof vi.fn>;
 
   const card = (id: string, posX: number, posY: number): Card =>
     ({
@@ -2256,7 +2258,7 @@ describe('StructuredCanvasComponent — axis lock (US08.11.8)', () => {
       // The whole point of the mutable stub: the lock captures where the card *is*.
       // The fan-out mirrors the real store — followers move by the anchor's delta — so a
       // multi-selection test can actually detect drift on the locked axis.
-      moveCard: vi.fn((id: string, x: number, y: number) => {
+      moveCard: (moveCard = vi.fn((id: string, x: number, y: number) => {
         const anchor = cards.find((c) => c.id === id);
         if (!anchor) {
           return;
@@ -2270,8 +2272,8 @@ describe('StructuredCanvasComponent — axis lock (US08.11.8)', () => {
               ? ({ ...c, posX: c.posX + dx, posY: c.posY + dy } as Card)
               : c,
         );
-      }),
-      commitDragCard: vi.fn(),
+      })),
+      commitDragCard: (commitDragCard = vi.fn()),
       startDragFrame: vi.fn(),
       commitDragFrame: vi.fn(),
       moveFrame: vi.fn((id: string, x: number, y: number) => {
@@ -2497,12 +2499,11 @@ describe('StructuredCanvasComponent — axis lock (US08.11.8)', () => {
     down('moving', 0, 0, true);
     move(3, 200, true);
 
-    const anchor = cards.find((c) => c.id === 'anchor') as Card;
-    // The anchor card is dragged; `anchor` here is the follower. Both keep their X: the delta the
-    // followers inherit is the constrained one, so the whole selection travels down as one block.
+    // What the component owns is the anchor's position: it must emit the *constrained* one, so the
+    // delta the store fans out to the followers carries no sideways component. Asserting the
+    // followers' coordinates instead would only re-check the stub's own arithmetic.
+    expect(moveCard).toHaveBeenLastCalledWith('moving', 0, 200);
     expect(moving().posX).toBe(0);
-    expect(anchor.posX).toBe(500);
-    expect(anchor.posY).toBe(500); // 300 + 200
   });
 
   it('locks the axis when dragging a frame (AC cadres)', async () => {
@@ -2541,6 +2542,10 @@ describe('StructuredCanvasComponent — axis lock (US08.11.8)', () => {
     expect(component['lockLine']()).toBeNull();
     expect(component['axisLock']).toBeNull();
     expect(component['pendingToggle']).toBeNull();
+    // And the drag is committed, not merely dropped: `startDragCard` put the card under local
+    // control and only `commitDragCard` releases it. Skipping it would leave the card deaf to
+    // remote updates for the rest of the session — the desync class fixed in #225.
+    expect(commitDragCard).toHaveBeenCalledTimes(1);
   });
 
   it('adds an unselected card to the selection on Shift+click, without deferring', async () => {
