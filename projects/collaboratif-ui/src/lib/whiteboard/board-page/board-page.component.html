@@ -142,6 +142,8 @@
         [disabled]="store.isReadonly()"
         [snapEnabled]="snapEnabled()"
         (snapToggle)="onSnapToggle()"
+        [alignGuidesEnabled]="alignGuidesEnabled()"
+        (alignGuidesToggle)="onAlignGuidesToggle()"
         (toolChange)="tool.set($event)"
         (colorChange)="onColorChange($event)"
         (fillColorChange)="fillColor.set($event)"
@@ -157,6 +159,7 @@
       [colorPicked]="colorPicked()"
       [fillColor]="fillColor()"
       [snapEnabled]="snapEnabled()"
+      [alignGuidesEnabled]="alignGuidesEnabled()"
       (toolConsumed)="onToolConsumed()"
     ></wb-structured-canvas>
 

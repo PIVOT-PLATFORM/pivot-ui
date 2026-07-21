@@ -88,3 +88,11 @@
   background: var(--wb-accent-ghost-fill);
   pointer-events: none;
 }
+
+/* Alignment guides (US08.11.4) — colour, thickness and stacking are set inline from the
+   component's constants so the spec's §4.3 values live in one place (`board-constants.ts`)
+   rather than being split between TS and SCSS. */
+.wb-align-guide {
+  position: absolute;
+  pointer-events: none;
+}

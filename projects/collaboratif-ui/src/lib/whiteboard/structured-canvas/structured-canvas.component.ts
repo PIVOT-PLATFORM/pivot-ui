@@ -61,6 +61,9 @@ import {
   DEFAULT_CARD_H,
   LINK_CARD_W,
   LINK_CARD_H,
+  ALIGN_GUIDE_COLOR,
+  ALIGN_GUIDE_Z_INDEX,
+  computeAlignGuides,
 } from '../model/board-constants';
 
 type Gesture =
@@ -130,6 +133,14 @@ interface RenderConnection {
 const RAW_CONTENT_TYPES = new Set(['IMAGE', 'DRAW', 'SHAPE']);
 /** Endpoint label truncation length in {@link StructuredCanvasComponent.endpointLabel}. */
 const ENDPOINT_LABEL_MAX = 24;
+/**
+ * Length (canvas px) of an alignment guide line (US08.11.4).
+ *
+ * Guides read as infinite rulers, so they are drawn far beyond any plausible board extent and
+ * clipped by the surface rather than sized to the viewport — which would mean recomputing them on
+ * every pan and zoom for no visual gain.
+ */
+const GUIDE_SPAN = 100_000;
 
 /**
  * The structured whiteboard surface — the Angular port of PouetPouet's `board-canvas.tsx`.
@@ -167,6 +178,15 @@ export class StructuredCanvasComponent {
    * emitted and nothing is written server-side, so a second participant is unaffected.
    */
   readonly snapEnabled = input<boolean>(false);
+  /**
+   * Whether alignment guides are on (US08.11.4). Owned by the board page like {@link snapEnabled},
+   * and just as local: no STOMP message, no server write.
+   *
+   * Mutually exclusive with the grid by design (§5.9) — when both are on, the grid wins and no
+   * guide is computed. The exclusion lives in {@link onPointerMove}, not here, so the input stays
+   * a plain preference.
+   */
+  readonly alignGuidesEnabled = input<boolean>(true);
   /** Active drawing colour (SHAPE stroke colour). */
   readonly color = input<string>(DEFAULT_SHAPE_COLOR);
   /**
@@ -205,6 +225,14 @@ export class StructuredCanvasComponent {
    * preview needs its own signal to render as the pointer moves.
    */
   protected readonly linePreview = signal<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
+  /**
+   * Live alignment guides for the card being dragged (US08.11.4), or `null` when none apply.
+   *
+   * Set only while a `drag-card` gesture is running and cleared on release — the guides are a
+   * transient drag affordance, never persisted state. At most one vertical and one horizontal
+   * line, per §4.3.
+   */
+  protected readonly alignGuides = signal<{ v: number | null; h: number | null } | null>(null);
 
   protected readonly layerTransform = computed(() => {
     const v = this.viewport();
@@ -217,6 +245,16 @@ export class StructuredCanvasComponent {
    * with the canvas — mirroring PouetPouet's `backgroundSize`/`backgroundPosition` on the board
    * container (`board-canvas.tsx`), where `d = DOT_SPACING * zoom` and the origin is `vp.{x,y} % d`.
    */
+  /** Guide rendering constants, surfaced for the template (US08.11.4). */
+  protected readonly GUIDE_SPAN = GUIDE_SPAN;
+  protected readonly guideColor = ALIGN_GUIDE_COLOR;
+  protected readonly guideZIndex = ALIGN_GUIDE_Z_INDEX;
+  /**
+   * Guide line thickness in canvas px. Inversely proportional to zoom so the rendered line stays
+   * exactly 1 screen px thick at any zoom — the layer scales it back up by `zoom`.
+   */
+  protected readonly guideThickness = computed(() => 1 / this.viewport().zoom);
+
   protected readonly gridSize = computed(() => {
     const d = DOT_SPACING * this.viewport().zoom;
     return `${d}px ${d}px`;
@@ -534,6 +572,41 @@ export class StructuredCanvasComponent {
     return { x: snapToGrid(x), y: snapToGrid(y) };
   }
 
+  /**
+   * Probes the alignment guides for the card being dragged and returns its corrected position
+   * (US08.11.4).
+   *
+   * Bails — clearing any visible guide — when the feature is off or when more than one item is
+   * selected: guides are a single-card affordance by design (§4.3), since a multi-selection has no
+   * single set of landmarks to align.
+   *
+   * Callers must have already ruled out the grid (§5.9): this method assumes it is only reached
+   * while the grid snap is off.
+   *
+   * @param id the dragged card's id
+   * @param pos its candidate position before alignment
+   * @returns the position corrected onto the matched edges, or `pos` unchanged when none matched
+   */
+  private applyAlignGuides(id: string, pos: { x: number; y: number }): { x: number; y: number } {
+    if (!this.alignGuidesEnabled() || this.store.selectedIds().size > 1) {
+      this.alignGuides.set(null);
+      return pos;
+    }
+    const cards = this.store.cards();
+    const moving = cards.find((c) => c.id === id);
+    if (!moving) {
+      this.alignGuides.set(null);
+      return pos;
+    }
+    const guides = computeAlignGuides(
+      { id, x: pos.x, y: pos.y, width: moving.width, height: moving.height },
+      cards,
+      this.viewport().zoom,
+    );
+    this.alignGuides.set(guides.v === null && guides.h === null ? null : { v: guides.v, h: guides.h });
+    return { x: pos.x + guides.dx, y: pos.y + guides.dy };
+  }
+
   protected onPointerMove(event: PointerEvent): void {
     const pt = this.toCanvas(event.clientX, event.clientY);
     this.lastPointerCanvas = pt;
@@ -547,8 +620,10 @@ export class StructuredCanvasComponent {
         // US08.11.1 — snap applied during the gesture, not only on commit: the card visibly
         // sticks to the grid while dragging, and the position the commit emits is already
         // rounded. `applySnap` is the single choke point where the grid short-circuits the
-        // alignment guides (§5.9) once those land with US08.11.4.
-        const next = this.applySnap(g.startPos.x + (pt.x - g.startX), g.startPos.y + (pt.y - g.startY));
+        // alignment guides (§5.9): `applyAlignGuides` runs only on the raw point it lets through.
+        const raw = { x: g.startPos.x + (pt.x - g.startX), y: g.startPos.y + (pt.y - g.startY) };
+        const snapped = this.applySnap(raw.x, raw.y);
+        const next = this.snapEnabled() ? snapped : this.applyAlignGuides(g.id, snapped);
         this.store.moveCard(g.id, next.x, next.y);
         break;
       }
@@ -592,6 +667,8 @@ export class StructuredCanvasComponent {
     (event.currentTarget as HTMLElement).releasePointerCapture?.(event.pointerId);
     switch (g.kind) {
       case 'drag-card':
+        // The guides are a drag affordance only — they must not outlive the gesture (US08.11.4).
+        this.alignGuides.set(null);
         this.store.commitDragCard();
         break;
       case 'resize-card':

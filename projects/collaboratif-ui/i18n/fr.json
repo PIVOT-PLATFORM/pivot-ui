@@ -391,7 +391,8 @@
       },
       "labelAdd": "Ajouter une étiquette",
       "labelEdit": "Modifier l'étiquette",
-      "snapToGrid": "Aimantation à la grille"
+      "snapToGrid": "Aimantation à la grille",
+      "alignGuides": "Guides d'alignement"
     },
     "card": {
       "editText": "Modifier le texte",

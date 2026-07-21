@@ -391,7 +391,8 @@
       },
       "labelAdd": "Add a label",
       "labelEdit": "Edit the label",
-      "snapToGrid": "Snap to grid"
+      "snapToGrid": "Snap to grid",
+      "alignGuides": "Alignment guides"
     },
     "card": {
       "editText": "Edit text",

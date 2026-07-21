@@ -104,6 +104,157 @@ export function readGridPreference(): boolean {
 }
 
 /**
+ * `localStorage` key backing the alignment-guides toggle (US08.11.4).
+ *
+ * Same `klx_` provenance as {@link GRID_STORAGE_KEY} — the spec pins the reference POC's key name
+ * verbatim. Note the inverted default relative to the grid: guides are **on** unless the stored
+ * value is exactly `'0'`.
+ */
+export const ALIGN_STORAGE_KEY = 'klx_board_align';
+
+/** Colour of the alignment guide lines (US08.11.4, §4.3/§7) — a literal, never user-derived. */
+export const ALIGN_GUIDE_COLOR = '#ec4899';
+
+/** Stacking order of the alignment guide lines (US08.11.4, §4.3/§7). */
+export const ALIGN_GUIDE_Z_INDEX = 60;
+
+/**
+ * Reads the persisted alignment-guides preference (US08.11.4).
+ *
+ * **On by default** — the mirror image of {@link readGridPreference}: only the exact string `'0'`
+ * disables the guides, so an absent key, a corrupted value or a hand-forged one all fall back to
+ * enabled. The stored string is only ever compared, never injected into the DOM nor evaluated.
+ *
+ * @returns `true` when the alignment guides are enabled, `false` otherwise
+ */
+export function readAlignPreference(): boolean {
+  if (typeof localStorage === 'undefined') {
+    return true;
+  }
+  try {
+    return localStorage.getItem(ALIGN_STORAGE_KEY) !== '0';
+  } catch {
+    // Private-browsing quotas or a disabled storage must not break canvas init.
+    return true;
+  }
+}
+
+/**
+ * Persists the alignment-guides preference (US08.11.4).
+ *
+ * Client-only preference: no STOMP message, no server write — a second participant on the same
+ * board is unaffected.
+ *
+ * @param enabled the state to persist
+ */
+export function writeAlignPreference(enabled: boolean): void {
+  if (typeof localStorage === 'undefined') {
+    return;
+  }
+  try {
+    localStorage.setItem(ALIGN_STORAGE_KEY, enabled ? '1' : '0');
+  } catch {
+    // Ignored on purpose — see readGridPreference.
+  }
+}
+
+/** A card considered as an alignment target by {@link computeAlignGuides}. */
+export interface AlignBox {
+  id: string;
+  type: string;
+  posX: number;
+  posY: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * The result of an alignment probe: the guide lines to draw and the correction to apply.
+ *
+ * `v`/`h` are canvas coordinates of the vertical / horizontal guide, or `null` when no candidate
+ * landed within tolerance on that axis. `dx`/`dy` are the deltas that move the dragged card onto
+ * the matched edge — `0` on an axis without a guide, so the caller can add them unconditionally.
+ */
+export interface AlignGuides {
+  v: number | null;
+  h: number | null;
+  dx: number;
+  dy: number;
+}
+
+/** Neutral result — no guide on either axis, no correction. */
+const NO_GUIDES: AlignGuides = { v: null, h: null, dx: 0, dy: 0 };
+
+/**
+ * Finds the best alignment guide per axis for a card being dragged (US08.11.4, §4.3).
+ *
+ * Compares the dragged card's three landmarks per axis (`[x, x + w/2, x + w]` horizontally,
+ * `[y, y + h/2, y + h]` vertically) against the same three landmarks of every other card. The
+ * single closest candidate within tolerance wins on each axis, so at most one vertical and one
+ * horizontal line are ever produced — never a thicket of near-misses.
+ *
+ * The tolerance is expressed in **screen** pixels ({@link ALIGN_SNAP_PX}) and divided by `zoom`
+ * before comparison, so the guides feel equally reachable whatever the zoom level: at 3× a 6 px
+ * screen gap is only 2 canvas px, at 0.5× it is 12.
+ *
+ * `DRAW` cards are excluded as targets: a freehand stroke's bounding box has no meaningful edge to
+ * align against — its visual extent is the path, not the box.
+ *
+ * @param moving the dragged card's candidate geometry (already offset by the pointer delta)
+ * @param others every other card on the board; the dragged card and `DRAW` cards are filtered out
+ * @param zoom the current viewport zoom; a non-finite or non-positive value yields no guides
+ * @returns the guides to render and the snap correction to apply
+ */
+export function computeAlignGuides(
+  moving: { id: string; x: number; y: number; width: number; height: number },
+  others: readonly AlignBox[],
+  zoom: number,
+): AlignGuides {
+  if (!Number.isFinite(zoom) || zoom <= 0) {
+    // Defensive: a zero/NaN zoom would turn the tolerance into Infinity/NaN and match everything.
+    return NO_GUIDES;
+  }
+  const tolerance = ALIGN_SNAP_PX / zoom;
+  const vSelf = [moving.x, moving.x + moving.width / 2, moving.x + moving.width];
+  const hSelf = [moving.y, moving.y + moving.height / 2, moving.y + moving.height];
+
+  let vBest: { line: number; delta: number; dist: number } | null = null;
+  let hBest: { line: number; delta: number; dist: number } | null = null;
+
+  for (const other of others) {
+    if (other.id === moving.id || other.type === 'DRAW') {
+      continue;
+    }
+    const vOther = [other.posX, other.posX + other.width / 2, other.posX + other.width];
+    const hOther = [other.posY, other.posY + other.height / 2, other.posY + other.height];
+
+    for (const self of vSelf) {
+      for (const target of vOther) {
+        const dist = Math.abs(self - target);
+        if (dist <= tolerance && (vBest === null || dist < vBest.dist)) {
+          vBest = { line: target, delta: target - self, dist };
+        }
+      }
+    }
+    for (const self of hSelf) {
+      for (const target of hOther) {
+        const dist = Math.abs(self - target);
+        if (dist <= tolerance && (hBest === null || dist < hBest.dist)) {
+          hBest = { line: target, delta: target - self, dist };
+        }
+      }
+    }
+  }
+
+  return {
+    v: vBest?.line ?? null,
+    h: hBest?.line ?? null,
+    dx: vBest?.delta ?? 0,
+    dy: hBest?.delta ?? 0,
+  };
+}
+
+/**
  * Persists the grid-snap preference (US08.11.1).
  *
  * Client-only preference: no STOMP message, no server write — a second participant on the same

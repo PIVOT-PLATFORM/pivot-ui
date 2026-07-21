@@ -115,6 +115,11 @@ export class FloatingToolbarComponent {
   /** Emits when the user toggles the grid-snap button (US08.11.1). */
   readonly snapToggle = output<void>();
 
+  /** Whether alignment guides are currently on (US08.11.4) — drives the button's pressed state. */
+  readonly alignGuidesEnabled = input<boolean>(true);
+  /** Emits when the user toggles the alignment-guides button (US08.11.4). */
+  readonly alignGuidesToggle = output<void>();
+
   protected readonly pointerTools = POINTER_TOOLS;
   protected readonly contentTools = CONTENT_TOOLS;
   protected readonly drawTools = DRAW_TOOLS;

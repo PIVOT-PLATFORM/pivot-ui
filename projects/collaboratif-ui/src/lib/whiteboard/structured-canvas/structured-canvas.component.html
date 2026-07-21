@@ -118,6 +118,37 @@
       ></wb-board-card>
     }
 
+    <!-- Alignment guides (US08.11.4) — purely decorative, hence aria-hidden: the alignment they
+         signal is already conveyed by the card's position. At most one line per axis. The span is
+         deliberately far larger than any realistic board so the line reads as infinite whatever
+         the pan/zoom, rather than stopping short at the matched card's edges. -->
+    @if (alignGuides(); as ag) {
+      @if (ag.v !== null) {
+        <div
+          class="wb-align-guide wb-align-guide--v"
+          aria-hidden="true"
+          [style.left.px]="ag.v"
+          [style.top.px]="-GUIDE_SPAN / 2"
+          [style.height.px]="GUIDE_SPAN"
+          [style.width.px]="guideThickness()"
+          [style.background]="guideColor"
+          [style.z-index]="guideZIndex"
+        ></div>
+      }
+      @if (ag.h !== null) {
+        <div
+          class="wb-align-guide wb-align-guide--h"
+          aria-hidden="true"
+          [style.top.px]="ag.h"
+          [style.left.px]="-GUIDE_SPAN / 2"
+          [style.width.px]="GUIDE_SPAN"
+          [style.height.px]="guideThickness()"
+          [style.background]="guideColor"
+          [style.z-index]="guideZIndex"
+        ></div>
+      }
+    }
+
     <!-- Marquee selection -->
     @if (marquee(); as m) {
       <div

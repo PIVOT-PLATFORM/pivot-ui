@@ -35,7 +35,12 @@ import type { Board } from '../../core/whiteboard/board.model';
 import type { Card, Connection, ConnectionPatch } from '../model/board.types';
 import { TOOL_SHORTCUTS, isShapeTool, type ToolMode } from '../model/tools';
 import { DEFAULT_SHAPE_COLOR } from '../model/colors';
-import { readGridPreference, writeGridPreference } from '../model/board-constants';
+import {
+  readGridPreference,
+  writeGridPreference,
+  readAlignPreference,
+  writeAlignPreference,
+} from '../model/board-constants';
 import { parseShape } from '../model/shape';
 import { parseLabelFmt, parseTextFmt, type TextAlign } from '../model/card-format';
 
@@ -110,6 +115,12 @@ export class BoardPageComponent implements OnInit, OnDestroy {
    * canvas (snapping) need it. Restored from the browser on load, off by default.
    */
   protected readonly snapEnabled = signal<boolean>(readGridPreference());
+  /**
+   * Alignment-guides preference (US08.11.4) — same ownership rationale as {@link snapEnabled}, but
+   * **on by default**: guides are an unobtrusive assist, whereas the grid visibly constrains every
+   * drag, so only the latter is opt-in.
+   */
+  protected readonly alignGuidesEnabled = signal<boolean>(readAlignPreference());
   /** Whether the keyboard shortcut cheat-sheet is open (toggled by `?`). */
   protected readonly showShortcuts = signal(false);
 
@@ -431,6 +442,18 @@ export class BoardPageComponent implements OnInit, OnDestroy {
     const next = !this.snapEnabled();
     this.snapEnabled.set(next);
     writeGridPreference(next);
+  }
+
+  /**
+   * Toggles the alignment guides and persists them for this browser (US08.11.4).
+   *
+   * Client-only, exactly like {@link onSnapToggle}. Note that turning the guides on while the grid
+   * is also on has no visible effect until the grid is turned off — §5.9 gives the grid priority.
+   */
+  protected onAlignGuidesToggle(): void {
+    const next = !this.alignGuidesEnabled();
+    this.alignGuidesEnabled.set(next);
+    writeAlignPreference(next);
   }
 
   protected onColorChange(color: string): void {
