@@ -281,6 +281,79 @@ describe('BoardStore — card:moved/card:resized sender exclusion (fix/EN08.4)',
     ).toEqual(['f-1', 'f-2']);
   });
 
+  it('does not push a duplicate history entry when the run is replayed by redo', () => {
+    const frame = (id: string, posX: number) =>
+      ({ id, boardId: BOARD_ID, title: '', posX, posY: 0, width: 400, height: 300, layer: 1 }) as Frame;
+
+    store.addTitledFrames([{ posX: -640, posY: 0, title: 'A' }]);
+    transport.dispatch('frame:created', frame('f-1', -640));
+
+    store.undo();
+    store.redo();
+    transport.dispatch('frame:created', frame('f-1-again', -640));
+
+    // Redo re-created the frame; a second undo must remove it — and there must be no leftover
+    // entry making a further undo silently re-delete an id that is already gone.
+    store.undo();
+    const deletes = transport.emitted
+      .filter((e) => e.type === 'frame:delete')
+      .map((e) => (e.data as { id: string }).id);
+    expect(deletes).toEqual(['f-1', 'f-1-again']);
+    expect(store.canUndo()).toBe(false);
+  });
+
+  it('gives up on a run whose echo never arrives, keeping what was created undoable', () => {
+    vi.useFakeTimers();
+    try {
+      const frame = (id: string, posX: number) =>
+        ({ id, boardId: BOARD_ID, title: '', posX, posY: 0, width: 400, height: 300, layer: 1 }) as Frame;
+
+      store.addTitledFrames([
+        { posX: -640, posY: 0, title: 'A' },
+        { posX: -200, posY: 0, title: 'B' },
+      ]);
+      transport.dispatch('frame:created', frame('f-1', -640));
+      // Second create is dropped (socket down / server refusal): no echo will ever come.
+      vi.advanceTimersByTime(10_000);
+
+      // The half-created template is still undoable rather than stranded outside the history.
+      expect(store.canUndo()).toBe(true);
+      store.undo();
+      expect(
+        transport.emitted
+          .filter((e) => e.type === 'frame:delete')
+          .map((e) => (e.data as { id: string }).id),
+      ).toEqual(['f-1']);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('ignores a second template while one is still in flight', () => {
+    const frame = (id: string, posX: number) =>
+      ({ id, boardId: BOARD_ID, title: '', posX, posY: 0, width: 400, height: 300, layer: 1 }) as Frame;
+
+    store.addTitledFrames([
+      { posX: -640, posY: 0, title: 'A' },
+      { posX: -200, posY: 0, title: 'B' },
+    ]);
+    store.addTitledFrames([{ posX: 50, posY: 50, title: 'Autre template' }]);
+
+    // The second run never started — the first is still driving the wire.
+    expect(
+      transport.emitted
+        .filter((e) => e.type === 'frame:create')
+        .map((e) => (e.data as { posX: number }).posX),
+    ).toEqual([-640]);
+
+    transport.dispatch('frame:created', frame('f-1', -640));
+    expect(
+      transport.emitted
+        .filter((e) => e.type === 'frame:create')
+        .map((e) => (e.data as { posX: number }).posX),
+    ).toEqual([-640, -200]);
+  });
+
   it('creates nothing for an empty template run', () => {
     store.addTitledFrames([]);
 

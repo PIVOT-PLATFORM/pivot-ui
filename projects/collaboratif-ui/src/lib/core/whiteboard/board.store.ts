@@ -69,6 +69,14 @@ const LOAD_BOARD_TIMEOUT_MS = 8_000;
 const OPTIMISTIC_CARD_TIMEOUT_MS = 10_000;
 
 /**
+ * Same last-resort net for a template frame awaiting its `frame:created` echo (see
+ * `addTitledFrames`). Without it a dropped create — the socket is down, or the server rejected
+ * it — would leave the run hanging forever, with the frames already created stuck outside the
+ * undo history.
+ */
+const FRAME_RUN_TIMEOUT_MS = 10_000;
+
+/**
  * Grace window (BUG 4 / BUG J) during which a card just released from a local drag/resize keeps
  * its optimistic geometry authoritative: inbound `card:moved`/`card:resized` echoes and room-wide
  * `board:state` snapshots for that card are ignored until it elapses. Covers the "snaps back
@@ -286,6 +294,8 @@ export class BoardStore {
    * the position it was sent with rather than by arrival order.
    */
   private pendingFrameRun: { posX: number; posY: number; apply: (frame: Frame) => void } | null = null;
+  /** Deadline for the in-flight template frame — see {@link runTitledFrames}. */
+  private frameRunTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly pendingGroupHistory: Array<(groupId: string) => void> = [];
 
   private cardDragStart: Map<string, { posX: number; posY: number }> | null = null;
@@ -372,6 +382,7 @@ export class BoardStore {
     // An unacknowledged template frame must not outlive the board: its continuation would emit
     // onto a torn-down transport, and a stale entry could later claim an unrelated frame.
     this.pendingFrameRun = null;
+    this.clearFrameRunTimer();
     this.optimisticCardTimers.forEach((t) => clearTimeout(t));
     this.optimisticCardTimers.clear();
     this.localControlGraceTimers.forEach((t) => clearTimeout(t));
@@ -1822,28 +1833,58 @@ export class BoardStore {
    * @param specs frames to create, in layout order
    */
   addTitledFrames(specs: ReadonlyArray<{ posX: number; posY: number; title: string }>): void {
-    if (specs.length === 0) {
+    // One run at a time: `pendingFrameRun` holds a single in-flight create, so starting a second
+    // template mid-run would strand the first (its remaining echoes would fall through to the
+    // plain path and consume an unrelated undo entry). Relaunching is a click away, so dropping
+    // the second request is safer than interleaving two runs.
+    if (specs.length === 0 || this.pendingFrameRun) {
       return;
     }
+    // `createdIds` is shared with the history entry and refilled on replay, so undo always
+    // targets the frames that currently exist rather than the ids of the original run.
     const createdIds: string[] = [];
-    const undo = () => {
-      for (const id of createdIds) {
-        this.transport.emit('frame:delete', { id, boardId: this.boardId });
+    const entry: HistoryEntry = {
+      undo: () => {
+        for (const id of createdIds) {
+          this.transport.emit('frame:delete', { id, boardId: this.boardId });
+        }
+      },
+      redo: () => this.runTitledFrames(specs, createdIds, true),
+    };
+    this.runTitledFrames(specs, createdIds, false, entry);
+  }
+
+  /**
+   * Drives one pass of a titled-frame run, one create at a time.
+   *
+   * @param specs frames to create, in layout order
+   * @param createdIds accumulator shared with the run's history entry — reset on every pass
+   * @param isReplay true when re-run by `redo()`, which has already restored the history entry
+   * @param entry history entry to push once the run completes (first pass only)
+   */
+  private runTitledFrames(
+    specs: ReadonlyArray<{ posX: number; posY: number; title: string }>,
+    createdIds: string[],
+    isReplay: boolean,
+    entry?: HistoryEntry,
+  ): void {
+    createdIds.length = 0;
+
+    const settle = (): void => {
+      this.clearFrameRunTimer();
+      this.pendingFrameRun = null;
+      // Nothing created (first create dropped) — no history entry, nothing to undo.
+      // On replay the entry is already back on the undo stack: pushing again would duplicate it
+      // *and* clear the redo stack (see `pushHistory`), swallowing a later Ctrl+Y.
+      if (isReplay || !entry || createdIds.length === 0) {
+        return;
       }
+      this.pushHistory(entry);
     };
 
     const step = (i: number): void => {
       if (i >= specs.length) {
-        // Whole run acknowledged — one entry for one user action. `redo` replays the same run;
-        // the ids are refreshed as the new echoes come in, so a second undo still targets the
-        // frames that actually exist.
-        this.pushHistory({
-          undo,
-          redo: () => {
-            createdIds.length = 0;
-            step(0);
-          },
-        });
+        settle();
         return;
       }
       const { posX, posY, title } = specs[i];
@@ -1859,10 +1900,25 @@ export class BoardStore {
           step(i + 1);
         },
       };
+      // A create issued while the socket is down is dropped silently (`frame:create` is neither
+      // a lifecycle nor a guaranteed action), and a server-side rejection sends nothing back —
+      // either way no echo ever arrives. Without this deadline the run would hang forever, the
+      // frames already created would have no undo entry, and the stale pending run would later
+      // claim an unrelated frame at the same position.
+      this.clearFrameRunTimer();
+      this.frameRunTimer = setTimeout(() => settle(), FRAME_RUN_TIMEOUT_MS);
       this.transport.emit('frame:create', { boardId: this.boardId, posX, posY });
     };
 
     step(0);
+  }
+
+  /** Clears (and forgets) the in-flight template-frame deadline, if any. */
+  private clearFrameRunTimer(): void {
+    if (this.frameRunTimer != null) {
+      clearTimeout(this.frameRunTimer);
+      this.frameRunTimer = null;
+    }
   }
 
   moveFrame(
