@@ -21,12 +21,22 @@
 
   <div class="wb-act__list">
     @for (a of activities; track a.id) {
-      <button type="button" class="wb-act__item" (click)="launch.emit(a.id)">
+      <button
+        type="button"
+        class="wb-act__item"
+        [class.wb-act__item--soon]="!a.available"
+        [disabled]="!a.available"
+        [attr.aria-describedby]="a.available ? null : 'wb-act-soon-' + a.id"
+        (click)="launch.emit(a.id)"
+      >
         <span class="pv-glyph pv-glyph--lg" [class]="'pv-tone-' + a.kind">{{ a.glyph }}</span>
         <span class="wb-act__item-body">
           <span class="wb-act__item-name">{{ 'whiteboard.activities.items.' + a.id + '.name' | transloco }}</span>
           <span class="wb-act__item-desc">{{ 'whiteboard.activities.items.' + a.id + '.desc' | transloco }}</span>
         </span>
+        @if (!a.available) {
+          <span class="wb-act__soon" [id]="'wb-act-soon-' + a.id">{{ 'whiteboard.activities.soon' | transloco }}</span>
+        }
       </button>
     }
   </div>

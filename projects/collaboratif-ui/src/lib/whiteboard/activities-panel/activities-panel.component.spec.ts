@@ -9,6 +9,7 @@ const FR: Record<string, unknown> = {
       title: 'Activités',
       close: 'Fermer',
       recentSection: 'Récemment utilisées',
+      soon: 'Bientôt disponible',
       items: {
         brainstorming: { name: 'Brainstorming', desc: 'Générez des idées' },
         poll: { name: 'Sondage', desc: 'Votez en direct' },
@@ -65,13 +66,42 @@ describe('ActivitiesPanelComponent', () => {
     expect(el.querySelector('.wb-act__section')?.textContent).toContain('Récemment utilisées');
   });
 
-  it('emits launch with the activity id when a list item is clicked', () => {
+  it('emits launch with the activity id when an available list item is clicked', () => {
     const emitted: string[] = [];
     fixture.componentInstance.launch.subscribe((id: string) => emitted.push(id));
 
-    (el.querySelectorAll('.wb-act__item')[1] as HTMLButtonElement).click();
+    // index 2 = dot-vote (index 1 is the poll, which is disabled — see below).
+    (el.querySelectorAll('.wb-act__item')[2] as HTMLButtonElement).click();
 
-    expect(emitted).toEqual(['poll']);
+    expect(emitted).toEqual(['dotvote']);
+  });
+
+  it('disables the activities that have no implementation and never emits launch for them', () => {
+    const emitted: string[] = [];
+    fixture.componentInstance.launch.subscribe((id: string) => emitted.push(id));
+    const poll = el.querySelectorAll('.wb-act__item')[1] as HTMLButtonElement;
+
+    expect(poll.disabled).toBe(true);
+    poll.click();
+
+    expect(emitted).toEqual([]);
+  });
+
+  it('labels an unavailable activity with a textual "coming soon" hint bound by aria-describedby', () => {
+    const poll = el.querySelectorAll('.wb-act__item')[1] as HTMLButtonElement;
+    const hint = poll.querySelector('.wb-act__soon');
+
+    expect(hint?.textContent).toContain('Bientôt disponible');
+    // The state must not rest on colour/opacity alone (WCAG 1.4.1).
+    expect(poll.getAttribute('aria-describedby')).toBe(hint?.id);
+    expect(hint?.id).toBeTruthy();
+  });
+
+  it('leaves every implemented activity enabled', () => {
+    const items = [...el.querySelectorAll<HTMLButtonElement>('.wb-act__item')];
+    const enabled = items.filter((b) => !b.disabled).length;
+
+    expect(enabled).toBe(6);
   });
 
   it('emits launch from a recently-used shortcut', () => {
