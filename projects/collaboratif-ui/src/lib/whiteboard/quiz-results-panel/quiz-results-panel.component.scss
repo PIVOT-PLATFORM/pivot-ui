@@ -1,0 +1,192 @@
+// Quiz results + facilitator-piloting panel (US-Q3/US-Q4) — calqued on `vote-results-panel`,
+// same `--wb-*` tokens (`_wb-tokens.scss`).
+.wb-quiz-results {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--wb-surface);
+  outline: none;
+
+  &__header {
+    padding: var(--wb-space-4) var(--wb-space-6);
+    border-bottom: 1px solid var(--wb-border);
+    flex-shrink: 0;
+  }
+
+  &__heading {
+    margin: 0;
+    font-size: var(--wb-text-lg);
+    font-weight: var(--wb-fw-semibold);
+    color: var(--wb-ink);
+  }
+
+  &__summary {
+    margin: var(--wb-space-1) 0 0;
+    font-size: var(--wb-text-13);
+    color: var(--wb-ink-muted);
+  }
+
+  // ── Empty state ──
+  &__empty {
+    padding: var(--wb-space-8) var(--wb-space-6);
+    margin: 0;
+    text-align: center;
+    font-size: var(--wb-text-base);
+    font-weight: var(--wb-fw-medium);
+    color: var(--wb-ink-muted);
+  }
+
+  // ── Distribution ──
+  &__distribution {
+    list-style: none;
+    margin: 0;
+    padding: var(--wb-space-4) var(--wb-space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--wb-space-3);
+  }
+
+  &__item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--wb-space-3);
+    padding: var(--wb-space-3) var(--wb-space-4);
+    border: 1px solid var(--wb-border);
+    background: var(--wb-surface-sunken);
+    border-radius: var(--wb-radius-card);
+    overflow: hidden;
+
+    &--correct {
+      border-color: var(--wb-accent-weak-2);
+      background: var(--wb-accent-weak);
+    }
+  }
+
+  &__bar {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: var(--wb-border);
+    transition: width var(--wb-dur-slow) ease;
+    z-index: 0;
+
+    .wb-quiz-results__item--correct & {
+      background: var(--wb-accent-weak-2);
+    }
+  }
+
+  &__choice-text {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    min-width: 0;
+    font-size: var(--wb-text-base);
+    font-weight: var(--wb-fw-medium);
+    color: var(--wb-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__correct-badge {
+    position: relative;
+    z-index: 1;
+    padding: 0.125rem var(--wb-space-2);
+    border-radius: var(--wb-radius-pill);
+    font-size: var(--wb-text-xs);
+    font-weight: var(--wb-fw-semibold);
+    background: var(--wb-accent);
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  &__count {
+    position: relative;
+    z-index: 1;
+    font-size: var(--wb-text-base);
+    font-weight: var(--wb-fw-bold);
+    color: var(--wb-ink-muted);
+    flex-shrink: 0;
+
+    .wb-quiz-results__item--correct & {
+      color: var(--wb-accent-active);
+    }
+  }
+
+  // ── Leaderboard ──
+  &__subheading {
+    margin: 0;
+    padding: var(--wb-space-4) var(--wb-space-6) 0;
+    font-size: var(--wb-text-13);
+    font-weight: var(--wb-fw-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--wb-ink-muted);
+  }
+
+  &__leaderboard {
+    margin: 0;
+    padding: var(--wb-space-3) var(--wb-space-6) var(--wb-space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--wb-space-2);
+    overflow-y: auto;
+  }
+
+  &__rank-item {
+    padding: var(--wb-space-2) var(--wb-space-3);
+    border-radius: var(--wb-radius-chip);
+    background: var(--wb-surface-sunken);
+    font-size: var(--wb-text-base);
+    font-weight: var(--wb-fw-medium);
+    color: var(--wb-ink);
+  }
+
+  // ── Footer ──
+  &__footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--wb-space-3);
+    padding: var(--wb-space-4) var(--wb-space-6);
+    border-top: 1px solid var(--wb-border);
+    flex-shrink: 0;
+    margin-top: auto;
+  }
+
+  &__btn {
+    flex: 1;
+    min-width: 8rem;
+    padding: 0.625rem var(--wb-space-4);
+    border: 1px solid var(--wb-border);
+    border-radius: var(--wb-radius-card);
+    background: var(--wb-surface);
+    color: var(--wb-ink);
+    font-size: var(--wb-text-base);
+    font-weight: var(--wb-fw-semibold);
+    cursor: pointer;
+
+    &:hover { background: var(--wb-surface-hover); }
+    &:focus-visible { outline: 2px solid var(--wb-focus); outline-offset: 2px; }
+
+    &--primary {
+      border-color: transparent;
+      background: var(--wb-accent);
+      color: #fff;
+
+      &:hover { background: var(--wb-accent-hover); }
+    }
+
+    &--danger {
+      border-color: var(--wb-danger-border);
+      color: var(--wb-danger);
+
+      &:hover { background: var(--wb-danger-bg); }
+      &:focus-visible { outline-color: var(--wb-danger); }
+    }
+
+    &--ghost {
+      border-color: transparent;
+      background: transparent;
+    }
+  }
+}

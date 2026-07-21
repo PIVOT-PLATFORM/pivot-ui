@@ -1,0 +1,109 @@
+<div
+  class="wb-quiz-results"
+  role="dialog"
+  aria-modal="true"
+  tabindex="-1"
+  [attr.aria-label]="'whiteboard.quiz.results.title' | transloco"
+  (keydown.escape)="onClose()"
+>
+  <!-- ── Header ─────────────────────────────────────────────────────── -->
+  <header class="wb-quiz-results__header">
+    <h2 class="wb-quiz-results__heading">
+      {{ 'whiteboard.quiz.results.title' | transloco }}
+    </h2>
+    @if (!isRevealed() && question(); as q) {
+      <p class="wb-quiz-results__summary">
+        {{ 'whiteboard.quiz.results.responders' | transloco: { n: responderCount() } }}
+      </p>
+    }
+  </header>
+
+  <!-- ── Body ───────────────────────────────────────────────────────── -->
+  @if (isEmpty()) {
+    <p class="wb-quiz-results__empty" role="status">
+      {{ 'whiteboard.quiz.results.empty' | transloco }}
+    </p>
+  } @else {
+    @if (isRevealed()) {
+      <ul
+        class="wb-quiz-results__distribution"
+        [attr.aria-label]="'whiteboard.quiz.results.title' | transloco"
+      >
+        @for (entry of distribution(); track entry.id) {
+          <li
+            class="wb-quiz-results__item"
+            [class.wb-quiz-results__item--correct]="entry.correct"
+          >
+            <div
+              class="wb-quiz-results__bar"
+              aria-hidden="true"
+              [style.width.%]="entry.percent"
+            ></div>
+            <span class="wb-quiz-results__choice-text">{{ entry.text }}</span>
+            @if (entry.correct) {
+              <span class="wb-quiz-results__correct-badge">
+                {{ 'whiteboard.quiz.config.correctLabel' | transloco }}
+              </span>
+            }
+            <span class="wb-quiz-results__count">{{ entry.count }}</span>
+          </li>
+        }
+      </ul>
+    }
+
+    @if (leaderboard().length > 0) {
+      <h3 class="wb-quiz-results__subheading">
+        {{ 'whiteboard.quiz.results.leaderboard' | transloco }}
+      </h3>
+      <ol
+        class="wb-quiz-results__leaderboard"
+        [attr.aria-label]="'whiteboard.quiz.results.leaderboard' | transloco"
+      >
+        @for (entry of leaderboard(); track entry.userId) {
+          <li class="wb-quiz-results__rank-item">
+            {{
+              'whiteboard.quiz.results.rank'
+                | transloco: { rank: entry.rank, name: entry.userId, score: entry.score }
+            }}
+          </li>
+        }
+      </ol>
+    }
+  }
+
+  <!-- ── Footer — facilitator controls (isOwner-gated, §4.1) ───────────── -->
+  <footer class="wb-quiz-results__footer">
+    @if (canReveal()) {
+      <button
+        type="button"
+        class="wb-quiz-results__btn wb-quiz-results__btn--primary"
+        (click)="onReveal()"
+      >
+        {{ 'whiteboard.quiz.results.reveal' | transloco }}
+      </button>
+    }
+    @if (canNext()) {
+      <button type="button" class="wb-quiz-results__btn" (click)="onNext()">
+        {{ 'whiteboard.quiz.results.next' | transloco }}
+      </button>
+    }
+    @if (canStop()) {
+      <button
+        type="button"
+        class="wb-quiz-results__btn wb-quiz-results__btn--danger"
+        (click)="onStop()"
+      >
+        {{ 'whiteboard.quiz.results.stop' | transloco }}
+      </button>
+    }
+    @if (canClose()) {
+      <button
+        type="button"
+        class="wb-quiz-results__btn wb-quiz-results__btn--ghost"
+        (click)="onClose()"
+      >
+        {{ 'whiteboard.quiz.close' | transloco }}
+      </button>
+    }
+  </footer>
+</div>
