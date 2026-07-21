@@ -65,6 +65,34 @@ export const AGILITE_ROUTES: Routes = [
       ),
   },
   {
+    path: 'capacity',
+    loadComponent: () =>
+      import('./features/capacity/capacity-list/capacity-list.component').then(
+        m => m.CapacityListComponent,
+      ),
+  },
+  {
+    path: 'capacity/new',
+    loadComponent: () =>
+      import('./features/capacity/capacity-form/capacity-form.component').then(
+        m => m.CapacityFormComponent,
+      ),
+  },
+  {
+    path: 'capacity/:eventId/edit',
+    loadComponent: () =>
+      import('./features/capacity/capacity-form/capacity-form.component').then(
+        m => m.CapacityFormComponent,
+      ),
+  },
+  {
+    path: 'capacity/:eventId',
+    loadComponent: () =>
+      import('./features/capacity/capacity-detail/capacity-detail.component').then(
+        m => m.CapacityDetailComponent,
+      ),
+  },
+  {
     path: 'scrum-poker/rooms/new',
     loadComponent: () =>
       import('./features/scrum-poker/create-room/create-room.component').then(

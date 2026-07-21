@@ -25,12 +25,9 @@
       "history": "Draw history"
     },
     "capacity": {
-      "velocity": "Velocity — last 6 sprints",
-      "chargeTitle": "Load vs capacity",
-      "legendOver": "Overloaded",
-      "legendBalanced": "Balanced",
-      "legendUnder": "Underloaded",
-      "days": "{{charge}}d / {{capacity}}d"
+      "title": "Capacity",
+      "description": "Plan events, members, absences, velocity and burndown for your teams.",
+      "open": "Open Capacity"
     },
     "poker": {
       "title": "Planning Poker",
@@ -437,5 +434,259 @@
     "statusChangeLabel": "Change the status of \"{{title}}\"",
     "statusChangeError": "The status change failed. Please try again.",
     "missingTeamId": "Missing team id."
+  },
+  "capacity": {
+    "list": {
+      "title": "Capacity",
+      "selectTeam": "Team",
+      "noTeams": "You don't belong to any team.",
+      "create": "New capacity event",
+      "empty": "No capacity events for this team.",
+      "typeFilter": "Type",
+      "typeFilterAll": "All types",
+      "statusFilter": "Status",
+      "statusFilterAll": "All statuses",
+      "open": "Open",
+      "edit": "Edit",
+      "delete": "Delete",
+      "loadError": "Unable to load capacity events.",
+      "retry": "Retry",
+      "deleteSuccess": "Capacity event deleted.",
+      "deleteError": "Unable to delete the capacity event.",
+      "dismiss": "Dismiss"
+    },
+    "types": {
+      "PI_PLANNING": "PI Planning",
+      "SPRINT": "Sprint",
+      "RELEASE": "Release",
+      "CUSTOM": "Custom"
+    },
+    "statuses": {
+      "PLANNING": "Planning",
+      "ACTIVE": "Active",
+      "DONE": "Done"
+    },
+    "maturity": {
+      "FORMING": "Forming",
+      "NORMING": "Norming",
+      "PERFORMING": "Performing",
+      "none": "Not set"
+    },
+    "confirmDelete": {
+      "title": "Delete this capacity event?",
+      "message": "\"{{name}}\" and all its members, absences and velocity data will be permanently deleted.",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "form": {
+      "createTitle": "Create a capacity event",
+      "editTitle": "Edit capacity event",
+      "teamLabel": "Team",
+      "typeLabel": "Type",
+      "nameLabel": "Name",
+      "startDateLabel": "Start date",
+      "endDateLabel": "End date",
+      "parentLabel": "Parent PI",
+      "parentNone": "None",
+      "maturityLabel": "Maturity level",
+      "focusFactorLabel": "Focus factor",
+      "margeSecuriteLabel": "Safety margin",
+      "pointsPerDayLabel": "Points per day",
+      "committedPointsLabel": "Committed points",
+      "workingDaysLabel": "Working days",
+      "notesLabel": "Notes",
+      "statusLabel": "Status",
+      "save": "Save",
+      "saving": "Saving…",
+      "saveSuccess": "Capacity event saved.",
+      "saveError": "Unable to save the capacity event.",
+      "retry": "Retry",
+      "loadError": "Unable to load this capacity event.",
+      "weekdays": {
+        "0": "Sun",
+        "1": "Mon",
+        "2": "Tue",
+        "3": "Wed",
+        "4": "Thu",
+        "5": "Fri",
+        "6": "Sat"
+      },
+      "cadence": {
+        "title": "Generate sprints (SAFe cadence)",
+        "sprintLengthMode": "Sprint length in",
+        "sprintLengthDays": "Days",
+        "sprintLengthWeeks": "Weeks",
+        "sprintLengthValue": "Sprint length",
+        "sprintCount": "Number of sprints",
+        "includeIpSprint": "Include a trailing Innovation & Planning sprint",
+        "namePrefix": "Name prefix",
+        "generate": "Generate sprints",
+        "generating": "Generating…",
+        "success": "Sprints generated.",
+        "error": "Unable to generate sprints."
+      },
+      "errors": {
+        "INVALID_TYPE": "Select a valid event type.",
+        "INVALID_NAME": "The name must be between 1 and 200 characters.",
+        "INVALID_START_DATE": "Enter a valid start date.",
+        "INVALID_END_DATE": "The end date must not be before the start date.",
+        "INVALID_CADENCE": "Enter exactly one of sprint length in days or in weeks, greater than zero.",
+        "CADENCE_OVERFLOW": "The requested sprints do not fit within the PI's window.",
+        "INVALID_HIERARCHY": "This parent/child relationship is not allowed.",
+        "INVALID_FOCUS_FACTOR": "Focus factor must be between 0 and 1.",
+        "INVALID_MARGE_SECURITE": "Safety margin must be between 0 and 1."
+      }
+    },
+    "detail": {
+      "loadError": "Unable to load this capacity event.",
+      "tabs": {
+        "overview": "Overview",
+        "members": "Members",
+        "velocity": "Velocity",
+        "burndown": "Burndown",
+        "summary": "Summary"
+      },
+      "children": {
+        "title": "Sprints",
+        "empty": "No sprint yet."
+      },
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "members": {
+      "title": "Members",
+      "add": "Add a member",
+      "empty": "No member yet.",
+      "nameLabel": "Name",
+      "roleLabel": "Role",
+      "quotiteLabel": "Quotity",
+      "focusFactorLabel": "Focus factor override",
+      "localityLabel": "Locality",
+      "excludedLabel": "Excluded from totals",
+      "positionLabel": "Position",
+      "save": "Save",
+      "saving": "Saving…",
+      "saveError": "Unable to save this member.",
+      "remove": "Remove",
+      "removeConfirm": "Remove this member and its absences?",
+      "removeError": "Unable to remove this member.",
+      "errors": {
+        "INVALID_NAME": "Enter a member name.",
+        "INVALID_QUOTITE": "Quotity must be greater than 0 and at most 1.",
+        "FOCUS_OUT_OF_RANGE": "Focus factor must be between 0 and 1."
+      }
+    },
+    "absences": {
+      "title": "Absences",
+      "add": "Add an absence",
+      "empty": "No absence recorded.",
+      "startDateLabel": "Start date",
+      "endDateLabel": "End date",
+      "fractionLabel": "Duration",
+      "fractionFull": "Full day",
+      "fractionHalf": "Half day",
+      "sourceLabel": "Source",
+      "sourceManual": "Manual",
+      "save": "Save",
+      "saving": "Saving…",
+      "saveError": "Unable to save this absence.",
+      "remove": "Remove",
+      "removeConfirm": "Remove this absence?",
+      "removeError": "Unable to remove this absence.",
+      "errors": {
+        "INVALID_DATE_RANGE": "The end date must not be before the start date.",
+        "ABSENCE_OUT_OF_RANGE": "The absence must fall within the event's window.",
+        "INVALID_FRACTION": "Duration must be a full or half day."
+      }
+    },
+    "velocity": {
+      "title": "Velocity",
+      "pointsEngagesLabel": "Committed points",
+      "pointsLivresLabel": "Completed points",
+      "save": "Save velocity",
+      "saving": "Saving…",
+      "saveSuccess": "Velocity saved.",
+      "saveError": "Unable to save the velocity.",
+      "history": {
+        "title": "Velocity history",
+        "empty": "No closed-out sprint yet.",
+        "forecastTitle": "Forecast",
+        "mean": "Average",
+        "stdDev": "Std deviation",
+        "coefficientOfVariation": "Coefficient of variation",
+        "lowerBound": "Lower bound",
+        "upperBound": "Upper bound",
+        "widened": "Widened confidence interval (high variability)",
+        "sampleSize": "Sample size"
+      }
+    },
+    "burndown": {
+      "title": "Burndown",
+      "empty": "No burndown data yet.",
+      "real": "Actual",
+      "ideal": "Ideal",
+      "loadError": "Unable to load the burndown."
+    },
+    "summary": {
+      "title": "Summary",
+      "loadError": "Unable to load the summary.",
+      "totalWorkingDays": "Total working days",
+      "totalNetPersonDays": "Net person-days",
+      "totalNetCapacity": "Net capacity",
+      "totalPoints": "Total points",
+      "totalRecommendedEngagement": "Recommended engagement",
+      "loadRatio": "Load ratio",
+      "predictability": "Predictability",
+      "consolidation": {
+        "title": "PI consolidation",
+        "totalJoursHommeNets": "Net person-days",
+        "totalCapaciteNette": "Net capacity",
+        "totalPoints": "Total points",
+        "includedSprintCount": "Included sprints",
+        "excludedIpSprintCount": "Excluded IP sprints"
+      },
+      "membersTable": {
+        "name": "Name",
+        "role": "Role",
+        "quotite": "Quotity",
+        "effectiveFocus": "Focus",
+        "absentWorkingDays": "Absent days",
+        "workedDays": "Worked days",
+        "netCapacity": "Net capacity",
+        "points": "Points",
+        "recommendedEngagement": "Recommended engagement",
+        "excluded": "Excluded"
+      }
+    },
+    "gauge": {
+      "title": "Engagement gauge",
+      "engagedPoints": "Engaged points",
+      "referenceEngagement": "Reference engagement",
+      "engagementRatio": "Engagement ratio",
+      "overCommitted": "Over-committed",
+      "ok": "Within capacity"
+    },
+    "kpi": {
+      "title": "Capacity KPIs",
+      "tauxUtilisation": "Utilization rate",
+      "capaciteNette": "Net capacity",
+      "velociteMoyenne": "Average velocity",
+      "tauxAbsence": "Absence rate",
+      "depassements": "Overruns",
+      "loadError": "Unable to load KPIs.",
+      "empty": "No KPI data yet.",
+      "eventSampleSize": "Events sampled",
+      "sprintSampleSize": "Sprints sampled"
+    },
+    "common": {
+      "cancel": "Cancel",
+      "close": "Close",
+      "confirm": "Confirm",
+      "yes": "Yes",
+      "no": "No",
+      "back": "Back",
+      "actions": "Actions",
+      "loading": "Loading…"
+    }
   }
 }

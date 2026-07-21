@@ -150,38 +150,13 @@
   @if (tab() === 'capacity') {
     <div class="agh__stack">
       <div class="pv-card agh__card">
-        <div class="agh__card-title agh__card-title--block">{{ 'hub.capacity.velocity' | transloco }}</div>
-        <div class="agh__velocity">
-          @for (v of view.velocity; track v.label) {
-            <div class="agh__vbar-col">
-              <span class="agh__vbar-val">{{ v.points }}</span>
-              <div class="agh__vbar" [style.height.%]="v.heightPct"></div>
-              <span class="agh__vbar-label">{{ v.label }}</span>
-            </div>
-          }
+        <div class="agh__card-title agh__card-title--block">{{ 'hub.capacity.title' | transloco }}</div>
+        <p class="agh__row-note">{{ 'hub.capacity.description' | transloco }}</p>
+        <div class="agh__poker-actions">
+          <a class="btn btn-primary" routerLink="capacity">
+            {{ 'hub.capacity.open' | transloco }}
+          </a>
         </div>
-      </div>
-
-      <div class="pv-card agh__card">
-        <div class="agh__card-head">
-          <span class="agh__card-title">{{ 'hub.capacity.chargeTitle' | transloco }}</span>
-          <div class="agh__legend">
-            <span class="agh__legend-item"><span class="agh__swatch agh__swatch--over"></span>{{ 'hub.capacity.legendOver' | transloco }}</span>
-            <span class="agh__legend-item"><span class="agh__swatch agh__swatch--balanced"></span>{{ 'hub.capacity.legendBalanced' | transloco }}</span>
-            <span class="agh__legend-item"><span class="agh__swatch agh__swatch--under"></span>{{ 'hub.capacity.legendUnder' | transloco }}</span>
-          </div>
-        </div>
-        @for (c of view.capacity; track c.name) {
-          <div class="agh__cap-row">
-            <span class="pv-avatar">{{ c.initials }}</span>
-            <span class="agh__cap-name">{{ c.name }}</span>
-            <div class="agh__cap-track">
-              <div class="agh__cap-fill" [class]="'agh__cap-fill--' + c.kind" [style.width.%]="c.barWidth"></div>
-            </div>
-            <span class="agh__mono agh__muted agh__cap-days">{{ 'hub.capacity.days' | transloco: { charge: c.chargeDays, capacity: c.capacityDays } }}</span>
-            <span class="agh__cap-ratio" [class]="'agh__cap-ratio--' + c.kind">{{ c.ratioLabel }}</span>
-          </div>
-        }
       </div>
     </div>
   }

@@ -42,7 +42,8 @@ describe('AgiliteHubComponent', () => {
     cmp.select('capacity');
     fixture.detectChanges();
     expect(cmp.tab()).toBe('capacity');
-    expect((fixture.nativeElement as HTMLElement).querySelector('.agh__velocity')).not.toBeNull();
+    const link = (fixture.nativeElement as HTMLElement).querySelector('.agh__poker-actions a[href]');
+    expect(link?.getAttribute('href')).toContain('capacity');
   });
 
   it('l\'onglet Planning Poker expose les liens vers créer et rejoindre une room', () => {

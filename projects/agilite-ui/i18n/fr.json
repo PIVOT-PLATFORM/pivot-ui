@@ -25,12 +25,9 @@
       "history": "Historique des tirages"
     },
     "capacity": {
-      "velocity": "Vélocité — 6 derniers sprints",
-      "chargeTitle": "Charge vs capacité",
-      "legendOver": "Surcharge",
-      "legendBalanced": "Équilibré",
-      "legendUnder": "Sous-charge",
-      "days": "{{charge}}j / {{capacity}}j"
+      "title": "Capacité",
+      "description": "Planifiez événements, membres, absences, vélocité et burndown pour vos équipes.",
+      "open": "Ouvrir Capacité"
     },
     "poker": {
       "title": "Planning Poker",
@@ -437,5 +434,259 @@
     "statusChangeLabel": "Changer le statut de « {{title}} »",
     "statusChangeError": "Le changement de statut a échoué. Veuillez réessayer.",
     "missingTeamId": "Identifiant d'équipe manquant."
+  },
+  "capacity": {
+    "list": {
+      "title": "Capacité",
+      "selectTeam": "Équipe",
+      "noTeams": "Vous n'appartenez à aucune équipe.",
+      "create": "Nouvel événement de capacité",
+      "empty": "Aucun événement de capacité pour cette équipe.",
+      "typeFilter": "Type",
+      "typeFilterAll": "Tous les types",
+      "statusFilter": "Statut",
+      "statusFilterAll": "Tous les statuts",
+      "open": "Ouvrir",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "loadError": "Impossible de charger les événements de capacité.",
+      "retry": "Réessayer",
+      "deleteSuccess": "Événement de capacité supprimé.",
+      "deleteError": "Impossible de supprimer l'événement de capacité.",
+      "dismiss": "Fermer"
+    },
+    "types": {
+      "PI_PLANNING": "PI Planning",
+      "SPRINT": "Sprint",
+      "RELEASE": "Release",
+      "CUSTOM": "Personnalisé"
+    },
+    "statuses": {
+      "PLANNING": "Planification",
+      "ACTIVE": "En cours",
+      "DONE": "Terminé"
+    },
+    "maturity": {
+      "FORMING": "Formation",
+      "NORMING": "Cohésion",
+      "PERFORMING": "Performance",
+      "none": "Non défini"
+    },
+    "confirmDelete": {
+      "title": "Supprimer cet événement de capacité ?",
+      "message": "« {{name}} » ainsi que tous ses membres, absences et données de vélocité seront définitivement supprimés.",
+      "confirm": "Supprimer",
+      "cancel": "Annuler"
+    },
+    "form": {
+      "createTitle": "Créer un événement de capacité",
+      "editTitle": "Modifier l'événement de capacité",
+      "teamLabel": "Équipe",
+      "typeLabel": "Type",
+      "nameLabel": "Nom",
+      "startDateLabel": "Date de début",
+      "endDateLabel": "Date de fin",
+      "parentLabel": "PI parent",
+      "parentNone": "Aucun",
+      "maturityLabel": "Niveau de maturité",
+      "focusFactorLabel": "Facteur de focus",
+      "margeSecuriteLabel": "Marge de sécurité",
+      "pointsPerDayLabel": "Points par jour",
+      "committedPointsLabel": "Points engagés",
+      "workingDaysLabel": "Jours travaillés",
+      "notesLabel": "Notes",
+      "statusLabel": "Statut",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "saveSuccess": "Événement de capacité enregistré.",
+      "saveError": "Impossible d'enregistrer l'événement de capacité.",
+      "retry": "Réessayer",
+      "loadError": "Impossible de charger cet événement de capacité.",
+      "weekdays": {
+        "0": "Dim",
+        "1": "Lun",
+        "2": "Mar",
+        "3": "Mer",
+        "4": "Jeu",
+        "5": "Ven",
+        "6": "Sam"
+      },
+      "cadence": {
+        "title": "Générer les sprints (cadence SAFe)",
+        "sprintLengthMode": "Longueur de sprint en",
+        "sprintLengthDays": "Jours",
+        "sprintLengthWeeks": "Semaines",
+        "sprintLengthValue": "Longueur de sprint",
+        "sprintCount": "Nombre de sprints",
+        "includeIpSprint": "Ajouter un sprint Innovation & Planning final",
+        "namePrefix": "Préfixe de nom",
+        "generate": "Générer les sprints",
+        "generating": "Génération…",
+        "success": "Sprints générés.",
+        "error": "Impossible de générer les sprints."
+      },
+      "errors": {
+        "INVALID_TYPE": "Sélectionnez un type d'événement valide.",
+        "INVALID_NAME": "Le nom doit contenir entre 1 et 200 caractères.",
+        "INVALID_START_DATE": "Saisissez une date de début valide.",
+        "INVALID_END_DATE": "La date de fin ne peut pas être antérieure à la date de début.",
+        "INVALID_CADENCE": "Saisissez exactement une longueur de sprint (jours ou semaines), supérieure à zéro.",
+        "CADENCE_OVERFLOW": "Les sprints demandés ne tiennent pas dans la fenêtre du PI.",
+        "INVALID_HIERARCHY": "Cette relation parent/enfant n'est pas autorisée.",
+        "INVALID_FOCUS_FACTOR": "Le facteur de focus doit être compris entre 0 et 1.",
+        "INVALID_MARGE_SECURITE": "La marge de sécurité doit être comprise entre 0 et 1."
+      }
+    },
+    "detail": {
+      "loadError": "Impossible de charger cet événement de capacité.",
+      "tabs": {
+        "overview": "Aperçu",
+        "members": "Membres",
+        "velocity": "Vélocité",
+        "burndown": "Burndown",
+        "summary": "Synthèse"
+      },
+      "children": {
+        "title": "Sprints",
+        "empty": "Aucun sprint pour le moment."
+      },
+      "edit": "Modifier",
+      "delete": "Supprimer"
+    },
+    "members": {
+      "title": "Membres",
+      "add": "Ajouter un membre",
+      "empty": "Aucun membre pour le moment.",
+      "nameLabel": "Nom",
+      "roleLabel": "Rôle",
+      "quotiteLabel": "Quotité",
+      "focusFactorLabel": "Facteur de focus (surcharge)",
+      "localityLabel": "Localité",
+      "excludedLabel": "Exclu des totaux",
+      "positionLabel": "Position",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "saveError": "Impossible d'enregistrer ce membre.",
+      "remove": "Retirer",
+      "removeConfirm": "Retirer ce membre et ses absences ?",
+      "removeError": "Impossible de retirer ce membre.",
+      "errors": {
+        "INVALID_NAME": "Saisissez un nom de membre.",
+        "INVALID_QUOTITE": "La quotité doit être supérieure à 0 et inférieure ou égale à 1.",
+        "FOCUS_OUT_OF_RANGE": "Le facteur de focus doit être compris entre 0 et 1."
+      }
+    },
+    "absences": {
+      "title": "Absences",
+      "add": "Ajouter une absence",
+      "empty": "Aucune absence enregistrée.",
+      "startDateLabel": "Date de début",
+      "endDateLabel": "Date de fin",
+      "fractionLabel": "Durée",
+      "fractionFull": "Journée complète",
+      "fractionHalf": "Demi-journée",
+      "sourceLabel": "Source",
+      "sourceManual": "Manuelle",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "saveError": "Impossible d'enregistrer cette absence.",
+      "remove": "Retirer",
+      "removeConfirm": "Retirer cette absence ?",
+      "removeError": "Impossible de retirer cette absence.",
+      "errors": {
+        "INVALID_DATE_RANGE": "La date de fin ne peut pas être antérieure à la date de début.",
+        "ABSENCE_OUT_OF_RANGE": "L'absence doit être comprise dans la fenêtre de l'événement.",
+        "INVALID_FRACTION": "La durée doit être une journée complète ou une demi-journée."
+      }
+    },
+    "velocity": {
+      "title": "Vélocité",
+      "pointsEngagesLabel": "Points engagés",
+      "pointsLivresLabel": "Points livrés",
+      "save": "Enregistrer la vélocité",
+      "saving": "Enregistrement…",
+      "saveSuccess": "Vélocité enregistrée.",
+      "saveError": "Impossible d'enregistrer la vélocité.",
+      "history": {
+        "title": "Historique de vélocité",
+        "empty": "Aucun sprint clôturé pour le moment.",
+        "forecastTitle": "Prévision",
+        "mean": "Moyenne",
+        "stdDev": "Écart type",
+        "coefficientOfVariation": "Coefficient de variation",
+        "lowerBound": "Borne basse",
+        "upperBound": "Borne haute",
+        "widened": "Intervalle de confiance élargi (forte variabilité)",
+        "sampleSize": "Taille de l'échantillon"
+      }
+    },
+    "burndown": {
+      "title": "Burndown",
+      "empty": "Aucune donnée de burndown pour le moment.",
+      "real": "Réel",
+      "ideal": "Idéal",
+      "loadError": "Impossible de charger le burndown."
+    },
+    "summary": {
+      "title": "Synthèse",
+      "loadError": "Impossible de charger la synthèse.",
+      "totalWorkingDays": "Jours travaillés totaux",
+      "totalNetPersonDays": "Jours-hommes nets",
+      "totalNetCapacity": "Capacité nette",
+      "totalPoints": "Points totaux",
+      "totalRecommendedEngagement": "Engagement recommandé",
+      "loadRatio": "Taux de charge",
+      "predictability": "Prévisibilité",
+      "consolidation": {
+        "title": "Consolidation du PI",
+        "totalJoursHommeNets": "Jours-hommes nets",
+        "totalCapaciteNette": "Capacité nette",
+        "totalPoints": "Points totaux",
+        "includedSprintCount": "Sprints inclus",
+        "excludedIpSprintCount": "Sprints IP exclus"
+      },
+      "membersTable": {
+        "name": "Nom",
+        "role": "Rôle",
+        "quotite": "Quotité",
+        "effectiveFocus": "Focus",
+        "absentWorkingDays": "Jours absents",
+        "workedDays": "Jours travaillés",
+        "netCapacity": "Capacité nette",
+        "points": "Points",
+        "recommendedEngagement": "Engagement recommandé",
+        "excluded": "Exclu"
+      }
+    },
+    "gauge": {
+      "title": "Jauge d'engagement",
+      "engagedPoints": "Points engagés",
+      "referenceEngagement": "Engagement de référence",
+      "engagementRatio": "Taux d'engagement",
+      "overCommitted": "Sur-engagé",
+      "ok": "Dans la capacité"
+    },
+    "kpi": {
+      "title": "KPI de capacité",
+      "tauxUtilisation": "Taux d'utilisation",
+      "capaciteNette": "Capacité nette",
+      "velociteMoyenne": "Vélocité moyenne",
+      "tauxAbsence": "Taux d'absence",
+      "depassements": "Dépassements",
+      "loadError": "Impossible de charger les KPI.",
+      "empty": "Aucune donnée de KPI pour le moment.",
+      "eventSampleSize": "Événements échantillonnés",
+      "sprintSampleSize": "Sprints échantillonnés"
+    },
+    "common": {
+      "cancel": "Annuler",
+      "close": "Fermer",
+      "confirm": "Confirmer",
+      "yes": "Oui",
+      "no": "Non",
+      "back": "Retour",
+      "actions": "Actions",
+      "loading": "Chargement…"
+    }
   }
 }
