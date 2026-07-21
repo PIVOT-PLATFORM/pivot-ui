@@ -1,0 +1,85 @@
+<section class="absences-section" aria-labelledby="absences-section-heading">
+  <h3 id="absences-section-heading">
+    {{ 'capacity.absences.title' | transloco }}
+    @if (memberName()) {
+      <span class="absences-section__member-name"> — {{ memberName() }}</span>
+    }
+  </h3>
+
+  @if (!memberId()) {
+    <p>{{ 'capacity.absences.empty' | transloco }}</p>
+  } @else {
+    @if (absences().length === 0) {
+      <p>{{ 'capacity.absences.empty' | transloco }}</p>
+    } @else {
+      <ul class="absences-section__list">
+        @for (absence of absences(); track absence.id) {
+          <li class="absences-section__item">
+            <span>{{ absence.startDate }} → {{ absence.endDate }}</span>
+            <span>
+              {{
+                (absence.fraction === 1 ? 'capacity.absences.fractionFull' : 'capacity.absences.fractionHalf')
+                  | transloco
+              }}
+            </span>
+            <button type="button" (click)="requestRemove(absence)">
+              {{ 'capacity.absences.remove' | transloco }}
+            </button>
+          </li>
+        }
+      </ul>
+    }
+
+    @if (removeErrorKey(); as removeError) {
+      <p role="alert">{{ removeError | transloco }}</p>
+    }
+
+    @if (pendingRemove(); as absence) {
+      <div class="dialog-backdrop">
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="absence-confirm-remove-title"
+        >
+          <h4 id="absence-confirm-remove-title">{{ 'capacity.absences.removeConfirm' | transloco }}</h4>
+          <p>{{ absence.startDate }} → {{ absence.endDate }}</p>
+          <button type="button" (click)="confirmRemove()">{{ 'capacity.common.yes' | transloco }}</button>
+          <button type="button" (click)="cancelRemove()">{{ 'capacity.common.no' | transloco }}</button>
+        </div>
+      </div>
+    }
+
+    <form class="absences-section__form" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <div class="absences-section__field">
+        <label for="absence-start-date">{{ 'capacity.absences.startDateLabel' | transloco }}</label>
+        <input id="absence-start-date" type="date" formControlName="startDate" />
+      </div>
+
+      <div class="absences-section__field">
+        <label for="absence-end-date">{{ 'capacity.absences.endDateLabel' | transloco }}</label>
+        <input id="absence-end-date" type="date" formControlName="endDate" />
+      </div>
+
+      <div class="absences-section__field">
+        <label for="absence-fraction">{{ 'capacity.absences.fractionLabel' | transloco }}</label>
+        <select id="absence-fraction" formControlName="fraction">
+          <option [ngValue]="1">{{ 'capacity.absences.fractionFull' | transloco }}</option>
+          <option [ngValue]="0.5">{{ 'capacity.absences.fractionHalf' | transloco }}</option>
+        </select>
+      </div>
+
+      <div class="absences-section__field">
+        <label for="absence-source">{{ 'capacity.absences.sourceLabel' | transloco }}</label>
+        <input id="absence-source" type="text" formControlName="source" [placeholder]="'capacity.absences.sourceManual' | transloco" />
+      </div>
+
+      <button type="submit" [disabled]="submitting()" [attr.aria-busy]="submitting()">
+        {{ (submitting() ? 'capacity.absences.saving' : 'capacity.absences.add') | transloco }}
+      </button>
+
+      @if (errorMessageKey(); as errorKey) {
+        <p role="alert">{{ errorKey | transloco }}</p>
+      }
+    </form>
+  }
+</section>

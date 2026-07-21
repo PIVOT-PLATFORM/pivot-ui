@@ -1,0 +1,120 @@
+<section class="summary-panel" aria-labelledby="summary-panel-heading">
+  <h2 id="summary-panel-heading">{{ 'capacity.summary.title' | transloco }}</h2>
+
+  @if (loadError()) {
+    <div role="alert">
+      <p>{{ 'capacity.summary.loadError' | transloco }}</p>
+    </div>
+  } @else if (summary(); as s) {
+    <dl class="summary-panel__totals">
+      <dt>{{ 'capacity.summary.totalWorkingDays' | transloco }}</dt>
+      <dd>{{ s.totalWorkingDays }}</dd>
+
+      <dt>{{ 'capacity.summary.totalNetPersonDays' | transloco }}</dt>
+      <dd>{{ s.totalNetPersonDays }}</dd>
+
+      <dt>{{ 'capacity.summary.totalNetCapacity' | transloco }}</dt>
+      <dd>{{ s.totalNetCapacity }}</dd>
+
+      <dt>{{ 'capacity.summary.totalPoints' | transloco }}</dt>
+      <dd>{{ s.totalPoints ?? '—' }}</dd>
+
+      <dt>{{ 'capacity.summary.totalRecommendedEngagement' | transloco }}</dt>
+      <dd>{{ s.totalRecommendedEngagement }}</dd>
+
+      <dt>{{ 'capacity.summary.loadRatio' | transloco }}</dt>
+      <dd>{{ s.loadRatio ?? '—' }}</dd>
+
+      <dt>{{ 'capacity.summary.predictability' | transloco }}</dt>
+      <dd>{{ s.predictability ?? '—' }}</dd>
+    </dl>
+
+    <table class="summary-panel__table">
+      <caption>{{ 'capacity.summary.title' | transloco }}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'capacity.summary.membersTable.name' | transloco }}</th>
+          <th scope="col">{{ 'capacity.summary.membersTable.role' | transloco }}</th>
+          <th scope="col">{{ 'capacity.summary.membersTable.quotite' | transloco }}</th>
+          <th scope="col">{{ 'capacity.summary.membersTable.effectiveFocus' | transloco }}</th>
+          <th scope="col">{{ 'capacity.summary.membersTable.absentWorkingDays' | transloco }}</th>
+          <th scope="col">{{ 'capacity.summary.membersTable.workedDays' | transloco }}</th>
+          <th scope="col">{{ 'capacity.summary.membersTable.netCapacity' | transloco }}</th>
+          <th scope="col">{{ 'capacity.summary.membersTable.points' | transloco }}</th>
+          <th scope="col">{{ 'capacity.summary.membersTable.recommendedEngagement' | transloco }}</th>
+          <th scope="col">{{ 'capacity.summary.membersTable.excluded' | transloco }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (member of s.members; track member.memberId) {
+          <tr>
+            <td>{{ member.name }}</td>
+            <td>{{ member.role ?? '—' }}</td>
+            <td>{{ member.quotite }}</td>
+            <td>{{ member.effectiveFocus }}</td>
+            <td>{{ member.absentWorkingDays }}</td>
+            <td>{{ member.workedDays }}</td>
+            <td>{{ member.netCapacity }}</td>
+            <td>{{ member.points ?? '—' }}</td>
+            <td>{{ member.recommendedEngagement }}</td>
+            <td>{{ member.excluded ? ('capacity.common.yes' | transloco) : ('capacity.common.no' | transloco) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (s.consolidation; as c) {
+      <section class="summary-panel__consolidation" aria-labelledby="summary-consolidation-heading">
+        <h3 id="summary-consolidation-heading">{{ 'capacity.summary.consolidation.title' | transloco }}</h3>
+        <dl>
+          <dt>{{ 'capacity.summary.consolidation.totalJoursHommeNets' | transloco }}</dt>
+          <dd>{{ c.totalJoursHommeNets }}</dd>
+          <dt>{{ 'capacity.summary.consolidation.totalCapaciteNette' | transloco }}</dt>
+          <dd>{{ c.totalCapaciteNette }}</dd>
+          <dt>{{ 'capacity.summary.consolidation.totalPoints' | transloco }}</dt>
+          <dd>{{ c.totalPoints ?? '—' }}</dd>
+          <dt>{{ 'capacity.summary.consolidation.includedSprintCount' | transloco }}</dt>
+          <dd>{{ c.includedSprintCount }}</dd>
+          <dt>{{ 'capacity.summary.consolidation.excludedIpSprintCount' | transloco }}</dt>
+          <dd>{{ c.excludedIpSprintCount }}</dd>
+        </dl>
+      </section>
+    }
+
+    <section
+      class="summary-panel__gauge"
+      [class.summary-panel__gauge--over]="s.gauge.overCommitted"
+      aria-labelledby="summary-gauge-heading"
+    >
+      <h3 id="summary-gauge-heading">{{ 'capacity.gauge.title' | transloco }}</h3>
+      <dl>
+        <dt>{{ 'capacity.gauge.engagedPoints' | transloco }}</dt>
+        <dd>{{ s.gauge.engagedPoints }}</dd>
+        <dt>{{ 'capacity.gauge.referenceEngagement' | transloco }}</dt>
+        <dd>{{ s.gauge.referenceEngagement }}</dd>
+        <dt>{{ 'capacity.gauge.engagementRatio' | transloco }}</dt>
+        <dd>{{ s.gauge.engagementRatio ?? '—' }}</dd>
+      </dl>
+
+      <div
+        class="summary-panel__gauge-bar"
+        role="meter"
+        [attr.aria-valuenow]="s.gauge.engagedPoints"
+        [attr.aria-valuemin]="0"
+        [attr.aria-valuemax]="s.gauge.overflowThreshold"
+        [attr.aria-label]="'capacity.gauge.title' | transloco"
+      >
+        <div
+          class="summary-panel__gauge-fill"
+          [style.width.%]="clampedRatio(s.gauge.engagementRatio) * 100"
+        ></div>
+      </div>
+
+      @if (s.gauge.overCommitted) {
+        <p class="summary-panel__gauge-alert" role="alert">{{ 'capacity.gauge.overCommitted' | transloco }}</p>
+      } @else {
+        <p class="summary-panel__gauge-ok" role="status">{{ 'capacity.gauge.ok' | transloco }}</p>
+      }
+    </section>
+  }
+</section>

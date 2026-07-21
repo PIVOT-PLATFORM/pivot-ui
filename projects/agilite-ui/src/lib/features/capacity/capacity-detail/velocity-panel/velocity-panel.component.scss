@@ -1,0 +1,53 @@
+// Styles minimaux, auto-contenus (pas de tokens @pivot/design-system — voir CLAUDE.md).
+
+.velocity-panel__form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.velocity-panel__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.velocity-panel__history {
+  margin-top: 1.5rem;
+}
+
+.velocity-panel__table {
+  border-collapse: collapse;
+  width: 100%;
+
+  th,
+  td {
+    border: 1px solid #d7dbe0;
+    padding: 0.375rem 0.625rem;
+    text-align: left;
+  }
+}
+
+.velocity-panel__forecast {
+  margin-top: 1rem;
+
+  dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.25rem 0.75rem;
+  }
+
+  dt {
+    font-weight: 600;
+  }
+
+  dd {
+    margin: 0;
+  }
+}
+
+.velocity-panel__widened {
+  color: #b3261e;
+  font-weight: 600;
+}

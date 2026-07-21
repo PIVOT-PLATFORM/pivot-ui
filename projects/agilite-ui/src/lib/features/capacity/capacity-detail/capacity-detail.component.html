@@ -1,0 +1,140 @@
+<section class="capacity-detail">
+  @if (loadError()) {
+    <div role="alert">
+      <p>{{ 'capacity.detail.loadError' | transloco }}</p>
+      <a routerLink="/capacity">{{ 'capacity.common.back' | transloco }}</a>
+    </div>
+  } @else if (event(); as ev) {
+    <header class="capacity-detail__header">
+      <h1>{{ ev.name }}</h1>
+      <div class="capacity-detail__actions">
+        <a [routerLink]="['/capacity', eventId, 'edit']">{{ 'capacity.detail.edit' | transloco }}</a>
+        <button type="button" (click)="requestDelete()">{{ 'capacity.detail.delete' | transloco }}</button>
+      </div>
+    </header>
+
+    <nav class="capacity-detail__tabs" role="tablist" [attr.aria-label]="ev.name">
+      <button type="button" role="tab" [attr.aria-selected]="activeTab() === 'overview'" (click)="selectTab('overview')">
+        {{ 'capacity.detail.tabs.overview' | transloco }}
+      </button>
+      <button type="button" role="tab" [attr.aria-selected]="activeTab() === 'members'" (click)="selectTab('members')">
+        {{ 'capacity.detail.tabs.members' | transloco }}
+      </button>
+      <button type="button" role="tab" [attr.aria-selected]="activeTab() === 'velocity'" (click)="selectTab('velocity')">
+        {{ 'capacity.detail.tabs.velocity' | transloco }}
+      </button>
+      <button type="button" role="tab" [attr.aria-selected]="activeTab() === 'burndown'" (click)="selectTab('burndown')">
+        {{ 'capacity.detail.tabs.burndown' | transloco }}
+      </button>
+      <button type="button" role="tab" [attr.aria-selected]="activeTab() === 'summary'" (click)="selectTab('summary')">
+        {{ 'capacity.detail.tabs.summary' | transloco }}
+      </button>
+    </nav>
+
+    @if (activeTab() === 'overview') {
+      <section class="capacity-detail__panel" role="tabpanel" aria-labelledby="capacity-detail-overview-heading">
+        <h2 id="capacity-detail-overview-heading">{{ 'capacity.detail.tabs.overview' | transloco }}</h2>
+
+        <dl class="capacity-detail__fields">
+          <dt>{{ 'capacity.form.typeLabel' | transloco }}</dt>
+          <dd>{{ 'capacity.types.' + ev.type | transloco }}</dd>
+
+          <dt>{{ 'capacity.form.statusLabel' | transloco }}</dt>
+          <dd>{{ 'capacity.statuses.' + ev.status | transloco }}</dd>
+
+          <dt>{{ 'capacity.form.startDateLabel' | transloco }}</dt>
+          <dd>{{ ev.startDate }}</dd>
+
+          <dt>{{ 'capacity.form.endDateLabel' | transloco }}</dt>
+          <dd>{{ ev.endDate }}</dd>
+
+          <dt>{{ 'capacity.form.maturityLabel' | transloco }}</dt>
+          <dd>{{ ev.maturityLevel ? ('capacity.maturity.' + ev.maturityLevel | transloco) : ('capacity.maturity.none' | transloco) }}</dd>
+
+          <dt>{{ 'capacity.form.focusFactorLabel' | transloco }}</dt>
+          <dd>{{ ev.focusFactor ?? '—' }}</dd>
+
+          <dt>{{ 'capacity.form.margeSecuriteLabel' | transloco }}</dt>
+          <dd>{{ ev.margeSecurite ?? '—' }}</dd>
+
+          <dt>{{ 'capacity.form.pointsPerDayLabel' | transloco }}</dt>
+          <dd>{{ ev.pointsPerDay ?? '—' }}</dd>
+
+          <dt>{{ 'capacity.form.committedPointsLabel' | transloco }}</dt>
+          <dd>{{ ev.committedPoints ?? '—' }}</dd>
+
+          @if (ev.notes) {
+            <dt>{{ 'capacity.form.notesLabel' | transloco }}</dt>
+            <dd>{{ ev.notes }}</dd>
+          }
+        </dl>
+
+        <section class="capacity-detail__children" aria-labelledby="capacity-detail-children-heading">
+          <h3 id="capacity-detail-children-heading">{{ 'capacity.detail.children.title' | transloco }}</h3>
+          @if (children().length === 0) {
+            <p>{{ 'capacity.detail.children.empty' | transloco }}</p>
+          } @else {
+            <ul>
+              @for (child of children(); track child.id) {
+                <li>
+                  <a [routerLink]="['/capacity', child.id]">{{ child.name }}</a>
+                  <span>{{ 'capacity.statuses.' + child.status | transloco }}</span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      </section>
+    }
+
+    @if (activeTab() === 'members') {
+      <div role="tabpanel">
+        <app-capacity-members-panel
+          [eventId]="eventId"
+          [members]="summary()?.members ?? []"
+          (changed)="loadSummary()"
+        />
+      </div>
+    }
+
+    @if (activeTab() === 'velocity') {
+      <div role="tabpanel">
+        <app-capacity-velocity-panel [eventId]="eventId" (changed)="loadSummary()" />
+      </div>
+    }
+
+    @if (activeTab() === 'burndown') {
+      <div role="tabpanel">
+        <app-capacity-burndown-panel [eventId]="eventId" />
+      </div>
+    }
+
+    @if (activeTab() === 'summary') {
+      <div role="tabpanel">
+        <app-capacity-summary-panel [summary]="summary()" [loadError]="summaryLoadError()" />
+      </div>
+    }
+
+    @if (pendingDelete()) {
+      <div class="dialog-backdrop">
+        <div role="alertdialog" aria-modal="true" aria-labelledby="capacity-detail-confirm-delete-title" aria-describedby="capacity-detail-confirm-delete-message">
+          <h2 id="capacity-detail-confirm-delete-title">{{ 'capacity.confirmDelete.title' | transloco }}</h2>
+          <p id="capacity-detail-confirm-delete-message">
+            {{ 'capacity.confirmDelete.message' | transloco : { name: ev.name } }}
+          </p>
+          <button type="button" (click)="confirmDelete()">{{ 'capacity.confirmDelete.confirm' | transloco }}</button>
+          <button type="button" #cancelDeleteButton (click)="cancelDelete()">
+            {{ 'capacity.confirmDelete.cancel' | transloco }}
+          </button>
+        </div>
+      </div>
+    }
+  }
+
+  @for (t of toasts(); track t.id) {
+    <div [attr.role]="t.type === 'error' || t.type === 'warning' ? 'alert' : 'status'">
+      <span>{{ t.messageKey | transloco }}</span>
+      <button type="button" (click)="dismissToast(t.id)">{{ 'capacity.common.close' | transloco }}</button>
+    </div>
+  }
+</section>

@@ -1,0 +1,39 @@
+// Styles minimaux, auto-contenus (pas de tokens @pivot/design-system — voir CLAUDE.md).
+
+.absences-section {
+  border-top: 1px solid #d7dbe0;
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+.absences-section__member-name {
+  font-weight: 400;
+}
+
+.absences-section__list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.absences-section__item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.absences-section__form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+  margin-top: 0.75rem;
+}
+
+.absences-section__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}

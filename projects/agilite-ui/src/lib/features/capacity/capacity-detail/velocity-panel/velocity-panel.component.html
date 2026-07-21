@@ -1,0 +1,76 @@
+<section class="velocity-panel" aria-labelledby="velocity-panel-heading">
+  <h2 id="velocity-panel-heading">{{ 'capacity.velocity.title' | transloco }}</h2>
+
+  <form class="velocity-panel__form" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <div class="velocity-panel__field">
+      <label for="velocity-points-engages">{{ 'capacity.velocity.pointsEngagesLabel' | transloco }}</label>
+      <input id="velocity-points-engages" type="number" min="0" formControlName="pointsEngages" />
+    </div>
+
+    <div class="velocity-panel__field">
+      <label for="velocity-points-livres">{{ 'capacity.velocity.pointsLivresLabel' | transloco }}</label>
+      <input id="velocity-points-livres" type="number" min="0" formControlName="pointsLivres" />
+    </div>
+
+    <button type="submit" [disabled]="submitting()" [attr.aria-busy]="submitting()">
+      {{ (submitting() ? 'capacity.velocity.saving' : 'capacity.velocity.save') | transloco }}
+    </button>
+
+    @if (saveSuccess()) {
+      <p role="status">{{ 'capacity.velocity.saveSuccess' | transloco }}</p>
+    }
+    @if (saveError()) {
+      <p role="alert">{{ 'capacity.velocity.saveError' | transloco }}</p>
+    }
+  </form>
+
+  <section class="velocity-panel__history" aria-labelledby="velocity-history-heading">
+    <h3 id="velocity-history-heading">{{ 'capacity.velocity.history.title' | transloco }}</h3>
+
+    @if (historyLoadError() || history().length === 0) {
+      <p>{{ 'capacity.velocity.history.empty' | transloco }}</p>
+    } @else {
+      <table class="velocity-panel__table">
+        <thead>
+          <tr>
+            <th scope="col">{{ 'capacity.summary.membersTable.name' | transloco }}</th>
+            <th scope="col">{{ 'capacity.velocity.pointsEngagesLabel' | transloco }}</th>
+            <th scope="col">{{ 'capacity.velocity.pointsLivresLabel' | transloco }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (point of history(); track point.sprintEventId) {
+            <tr>
+              <td>{{ point.name }}</td>
+              <td>{{ point.pointsEngages ?? '—' }}</td>
+              <td>{{ point.pointsLivres ?? '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+    @if (forecast(); as f) {
+      <div class="velocity-panel__forecast">
+        <h4>{{ 'capacity.velocity.history.forecastTitle' | transloco }}</h4>
+        <dl>
+          <dt>{{ 'capacity.velocity.history.sampleSize' | transloco }}</dt>
+          <dd>{{ f.sampleSize }}</dd>
+          <dt>{{ 'capacity.velocity.history.mean' | transloco }}</dt>
+          <dd>{{ f.mean }}</dd>
+          <dt>{{ 'capacity.velocity.history.stdDev' | transloco }}</dt>
+          <dd>{{ f.stdDev }}</dd>
+          <dt>{{ 'capacity.velocity.history.coefficientOfVariation' | transloco }}</dt>
+          <dd>{{ f.coefficientOfVariation }}</dd>
+          <dt>{{ 'capacity.velocity.history.lowerBound' | transloco }}</dt>
+          <dd>{{ f.lowerBound }}</dd>
+          <dt>{{ 'capacity.velocity.history.upperBound' | transloco }}</dt>
+          <dd>{{ f.upperBound }}</dd>
+        </dl>
+        @if (f.widened) {
+          <p class="velocity-panel__widened" role="status">{{ 'capacity.velocity.history.widened' | transloco }}</p>
+        }
+      </div>
+    }
+  </section>
+</section>

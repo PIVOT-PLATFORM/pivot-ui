@@ -1,0 +1,104 @@
+<section class="members-panel" aria-labelledby="members-panel-heading">
+  <h2 id="members-panel-heading">{{ 'capacity.members.title' | transloco }}</h2>
+
+  @if (members().length === 0) {
+    <p>{{ 'capacity.members.empty' | transloco }}</p>
+  } @else {
+    <ul class="members-panel__list">
+      @for (member of members(); track member.memberId) {
+        <li class="members-panel__item">
+          <button
+            type="button"
+            class="members-panel__select"
+            [attr.aria-pressed]="selectedMemberId() === member.memberId"
+            (click)="selectMember(member.memberId)"
+          >
+            <span>{{ member.name }}</span>
+            @if (member.role) {
+              <span class="members-panel__role">({{ member.role }})</span>
+            }
+            <span>{{ 'capacity.members.quotiteLabel' | transloco }}: {{ member.quotite }}</span>
+            @if (member.excluded) {
+              <span class="members-panel__excluded">{{ 'capacity.members.excludedLabel' | transloco }}</span>
+            }
+          </button>
+          <button type="button" (click)="openEditForm(member)">{{ 'capacity.detail.edit' | transloco }}</button>
+          <button type="button" (click)="requestRemove(member, $event)">
+            {{ 'capacity.members.remove' | transloco }}
+          </button>
+        </li>
+      }
+    </ul>
+  }
+
+  @if (removeErrorKey(); as removeError) {
+    <p role="alert">{{ removeError | transloco }}</p>
+  }
+
+  @if (pendingRemove(); as member) {
+    <div class="dialog-backdrop">
+      <div role="alertdialog" aria-modal="true" aria-labelledby="member-confirm-remove-title">
+        <h3 id="member-confirm-remove-title">{{ 'capacity.members.removeConfirm' | transloco }}</h3>
+        <p>{{ member.name }}</p>
+        <button type="button" (click)="confirmRemove()">{{ 'capacity.common.yes' | transloco }}</button>
+        <button type="button" (click)="cancelRemove()">{{ 'capacity.common.no' | transloco }}</button>
+      </div>
+    </div>
+  }
+
+  @if (!addFormOpen() && editingMemberId() === null) {
+    <button type="button" (click)="openAddForm()">{{ 'capacity.members.add' | transloco }}</button>
+  } @else {
+    <form class="members-panel__form" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <div class="members-panel__field">
+        <label for="member-name">{{ 'capacity.members.nameLabel' | transloco }}</label>
+        <input id="member-name" type="text" formControlName="name" />
+      </div>
+
+      <div class="members-panel__field">
+        <label for="member-role">{{ 'capacity.members.roleLabel' | transloco }}</label>
+        <input id="member-role" type="text" formControlName="role" />
+      </div>
+
+      <div class="members-panel__field">
+        <label for="member-quotite">{{ 'capacity.members.quotiteLabel' | transloco }}</label>
+        <input id="member-quotite" type="number" step="0.05" min="0.01" max="1" formControlName="quotite" />
+      </div>
+
+      <div class="members-panel__field">
+        <label for="member-focus-factor">{{ 'capacity.members.focusFactorLabel' | transloco }}</label>
+        <input id="member-focus-factor" type="number" step="0.05" min="0" max="1" formControlName="focusFactor" />
+      </div>
+
+      <div class="members-panel__field">
+        <label for="member-locality">{{ 'capacity.members.localityLabel' | transloco }}</label>
+        <input id="member-locality" type="text" formControlName="locality" />
+      </div>
+
+      <div class="members-panel__field">
+        <label for="member-position">{{ 'capacity.members.positionLabel' | transloco }}</label>
+        <input id="member-position" type="number" step="1" min="0" formControlName="position" />
+      </div>
+
+      <div class="members-panel__field members-panel__field--checkbox">
+        <label for="member-excluded">
+          <input id="member-excluded" type="checkbox" formControlName="excluded" />
+          {{ 'capacity.members.excludedLabel' | transloco }}
+        </label>
+      </div>
+
+      <button type="submit" [disabled]="submitting()" [attr.aria-busy]="submitting()">
+        {{ (submitting() ? 'capacity.members.saving' : 'capacity.members.save') | transloco }}
+      </button>
+      <button type="button" (click)="closeForm()">{{ 'capacity.common.cancel' | transloco }}</button>
+
+      @if (errorMessageKey(); as errorKey) {
+        <p role="alert">{{ errorKey | transloco }}</p>
+      }
+    </form>
+  }
+
+  @if (selectedMemberId(); as memberId) {
+    <app-capacity-absences-section [memberId]="memberId" [memberName]="selectedMemberName()" (changed)="changed.emit()" />
+  }
+</section>
