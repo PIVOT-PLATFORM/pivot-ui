@@ -3,7 +3,9 @@ import {
   Component,
   ElementRef,
   HostListener,
+  OnDestroy,
   computed,
+  effect,
   inject,
   input,
   output,
@@ -42,6 +44,10 @@ import {
   pointInRect,
   rectsIntersect,
   computeMinZoom,
+  fitBox,
+  unionRect,
+  wheelZoom,
+  zoomAround,
   screenToCanvas,
   type EdgeSide,
   type Rect,
@@ -55,6 +61,10 @@ import {
   LINE_SNAP_DEG,
   LINE_MIN_DRAG,
   MAX_ZOOM,
+  AUTO_FIT_WINDOW_MS,
+  FIT_CONTENT_MAX_ZOOM,
+  FIT_SELECTION_MAX_ZOOM,
+  WHEEL_COMMIT_DEBOUNCE_MS,
   DOT_SPACING,
   snapToGrid,
   DEFAULT_CARD_W,
@@ -165,7 +175,7 @@ const GUIDE_SPAN = 100_000;
   templateUrl: './structured-canvas.component.html',
   styleUrl: './structured-canvas.component.scss',
 })
-export class StructuredCanvasComponent {
+export class StructuredCanvasComponent implements OnDestroy {
   protected readonly store = inject(BoardStore);
   private readonly transloco = inject(TranslocoService);
 
@@ -208,6 +218,23 @@ export class StructuredCanvasComponent {
   private readonly connectionLines = viewChildren(ConnectionLineComponent);
 
   protected readonly viewport = signal<Viewport>({ x: 0, y: 0, zoom: 1 });
+  /**
+   * Viewport awaiting the end of a wheel burst (US08.11.2), or `null` outside one.
+   *
+   * Deliberately a plain field rather than a signal: it exists precisely to *avoid* notifying
+   * dependents on every wheel event — making it reactive would defeat the debounce it implements.
+   */
+  private pendingViewport: Viewport | null = null;
+  private wheelCommitTimer: ReturnType<typeof setTimeout> | null = null;
+  /**
+   * Whether the board's content is still hidden pending the one-shot auto-fit (US08.11.2, §4.1).
+   *
+   * Starts `true` so the board never flashes at 100 % before snapping to its fitted framing; the
+   * fade-in is driven from the template.
+   */
+  protected readonly contentHidden = signal(true);
+  /** Whether the open-the-board auto-fit may still run — disarmed on first fit or on timeout. */
+  private autoFitArmed = true;
   protected readonly marquee = signal<Rect | null>(null);
   protected readonly connectGhost = signal<{ from: { x: number; y: number }; to: { x: number; y: number } } | null>(null);
   /** Anchor pastilles shown on the card currently hovered during a connect drag (ITEM B). */
@@ -374,25 +401,156 @@ export class StructuredCanvasComponent {
     return computeMinZoom(content, surfaceWidth, surfaceHeight);
   }
 
-  // ── Wheel zoom / pan ──────────────────────────────────────────────────────
+  // ── Wheel zoom ────────────────────────────────────────────────────────────
+  /**
+   * Zooms on wheel, anchored under the cursor (US08.11.2, §4.1).
+   *
+   * ⚠️ The wheel no longer pans. Before US08.11.2 a plain scroll moved the viewport and only
+   * Ctrl+wheel zoomed; the spec (and the reference POC) make every wheel event a zoom, with
+   * Ctrl/Cmd merely selecting a faster base. Panning remains available on the middle button, the
+   * hand tool and Space+drag. Decision confirmed by the maintainer on 2026-07-21.
+   *
+   * The pending viewport is committed on a {@link WHEEL_COMMIT_DEBOUNCE_MS} trailing edge rather
+   * than on every event: a single gesture fires dozens of them, and each write re-runs every
+   * dependent computed.
+   */
   protected onWheel(event: WheelEvent): void {
     event.preventDefault();
+    const rect = this.surface().nativeElement.getBoundingClientRect();
+    // Chain from the pending viewport, not the committed one — otherwise every event inside a
+    // burst would compute its step from the same stale zoom and the gesture would barely move.
+    const v = this.pendingViewport ?? this.viewport();
+    const raw = wheelZoom(v.zoom, event.deltaY, event.ctrlKey || event.metaKey);
+    const zoom = this.clampZoom(raw, rect.width, rect.height);
+    this.commitViewportDebounced(zoomAround(v, zoom, event.clientX - rect.left, event.clientY - rect.top));
+  }
+
+  /**
+   * Arms the one-shot open-the-board auto-fit (US08.11.2, §4.1).
+   *
+   * The board's content arrives asynchronously over the WebSocket, so the fit cannot simply run on
+   * init — it waits for the first non-empty state. Two things disarm it: that first fit, and a
+   * {@link AUTO_FIT_WINDOW_MS} deadline. The deadline matters as much as the fit: without it, a
+   * card created by hand ten minutes into a session would be the "first content" on an
+   * initially-empty board and would yank the view out from under the user.
+   */
+  constructor() {
+    setTimeout(() => this.revealContent(), AUTO_FIT_WINDOW_MS);
+    effect(() => {
+      const hasContent = this.store.cards().length > 0 || this.store.frames().length > 0;
+      if (!this.autoFitArmed || !hasContent) {
+        return;
+      }
+      this.autoFitArmed = false;
+      // Defer past this effect's own reactive context: `fitToContent` writes `viewport`, which is
+      // read by computeds this effect would otherwise be seen to depend on.
+      setTimeout(() => {
+        this.fitToContent();
+        this.revealContent();
+      });
+    });
+  }
+
+  /** Reveals the content and permanently disarms the auto-fit. */
+  private revealContent(): void {
+    this.autoFitArmed = false;
+    this.contentHidden.set(false);
+  }
+
+  ngOnDestroy(): void {
+    // A pending wheel commit would otherwise fire into a destroyed component.
+    if (this.wheelCommitTimer !== null) {
+      clearTimeout(this.wheelCommitTimer);
+    }
+  }
+
+  /** Clamps a zoom into the board's effective bounds (US08.3.5 floor, {@link MAX_ZOOM} ceiling). */
+  private clampZoom(zoom: number, surfaceWidth: number, surfaceHeight: number): number {
+    return Math.min(MAX_ZOOM, Math.max(this.minZoom(surfaceWidth, surfaceHeight), zoom));
+  }
+
+  /**
+   * Schedules `next` to land on the {@link viewport} signal after the wheel burst settles.
+   *
+   * Keeps {@link pendingViewport} in sync immediately so the *next* wheel event in the same burst
+   * chains from it, while the signal — and therefore the render — is written once per burst.
+   */
+  private commitViewportDebounced(next: Viewport): void {
+    this.pendingViewport = next;
+    if (this.wheelCommitTimer !== null) {
+      clearTimeout(this.wheelCommitTimer);
+    }
+    this.wheelCommitTimer = setTimeout(() => {
+      this.wheelCommitTimer = null;
+      const pending = this.pendingViewport;
+      this.pendingViewport = null;
+      if (pending) {
+        this.viewport.set(pending);
+      }
+    }, WHEEL_COMMIT_DEBOUNCE_MS);
+  }
+
+  // ── Zoom commands (US08.11.2) ─────────────────────────────────────────────
+  /** Current zoom factor, for the zoom control's readout. */
+  readonly zoomLevel = computed(() => this.viewport().zoom);
+
+  /**
+   * Multiplies the zoom by `factor`, anchored on the centre of the surface.
+   *
+   * @param factor `> 1` zooms in, `< 1` zooms out; the result is clamped to the board's bounds
+   */
+  zoomByStep(factor: number): void {
+    const rect = this.surface().nativeElement.getBoundingClientRect();
     const v = this.viewport();
-    if (event.ctrlKey || event.metaKey) {
-      const rect = this.surface().nativeElement.getBoundingClientRect();
-      const px = event.clientX - rect.left;
-      const py = event.clientY - rect.top;
-      const factor = event.deltaY < 0 ? 1.1 : 1 / 1.1;
-      // US08.3.5 — clamp against the *dynamic* floor, never `MIN_ZOOM` alone: on a board larger
-      // than the fixed floor can show, the fixed value would stop the zoom-out while the content
-      // still overflows the viewport.
-      const zoom = Math.min(MAX_ZOOM, Math.max(this.minZoom(rect.width, rect.height), v.zoom * factor));
-      // Zoom toward the cursor.
-      const x = px - (px - v.x) * (zoom / v.zoom);
-      const y = py - (py - v.y) * (zoom / v.zoom);
-      this.viewport.set({ x, y, zoom });
-    } else {
-      this.viewport.set({ ...v, x: v.x - event.deltaX, y: v.y - event.deltaY });
+    const zoom = this.clampZoom(v.zoom * factor, rect.width, rect.height);
+    this.viewport.set(zoomAround(v, zoom, rect.width / 2, rect.height / 2));
+  }
+
+  /** Returns the zoom to 100 %, keeping the centre of the surface stable (US08.11.2). */
+  resetZoom(): void {
+    const rect = this.surface().nativeElement.getBoundingClientRect();
+    const v = this.viewport();
+    this.viewport.set(zoomAround(v, this.clampZoom(1, rect.width, rect.height), rect.width / 2, rect.height / 2));
+  }
+
+  /** Frames every card and frame on the board, never magnifying past 100 % (US08.11.2). */
+  fitToContent(): void {
+    this.applyFit(
+      [...this.store.cards().map(cardRect), ...this.store.frames().map(frameRect)],
+      FIT_CONTENT_MAX_ZOOM,
+    );
+  }
+
+  /** Frames the current selection, magnifying up to 150 % for a small one (US08.11.2). */
+  fitToSelection(): void {
+    const selected = this.store.selectedIds();
+    this.applyFit(
+      [
+        ...this.store.cards().filter((c) => selected.has(c.id)).map(cardRect),
+        ...this.store.frames().filter((f) => selected.has(f.id)).map(frameRect),
+      ],
+      FIT_SELECTION_MAX_ZOOM,
+    );
+  }
+
+  /** True when a fit-to-selection would do something — drives the button's disabled state. */
+  readonly hasSelection = computed(() => this.store.selectedIds().size > 0);
+
+  /**
+   * Frames `rects`, or does nothing when there is nothing to frame.
+   *
+   * The silent no-op is deliberate (US08.11.2 error ACs): an empty board or an empty selection must
+   * leave the view exactly as it was rather than jumping to some default framing.
+   */
+  private applyFit(rects: Rect[], maxZoom: number): void {
+    const box = unionRect(rects);
+    if (box === null) {
+      return;
+    }
+    const rect = this.surface().nativeElement.getBoundingClientRect();
+    const next = fitBox(box, rect.width, rect.height, maxZoom, this.minZoom(rect.width, rect.height));
+    if (next !== null) {
+      this.viewport.set(next);
     }
   }
 

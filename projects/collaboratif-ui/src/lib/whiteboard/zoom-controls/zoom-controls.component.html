@@ -1,0 +1,68 @@
+<div class="wb-zoom" role="group" [attr.aria-label]="'whiteboard.zoom.group' | transloco">
+  <button
+    type="button"
+    class="wb-zoom__btn"
+    [attr.aria-label]="'whiteboard.zoom.out' | transloco"
+    [title]="'whiteboard.zoom.out' | transloco"
+    (click)="zoomOut.emit()"
+  >
+    <svg class="wb-zoom__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">
+      <path stroke-linecap="round" stroke-width="2" d="M5 12h14" />
+    </svg>
+  </button>
+
+  <!-- The readout is the reset control: clicking the current zoom to return to 100 % is the
+       convention users already know from Figma/Miro, and it saves a separate button. -->
+  <button
+    type="button"
+    class="wb-zoom__readout"
+    [attr.aria-label]="'whiteboard.zoom.reset' | transloco: { percent: percent() }"
+    [title]="'whiteboard.zoom.reset' | transloco: { percent: percent() }"
+    (click)="resetZoom.emit()"
+  >
+    <span aria-hidden="true">{{ percent() }}%</span>
+  </button>
+
+  <button
+    type="button"
+    class="wb-zoom__btn"
+    [attr.aria-label]="'whiteboard.zoom.in' | transloco"
+    [title]="'whiteboard.zoom.in' | transloco"
+    (click)="zoomIn.emit()"
+  >
+    <svg class="wb-zoom__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">
+      <path stroke-linecap="round" stroke-width="2" d="M12 5v14M5 12h14" />
+    </svg>
+  </button>
+
+  <span class="wb-zoom__sep" aria-hidden="true"></span>
+
+  <button
+    type="button"
+    class="wb-zoom__btn"
+    [attr.aria-label]="'whiteboard.zoom.fitContent' | transloco"
+    [title]="'whiteboard.zoom.fitContent' | transloco"
+    (click)="fitContent.emit()"
+  >
+    <svg class="wb-zoom__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+    </svg>
+  </button>
+
+  <!-- `aria-disabled` rather than `disabled`: the button stays focusable so a keyboard user can
+       reach it and hear why it does nothing, instead of it vanishing from the tab order. -->
+  <button
+    type="button"
+    class="wb-zoom__btn"
+    [class.wb-zoom__btn--inert]="!hasSelection()"
+    [attr.aria-disabled]="!hasSelection()"
+    [attr.aria-label]="'whiteboard.zoom.fitSelection' | transloco"
+    [title]="'whiteboard.zoom.fitSelection' | transloco"
+    (click)="hasSelection() ? fitSelection.emit() : null"
+  >
+    <svg class="wb-zoom__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">
+      <rect x="8" y="8" width="8" height="8" rx="1" stroke-width="2" />
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4" />
+    </svg>
+  </button>
+</div>

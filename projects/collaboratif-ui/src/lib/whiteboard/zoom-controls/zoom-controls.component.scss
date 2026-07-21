@@ -1,0 +1,84 @@
+:host {
+  display: block;
+}
+
+// Horizontal counterpart of `.wb-toolbar`, reusing its tokens so the two clusters read as one
+// family despite sitting on opposite edges of the board.
+.wb-zoom {
+  display: flex;
+  align-items: center;
+  gap: var(--wb-space-1);
+  padding: var(--wb-space-1) var(--wb-space-2);
+  background: var(--wb-surface);
+  border: 1px solid var(--wb-border);
+  border-radius: var(--wb-radius-panel);
+  box-shadow: var(--wb-elev-2);
+  user-select: none;
+}
+
+.wb-zoom__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--wb-radius-sm);
+  background: transparent;
+  color: var(--wb-text);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--wb-surface-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--wb-focus);
+    outline-offset: 1px;
+  }
+
+  // Not `disabled`: the control keeps its place in the tab order so a keyboard user can reach it
+  // and hear its `aria-disabled` state rather than finding it silently absent.
+  &--inert {
+    opacity: 0.4;
+    cursor: default;
+
+    &:hover {
+      background: transparent;
+    }
+  }
+}
+
+.wb-zoom__icon {
+  width: 16px;
+  height: 16px;
+}
+
+.wb-zoom__readout {
+  min-width: 52px;
+  padding: 0 var(--wb-space-1);
+  border: 0;
+  border-radius: var(--wb-radius-sm);
+  background: transparent;
+  color: var(--wb-text);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums; // keeps the cluster from reflowing as the digits change
+  cursor: pointer;
+
+  &:hover {
+    background: var(--wb-surface-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--wb-focus);
+    outline-offset: 1px;
+  }
+}
+
+.wb-zoom__sep {
+  width: 1px;
+  height: 18px;
+  margin: 0 var(--wb-space-1);
+  background: var(--wb-border);
+}

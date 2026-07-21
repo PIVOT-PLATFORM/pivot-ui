@@ -16,7 +16,15 @@
   (keydown)="onKeyDown($event)"
   (keyup)="onKeyUp($event)"
 >
-  <div class="wb-layer" [style.transform]="layerTransform()">
+  <!-- US08.11.2 — the layer stays invisible until the one-shot auto-fit has framed the content,
+       so the board never flashes at 100 % before snapping to its fitted view. The dotted grid
+       stays visible throughout: it carries no content, and hiding it too would read as a blank
+       page rather than as a board still settling. -->
+  <div
+    class="wb-layer"
+    [class.wb-layer--hidden]="contentHidden()"
+    [style.transform]="layerTransform()"
+  >
     <!-- Connections + live drag ghost -->
     <svg class="wb-connections" xmlns="http://www.w3.org/2000/svg">
       @for (rc of renderConnections(); track rc.conn.id) {
