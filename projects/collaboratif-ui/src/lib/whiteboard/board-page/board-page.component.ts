@@ -18,6 +18,7 @@ import { ToastService } from '../../core/toast/toast.service';
 import { BoardTransport, StompBoardTransport } from '../../core/whiteboard/board-transport';
 import { FloatingToolbarComponent } from '../floating-toolbar/floating-toolbar.component';
 import { StructuredCanvasComponent } from '../structured-canvas/structured-canvas.component';
+import { ZoomControlsComponent } from '../zoom-controls/zoom-controls.component';
 import { GroupsPanelComponent } from '../groups-panel/groups-panel.component';
 import { BoardFieldsPanelComponent } from '../board-fields-panel/board-fields-panel.component';
 import { CardFieldValuesPanelComponent } from '../card-field-values-panel/card-field-values-panel.component';
@@ -40,6 +41,7 @@ import {
   writeGridPreference,
   readAlignPreference,
   writeAlignPreference,
+  ZOOM_STEP,
 } from '../model/board-constants';
 import { parseShape } from '../model/shape';
 import { parseLabelFmt, parseTextFmt, type TextAlign } from '../model/card-format';
@@ -70,6 +72,7 @@ const RESET_CONFIRM_WINDOW_MS = 2000;
     TranslocoPipe,
     FloatingToolbarComponent,
     StructuredCanvasComponent,
+    ZoomControlsComponent,
     GroupsPanelComponent,
     BoardFieldsPanelComponent,
     CardFieldValuesPanelComponent,
@@ -97,7 +100,7 @@ export class BoardPageComponent implements OnInit, OnDestroy {
 
   /** The canvas instance — relays the toolbar's explicit image-upload selection to it
    *  (US08.6.4), since insertion logic (dimensioning, positioning) lives on the canvas. */
-  private readonly canvas = viewChild(StructuredCanvasComponent);
+  protected readonly canvas = viewChild(StructuredCanvasComponent);
 
   protected readonly tool = signal<ToolMode>('select');
   protected readonly color = signal<string>(DEFAULT_SHAPE_COLOR);
@@ -121,6 +124,8 @@ export class BoardPageComponent implements OnInit, OnDestroy {
    * drag, so only the latter is opt-in.
    */
   protected readonly alignGuidesEnabled = signal<boolean>(readAlignPreference());
+  /** Zoom step for the +/− buttons (US08.11.2) — surfaced so the template can pass it verbatim. */
+  protected readonly ZOOM_STEP = ZOOM_STEP;
   /** Whether the keyboard shortcut cheat-sheet is open (toggled by `?`). */
   protected readonly showShortcuts = signal(false);
 

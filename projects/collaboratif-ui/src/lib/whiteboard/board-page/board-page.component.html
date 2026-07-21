@@ -163,6 +163,21 @@
       (toolConsumed)="onToolConsumed()"
     ></wb-structured-canvas>
 
+    <!-- Zoom cluster (US08.11.2). Bottom-right — the corner opposite the tool hint, and the one
+         convention already reserves for zoom in canvas apps. -->
+    @if (canvas(); as c) {
+      <wb-zoom-controls
+        class="wb-page__zoom"
+        [zoom]="c.zoomLevel()"
+        [hasSelection]="c.hasSelection()"
+        (zoomIn)="c.zoomByStep(ZOOM_STEP)"
+        (zoomOut)="c.zoomByStep(1 / ZOOM_STEP)"
+        (resetZoom)="c.resetZoom()"
+        (fitContent)="c.fitToContent()"
+        (fitSelection)="c.fitToSelection()"
+      ></wb-zoom-controls>
+    }
+
     <!-- Contextual hint for the active tool. Bottom-left of the board, not inside the toolbar:
          the bar is ~50px wide, and a 180px hint stretched it. Same vertical axis as the bar, so
          it stays where the eye already is after picking a tool. -->

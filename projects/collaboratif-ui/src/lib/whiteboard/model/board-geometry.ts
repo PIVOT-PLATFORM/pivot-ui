@@ -4,7 +4,15 @@
  * the PouetPouet `board-canvas.tsx` / `connection-line.tsx`.
  */
 import type { Card, Frame } from './board.types';
-import { FIT_PAD, MIN_ZOOM, MIN_ZOOM_HEADROOM } from './board-constants';
+import {
+  FIT_PAD,
+  MAX_ZOOM,
+  MIN_ZOOM,
+  MIN_ZOOM_HEADROOM,
+  WHEEL_EXPONENT_LIMIT,
+  WHEEL_ZOOM_BASE_FAST,
+  WHEEL_ZOOM_BASE_SLOW,
+} from './board-constants';
 
 /** Canvas viewport: pan offset (screen px) + zoom factor. */
 export interface Viewport {
@@ -162,4 +170,103 @@ export function computeMinZoom(content: readonly Rect[], viewportWidth: number, 
     return MIN_ZOOM;
   }
   return Math.min(MIN_ZOOM, fitAll * MIN_ZOOM_HEADROOM);
+}
+
+/**
+ * The viewport that frames `box` within a surface of the given size (US08.11.2, §4.1).
+ *
+ * The zoom is whatever makes the box fit with {@link FIT_PAD} of margin on each side, then clamped
+ * into `[minZoom, min(maxZoom, MAX_ZOOM)]`. `maxZoom` is the caller's ceiling rather than a
+ * constant because the two fit commands want different ones: fitting the whole board must never
+ * magnify past 100 % (a two-sticky board would otherwise fill the screen absurdly), while fitting a
+ * selection is allowed up to 150 % so a single small card actually becomes readable.
+ *
+ * The resulting pan centres the box on both axes, so the framed content sits in the middle of the
+ * surface rather than in a corner.
+ *
+ * @param box            the content to frame, in canvas coordinates
+ * @param viewportWidth  surface width in screen px
+ * @param viewportHeight surface height in screen px
+ * @param maxZoom        the caller's zoom ceiling (further capped by {@link MAX_ZOOM})
+ * @param minZoom        the board's effective floor, from {@link computeMinZoom}
+ * @returns the viewport to apply, or `null` when the box or the surface is degenerate — callers
+ *          must treat `null` as "do nothing" rather than substituting a default
+ */
+export function fitBox(
+  box: Rect,
+  viewportWidth: number,
+  viewportHeight: number,
+  maxZoom: number,
+  minZoom: number,
+): Viewport | null {
+  if (!(box.width > 0) || !(box.height > 0)) {
+    return null;
+  }
+  const availableW = viewportWidth - FIT_PAD * 2;
+  const availableH = viewportHeight - FIT_PAD * 2;
+  if (!(availableW > 0) || !(availableH > 0)) {
+    return null;
+  }
+  const fit = Math.min(availableW / box.width, availableH / box.height);
+  if (!Number.isFinite(fit) || fit <= 0) {
+    return null;
+  }
+  const zoom = Math.min(Math.min(maxZoom, MAX_ZOOM), Math.max(minZoom, fit));
+  return {
+    zoom,
+    x: (viewportWidth - box.width * zoom) / 2 - box.x * zoom,
+    y: (viewportHeight - box.height * zoom) / 2 - box.y * zoom,
+  };
+}
+
+/**
+ * The viewport after a zoom that keeps `anchor` (a point in *screen* coordinates, relative to the
+ * surface) pinned to the same spot (US08.11.2).
+ *
+ * Used by every zoom entry point, not just the wheel: the buttons and the reset pass the surface
+ * centre as the anchor, so zooming with them keeps the middle of the view stable instead of
+ * drifting toward the canvas origin.
+ *
+ * @param vp        the current viewport
+ * @param nextZoom  the already-clamped target zoom
+ * @param anchorX   anchor X in screen px, relative to the surface's left edge
+ * @param anchorY   anchor Y in screen px, relative to the surface's top edge
+ * @returns the viewport to apply
+ */
+export function zoomAround(vp: Viewport, nextZoom: number, anchorX: number, anchorY: number): Viewport {
+  const ratio = nextZoom / vp.zoom;
+  return {
+    zoom: nextZoom,
+    x: anchorX - (anchorX - vp.x) * ratio,
+    y: anchorY - (anchorY - vp.y) * ratio,
+  };
+}
+
+/**
+ * The zoom a single wheel event should produce, before clamping (US08.11.2, §4.1).
+ *
+ * Exponential rather than a fixed multiplier so the perceived speed is uniform across the zoom
+ * range, and damped above 1× (`1/sqrt(zoom)`) so the gesture does not become unusably coarse once
+ * magnified. Holding Ctrl/Cmd — or a trackpad pinch, which browsers report as a Ctrl-wheel —
+ * selects a much larger base, matching the intent of a deliberate pinch versus a casual scroll.
+ *
+ * @param zoom     the current zoom
+ * @param deltaY   the wheel event's `deltaY`
+ * @param accelerated true when Ctrl or Meta is held (or the event is a pinch)
+ * @returns the raw next zoom; the caller must still clamp it to the board's bounds
+ */
+export function wheelZoom(zoom: number, deltaY: number, accelerated: boolean): number {
+  const base = accelerated ? WHEEL_ZOOM_BASE_FAST : WHEEL_ZOOM_BASE_SLOW;
+  const damp = zoom > 1 ? 1 / Math.sqrt(zoom) : 1;
+  // The exponent is bounded purely to keep the result representable, never to shape the feel of
+  // the gesture: a `DOM_DELTA_PAGE` event, a coarse driver or a synthetic event can carry a delta
+  // orders of magnitude above the usual ±100, and `exp(-1000)` underflows to exactly 0 — a zoom of
+  // zero collapses the layer's `scale()` and makes the whole board vanish.
+  //
+  // The bound is deliberately far outside real use. A Ctrl+wheel notch (delta ~100, fast base)
+  // produces an exponent of ~1, so a tighter cap would silently flatten ordinary accelerated
+  // zooming; at ±20 the clamp is unreachable by any real gesture, while `exp(±20)` stays finite
+  // and strictly positive. The caller still clamps to the board's actual bounds afterwards.
+  const exponent = Math.max(-WHEEL_EXPONENT_LIMIT, Math.min(WHEEL_EXPONENT_LIMIT, -deltaY * base * damp));
+  return zoom * Math.exp(exponent);
 }

@@ -58,6 +58,51 @@ export const FIT_PAD = 64;
  */
 export const MIN_ZOOM_HEADROOM = 0.6;
 
+/**
+ * Wheel-zoom sensitivity (US08.11.2, §4.1) — the exponent base applied to `deltaY`.
+ *
+ * Two values, not one: a plain scroll is often incidental, so it zooms gently, while Ctrl/Cmd —
+ * which is also what browsers report for a trackpad pinch — signals a deliberate zoom and moves an
+ * order of magnitude faster.
+ */
+export const WHEEL_ZOOM_BASE_SLOW = 0.0008;
+export const WHEEL_ZOOM_BASE_FAST = 0.01;
+
+/**
+ * Absolute bound on a single wheel event's zoom exponent (US08.11.2).
+ *
+ * A safety rail against non-finite results, not a feel-shaping parameter — see `wheelZoom` in
+ * `board-geometry.ts`. Set far outside any real gesture: a Ctrl+wheel notch produces an exponent
+ * of about 1.
+ */
+export const WHEEL_EXPONENT_LIMIT = 20;
+
+/**
+ * Delay (ms) before a wheel burst is committed to the viewport signal (US08.11.2).
+ *
+ * A wheel gesture fires dozens of events; without this, each one writes the signal and re-runs
+ * every dependent computed. The zoom still *tracks* the wheel — the pending value is applied on
+ * this trailing edge, which is short enough to read as immediate.
+ */
+export const WHEEL_COMMIT_DEBOUNCE_MS = 80;
+
+/** Zoom step applied by the toolbar's +/− buttons (US08.11.2) — ×1,25 in, ÷1,25 out. */
+export const ZOOM_STEP = 1.25;
+
+/** Zoom ceiling of "fit to content" — never magnifies past 100 % (US08.11.2). */
+export const FIT_CONTENT_MAX_ZOOM = 1;
+
+/**
+ * Zoom ceiling of "fit to selection" (US08.11.2).
+ *
+ * Above 100 %, unlike {@link FIT_CONTENT_MAX_ZOOM}: zooming to a single small card is precisely
+ * when magnifying past 1× is what the user wants.
+ */
+export const FIT_SELECTION_MAX_ZOOM = 1.5;
+
+/** How long the one-shot open-the-board auto-fit stays armed (ms, US08.11.2). */
+export const AUTO_FIT_WINDOW_MS = 2000;
+
 /** Dotted-grid spacing (canvas pixels). */
 export const DOT_SPACING = 24;
 

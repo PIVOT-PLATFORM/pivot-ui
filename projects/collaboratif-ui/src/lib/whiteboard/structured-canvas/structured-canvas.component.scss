@@ -96,3 +96,19 @@
   position: absolute;
   pointer-events: none;
 }
+
+/* US08.11.2 — content fades in once the opening auto-fit has framed it. `visibility` is left
+   untouched on purpose: the layer must stay laid out so the fit can measure it. */
+.wb-layer {
+  transition: opacity 0.2s;
+}
+
+.wb-layer--hidden {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wb-layer {
+    transition: none;
+  }
+}

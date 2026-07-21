@@ -696,6 +696,14 @@
         "tooLarge": "File too large to import (images included). Reduce the number or size of media, then try again.",
         "undoFailed": "Unable to undo the import."
       }
+    },
+    "zoom": {
+      "group": "Zoom",
+      "in": "Zoom in",
+      "out": "Zoom out",
+      "reset": "Zoom: {{percent}}% — reset to 100%",
+      "fitContent": "Fit to content",
+      "fitSelection": "Fit to selection"
     }
   }
 }

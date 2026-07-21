@@ -344,3 +344,14 @@
     display: none;
   }
 }
+
+// ── Contrôles de zoom (US08.11.2) ───────────────────────────────────────────
+// Coin bas-droit : opposé au hint d'outil (bas-gauche) pour ne jamais se disputer la place, et
+// c'est le coin que la convention réserve au zoom dans les applications de canevas. Même
+// z-index que le hint : sous les panneaux et la selection-toolbar, qui doivent primer.
+.wb-page__zoom {
+  position: absolute;
+  right: var(--wb-space-4);
+  bottom: var(--wb-space-4);
+  z-index: var(--wb-z-chrome);
+}
