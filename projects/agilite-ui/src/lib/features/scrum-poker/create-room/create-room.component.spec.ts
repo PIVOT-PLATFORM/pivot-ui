@@ -247,7 +247,11 @@ describe('CreateRoomComponent', () => {
    */
   it('copyInviteCode() no-ops when no room was created', () => {
     const writeText = vi.fn();
-    Object.assign(navigator, { clipboard: { writeText } });
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+      writable: true,
+    });
 
     const fixture = TestBed.createComponent(CreateRoomComponent);
     fixture.detectChanges();
@@ -268,7 +272,11 @@ describe('CreateRoomComponent', () => {
    */
   it('announces an error when copying the invite code fails', async () => {
     const writeText = vi.fn().mockRejectedValue(new Error('denied'));
-    Object.assign(navigator, { clipboard: { writeText } });
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+      writable: true,
+    });
 
     const fixture = TestBed.createComponent(CreateRoomComponent);
     fixture.detectChanges();
@@ -319,7 +327,11 @@ describe('CreateRoomComponent', () => {
    */
   it('announces success after copying the invite code', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
-    Object.assign(navigator, { clipboard: { writeText } });
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+      writable: true,
+    });
 
     const fixture = TestBed.createComponent(CreateRoomComponent);
     fixture.detectChanges();
@@ -350,7 +362,11 @@ describe('CreateRoomComponent', () => {
    */
   it('copyShareUrl() no-ops when no room was created', () => {
     const writeText = vi.fn();
-    Object.assign(navigator, { clipboard: { writeText } });
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+      writable: true,
+    });
 
     const fixture = TestBed.createComponent(CreateRoomComponent);
     fixture.detectChanges();
@@ -374,7 +390,11 @@ describe('CreateRoomComponent', () => {
    */
   it('computes the shareable join URL and announces success after copying it', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
-    Object.assign(navigator, { clipboard: { writeText } });
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+      writable: true,
+    });
     // Explicitly control the page URL (rather than relying on jsdom's default) — this component
     // is only ever rendered at the "…/rooms/new" route in the real app.
     window.history.pushState({}, '', '/agilite/scrum-poker/rooms/new');
@@ -413,7 +433,11 @@ describe('CreateRoomComponent', () => {
    */
   it('announces an error when copying the share URL fails', async () => {
     const writeText = vi.fn().mockRejectedValue(new Error('denied'));
-    Object.assign(navigator, { clipboard: { writeText } });
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+      writable: true,
+    });
 
     const fixture = TestBed.createComponent(CreateRoomComponent);
     fixture.detectChanges();
