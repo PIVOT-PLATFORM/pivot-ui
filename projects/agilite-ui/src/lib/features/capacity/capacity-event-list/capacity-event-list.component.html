@@ -1,0 +1,74 @@
+<section class="capacity-list">
+  <h1>{{ 'capacityPlanning.list.title' | transloco }}</h1>
+
+  @if (teams().length === 0) {
+    @if (loadError()) {
+      <div role="alert">
+        <p>{{ 'capacityPlanning.list.loadError' | transloco }}</p>
+      </div>
+    } @else {
+      <p>{{ 'capacityPlanning.list.noTeams' | transloco }}</p>
+    }
+  } @else {
+    <div class="capacity-list__filters">
+      <div>
+        <label for="capacity-team-select">{{ 'capacityPlanning.list.selectTeam' | transloco }}</label>
+        <select id="capacity-team-select" [value]="selectedTeamId()" (change)="onTeamChange($event)">
+          @for (team of teams(); track team.id) {
+            <option [value]="team.id">{{ team.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label for="capacity-type-filter">{{ 'capacityPlanning.list.typeFilter' | transloco }}</label>
+        <select id="capacity-type-filter" [value]="typeFilter()" (change)="onTypeFilterChange($event)">
+          <option value="ALL">{{ 'capacityPlanning.list.typeAll' | transloco }}</option>
+          <option value="PI_PLANNING">{{ 'capacityPlanning.type.PI_PLANNING' | transloco }}</option>
+          <option value="SPRINT">{{ 'capacityPlanning.type.SPRINT' | transloco }}</option>
+          <option value="RELEASE">{{ 'capacityPlanning.type.RELEASE' | transloco }}</option>
+          <option value="CUSTOM">{{ 'capacityPlanning.type.CUSTOM' | transloco }}</option>
+        </select>
+      </div>
+    </div>
+
+    @if (selectedTeamId() !== null) {
+      <a class="capacity-list__create" [routerLink]="['/capacity/new']" [queryParams]="{ teamId: selectedTeamId() }">
+        {{ 'capacityPlanning.list.create' | transloco }}
+      </a>
+
+      @if (loadError()) {
+        <div role="alert">
+          <p>{{ 'capacityPlanning.list.loadError' | transloco }}</p>
+          <button type="button" (click)="loadEvents()">{{ 'capacityPlanning.list.retry' | transloco }}</button>
+        </div>
+      } @else if (events().length === 0) {
+        <p>{{ 'capacityPlanning.list.empty' | transloco }}</p>
+      } @else {
+        <ul class="capacity-list__events">
+          @for (event of events(); track event.id) {
+            <li>
+              <a [routerLink]="['/capacity', event.id]">{{ event.name }}</a>
+              <span class="capacity-list__type">{{ 'capacityPlanning.type.' + event.type | transloco }}</span>
+              <span class="capacity-list__dates">{{ event.startDate }} – {{ event.endDate }}</span>
+              <button type="button" (click)="requestDelete(event.id)">
+                {{ 'capacityPlanning.list.delete' | transloco }}
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    }
+
+    @if (pendingDeleteId() !== null) {
+      <div role="alertdialog" aria-labelledby="capacity-delete-title" class="capacity-list__confirm">
+        <p id="capacity-delete-title">{{ 'capacityPlanning.list.confirmDelete' | transloco }}</p>
+        @if (deleteError()) {
+          <p role="alert">{{ deleteError() | transloco }}</p>
+        }
+        <button type="button" (click)="confirmDelete()">{{ 'capacityPlanning.list.delete' | transloco }}</button>
+        <button type="button" (click)="cancelDelete()">{{ 'capacityPlanning.list.cancel' | transloco }}</button>
+      </div>
+    }
+  }
+</section>
