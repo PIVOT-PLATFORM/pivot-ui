@@ -3,29 +3,34 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { AGILITE_API_URL } from '../../../core/config/tokens';
 import {
+  CapacityAbsenceImportResponse,
   CapacityBurndownResponse,
   CapacityEventMemberResponse,
   CapacityEventResponse,
   CapacityEventSummary,
   CapacityEventSummaryResponse,
   CapacityEventType,
+  CapacityHolidayResponse,
   CapacitySummaryResponse,
+  CapacityTeamMaturityResponse,
   CapacityVelocityAverageResponse,
+  CapacityVelocityForecastResponse,
   CapacityVelocityHistoryEntry,
   CreateCapacityAbsenceRequest,
   CreateCapacityEventRequest,
+  CreateCapacityHolidayRequest,
   TeamResponse,
   UpdateCapacityEventMemberRequest,
   UpdateCapacityEventRequest,
+  UpdateCapacityTeamMaturityRequest,
   UpdateCapacityVelocityRequest,
   UpsertBurndownEntryRequest,
 } from '../models/capacity.model';
 
 /**
- * HTTP client for the Capacity Planning v1 feature's backend (`pivot-agilite-core`,
- * `${environment.apiUrl}/capacity`) — F11.1→F11.4 (US11.1.1, US11.1.2, US11.2.1, US11.2.2,
- * US11.3.1, US11.4.1, US11.4.2). The full calculation engine (F11.6) is Sprint 21 — every summary
- * figure returned by this service is explicitly provisional, see `CapacitySummaryResponse`.
+ * HTTP client for the Capacity Planning feature's backend (`pivot-agilite-core`,
+ * `${environment.apiUrl}/capacity`) — F11.1→F11.4 socle (Sprint 20) plus the full F11.6 engine,
+ * cadence (US11.5.1), CSV absence import (US11.7.1) delivered Sprint 21.
  *
  * No `Authorization` header is attached here: bearer token attachment is delegated to
  * `@pivot/ui-core`'s `AuthInterceptor`, same as `StandupApiService`/`PiCycleApiService`.
@@ -252,5 +257,103 @@ export class CapacityApiService {
   upsertBurndownEntry(eventId: string, date: string, pointsRemaining: number): Observable<void> {
     const request: UpsertBurndownEntryRequest = { pointsRemaining };
     return this.http.put<void>(`${this.baseUrl}/capacity/events/${eventId}/burndown/${date}`, request);
+  }
+
+  /**
+   * Lists the tenant's holidays (US11.6.1), optionally filtered by period.
+   *
+   * @param from inclusive lower bound (`YYYY-MM-DD`), or `undefined`
+   * @param to   inclusive upper bound (`YYYY-MM-DD`), or `undefined`
+   * @returns the tenant's holidays, `date` ascending
+   */
+  listHolidays(from?: string, to?: string): Observable<CapacityHolidayResponse[]> {
+    let params = new HttpParams();
+    if (from !== undefined) {
+      params = params.set('from', from);
+    }
+    if (to !== undefined) {
+      params = params.set('to', to);
+    }
+    return this.http.get<CapacityHolidayResponse[]>(`${this.baseUrl}/capacity/holidays`, { params });
+  }
+
+  /**
+   * Adds a tenant holiday (US11.6.1). Tenant-admin only — the backend returns 403 (not the
+   * team-scoped 404 anti-enumeration convention) for a non-admin caller.
+   *
+   * @param request the holiday's date and label
+   * @returns the created holiday
+   */
+  createHoliday(request: CreateCapacityHolidayRequest): Observable<CapacityHolidayResponse> {
+    return this.http.post<CapacityHolidayResponse>(`${this.baseUrl}/capacity/holidays`, request);
+  }
+
+  /**
+   * Removes a tenant holiday (US11.6.1). Tenant-admin only.
+   *
+   * @param holidayId the holiday's identifier
+   */
+  deleteHoliday(holidayId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/capacity/holidays/${holidayId}`);
+  }
+
+  /**
+   * Fetches a team's agile-maturity tier and its effective focus-factor/margin defaults
+   * (US11.6.4).
+   *
+   * @param teamId the team's identifier
+   * @returns the team's maturity setting
+   */
+  getTeamMaturity(teamId: number): Observable<CapacityTeamMaturityResponse> {
+    return this.http.get<CapacityTeamMaturityResponse>(`${this.baseUrl}/capacity/teams/${teamId}/capacity-maturity`);
+  }
+
+  /**
+   * Sets a team's agile-maturity tier (US11.6.4). An explicit per-event/per-member focus factor
+   * (US11.6.2) always prevails over the tier's derived default.
+   *
+   * @param teamId  the team's identifier
+   * @param request the new maturity tier
+   * @returns the updated maturity setting
+   */
+  updateTeamMaturity(teamId: number, request: UpdateCapacityTeamMaturityRequest): Observable<CapacityTeamMaturityResponse> {
+    return this.http.patch<CapacityTeamMaturityResponse>(`${this.baseUrl}/capacity/teams/${teamId}/capacity-maturity`, request);
+  }
+
+  /**
+   * Fetches a team's rolling velocity forecast (US11.6.3).
+   *
+   * @param teamId the team's identifier
+   * @param window the number of most recent completed sprints to average, `[1, 10]`, defaults to `3` server-side
+   * @returns the forecast, or a `NO_HISTORY` basis if no completed sprint has velocity yet
+   */
+  getVelocityForecast(teamId: number, window?: number): Observable<CapacityVelocityForecastResponse> {
+    let params = new HttpParams();
+    if (window !== undefined) {
+      params = params.set('window', window);
+    }
+    return this.http.get<CapacityVelocityForecastResponse>(
+      `${this.baseUrl}/capacity/teams/${teamId}/velocity-forecast`,
+      { params },
+    );
+  }
+
+  /**
+   * Bulk-imports absences for an event's members from a CSV file (US11.7.1) — three fixed columns
+   * (`teamMemberIdOrEmail`, `dateDebut`, `dateFin`); any other column, including a reason/category
+   * one, is silently ignored server-side, never persisted. Never all-or-nothing: valid rows import
+   * even if others fail, reported per row.
+   *
+   * @param eventId the event's identifier
+   * @param file    the CSV file to import (max 500 rows)
+   * @returns the per-row import outcome
+   */
+  importAbsencesCsv(eventId: string, file: File): Observable<CapacityAbsenceImportResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<CapacityAbsenceImportResponse>(
+      `${this.baseUrl}/capacity/events/${eventId}/absences/import`,
+      formData,
+    );
   }
 }
