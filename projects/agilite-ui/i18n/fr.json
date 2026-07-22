@@ -33,7 +33,9 @@
       "legendOver": "Surcharge",
       "legendBalanced": "Équilibré",
       "legendUnder": "Sous-charge",
-      "days": "{{charge}}j / {{capacity}}j"
+      "days": "{{charge}}j / {{capacity}}j",
+      "realFeatureIntro": "Créez de vrais événements de capacité (PI Planning, Sprint, Release) pour votre équipe.",
+      "realFeatureCta": "Voir mes événements de capacité"
     },
     "poker": {
       "title": "Planning Poker",
@@ -653,6 +655,98 @@
         "DEPENDENCY_CYCLE": "Cette dépendance créerait une boucle (cycle).",
         "NETWORK_ERROR": "Une erreur est survenue. Veuillez réessayer."
       }
+    }
+  },
+  "capacityPlanning": {
+    "type": {
+      "PI_PLANNING": "PI Planning",
+      "SPRINT": "Sprint",
+      "RELEASE": "Release",
+      "CUSTOM": "Custom"
+    },
+    "list": {
+      "title": "Capacity Planning",
+      "selectTeam": "Équipe",
+      "noTeams": "Vous n’appartenez à aucune équipe.",
+      "typeFilter": "Type",
+      "typeAll": "Tous types",
+      "create": "Créer un événement",
+      "empty": "Aucun événement pour cette équipe.",
+      "delete": "Supprimer",
+      "loadError": "Impossible de charger les événements.",
+      "retry": "Réessayer",
+      "confirmDelete": "Supprimer cet événement ? Cette action est irréversible.",
+      "deleteError": "Impossible de supprimer un événement qui a des enfants — supprimez d’abord ses Sprints.",
+      "cancel": "Annuler"
+    },
+    "form": {
+      "title": "Créer un événement de capacité",
+      "saveError": "Impossible de créer l’événement.",
+      "typeLabel": "Type d’événement",
+      "nameLabel": "Nom",
+      "startDateLabel": "Date de début",
+      "endDateLabel": "Date de fin",
+      "parentLabel": "PI Planning parent (optionnel)",
+      "parentNone": "Aucun",
+      "save": "Créer",
+      "saving": "Création…",
+      "cancel": "Annuler",
+      "errors": {
+        "INVALID_NAME": "Le nom doit contenir entre 1 et 120 caractères.",
+        "INVALID_DATE_RANGE": "La date de début doit être antérieure à la date de fin.",
+        "INVALID_EVENT_TYPE": "Type d’événement invalide.",
+        "INVALID_PARENT_EVENT": "Ce PI Planning n’est pas valide comme parent."
+      }
+    },
+    "detail": {
+      "loadError": "Impossible de charger cet événement.",
+      "retry": "Réessayer",
+      "parentLabel": "Rattaché à :",
+      "summaryTitle": "Capacité nette",
+      "provisionalBadge": "Estimation provisoire",
+      "provisionalTooltip": "Calcul simplifié (jours ouvrés × disponibilité − absences). Le moteur complet (jours fériés, facteur de concentration, ajustement vélocité) arrive au Sprint 21.",
+      "workingDays": "Jours ouvrés",
+      "memberCount": "Membres",
+      "totalAbsenceDays": "Jours d’absence",
+      "netCapacityDays": "Capacité nette (jours)",
+      "netCapacityPoints": "Capacité nette (points)",
+      "childrenTitle": "Sprints du PI",
+      "childrenEmpty": "Aucun Sprint rattaché à ce PI pour le moment.",
+      "addSprint": "Ajouter un Sprint",
+      "membersTitle": "Membres",
+      "availabilityLabel": "Disponibilité (%)",
+      "deleteAbsence": "Supprimer",
+      "absenceStartLabel": "Début d’absence",
+      "absenceEndLabel": "Fin d’absence",
+      "addAbsence": "Ajouter l’absence",
+      "absenceErrors": {
+        "INVALID_DATE_RANGE": "La date de début doit être antérieure à la date de fin.",
+        "ABSENCE_OUTSIDE_EVENT": "Cette absence est entièrement en dehors de la période de l’événement.",
+        "GENERIC": "Impossible d’enregistrer cette absence."
+      },
+      "velocityTitle": "Vélocité",
+      "committedPointsLabel": "Points engagés",
+      "completedPointsLabel": "Points livrés",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "velocitySuggestion": "Moyenne des {{average}} derniers points livrés → capacité suggérée pour le prochain sprint : {{suggested}}",
+      "viewBurndown": "Voir le burndown"
+    },
+    "burndown": {
+      "title": "Burndown du sprint",
+      "loadError": "Impossible de charger le burndown.",
+      "retry": "Réessayer",
+      "atRisk": "À risque : la courbe réelle est au-dessus de la courbe idéale depuis 2 jours ou plus.",
+      "stale": "Aucune saisie depuis plusieurs jours — pensez à mettre à jour les points restants.",
+      "empty": "Aucune saisie pour le moment. Utilisez le formulaire ci-dessous pour commencer.",
+      "chartLabel": "Graphique burndown : ligne idéale et ligne réelle",
+      "legendIdeal": "Idéale",
+      "legendActual": "Réelle",
+      "entryDateLabel": "Date",
+      "entryPointsLabel": "Points restants",
+      "submitEntry": "Enregistrer",
+      "saveError": "Impossible d’enregistrer cette saisie.",
+      "back": "Retour"
     }
   }
 }

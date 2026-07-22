@@ -1,0 +1,141 @@
+.capacity-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 48rem;
+}
+
+.capacity-detail__head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.capacity-detail__type,
+.capacity-detail__dates {
+  font-size: var(--text-xs);
+  color: var(--color-gray-500);
+}
+
+.capacity-detail__parent {
+  font-size: var(--text-sm);
+}
+
+.capacity-detail__card-title {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.capacity-detail__summary-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.capacity-detail__provisional-badge {
+  font-size: var(--text-xs);
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-sm, 4px);
+  background: var(--color-warning-100, #fef0c7);
+  color: var(--color-warning-700, #b54708);
+}
+
+.capacity-detail__summary-grid {
+  display: grid;
+  grid-template-columns: max-content max-content;
+  gap: 0.25rem 1rem;
+
+  dt {
+    color: var(--color-gray-500);
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 600;
+  }
+}
+
+.capacity-detail__children-toggle {
+  font-weight: 600;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  margin-bottom: 0.5rem;
+}
+
+.capacity-detail__member {
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  margin-bottom: 0.5rem;
+}
+
+.capacity-detail__member-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.capacity-detail__availability-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  input {
+    width: 4rem;
+  }
+}
+
+.capacity-detail__absences {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: var(--text-sm);
+  }
+}
+
+.capacity-detail__add-absence {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.capacity-detail__velocity-fields {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+
+  input {
+    width: 5rem;
+  }
+}
+
+.capacity-detail__velocity-suggestion {
+  font-size: var(--text-sm);
+  color: var(--color-gray-600);
+}
+
+.capacity-detail__velocity-history {
+  list-style: none;
+  padding: 0;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--text-sm);
+  }
+}

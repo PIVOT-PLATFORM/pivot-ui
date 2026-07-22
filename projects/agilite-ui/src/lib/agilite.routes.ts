@@ -117,6 +117,38 @@ export const AGILITE_ROUTES: Routes = [
       ),
   },
   {
+    // US11.1.1 — liste des événements de capacité de l'équipe sélectionnée.
+    path: 'capacity',
+    loadComponent: () =>
+      import('./features/capacity/capacity-event-list/capacity-event-list.component').then(
+        m => m.CapacityEventListComponent,
+      ),
+  },
+  {
+    // US11.1.1 — création d'un nouvel événement de capacité.
+    path: 'capacity/new',
+    loadComponent: () =>
+      import('./features/capacity/capacity-event-form/capacity-event-form.component').then(
+        m => m.CapacityEventFormComponent,
+      ),
+  },
+  {
+    // US11.4.2 — burndown chart d'un événement SPRINT.
+    path: 'capacity/:eventId/burndown',
+    loadComponent: () =>
+      import('./features/capacity/capacity-burndown-chart/capacity-burndown-chart.component').then(
+        m => m.CapacityBurndownChartComponent,
+      ),
+  },
+  {
+    // US11.1.1/US11.1.2/US11.2.1/US11.2.2/US11.3.1/US11.4.1 — détail d'un événement de capacité.
+    path: 'capacity/:eventId',
+    loadComponent: () =>
+      import('./features/capacity/capacity-event-detail/capacity-event-detail.component').then(
+        m => m.CapacityEventDetailComponent,
+      ),
+  },
+  {
     path: 'scrum-poker/rooms/new',
     loadComponent: () =>
       import('./features/scrum-poker/create-room/create-room.component').then(

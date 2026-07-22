@@ -33,7 +33,9 @@
       "legendOver": "Overloaded",
       "legendBalanced": "Balanced",
       "legendUnder": "Underloaded",
-      "days": "{{charge}}d / {{capacity}}d"
+      "days": "{{charge}}d / {{capacity}}d",
+      "realFeatureIntro": "Create real capacity events (PI Planning, Sprint, Release) for your team.",
+      "realFeatureCta": "View my capacity events"
     },
     "poker": {
       "title": "Planning Poker",
@@ -653,6 +655,98 @@
         "DEPENDENCY_CYCLE": "This dependency would create a cycle.",
         "NETWORK_ERROR": "Something went wrong. Please try again."
       }
+    }
+  },
+  "capacityPlanning": {
+    "type": {
+      "PI_PLANNING": "PI Planning",
+      "SPRINT": "Sprint",
+      "RELEASE": "Release",
+      "CUSTOM": "Custom"
+    },
+    "list": {
+      "title": "Capacity Planning",
+      "selectTeam": "Team",
+      "noTeams": "You don't belong to any team.",
+      "typeFilter": "Type",
+      "typeAll": "All types",
+      "create": "Create event",
+      "empty": "No event for this team.",
+      "delete": "Delete",
+      "loadError": "Unable to load events.",
+      "retry": "Retry",
+      "confirmDelete": "Delete this event? This action is irreversible.",
+      "deleteError": "Cannot delete an event that has children — delete its Sprints first.",
+      "cancel": "Cancel"
+    },
+    "form": {
+      "title": "Create a capacity event",
+      "saveError": "Unable to create the event.",
+      "typeLabel": "Event type",
+      "nameLabel": "Name",
+      "startDateLabel": "Start date",
+      "endDateLabel": "End date",
+      "parentLabel": "Parent PI Planning (optional)",
+      "parentNone": "None",
+      "save": "Create",
+      "saving": "Creating…",
+      "cancel": "Cancel",
+      "errors": {
+        "INVALID_NAME": "Name must be between 1 and 120 characters.",
+        "INVALID_DATE_RANGE": "Start date must be before end date.",
+        "INVALID_EVENT_TYPE": "Invalid event type.",
+        "INVALID_PARENT_EVENT": "This PI Planning is not valid as a parent."
+      }
+    },
+    "detail": {
+      "loadError": "Unable to load this event.",
+      "retry": "Retry",
+      "parentLabel": "Attached to:",
+      "summaryTitle": "Net capacity",
+      "provisionalBadge": "Provisional estimate",
+      "provisionalTooltip": "Simplified calculation (working days × availability − absences). The full engine (holidays, focus factor, velocity adjustment) lands in Sprint 21.",
+      "workingDays": "Working days",
+      "memberCount": "Members",
+      "totalAbsenceDays": "Absence days",
+      "netCapacityDays": "Net capacity (days)",
+      "netCapacityPoints": "Net capacity (points)",
+      "childrenTitle": "PI Sprints",
+      "childrenEmpty": "No Sprint attached to this PI yet.",
+      "addSprint": "Add a Sprint",
+      "membersTitle": "Members",
+      "availabilityLabel": "Availability (%)",
+      "deleteAbsence": "Delete",
+      "absenceStartLabel": "Absence start",
+      "absenceEndLabel": "Absence end",
+      "addAbsence": "Add absence",
+      "absenceErrors": {
+        "INVALID_DATE_RANGE": "Start date must be before end date.",
+        "ABSENCE_OUTSIDE_EVENT": "This absence is entirely outside the event's period.",
+        "GENERIC": "Unable to save this absence."
+      },
+      "velocityTitle": "Velocity",
+      "committedPointsLabel": "Committed points",
+      "completedPointsLabel": "Completed points",
+      "save": "Save",
+      "saving": "Saving…",
+      "velocitySuggestion": "Average of the last {{average}} completed points → suggested capacity for the next sprint: {{suggested}}",
+      "viewBurndown": "View burndown"
+    },
+    "burndown": {
+      "title": "Sprint burndown",
+      "loadError": "Unable to load the burndown.",
+      "retry": "Retry",
+      "atRisk": "At risk: the actual curve has been above the ideal curve for 2 days or more.",
+      "stale": "No entry in several days — remember to update the remaining points.",
+      "empty": "No entry yet. Use the form below to get started.",
+      "chartLabel": "Burndown chart: ideal line and actual line",
+      "legendIdeal": "Ideal",
+      "legendActual": "Actual",
+      "entryDateLabel": "Date",
+      "entryPointsLabel": "Points remaining",
+      "submitEntry": "Save",
+      "saveError": "Unable to save this entry.",
+      "back": "Back"
     }
   }
 }

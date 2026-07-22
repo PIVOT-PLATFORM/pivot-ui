@@ -1,0 +1,187 @@
+<section class="capacity-detail">
+  @if (loadError()) {
+    <div role="alert">
+      <p>{{ 'capacityPlanning.detail.loadError' | transloco }}</p>
+      <button type="button" (click)="load()">{{ 'capacityPlanning.detail.retry' | transloco }}</button>
+    </div>
+  } @else if (event(); as ev) {
+    <header class="capacity-detail__head">
+      <h1>{{ ev.name }}</h1>
+      <span class="capacity-detail__type">{{ 'capacityPlanning.type.' + ev.type | transloco }}</span>
+      <span class="capacity-detail__dates">{{ ev.startDate }} – {{ ev.endDate }}</span>
+    </header>
+
+    @if (ev.parent; as parent) {
+      <p class="capacity-detail__parent">
+        {{ 'capacityPlanning.detail.parentLabel' | transloco }}
+        <a [routerLink]="['/capacity', parent.id]">{{ parent.name }}</a>
+      </p>
+    }
+
+    @if (summary(); as s) {
+      <div class="pv-card capacity-detail__summary">
+        <div class="capacity-detail__summary-head">
+          <span class="capacity-detail__card-title">{{ 'capacityPlanning.detail.summaryTitle' | transloco }}</span>
+          @if (s.isProvisional) {
+            <span class="capacity-detail__provisional-badge" [attr.title]="'capacityPlanning.detail.provisionalTooltip' | transloco">
+              {{ 'capacityPlanning.detail.provisionalBadge' | transloco }}
+            </span>
+          }
+        </div>
+        <dl class="capacity-detail__summary-grid">
+          <dt>{{ 'capacityPlanning.detail.workingDays' | transloco }}</dt>
+          <dd>{{ s.workingDays }}</dd>
+          <dt>{{ 'capacityPlanning.detail.memberCount' | transloco }}</dt>
+          <dd>{{ s.memberCount }}</dd>
+          <dt>{{ 'capacityPlanning.detail.totalAbsenceDays' | transloco }}</dt>
+          <dd>{{ s.totalAbsenceDays }}</dd>
+          <dt>{{ 'capacityPlanning.detail.netCapacityDays' | transloco }}</dt>
+          <dd>{{ s.netCapacityDays }}</dd>
+          @if (s.netCapacityPoints !== null) {
+            <dt>{{ 'capacityPlanning.detail.netCapacityPoints' | transloco }}</dt>
+            <dd>{{ s.netCapacityPoints }}</dd>
+          }
+        </dl>
+      </div>
+    }
+
+    @if (isPiPlanning()) {
+      <div class="pv-card capacity-detail__children">
+        <button
+          type="button"
+          class="capacity-detail__children-toggle"
+          [attr.aria-expanded]="childrenExpanded()"
+          aria-controls="capacity-detail-children-list"
+          (click)="toggleChildrenExpanded()"
+        >
+          {{ 'capacityPlanning.detail.childrenTitle' | transloco }}
+        </button>
+        @if (childrenExpanded()) {
+          <div id="capacity-detail-children-list">
+            @if (ev.children.length === 0) {
+              <p>{{ 'capacityPlanning.detail.childrenEmpty' | transloco }}</p>
+            } @else {
+              <ul>
+                @for (child of ev.children; track child.id) {
+                  <li>
+                    <a [routerLink]="['/capacity', child.id]">{{ child.name }}</a>
+                    <span class="capacity-detail__dates">{{ child.startDate }} – {{ child.endDate }}</span>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        }
+        <a class="btn btn-primary" [routerLink]="['/capacity/new']" [queryParams]="{ teamId: ev.teamId }">
+          {{ 'capacityPlanning.detail.addSprint' | transloco }}
+        </a>
+      </div>
+    } @else {
+      <div class="pv-card capacity-detail__members">
+        <span class="capacity-detail__card-title">{{ 'capacityPlanning.detail.membersTitle' | transloco }}</span>
+        @if (absenceError()) {
+          <p role="alert">{{ 'capacityPlanning.detail.absenceErrors.' + absenceError() | transloco }}</p>
+        }
+        <ul>
+          @for (member of members(); track member.id) {
+            <li class="capacity-detail__member">
+              <div class="capacity-detail__member-row">
+                <label [for]="'member-exclude-' + member.id">
+                  <input
+                    [id]="'member-exclude-' + member.id"
+                    type="checkbox"
+                    [checked]="member.excluded"
+                    (change)="toggleExcluded(member, $event)"
+                  />
+                  {{ member.name }}
+                </label>
+                <label [for]="'member-availability-' + member.id" class="capacity-detail__availability-label">
+                  {{ 'capacityPlanning.detail.availabilityLabel' | transloco }}
+                  <input
+                    [id]="'member-availability-' + member.id"
+                    type="number"
+                    min="10"
+                    max="100"
+                    [value]="member.availabilityPercent"
+                    (change)="onAvailabilityInput(member, $event)"
+                  />
+                </label>
+              </div>
+
+              @if (member.absences.length > 0) {
+                <ul class="capacity-detail__absences">
+                  @for (absence of member.absences; track absence.id) {
+                    <li>
+                      <span>{{ absence.dateDebut }} – {{ absence.dateFin }}</span>
+                      <button type="button" (click)="deleteAbsence(absence.id)">
+                        {{ 'capacityPlanning.detail.deleteAbsence' | transloco }}
+                      </button>
+                    </li>
+                  }
+                </ul>
+              }
+
+              <div class="capacity-detail__add-absence">
+                <label [for]="'absence-start-' + member.id">{{ 'capacityPlanning.detail.absenceStartLabel' | transloco }}</label>
+                <input
+                  [id]="'absence-start-' + member.id"
+                  type="date"
+                  (input)="onAbsenceStartInput(member.id, $event)"
+                />
+                <label [for]="'absence-end-' + member.id">{{ 'capacityPlanning.detail.absenceEndLabel' | transloco }}</label>
+                <input
+                  [id]="'absence-end-' + member.id"
+                  type="date"
+                  (input)="onAbsenceEndInput(member.id, $event)"
+                />
+                <button type="button" (click)="addAbsence(member)">
+                  {{ 'capacityPlanning.detail.addAbsence' | transloco }}
+                </button>
+              </div>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+
+    @if (isSprint()) {
+      <div class="pv-card capacity-detail__velocity">
+        <span class="capacity-detail__card-title">{{ 'capacityPlanning.detail.velocityTitle' | transloco }}</span>
+        <div class="capacity-detail__velocity-fields">
+          <label for="velocity-committed">{{ 'capacityPlanning.detail.committedPointsLabel' | transloco }}</label>
+          <input id="velocity-committed" type="number" min="0" [value]="committedPointsDraft()" (input)="onCommittedPointsInput($event)" />
+          <label for="velocity-completed">{{ 'capacityPlanning.detail.completedPointsLabel' | transloco }}</label>
+          <input id="velocity-completed" type="number" min="0" [value]="completedPointsDraft()" (input)="onCompletedPointsInput($event)" />
+          <button type="button" [disabled]="velocitySaving()" (click)="saveVelocity()">
+            {{ (velocitySaving() ? 'capacityPlanning.detail.saving' : 'capacityPlanning.detail.save') | transloco }}
+          </button>
+        </div>
+
+        @if (velocityAverage(); as avg) {
+          @if (avg.averageVelocity !== null) {
+            <p class="capacity-detail__velocity-suggestion">
+              {{ 'capacityPlanning.detail.velocitySuggestion' | transloco: { average: avg.averageVelocity, suggested: avg.suggestedCapacity } }}
+            </p>
+          }
+        }
+
+        @if (velocityHistory().length > 0) {
+          <ul class="capacity-detail__velocity-history">
+            @for (entry of velocityHistory(); track entry.id) {
+              <li>
+                <span>{{ entry.name }}</span>
+                <span>{{ entry.completedPoints }} / {{ entry.committedPoints }}</span>
+              </li>
+            }
+          </ul>
+        }
+
+        @if (ev.committedPoints !== null) {
+          <a class="btn btn-primary" [routerLink]="['/capacity', ev.id, 'burndown']">
+            {{ 'capacityPlanning.detail.viewBurndown' | transloco }}
+          </a>
+        }
+      </div>
+    }
+  }
+</section>

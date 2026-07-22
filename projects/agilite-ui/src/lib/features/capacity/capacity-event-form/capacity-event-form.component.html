@@ -1,0 +1,71 @@
+<section class="capacity-event-form">
+  <h1>{{ 'capacityPlanning.form.title' | transloco }}</h1>
+
+  @if (saveNetworkError()) {
+    <div role="alert">
+      <p>{{ 'capacityPlanning.form.saveError' | transloco }}</p>
+    </div>
+  }
+
+  <div class="capacity-event-form__field capacity-event-form__field--type">
+    <label for="capacity-event-type">{{ 'capacityPlanning.form.typeLabel' | transloco }}</label>
+    <span class="capacity-event-form__type-icon" [class]="'capacity-event-form__type-icon--' + type()" aria-hidden="true"></span>
+    <select id="capacity-event-type" [value]="type()" (change)="onTypeChange($event)"
+      [attr.aria-invalid]="fieldErrorCode() === 'INVALID_EVENT_TYPE'">
+      @for (t of eventTypes; track t) {
+        <option [value]="t">{{ 'capacityPlanning.type.' + t | transloco }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="capacity-event-form__field">
+    <label for="capacity-event-name">{{ 'capacityPlanning.form.nameLabel' | transloco }}</label>
+    <input id="capacity-event-name" type="text" [value]="name()" (input)="onNameInput($event)"
+      [attr.aria-invalid]="fieldErrorCode() === 'INVALID_NAME'"
+      [attr.aria-describedby]="fieldErrorCode() === 'INVALID_NAME' ? 'capacity-event-name-error' : null" />
+    @if (fieldErrorCode() === 'INVALID_NAME') {
+      <p id="capacity-event-name-error" role="alert">{{ 'capacityPlanning.form.errors.INVALID_NAME' | transloco }}</p>
+    }
+  </div>
+
+  <div class="capacity-event-form__field">
+    <label for="capacity-event-start-date">{{ 'capacityPlanning.form.startDateLabel' | transloco }}</label>
+    <input id="capacity-event-start-date" type="date" [value]="startDate()" (input)="onStartDateInput($event)"
+      [attr.aria-invalid]="fieldErrorCode() === 'INVALID_DATE_RANGE'"
+      [attr.aria-describedby]="fieldErrorCode() === 'INVALID_DATE_RANGE' ? 'capacity-event-date-error' : null" />
+  </div>
+
+  <div class="capacity-event-form__field">
+    <label for="capacity-event-end-date">{{ 'capacityPlanning.form.endDateLabel' | transloco }}</label>
+    <input id="capacity-event-end-date" type="date" [value]="endDate()" (input)="onEndDateInput($event)"
+      [attr.aria-invalid]="fieldErrorCode() === 'INVALID_DATE_RANGE'"
+      [attr.aria-describedby]="fieldErrorCode() === 'INVALID_DATE_RANGE' ? 'capacity-event-date-error' : null" />
+    @if (fieldErrorCode() === 'INVALID_DATE_RANGE') {
+      <p id="capacity-event-date-error" role="alert">{{ 'capacityPlanning.form.errors.INVALID_DATE_RANGE' | transloco }}</p>
+    }
+  </div>
+
+  @if (showParentPicker()) {
+    <div class="capacity-event-form__field">
+      <label for="capacity-event-parent">{{ 'capacityPlanning.form.parentLabel' | transloco }}</label>
+      <select id="capacity-event-parent" [value]="parentEventId() ?? ''" (change)="onParentChange($event)"
+        [attr.aria-invalid]="fieldErrorCode() === 'INVALID_PARENT_EVENT'"
+        [attr.aria-describedby]="fieldErrorCode() === 'INVALID_PARENT_EVENT' ? 'capacity-event-parent-error' : null">
+        <option value="">{{ 'capacityPlanning.form.parentNone' | transloco }}</option>
+        @for (pi of piEvents(); track pi.id) {
+          <option [value]="pi.id">{{ pi.name }}</option>
+        }
+      </select>
+      @if (fieldErrorCode() === 'INVALID_PARENT_EVENT') {
+        <p id="capacity-event-parent-error" role="alert">{{ 'capacityPlanning.form.errors.INVALID_PARENT_EVENT' | transloco }}</p>
+      }
+    </div>
+  }
+
+  <div class="capacity-event-form__actions">
+    <button type="button" [disabled]="!canSave()" (click)="save()">
+      {{ (saving() ? 'capacityPlanning.form.saving' : 'capacityPlanning.form.save') | transloco }}
+    </button>
+    <a routerLink="/capacity">{{ 'capacityPlanning.form.cancel' | transloco }}</a>
+  </div>
+</section>

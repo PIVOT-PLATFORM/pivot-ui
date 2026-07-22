@@ -167,6 +167,15 @@
 
   <!-- ===== CAPACITY ===== -->
   @if (tab() === 'capacity') {
+    <!-- US11.1.1 — le module Capacity Planning a désormais un backend/frontend réels ; ceci est
+         le seul chemin de navigation vers ces vraies vues (même convention que Daily/PI Planning
+         ci-dessus). Le reste de cet onglet (vélocité/charge par membre) reste la maquette démo —
+         pas encore branchée sur les vraies US11.x. -->
+    <div class="pv-card agh__card agh__card--daily-cta">
+      <p>{{ 'hub.capacity.realFeatureIntro' | transloco }}</p>
+      <a class="btn btn-primary" routerLink="capacity">{{ 'hub.capacity.realFeatureCta' | transloco }}</a>
+    </div>
+
     <div class="agh__stack">
       <div class="pv-card agh__card">
         <div class="agh__card-title agh__card-title--block">{{ 'hub.capacity.velocity' | transloco }}</div>
