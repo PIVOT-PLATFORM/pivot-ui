@@ -125,6 +125,22 @@ export const AGILITE_ROUTES: Routes = [
       ),
   },
   {
+    // US11.6.1 — administration des jours fériés du tenant (substitut minimal à EN22.3).
+    path: 'capacity/holidays',
+    loadComponent: () =>
+      import('./features/capacity/capacity-holidays/capacity-holidays.component').then(
+        m => m.CapacityHolidaysComponent,
+      ),
+  },
+  {
+    // US11.6.4 — maturité agile de l'équipe (focus/marge effectifs).
+    path: 'capacity/teams/:teamId/maturity',
+    loadComponent: () =>
+      import('./features/capacity/capacity-team-settings/capacity-team-settings.component').then(
+        m => m.CapacityTeamSettingsComponent,
+      ),
+  },
+  {
     // US11.1.1 — création d'un nouvel événement de capacité.
     path: 'capacity/new',
     loadComponent: () =>

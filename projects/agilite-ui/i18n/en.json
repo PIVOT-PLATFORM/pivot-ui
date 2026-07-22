@@ -662,7 +662,8 @@
       "PI_PLANNING": "PI Planning",
       "SPRINT": "Sprint",
       "RELEASE": "Release",
-      "CUSTOM": "Custom"
+      "CUSTOM": "Custom",
+      "INCREMENT": "Increment"
     },
     "list": {
       "title": "Capacity Planning",
@@ -677,7 +678,10 @@
       "retry": "Retry",
       "confirmDelete": "Delete this event? This action is irreversible.",
       "deleteError": "Cannot delete an event that has children — delete its Sprints first.",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "settingsNavLabel": "Capacity Planning settings",
+      "holidaysLink": "Holidays",
+      "maturityLink": "Team maturity"
     },
     "form": {
       "title": "Create a capacity event",
@@ -695,8 +699,11 @@
         "INVALID_NAME": "Name must be between 1 and 120 characters.",
         "INVALID_DATE_RANGE": "Start date must be before end date.",
         "INVALID_EVENT_TYPE": "Invalid event type.",
-        "INVALID_PARENT_EVENT": "This PI Planning is not valid as a parent."
-      }
+        "INVALID_PARENT_EVENT": "This PI Planning is not valid as a parent.",
+        "INVALID_FOCUS_FACTOR": "The focus factor must be between 10 and 100."
+      },
+      "focusFactorLabel": "Focus factor (%, optional)",
+      "focusFactorHint": "Maximum percentage of actually productive time per day. Leave empty to use the team's maturity or the default (70%)."
     },
     "detail": {
       "loadError": "Unable to load this event.",
@@ -730,7 +737,42 @@
       "save": "Save",
       "saving": "Saving…",
       "velocitySuggestion": "Average of the last {{average}} completed points → suggested capacity for the next sprint: {{suggested}}",
-      "viewBurndown": "View burndown"
+      "viewBurndown": "View burndown",
+      "ipIterationLabel": "IP iteration",
+      "ipIterationHint": "Excludes this Sprint from the PI's aggregated capacity (unallocated deliverable).",
+      "ipIterationBadge": "IP",
+      "completeBadge": "Full calculation",
+      "marginLabel": "Uncertainty margin",
+      "marginSource": {
+        "TEAM_MATURITY": "Team maturity",
+        "DEFAULT": "Global default"
+      },
+      "forecastLabel": "Forecast velocity (points)",
+      "engagementRecommendedLabel": "Recommended engagement (points)",
+      "focusFactorOverrideLabel": "Focus factor (%)",
+      "focusFactorOverridePlaceholder": "Team default",
+      "importTitle": "Import absences (CSV)",
+      "importHint": "Expected columns: teamMemberIdOrEmail, dateDebut, dateFin. Any other column (e.g. reason) is ignored. 500 rows maximum.",
+      "importFileLabel": "CSV file",
+      "importing": "Importing…",
+      "importSubmit": "Import",
+      "importNetworkError": "Could not import this file.",
+      "importSuccessCount": "{{count}} absence(s) imported.",
+      "importErrorsTitle": "Rows with errors",
+      "importErrorLine": "Row",
+      "importErrorCode": "Error",
+      "importErrors": {
+        "UNKNOWN_MEMBER": "Member not found in this event.",
+        "INVALID_DATE_RANGE": "Invalid dates.",
+        "ABSENCE_OUTSIDE_EVENT": "Absence entirely outside the event's period."
+      },
+      "forecastTitle": "Forecast velocity",
+      "forecastNoHistory": "No completed sprint with velocity recorded yet — no history available.",
+      "forecastPointsLabel": "{{points}} points forecast",
+      "confidence": {
+        "NARROW": "Narrow interval",
+        "WIDE": "Wide interval"
+      }
     },
     "burndown": {
       "title": "Sprint burndown",
@@ -747,6 +789,39 @@
       "submitEntry": "Save",
       "saveError": "Unable to save this entry.",
       "back": "Back"
+    },
+    "holidays": {
+      "title": "Tenant holidays",
+      "hint": "These dates are excluded from working-day counts, like weekends. Minimal substitute pending a Roadmap module (not planned in PIVOT).",
+      "forbidden": "Restricted to tenant administrators.",
+      "loadError": "Could not load holidays.",
+      "retry": "Retry",
+      "dateLabel": "Date",
+      "labelLabel": "Label",
+      "add": "Add",
+      "saving": "Adding…",
+      "errors": {
+        "INVALID_HOLIDAY": "Invalid date or label (label: 1 to 100 characters).",
+        "DUPLICATE_HOLIDAY": "A holiday already exists on this date.",
+        "GENERIC": "Could not add this holiday."
+      },
+      "empty": "No holidays configured.",
+      "delete": "Delete"
+    },
+    "maturity": {
+      "title": "Team agile maturity",
+      "hint": "Drives the default focus factor and uncertainty margin. An explicit event- or member-level value always prevails.",
+      "loadError": "Could not load this team's maturity.",
+      "retry": "Retry",
+      "selectLabel": "Maturity level",
+      "level": {
+        "FORMING": "Forming",
+        "NORMING": "Norming",
+        "PERFORMING": "Performing"
+      },
+      "effectiveFocusLabel": "Effective focus factor",
+      "effectiveMarginLabel": "Effective uncertainty margin",
+      "saveError": "Could not update maturity."
     }
   }
 }

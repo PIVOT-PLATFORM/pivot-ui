@@ -662,7 +662,8 @@
       "PI_PLANNING": "PI Planning",
       "SPRINT": "Sprint",
       "RELEASE": "Release",
-      "CUSTOM": "Custom"
+      "CUSTOM": "Custom",
+      "INCREMENT": "Incrément"
     },
     "list": {
       "title": "Capacity Planning",
@@ -677,7 +678,10 @@
       "retry": "Réessayer",
       "confirmDelete": "Supprimer cet événement ? Cette action est irréversible.",
       "deleteError": "Impossible de supprimer un événement qui a des enfants — supprimez d’abord ses Sprints.",
-      "cancel": "Annuler"
+      "cancel": "Annuler",
+      "settingsNavLabel": "Paramètres Capacity Planning",
+      "holidaysLink": "Jours fériés",
+      "maturityLink": "Maturité de l'équipe"
     },
     "form": {
       "title": "Créer un événement de capacité",
@@ -695,8 +699,11 @@
         "INVALID_NAME": "Le nom doit contenir entre 1 et 120 caractères.",
         "INVALID_DATE_RANGE": "La date de début doit être antérieure à la date de fin.",
         "INVALID_EVENT_TYPE": "Type d’événement invalide.",
-        "INVALID_PARENT_EVENT": "Ce PI Planning n’est pas valide comme parent."
-      }
+        "INVALID_PARENT_EVENT": "Ce PI Planning n’est pas valide comme parent.",
+        "INVALID_FOCUS_FACTOR": "Le facteur de concentration doit être compris entre 10 et 100."
+      },
+      "focusFactorLabel": "Facteur de concentration (%, optionnel)",
+      "focusFactorHint": "Pourcentage maximal de temps réellement productif par jour. Laissez vide pour utiliser la maturité de l'équipe ou le défaut (70 %)."
     },
     "detail": {
       "loadError": "Impossible de charger cet événement.",
@@ -730,7 +737,42 @@
       "save": "Enregistrer",
       "saving": "Enregistrement…",
       "velocitySuggestion": "Moyenne des {{average}} derniers points livrés → capacité suggérée pour le prochain sprint : {{suggested}}",
-      "viewBurndown": "Voir le burndown"
+      "viewBurndown": "Voir le burndown",
+      "ipIterationLabel": "Itération IP",
+      "ipIterationHint": "Exclut ce Sprint de la capacité agrégée du PI (délivrable non alloué).",
+      "ipIterationBadge": "IP",
+      "completeBadge": "Calcul complet",
+      "marginLabel": "Marge d'incertitude",
+      "marginSource": {
+        "TEAM_MATURITY": "Maturité de l'équipe",
+        "DEFAULT": "Défaut global"
+      },
+      "forecastLabel": "Vélocité prévisionnelle (points)",
+      "engagementRecommendedLabel": "Engagement recommandé (points)",
+      "focusFactorOverrideLabel": "Facteur de concentration (%)",
+      "focusFactorOverridePlaceholder": "Défaut équipe",
+      "importTitle": "Importer des absences (CSV)",
+      "importHint": "Colonnes attendues : teamMemberIdOrEmail, dateDebut, dateFin. Toute autre colonne (ex. motif) est ignorée. 500 lignes maximum.",
+      "importFileLabel": "Fichier CSV",
+      "importing": "Import en cours…",
+      "importSubmit": "Importer",
+      "importNetworkError": "Impossible d'importer ce fichier.",
+      "importSuccessCount": "{{count}} absence(s) importée(s).",
+      "importErrorsTitle": "Lignes en erreur",
+      "importErrorLine": "Ligne",
+      "importErrorCode": "Erreur",
+      "importErrors": {
+        "UNKNOWN_MEMBER": "Membre introuvable dans cet événement.",
+        "INVALID_DATE_RANGE": "Dates invalides.",
+        "ABSENCE_OUTSIDE_EVENT": "Absence entièrement hors de la période de l'événement."
+      },
+      "forecastTitle": "Vélocité prévisionnelle",
+      "forecastNoHistory": "Aucun sprint terminé avec vélocité saisie — pas d'historique disponible.",
+      "forecastPointsLabel": "{{points}} points prévus",
+      "confidence": {
+        "NARROW": "Intervalle resserré",
+        "WIDE": "Intervalle élargi"
+      }
     },
     "burndown": {
       "title": "Burndown du sprint",
@@ -747,6 +789,39 @@
       "submitEntry": "Enregistrer",
       "saveError": "Impossible d’enregistrer cette saisie.",
       "back": "Retour"
+    },
+    "holidays": {
+      "title": "Jours fériés du tenant",
+      "hint": "Ces jours sont exclus du calcul des jours ouvrés, comme les weekends. Substitut minimal en attendant un module Roadmap (non planifié dans PIVOT).",
+      "forbidden": "Réservé aux administrateurs du tenant.",
+      "loadError": "Impossible de charger les jours fériés.",
+      "retry": "Réessayer",
+      "dateLabel": "Date",
+      "labelLabel": "Libellé",
+      "add": "Ajouter",
+      "saving": "Ajout…",
+      "errors": {
+        "INVALID_HOLIDAY": "Date ou libellé invalide (libellé : 1 à 100 caractères).",
+        "DUPLICATE_HOLIDAY": "Un jour férié existe déjà à cette date.",
+        "GENERIC": "Impossible d'ajouter ce jour férié."
+      },
+      "empty": "Aucun jour férié configuré.",
+      "delete": "Supprimer"
+    },
+    "maturity": {
+      "title": "Maturité agile de l'équipe",
+      "hint": "Détermine le facteur de concentration et la marge d'incertitude par défaut. Une saisie explicite au niveau événement ou membre prévaut toujours.",
+      "loadError": "Impossible de charger la maturité de cette équipe.",
+      "retry": "Réessayer",
+      "selectLabel": "Niveau de maturité",
+      "level": {
+        "FORMING": "Peu mature (forming)",
+        "NORMING": "En cours (norming)",
+        "PERFORMING": "Performante (performing)"
+      },
+      "effectiveFocusLabel": "Facteur de concentration effectif",
+      "effectiveMarginLabel": "Marge d'incertitude effective",
+      "saveError": "Impossible de mettre à jour la maturité."
     }
   }
 }
