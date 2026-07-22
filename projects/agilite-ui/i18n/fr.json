@@ -14,7 +14,9 @@
     "daily": {
       "todayTitle": "Daily du jour",
       "sprintTasks": "Tâches du sprint en cours",
-      "history": "Historique des dailies"
+      "history": "Historique des dailies",
+      "realFeatureIntro": "Créez et animez de vraies sessions de daily standup pour votre équipe.",
+      "realFeatureCta": "Voir mes sessions Daily Standup"
     },
     "wheel": {
       "goalLabel": "Tirage au sort :",
@@ -450,5 +452,97 @@
     "statusChangeLabel": "Changer le statut de « {{title}} »",
     "statusChangeError": "Le changement de statut a échoué. Veuillez réessayer.",
     "missingTeamId": "Identifiant d'équipe manquant."
+  },
+  "standup": {
+    "status": {
+      "PENDING": "En attente",
+      "RUNNING": "En cours",
+      "DONE": "Terminée"
+    },
+    "participantStatus": {
+      "WAITING": "En attente",
+      "SPEAKING": "En train de parler",
+      "DONE": "A parlé",
+      "SKIPPED": "Passé"
+    },
+    "list": {
+      "title": "Mes daily standups",
+      "selectTeam": "Équipe",
+      "noTeams": "Vous n'appartenez à aucune équipe.",
+      "statusFilter": "Statut",
+      "statusAll": "Tous les statuts",
+      "create": "Créer une session",
+      "viewStats": "Voir les statistiques",
+      "empty": "Aucune session pour cette équipe.",
+      "delete": "Supprimer",
+      "cancel": "Annuler",
+      "confirmDelete": "Supprimer cette session ? Cette action est définitive.",
+      "loadError": "Impossible de charger les sessions.",
+      "deleteError": "Impossible de supprimer cette session (une session en cours doit d'abord être terminée).",
+      "retry": "Réessayer"
+    },
+    "form": {
+      "title": "Créer une session de daily standup",
+      "nameLabel": "Nom de la session",
+      "timeLabel": "Temps de parole par participant (secondes)",
+      "participantsTitle": "Participants",
+      "participantsEmpty": "Sélectionnez au moins un participant.",
+      "orderTitle": "Ordre de passage",
+      "shuffle": "Mélanger l'ordre",
+      "moveUp": "Monter",
+      "moveDown": "Descendre",
+      "save": "Créer la session",
+      "saving": "Création en cours…",
+      "saveError": "Impossible de créer la session.",
+      "retry": "Réessayer",
+      "loadError": "Impossible de charger les membres de l'équipe.",
+      "errors": {
+        "INVALID_NAME": "Le nom doit contenir entre 1 et 100 caractères.",
+        "EMPTY_PARTICIPANTS": "Sélectionnez au moins un participant.",
+        "INVALID_TIME_PER_PERSON": "Le temps par participant doit être compris entre 30 secondes et 30 minutes.",
+        "INVALID_PARTICIPANT": "Un des participants sélectionnés n'appartient pas à cette équipe."
+      }
+    },
+    "runner": {
+      "loadError": "Impossible de charger cette session.",
+      "wsError": "Connexion au salon temps réel impossible — les mises à jour ne sont pas garanties en direct.",
+      "start": "Démarrer",
+      "nextTurn": "Passer la parole",
+      "finishTurn": "Terminer la session",
+      "skip": "Passer",
+      "extend30": "+30s",
+      "extend60": "+60s",
+      "end": "Terminer maintenant",
+      "nextLabel": "Suivant",
+      "queueLabel": "File d'attente (glisser-déposer pour réordonner)",
+      "viewStats": "Voir les statistiques",
+      "errors": {
+        "INVALID_SESSION_STATUS": "Cette action n'est plus possible dans l'état actuel de la session.",
+        "INVALID_EXTEND_SECONDS": "La durée d'extension doit être 30 ou 60 secondes.",
+        "INVALID_REORDER": "Impossible de réordonner — la liste ne correspond plus aux participants en attente.",
+        "NETWORK_ERROR": "Une erreur est survenue. Veuillez réessayer."
+      }
+    },
+    "timer": {
+      "remainingAria": "Temps restant : {{time}}",
+      "overdueAria": "Temps dépassé : {{time}}",
+      "overdue": "Temps dépassé"
+    },
+    "stats": {
+      "title": "Statistiques des daily standups",
+      "loadError": "Impossible de charger les statistiques.",
+      "retry": "Réessayer",
+      "periodLabel": "Période",
+      "period7d": "7 derniers jours",
+      "period30d": "30 derniers jours",
+      "periodCustom": "Période personnalisée",
+      "fromLabel": "Du",
+      "toLabel": "Au",
+      "apply": "Appliquer",
+      "empty": "Aucune session terminée sur cette période.",
+      "chartAria": "Temps de parole cumulé par participant",
+      "totalSpeaking": "{{seconds}}s cumulées sur {{sessions}} session(s)",
+      "duration": "{{seconds}}s"
+    }
   }
 }
