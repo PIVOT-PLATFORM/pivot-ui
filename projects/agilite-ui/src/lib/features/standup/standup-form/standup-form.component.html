@@ -1,0 +1,104 @@
+<section class="standup-form">
+  <h1>{{ 'standup.form.title' | transloco }}</h1>
+
+  @if (loadError()) {
+    <div role="alert">
+      <p>{{ 'standup.form.loadError' | transloco }}</p>
+      <a routerLink="/standup">{{ 'standup.list.title' | transloco }}</a>
+    </div>
+  } @else {
+    @if (saveNetworkError()) {
+      <div role="alert">
+        <p>{{ 'standup.form.saveError' | transloco }}</p>
+        <button type="button" (click)="save()">{{ 'standup.form.retry' | transloco }}</button>
+      </div>
+    }
+
+    <div>
+      <label for="standup-name">{{ 'standup.form.nameLabel' | transloco }}</label>
+      <input
+        id="standup-name"
+        type="text"
+        [value]="name()"
+        (input)="onNameInput($event)"
+        [attr.aria-invalid]="fieldErrorCode() === 'INVALID_NAME' ? 'true' : null"
+        [attr.aria-describedby]="fieldErrorCode() === 'INVALID_NAME' ? 'standup-name-error' : null"
+      />
+      @if (fieldErrorCode() === 'INVALID_NAME') {
+        <p id="standup-name-error" role="alert">{{ 'standup.form.errors.INVALID_NAME' | transloco }}</p>
+      }
+    </div>
+
+    <div>
+      <label for="standup-time">{{ 'standup.form.timeLabel' | transloco }}</label>
+      <input
+        id="standup-time"
+        type="number"
+        min="30"
+        max="1800"
+        [value]="timePerPersonSeconds()"
+        (change)="onTimeInput($event)"
+        [attr.aria-invalid]="fieldErrorCode() === 'INVALID_TIME_PER_PERSON' ? 'true' : null"
+        [attr.aria-describedby]="fieldErrorCode() === 'INVALID_TIME_PER_PERSON' ? 'standup-time-error' : null"
+      />
+      @if (fieldErrorCode() === 'INVALID_TIME_PER_PERSON') {
+        <p id="standup-time-error" role="alert">{{ 'standup.form.errors.INVALID_TIME_PER_PERSON' | transloco }}</p>
+      }
+    </div>
+
+    <fieldset>
+      <legend>{{ 'standup.form.participantsTitle' | transloco }}</legend>
+
+      @if (fieldErrorCode() === 'EMPTY_PARTICIPANTS' || fieldErrorCode() === 'INVALID_PARTICIPANT') {
+        <p role="alert">{{ 'standup.form.errors.' + fieldErrorCode() | transloco }}</p>
+      }
+
+      <ul class="standup-form__available">
+        @for (member of teamMembers(); track member.id) {
+          <li>
+            <label [attr.for]="'standup-member-' + member.id">
+              <input
+                [id]="'standup-member-' + member.id"
+                type="checkbox"
+                [checked]="!availableMembers().includes(member)"
+                (change)="onMemberToggle(member, $event)"
+              />
+              {{ member.displayName }}
+            </label>
+          </li>
+        }
+      </ul>
+
+      @if (selected().length === 0) {
+        <p id="standup-participants-empty" role="status">{{ 'standup.form.participantsEmpty' | transloco }}</p>
+      } @else {
+        <div class="standup-form__order">
+          <p>{{ 'standup.form.orderTitle' | transloco }}</p>
+          <button type="button" (click)="shuffle()">{{ 'standup.form.shuffle' | transloco }}</button>
+          <ol>
+            @for (participant of selected(); track participant.teamMemberId; let i = $index) {
+              <li>
+                <span>{{ i + 1 }}. {{ participant.displayName }}</span>
+                <button type="button" [disabled]="i === 0" (click)="moveUp(i)">
+                  {{ 'standup.form.moveUp' | transloco }}
+                </button>
+                <button type="button" [disabled]="i === selected().length - 1" (click)="moveDown(i)">
+                  {{ 'standup.form.moveDown' | transloco }}
+                </button>
+              </li>
+            }
+          </ol>
+        </div>
+      }
+    </fieldset>
+
+    <button
+      type="button"
+      [disabled]="!canSave()"
+      [attr.aria-describedby]="selected().length === 0 ? 'standup-participants-empty' : null"
+      (click)="save()"
+    >
+      {{ (saving() ? 'standup.form.saving' : 'standup.form.save') | transloco }}
+    </button>
+  }
+</section>
