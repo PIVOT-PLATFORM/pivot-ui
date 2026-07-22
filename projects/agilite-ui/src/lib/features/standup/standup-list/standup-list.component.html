@@ -1,0 +1,77 @@
+<section class="standup-list">
+  <h1>{{ 'standup.list.title' | transloco }}</h1>
+
+  @if (teams().length === 0) {
+    @if (loadError()) {
+      <div role="alert">
+        <p>{{ 'standup.list.loadError' | transloco }}</p>
+      </div>
+    } @else {
+      <p>{{ 'standup.list.noTeams' | transloco }}</p>
+    }
+  } @else {
+    <div class="standup-list__filters">
+      <div>
+        <label for="standup-team-select">{{ 'standup.list.selectTeam' | transloco }}</label>
+        <select id="standup-team-select" [value]="selectedTeamId()" (change)="onTeamChange($event)">
+          @for (team of teams(); track team.id) {
+            <option [value]="team.id">{{ team.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label for="standup-status-filter">{{ 'standup.list.statusFilter' | transloco }}</label>
+        <select id="standup-status-filter" [value]="statusFilter()" (change)="onStatusFilterChange($event)">
+          <option value="ALL">{{ 'standup.list.statusAll' | transloco }}</option>
+          <option value="PENDING">{{ 'standup.status.PENDING' | transloco }}</option>
+          <option value="RUNNING">{{ 'standup.status.RUNNING' | transloco }}</option>
+          <option value="DONE">{{ 'standup.status.DONE' | transloco }}</option>
+        </select>
+      </div>
+    </div>
+
+    @if (selectedTeamId() !== null) {
+      <a class="standup-list__create" [routerLink]="['/standup/new']" [queryParams]="{ teamId: selectedTeamId() }">
+        {{ 'standup.list.create' | transloco }}
+      </a>
+      <a [routerLink]="['/standup/stats']" [queryParams]="{ teamId: selectedTeamId() }">
+        {{ 'standup.list.viewStats' | transloco }}
+      </a>
+
+      @if (loadError()) {
+        <div role="alert">
+          <p>{{ 'standup.list.loadError' | transloco }}</p>
+          <button type="button" (click)="loadSessions()">{{ 'standup.list.retry' | transloco }}</button>
+        </div>
+      } @else if (sessions().length === 0) {
+        <p>{{ 'standup.list.empty' | transloco }}</p>
+      } @else {
+        <ul class="standup-list__sessions">
+          @for (session of sessions(); track session.id) {
+            <li>
+              <a [routerLink]="['/standup/sessions', session.id]">{{ session.name }}</a>
+              <span class="standup-list__status">{{ 'standup.status.' + session.status | transloco }}</span>
+              @if (session.status !== 'RUNNING') {
+                <button type="button" (click)="requestDelete(session.id)">
+                  {{ 'standup.list.delete' | transloco }}
+                </button>
+              }
+            </li>
+          }
+        </ul>
+      }
+    }
+
+    @if (pendingDeleteId() !== null) {
+      <div role="alertdialog" aria-labelledby="standup-delete-title" class="standup-list__confirm">
+        <p id="standup-delete-title">{{ 'standup.list.confirmDelete' | transloco }}</p>
+        @if (deleteError()) {
+          <p role="alert">{{ deleteError() | transloco }}</p>
+        }
+        <button type="button" (click)="confirmDelete()">{{ 'standup.list.delete' | transloco }}</button>
+        <button type="button" (click)="cancelDelete()">{{ 'standup.list.cancel' | transloco }}</button>
+      </div>
+    }
+  }
+</section>

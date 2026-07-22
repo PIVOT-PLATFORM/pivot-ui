@@ -1,0 +1,29 @@
+<div class="standup-timer" [class.standup-timer--overdue]="isOverdue()">
+  <svg
+    class="standup-timer__ring"
+    width="180"
+    height="180"
+    viewBox="0 0 180 180"
+    role="img"
+    [attr.aria-label]="
+      (isOverdue() ? 'standup.timer.overdueAria' : 'standup.timer.remainingAria')
+        | transloco: { time: formattedRemaining() }
+    "
+  >
+    <circle class="standup-timer__track" cx="90" cy="90" [attr.r]="radius" />
+    <circle
+      class="standup-timer__progress"
+      cx="90"
+      cy="90"
+      [attr.r]="radius"
+      [attr.stroke-dasharray]="circumference"
+      [attr.stroke-dashoffset]="dashOffset()"
+    />
+  </svg>
+  <div class="standup-timer__label">
+    <span class="standup-timer__time" aria-hidden="true">{{ formattedRemaining() }}</span>
+    @if (isOverdue()) {
+      <span class="standup-timer__overdue-text" aria-hidden="true">{{ 'standup.timer.overdue' | transloco }}</span>
+    }
+  </div>
+</div>

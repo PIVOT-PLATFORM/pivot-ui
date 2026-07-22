@@ -1,0 +1,54 @@
+.standup-timer {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.standup-timer__ring {
+  transform: rotate(-90deg);
+}
+
+.standup-timer__track {
+  fill: none;
+  stroke: var(--color-gray-200);
+  stroke-width: 8;
+}
+
+.standup-timer__progress {
+  fill: none;
+  stroke: var(--color-brand-500);
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease;
+
+  .standup-timer--overdue & {
+    stroke: var(--color-error);
+  }
+}
+
+.standup-timer__label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.standup-timer__time {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-navy-900);
+
+  .standup-timer--overdue & {
+    color: var(--color-error);
+  }
+}
+
+.standup-timer__overdue-text {
+  margin-top: 2px;
+  font-size: var(--text-xs);
+  color: var(--color-error);
+}

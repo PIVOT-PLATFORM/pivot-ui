@@ -1,0 +1,54 @@
+<section class="standup-stats">
+  <h1>{{ 'standup.stats.title' | transloco }}</h1>
+
+  @if (loadError()) {
+    <div role="alert">
+      <p>{{ 'standup.stats.loadError' | transloco }}</p>
+      <button type="button" (click)="load()">{{ 'standup.stats.retry' | transloco }}</button>
+    </div>
+  } @else {
+    <div class="standup-stats__period">
+      <label for="standup-stats-period">{{ 'standup.stats.periodLabel' | transloco }}</label>
+      <select id="standup-stats-period" [value]="period()" (change)="onPeriodChange($event)">
+        <option value="7d">{{ 'standup.stats.period7d' | transloco }}</option>
+        <option value="30d">{{ 'standup.stats.period30d' | transloco }}</option>
+        <option value="custom">{{ 'standup.stats.periodCustom' | transloco }}</option>
+      </select>
+
+      @if (period() === 'custom') {
+        <label for="standup-stats-from">{{ 'standup.stats.fromLabel' | transloco }}</label>
+        <input id="standup-stats-from" type="date" [value]="customFrom()" (input)="onCustomFromInput($event)" />
+        <label for="standup-stats-to">{{ 'standup.stats.toLabel' | transloco }}</label>
+        <input id="standup-stats-to" type="date" [value]="customTo()" (input)="onCustomToInput($event)" />
+        <button type="button" (click)="applyCustomRange()">{{ 'standup.stats.apply' | transloco }}</button>
+      }
+    </div>
+
+    @if (isEmpty()) {
+      <p role="status">{{ 'standup.stats.empty' | transloco }}</p>
+    } @else if (stats(); as stats) {
+      <div class="standup-stats__chart" role="img" [attr.aria-label]="'standup.stats.chartAria' | transloco">
+        @for (bar of chartBars(); track bar.name) {
+          <div class="standup-stats__bar-row">
+            <span class="standup-stats__bar-name">{{ bar.name }}</span>
+            <div class="standup-stats__bar-track">
+              <div class="standup-stats__bar-fill" [style.width.%]="bar.widthPercent"></div>
+            </div>
+            <span class="standup-stats__bar-value">
+              {{ 'standup.stats.totalSpeaking' | transloco: { seconds: bar.totalSpeakingSeconds, sessions: bar.sessionCount } }}
+            </span>
+          </div>
+        }
+      </div>
+
+      <ul class="standup-stats__sessions">
+        @for (session of stats.sessions; track session.id) {
+          <li>
+            <span>{{ session.name }}</span>
+            <span>{{ 'standup.stats.duration' | transloco: { seconds: session.durationSeconds } }}</span>
+          </li>
+        }
+      </ul>
+    }
+  }
+</section>

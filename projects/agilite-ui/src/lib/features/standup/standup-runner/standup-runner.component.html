@@ -1,0 +1,88 @@
+<section class="standup-runner">
+  @if (loadError()) {
+    <div role="alert">
+      <p>{{ 'standup.runner.loadError' | transloco }}</p>
+      <a routerLink="/standup">{{ 'standup.list.title' | transloco }}</a>
+    </div>
+  } @else if (session(); as session) {
+    <h1>{{ session.name }}</h1>
+    <p class="standup-runner__status">{{ 'standup.status.' + session.status | transloco }}</p>
+
+    @if (wsStatus() === 'error') {
+      <p role="status">{{ 'standup.runner.wsError' | transloco }}</p>
+    }
+    @if (actionError()) {
+      <p role="alert">{{ 'standup.runner.errors.' + actionError() | transloco }}</p>
+    }
+
+    @if (session.status === 'PENDING') {
+      <button type="button" [disabled]="acting()" (click)="start()">
+        {{ 'standup.runner.start' | transloco }}
+      </button>
+    }
+
+    @if (session.status === 'RUNNING' && currentParticipant(); as current) {
+      <div class="standup-runner__stage">
+        <app-standup-timer
+          [speakingAt]="current.speakingAt"
+          [timePerPersonSeconds]="session.timePerPersonSeconds"
+          [extraSeconds]="current.extraSeconds"
+        />
+        <p class="standup-runner__current-name">{{ current.name }}</p>
+
+        @if (nextParticipant(); as next) {
+          <div class="standup-runner__next">
+            <p>{{ 'standup.runner.nextLabel' | transloco }}</p>
+            <p>{{ next.name }}</p>
+          </div>
+        }
+
+        <div class="standup-runner__controls">
+          <button type="button" [disabled]="acting()" (click)="next()">
+            {{ (isLastSpeaker() ? 'standup.runner.finishTurn' : 'standup.runner.nextTurn') | transloco }}
+          </button>
+          <button type="button" [disabled]="acting()" (click)="skip()">
+            {{ 'standup.runner.skip' | transloco }}
+          </button>
+          <button type="button" [disabled]="acting()" (click)="extend(30)">
+            {{ 'standup.runner.extend30' | transloco }}
+          </button>
+          <button type="button" [disabled]="acting()" (click)="extend(60)">
+            {{ 'standup.runner.extend60' | transloco }}
+          </button>
+          <button type="button" [disabled]="acting()" (click)="end()">
+            {{ 'standup.runner.end' | transloco }}
+          </button>
+        </div>
+      </div>
+
+      @if (waitingParticipants().length > 0) {
+        <div class="standup-runner__queue">
+          <p>{{ 'standup.runner.queueLabel' | transloco }}</p>
+          <ul cdkDropList (cdkDropListDropped)="onReorder($event)">
+            @for (participant of waitingParticipants(); track participant.id) {
+              <li cdkDrag>{{ participant.name }}</li>
+            }
+          </ul>
+        </div>
+      }
+    }
+
+    <ul class="standup-runner__all-participants">
+      @for (participant of session.participants; track participant.id) {
+        <li>
+          <span>{{ participant.name }}</span>
+          <span class="standup-runner__participant-status">
+            {{ 'standup.participantStatus.' + participant.status | transloco }}
+          </span>
+        </li>
+      }
+    </ul>
+
+    @if (session.status === 'DONE') {
+      <a [routerLink]="['/standup/stats']" [queryParams]="{ teamId: session.teamId }">
+        {{ 'standup.runner.viewStats' | transloco }}
+      </a>
+    }
+  }
+</section>

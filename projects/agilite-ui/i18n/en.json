@@ -14,7 +14,9 @@
     "daily": {
       "todayTitle": "Today’s daily",
       "sprintTasks": "Current sprint tasks",
-      "history": "Daily history"
+      "history": "Daily history",
+      "realFeatureIntro": "Create and run real daily standup sessions for your team.",
+      "realFeatureCta": "View my Daily Standup sessions"
     },
     "wheel": {
       "goalLabel": "Random draw:",
@@ -450,5 +452,97 @@
     "statusChangeLabel": "Change the status of \"{{title}}\"",
     "statusChangeError": "The status change failed. Please try again.",
     "missingTeamId": "Missing team id."
+  },
+  "standup": {
+    "status": {
+      "PENDING": "Pending",
+      "RUNNING": "Running",
+      "DONE": "Done"
+    },
+    "participantStatus": {
+      "WAITING": "Waiting",
+      "SPEAKING": "Speaking",
+      "DONE": "Spoke",
+      "SKIPPED": "Skipped"
+    },
+    "list": {
+      "title": "My daily standups",
+      "selectTeam": "Team",
+      "noTeams": "You don't belong to any team.",
+      "statusFilter": "Status",
+      "statusAll": "All statuses",
+      "create": "Create a session",
+      "viewStats": "View statistics",
+      "empty": "No sessions for this team.",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "confirmDelete": "Delete this session? This action is permanent.",
+      "loadError": "Unable to load sessions.",
+      "deleteError": "Unable to delete this session (a running session must be ended first).",
+      "retry": "Retry"
+    },
+    "form": {
+      "title": "Create a daily standup session",
+      "nameLabel": "Session name",
+      "timeLabel": "Speaking time per participant (seconds)",
+      "participantsTitle": "Participants",
+      "participantsEmpty": "Select at least one participant.",
+      "orderTitle": "Speaking order",
+      "shuffle": "Shuffle order",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "save": "Create session",
+      "saving": "Creating…",
+      "saveError": "Unable to create the session.",
+      "retry": "Retry",
+      "loadError": "Unable to load the team's members.",
+      "errors": {
+        "INVALID_NAME": "The name must be between 1 and 100 characters.",
+        "EMPTY_PARTICIPANTS": "Select at least one participant.",
+        "INVALID_TIME_PER_PERSON": "The time per participant must be between 30 seconds and 30 minutes.",
+        "INVALID_PARTICIPANT": "One of the selected participants does not belong to this team."
+      }
+    },
+    "runner": {
+      "loadError": "Unable to load this session.",
+      "wsError": "Could not connect to the live room — updates may not arrive live.",
+      "start": "Start",
+      "nextTurn": "Next speaker",
+      "finishTurn": "End session",
+      "skip": "Skip",
+      "extend30": "+30s",
+      "extend60": "+60s",
+      "end": "End now",
+      "nextLabel": "Next",
+      "queueLabel": "Queue (drag to reorder)",
+      "viewStats": "View statistics",
+      "errors": {
+        "INVALID_SESSION_STATUS": "This action is no longer possible in the session's current state.",
+        "INVALID_EXTEND_SECONDS": "The extension duration must be 30 or 60 seconds.",
+        "INVALID_REORDER": "Unable to reorder — the list no longer matches the waiting participants.",
+        "NETWORK_ERROR": "Something went wrong. Please try again."
+      }
+    },
+    "timer": {
+      "remainingAria": "Time remaining: {{time}}",
+      "overdueAria": "Time overdue: {{time}}",
+      "overdue": "Time's up"
+    },
+    "stats": {
+      "title": "Daily standup statistics",
+      "loadError": "Unable to load statistics.",
+      "retry": "Retry",
+      "periodLabel": "Period",
+      "period7d": "Last 7 days",
+      "period30d": "Last 30 days",
+      "periodCustom": "Custom period",
+      "fromLabel": "From",
+      "toLabel": "To",
+      "apply": "Apply",
+      "empty": "No completed session in this period.",
+      "chartAria": "Total speaking time per participant",
+      "totalSpeaking": "{{seconds}}s across {{sessions}} session(s)",
+      "duration": "{{seconds}}s"
+    }
   }
 }

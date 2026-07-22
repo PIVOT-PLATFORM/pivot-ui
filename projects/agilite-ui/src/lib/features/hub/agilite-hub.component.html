@@ -49,6 +49,15 @@
 
   <!-- ===== DAILY ===== -->
   @if (tab() === 'daily') {
+    <!-- US10.1.1 — le module Daily Standup a désormais un backend/frontend réels ; ceci est le
+         seul chemin de navigation vers ces vraies vues (même convention que l'entrée Planning
+         Poker ci-dessous). Le reste de cet onglet (équipe/tâches sprint/historique) reste la
+         maquette démo — pas encore branchée sur une US tracée. -->
+    <div class="pv-card agh__card agh__card--daily-cta">
+      <p>{{ 'hub.daily.realFeatureIntro' | transloco }}</p>
+      <a class="btn btn-primary" routerLink="standup">{{ 'hub.daily.realFeatureCta' | transloco }}</a>
+    </div>
+
     <div class="agh__cols">
       <div class="agh__col agh__col--main">
         <div class="pv-card agh__card">
