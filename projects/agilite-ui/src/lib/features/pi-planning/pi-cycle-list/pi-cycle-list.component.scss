@@ -1,0 +1,33 @@
+.pi-cycle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pi-cycle-list__create {
+  align-self: flex-start;
+}
+
+.pi-cycle-list__cycles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--surface-card);
+    border-radius: var(--radius-md);
+  }
+}
+
+.pi-cycle-list__art,
+.pi-cycle-list__status,
+.pi-cycle-list__meta {
+  font-size: var(--text-xs);
+  color: var(--color-gray-500);
+}

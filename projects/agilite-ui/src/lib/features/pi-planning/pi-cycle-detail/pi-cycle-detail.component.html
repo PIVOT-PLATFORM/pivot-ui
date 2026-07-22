@@ -1,0 +1,79 @@
+<section class="pi-cycle-detail">
+  @if (loadError()) {
+    <div role="alert">
+      <p>{{ 'piPlanning.detail.loadError' | transloco }}</p>
+      <button type="button" (click)="loadCycle()">{{ 'piPlanning.detail.retry' | transloco }}</button>
+    </div>
+  } @else if (cycle(); as cycle) {
+    <header class="pi-cycle-detail__head">
+      <h1>{{ cycle.name }}</h1>
+      @if (cycle.artName) {
+        <p class="pi-cycle-detail__art">{{ cycle.artName }}</p>
+      }
+      <span class="pi-cycle-detail__status">{{ 'piPlanning.status.' + cycle.status | transloco }}</span>
+      <a class="pi-cycle-detail__board-link" [routerLink]="['/pi', cycle.id, 'board']">
+        {{ 'piPlanning.detail.viewBoard' | transloco }}
+      </a>
+    </header>
+
+    <section class="pi-cycle-detail__iterations">
+      <h2>{{ 'piPlanning.detail.iterationsTitle' | transloco }}</h2>
+      <ul>
+        @for (iteration of cycle.iterations; track iteration.id) {
+          <li>
+            <span class="pi-cycle-detail__iteration-label">{{ iteration.label }}</span>
+            <span class="pi-cycle-detail__iteration-dates">{{ iteration.startDate }} → {{ iteration.endDate }}</span>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <section class="pi-cycle-detail__teams">
+      <h2>{{ 'piPlanning.detail.teamsTitle' | transloco }}</h2>
+      <ul>
+        @for (team of cycle.teams; track team.id) {
+          <li>
+            <span class="pi-cycle-detail__team-swatch" [style.background]="team.color || '#6b7280'" aria-hidden="true"></span>
+            <span>{{ team.name }}</span>
+            @if (team.sourceTeamId === null) {
+              <span class="pi-cycle-detail__team-manual">{{ 'piPlanning.detail.manualTeamBadge' | transloco }}</span>
+            }
+            <button type="button" (click)="removeTeam(team.id)">{{ 'piPlanning.detail.removeTeam' | transloco }}</button>
+          </li>
+        }
+      </ul>
+
+      @if (importableTeams().length > 0) {
+        <div class="pi-cycle-detail__import">
+          <h3>{{ 'piPlanning.detail.importTitle' | transloco }}</h3>
+          @if (importError()) {
+            <p role="alert">{{ 'piPlanning.detail.errors.' + importError() | transloco }}</p>
+          }
+          <fieldset>
+            <legend>{{ 'piPlanning.detail.importLegend' | transloco }}</legend>
+            @for (team of importableTeams(); track team.id) {
+              <div class="pi-cycle-detail__import-row">
+                <input type="checkbox" [id]="'pi-import-team-' + team.id" (change)="onImportToggle(team.id, $event)" />
+                <label [for]="'pi-import-team-' + team.id">{{ team.name }}</label>
+              </div>
+            }
+          </fieldset>
+          <button type="button" [disabled]="importing() || selectedImportIds().length === 0" (click)="importSelected()">
+            {{ (importing() ? 'piPlanning.detail.importing' : 'piPlanning.detail.import') | transloco }}
+          </button>
+        </div>
+      }
+
+      <div class="pi-cycle-detail__manual-team">
+        <label for="pi-manual-team-name">{{ 'piPlanning.detail.manualTeamNameLabel' | transloco }}</label>
+        <input id="pi-manual-team-name" type="text" [value]="manualTeamName()" (input)="onManualTeamNameInput($event)" />
+        @if (manualTeamError()) {
+          <p role="alert">{{ 'piPlanning.detail.errors.' + manualTeamError() | transloco }}</p>
+        }
+        <button type="button" [disabled]="addingManualTeam() || manualTeamName().trim().length === 0" (click)="addManualTeam()">
+          {{ (addingManualTeam() ? 'piPlanning.detail.addingManualTeam' : 'piPlanning.detail.addManualTeam') | transloco }}
+        </button>
+      </div>
+    </section>
+  }
+</section>
