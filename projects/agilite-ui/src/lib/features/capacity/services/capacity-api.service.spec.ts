@@ -22,6 +22,8 @@ describe('CapacityApiService', () => {
     pointsPerDay: null,
     committedPoints: null,
     completedPoints: null,
+    isIpIteration: false,
+    focusFactorPercent: null,
     createdBy: 1,
     parent: null,
     children: [],
@@ -96,7 +98,19 @@ describe('CapacityApiService', () => {
     service.getSummary('e-1').subscribe();
     const req = httpMock.expectOne(`${environment.apiUrl}/capacity/events/e-1/summary`);
     expect(req.request.method).toBe('GET');
-    req.flush({ durationDays: 14, workingDays: 10, memberCount: 5, totalAbsenceDays: 0, netCapacityDays: 50, netCapacityPoints: null, isProvisional: true });
+    req.flush({
+      durationDays: 14,
+      workingDays: 10,
+      memberCount: 5,
+      totalAbsenceDays: 0,
+      netCapacityDays: 50,
+      netCapacityPoints: null,
+      isProvisional: true,
+      marginPercent: null,
+      maturitySource: null,
+      forecastPoints: null,
+      engagementRecommendedPoints: null,
+    });
   });
 
   it('listMembers() calls GET /capacity/events/{id}/members', () => {
@@ -111,7 +125,7 @@ describe('CapacityApiService', () => {
     const req = httpMock.expectOne(`${environment.apiUrl}/capacity/events/e-1/members/m-1`);
     expect(req.request.method).toBe('PATCH');
     expect(req.request.body).toEqual({ excluded: true });
-    req.flush({ id: 'm-1', eventId: 'e-1', teamMemberId: 1, name: 'Alice', availabilityPercent: 100, excluded: true, absences: [] });
+    req.flush({ id: 'm-1', eventId: 'e-1', teamMemberId: 1, name: 'Alice', availabilityPercent: 100, excluded: true, focusFactorPercent: null, absences: [] });
   });
 
   it('createAbsence() POSTs /capacity/events/{id}/members/{memberId}/absences with ONLY a date range — no reason field in the request contract', () => {
@@ -169,5 +183,61 @@ describe('CapacityApiService', () => {
     expect(req.request.method).toBe('PUT');
     expect(req.request.body).toEqual({ pointsRemaining: 42 });
     req.flush(null);
+  });
+
+  it('listHolidays() calls GET /capacity/holidays with optional period params', () => {
+    service.listHolidays('2026-01-01', '2026-12-31').subscribe();
+    const req = httpMock.expectOne(r => r.url === `${environment.apiUrl}/capacity/holidays`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.get('from')).toBe('2026-01-01');
+    expect(req.request.params.get('to')).toBe('2026-12-31');
+    req.flush([]);
+  });
+
+  it('createHoliday() POSTs /capacity/holidays', () => {
+    service.createHoliday({ date: '2026-12-25', label: 'Noël' }).subscribe();
+    const req = httpMock.expectOne(`${environment.apiUrl}/capacity/holidays`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ date: '2026-12-25', label: 'Noël' });
+    req.flush({ id: 'h-1', date: '2026-12-25', label: 'Noël' });
+  });
+
+  it('deleteHoliday() calls DELETE /capacity/holidays/{id}', () => {
+    service.deleteHoliday('h-1').subscribe();
+    const req = httpMock.expectOne(`${environment.apiUrl}/capacity/holidays/h-1`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+  });
+
+  it('getTeamMaturity() calls GET /capacity/teams/{teamId}/capacity-maturity', () => {
+    service.getTeamMaturity(42).subscribe();
+    const req = httpMock.expectOne(`${environment.apiUrl}/capacity/teams/42/capacity-maturity`);
+    expect(req.request.method).toBe('GET');
+    req.flush({ teamId: 42, maturity: null, effectiveFocusFactorPercent: 70, effectiveMarginPercent: 15 });
+  });
+
+  it('updateTeamMaturity() PATCHes /capacity/teams/{teamId}/capacity-maturity', () => {
+    service.updateTeamMaturity(42, { maturity: 'NORMING' }).subscribe();
+    const req = httpMock.expectOne(`${environment.apiUrl}/capacity/teams/42/capacity-maturity`);
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual({ maturity: 'NORMING' });
+    req.flush({ teamId: 42, maturity: 'NORMING', effectiveFocusFactorPercent: 70, effectiveMarginPercent: 10 });
+  });
+
+  it('getVelocityForecast() calls GET /capacity/teams/{teamId}/velocity-forecast with an optional window param', () => {
+    service.getVelocityForecast(42, 5).subscribe();
+    const req = httpMock.expectOne(r => r.url === `${environment.apiUrl}/capacity/teams/42/velocity-forecast`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.get('window')).toBe('5');
+    req.flush({ forecastPoints: 24, confidenceInterval: 'NARROW', basis: 'HISTORY' });
+  });
+
+  it('importAbsencesCsv() POSTs multipart/form-data to /capacity/events/{id}/absences/import', () => {
+    const file = new File(['teamMemberIdOrEmail,dateDebut,dateFin\nalice@x.com,2026-08-03,2026-08-04'], 'absences.csv', { type: 'text/csv' });
+    service.importAbsencesCsv('e-1', file).subscribe();
+    const req = httpMock.expectOne(`${environment.apiUrl}/capacity/events/e-1/absences/import`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body instanceof FormData).toBe(true);
+    req.flush({ imported: 1, errors: [] });
   });
 });

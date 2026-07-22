@@ -20,6 +20,8 @@ const sprintEvent: CapacityEventResponse = {
   pointsPerDay: 5,
   committedPoints: 30,
   completedPoints: null,
+  isIpIteration: false,
+  focusFactorPercent: null,
   createdBy: 1,
   parent: null,
   children: [],
@@ -32,7 +34,9 @@ const piEvent: CapacityEventResponse = {
   id: 'pi-1',
   type: 'PI_PLANNING',
   committedPoints: null,
-  children: [{ id: 'e-1', type: 'SPRINT', name: 'Sprint 20', startDate: '2026-08-01', endDate: '2026-08-14' }],
+  children: [
+    { id: 'e-1', type: 'SPRINT', name: 'Sprint 20', startDate: '2026-08-01', endDate: '2026-08-14', isIpIteration: false },
+  ],
 };
 
 const summary: CapacitySummaryResponse = {
@@ -43,6 +47,10 @@ const summary: CapacitySummaryResponse = {
   netCapacityDays: 27,
   netCapacityPoints: 135,
   isProvisional: true,
+  marginPercent: null,
+  maturitySource: null,
+  forecastPoints: null,
+  engagementRecommendedPoints: null,
 };
 
 const member: CapacityEventMemberResponse = {
@@ -52,6 +60,7 @@ const member: CapacityEventMemberResponse = {
   name: 'Alice',
   availabilityPercent: 100,
   excluded: false,
+  focusFactorPercent: null,
   absences: [],
 };
 
@@ -82,6 +91,7 @@ describe('CapacityEventDetailComponent', () => {
     httpMock.expectOne(`${environment.apiUrl}/capacity/events/e-1/members`).flush([member]);
     httpMock.expectOne(r => r.url === `${environment.apiUrl}/capacity/teams/42/velocity-history`).flush([]);
     httpMock.expectOne(r => r.url === `${environment.apiUrl}/capacity/teams/42/velocity-history/average`).flush({ averageVelocity: null, suggestedCapacity: null });
+    httpMock.expectOne(r => r.url === `${environment.apiUrl}/capacity/teams/42/velocity-forecast`).flush({ forecastPoints: null, confidenceInterval: null, basis: 'NO_HISTORY' });
     fixture.detectChanges();
     return fixture;
   }
@@ -211,6 +221,7 @@ describe('CapacityEventDetailComponent', () => {
       req.flush({ ...sprintEvent, completedPoints: 28 });
       httpMock.expectOne(r => r.url === `${environment.apiUrl}/capacity/teams/42/velocity-history`).flush([]);
       httpMock.expectOne(r => r.url === `${environment.apiUrl}/capacity/teams/42/velocity-history/average`).flush({ averageVelocity: 28, suggestedCapacity: 23.8 });
+      httpMock.expectOne(r => r.url === `${environment.apiUrl}/capacity/teams/42/velocity-forecast`).flush({ forecastPoints: 24, confidenceInterval: 'NARROW', basis: 'HISTORY' });
 
       expect(fixture.componentInstance.velocitySaving()).toBe(false);
     });
@@ -224,5 +235,133 @@ describe('CapacityEventDetailComponent', () => {
     httpMock.expectOne(`${environment.apiUrl}/capacity/events/e-1/summary`).flush(null, { status: 500, statusText: 'Server Error' });
     fixture.detectChanges();
     expect(fixture.componentInstance.loadError()).toBe(true);
+  });
+
+  describe('US11.5.1 — IP iteration toggle', () => {
+    it('only shows the toggle for a SPRINT child of a PI_PLANNING parent', async () => {
+      await setup();
+      const fixture = TestBed.createComponent(CapacityEventDetailComponent);
+      fixture.detectChanges();
+      httpMock.expectOne(`${environment.apiUrl}/capacity/events/e-1`).flush({
+        ...sprintEvent,
+        parent: { id: 'pi-1', type: 'PI_PLANNING', name: 'PI 2026.Q3', startDate: '2026-07-01', endDate: '2026-10-01', isIpIteration: false },
+      });
+      httpMock.expectOne(`${environment.apiUrl}/capacity/events/e-1/summary`).flush(summary);
+      fixture.detectChanges();
+      httpMock.expectOne(`${environment.apiUrl}/capacity/events/e-1/members`).flush([member]);
+      httpMock.expectOne(r => r.url === `${environment.apiUrl}/capacity/teams/42/velocity-history`).flush([]);
+      httpMock.expectOne(r => r.url === `${environment.apiUrl}/capacity/teams/42/velocity-history/average`).flush({ averageVelocity: null, suggestedCapacity: null });
+      httpMock.expectOne(r => r.url === `${environment.apiUrl}/capacity/teams/42/velocity-forecast`).flush({ forecastPoints: null, confidenceInterval: null, basis: 'NO_HISTORY' });
+
+      expect(fixture.componentInstance.showIpIterationToggle()).toBe(true);
+    });
+
+    it('hides the toggle for a SPRINT with no parent (or a non-PI_PLANNING parent)', () => {
+      return setup().then(() => {
+        const fixture = createSprintFixture();
+        expect(fixture.componentInstance.showIpIterationToggle()).toBe(false);
+      });
+    });
+
+    it('toggling the flag PATCHes the event and reloads the summary', () => {
+      return setup().then(() => {
+        const fixture = createSprintFixture();
+        fixture.componentInstance.toggleIpIteration({ target: { checked: true } } as unknown as Event);
+
+        const req = httpMock.expectOne(`${environment.apiUrl}/capacity/events/e-1`);
+        expect(req.request.method).toBe('PATCH');
+        expect(req.request.body).toEqual({ isIpIteration: true });
+        req.flush({ ...sprintEvent, isIpIteration: true });
+        httpMock.expectOne(`${environment.apiUrl}/capacity/events/e-1/summary`).flush({ ...summary, isProvisional: false });
+
+        expect(fixture.componentInstance.event()?.isIpIteration).toBe(true);
+      });
+    });
+  });
+
+  describe('US11.6.2 — member focus-factor override', () => {
+    it('saves a clamped focus-factor override for a member', () => {
+      return setup().then(() => {
+        const fixture = createSprintFixture();
+        fixture.componentInstance.onFocusFactorInput('m-1', { target: { value: '150' } } as unknown as Event);
+        fixture.componentInstance.saveFocusFactor(member);
+
+        const req = httpMock.expectOne(`${environment.apiUrl}/capacity/events/e-1/members/m-1`);
+        expect(req.request.body).toEqual({ focusFactorPercent: 100 });
+        req.flush({ ...member, focusFactorPercent: 100 });
+        httpMock.expectOne(`${environment.apiUrl}/capacity/events/e-1/summary`).flush(summary);
+
+        expect(fixture.componentInstance.members()[0].focusFactorPercent).toBe(100);
+      });
+    });
+
+    it('does not submit an unparseable draft', () => {
+      return setup().then(() => {
+        const fixture = createSprintFixture();
+        fixture.componentInstance.onFocusFactorInput('m-1', { target: { value: '' } } as unknown as Event);
+        fixture.componentInstance.saveFocusFactor(member);
+
+        httpMock.expectNone(`${environment.apiUrl}/capacity/events/e-1/members/m-1`);
+      });
+    });
+  });
+
+  describe('US11.7.1 — CSV absence import', () => {
+    it('uploads the selected file and reloads members/summary on success', () => {
+      return setup().then(() => {
+        const fixture = createSprintFixture();
+        const file = new File(['teamMemberIdOrEmail,dateDebut,dateFin\nalice@x.com,2026-08-03,2026-08-04'], 'absences.csv', { type: 'text/csv' });
+        fixture.componentInstance.onImportFileChange({ target: { files: [file] } } as unknown as Event);
+        fixture.componentInstance.importAbsencesCsv();
+
+        const req = httpMock.expectOne(`${environment.apiUrl}/capacity/events/e-1/absences/import`);
+        expect(req.request.method).toBe('POST');
+        expect(req.request.body instanceof FormData).toBe(true);
+        req.flush({ imported: 1, errors: [] });
+        httpMock.expectOne(`${environment.apiUrl}/capacity/events/e-1/members`).flush([member]);
+        httpMock.expectOne(`${environment.apiUrl}/capacity/events/e-1/summary`).flush(summary);
+
+        expect(fixture.componentInstance.importResult()).toEqual({ imported: 1, errors: [] });
+        expect(fixture.componentInstance.importFile()).toBeNull();
+      });
+    });
+
+    it('surfaces a per-row error report without blocking the rows that succeeded', () => {
+      return setup().then(() => {
+        const fixture = createSprintFixture();
+        const file = new File(['x'], 'absences.csv', { type: 'text/csv' });
+        fixture.componentInstance.onImportFileChange({ target: { files: [file] } } as unknown as Event);
+        fixture.componentInstance.importAbsencesCsv();
+
+        const req = httpMock.expectOne(`${environment.apiUrl}/capacity/events/e-1/absences/import`);
+        req.flush({ imported: 2, errors: [{ line: 3, code: 'UNKNOWN_MEMBER' }] });
+        httpMock.expectOne(`${environment.apiUrl}/capacity/events/e-1/members`).flush([member]);
+        httpMock.expectOne(`${environment.apiUrl}/capacity/events/e-1/summary`).flush(summary);
+
+        expect(fixture.componentInstance.importResult()?.errors).toEqual([{ line: 3, code: 'UNKNOWN_MEMBER' }]);
+      });
+    });
+
+    it('flags a network error and does not clear the selected file on failure', () => {
+      return setup().then(() => {
+        const fixture = createSprintFixture();
+        const file = new File(['x'], 'absences.csv', { type: 'text/csv' });
+        fixture.componentInstance.onImportFileChange({ target: { files: [file] } } as unknown as Event);
+        fixture.componentInstance.importAbsencesCsv();
+
+        httpMock.expectOne(`${environment.apiUrl}/capacity/events/e-1/absences/import`).flush(null, { status: 500, statusText: 'Server Error' });
+
+        expect(fixture.componentInstance.importNetworkError()).toBe(true);
+        expect(fixture.componentInstance.importing()).toBe(false);
+      });
+    });
+
+    it('does not submit without a selected file', () => {
+      return setup().then(() => {
+        const fixture = createSprintFixture();
+        fixture.componentInstance.importAbsencesCsv();
+        httpMock.expectNone(`${environment.apiUrl}/capacity/events/e-1/absences/import`);
+      });
+    });
   });
 });

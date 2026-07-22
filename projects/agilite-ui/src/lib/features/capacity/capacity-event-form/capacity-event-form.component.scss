@@ -43,6 +43,10 @@
     background: var(--color-primary, #6941c6);
   }
 
+  &--INCREMENT {
+    background: var(--color-warning, #dc6803);
+  }
+
   &--SPRINT {
     background: var(--color-info, #2970ff);
   }

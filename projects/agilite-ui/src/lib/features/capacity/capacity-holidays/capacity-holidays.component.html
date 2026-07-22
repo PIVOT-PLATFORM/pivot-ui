@@ -1,0 +1,56 @@
+<section class="capacity-holidays">
+  <h1>{{ 'capacityPlanning.holidays.title' | transloco }}</h1>
+  <p>{{ 'capacityPlanning.holidays.hint' | transloco }}</p>
+
+  @if (forbidden()) {
+    <div role="alert">
+      <p>{{ 'capacityPlanning.holidays.forbidden' | transloco }}</p>
+    </div>
+  } @else if (loadError()) {
+    <div role="alert">
+      <p>{{ 'capacityPlanning.holidays.loadError' | transloco }}</p>
+      <button type="button" (click)="load()">{{ 'capacityPlanning.holidays.retry' | transloco }}</button>
+    </div>
+  } @else {
+    <div class="pv-card capacity-holidays__form">
+      <div class="capacity-holidays__field">
+        <label for="holiday-date">{{ 'capacityPlanning.holidays.dateLabel' | transloco }}</label>
+        <input
+          id="holiday-date"
+          type="date"
+          [value]="dateDraft()"
+          (input)="onDateInput($event)"
+          [attr.aria-invalid]="fieldErrorCode() === 'INVALID_HOLIDAY' || fieldErrorCode() === 'DUPLICATE_HOLIDAY'"
+          [attr.aria-describedby]="fieldErrorCode() ? 'capacity-holiday-error' : null"
+        />
+      </div>
+      <div class="capacity-holidays__field">
+        <label for="holiday-label">{{ 'capacityPlanning.holidays.labelLabel' | transloco }}</label>
+        <input id="holiday-label" type="text" [value]="labelDraft()" (input)="onLabelInput($event)" />
+      </div>
+      @if (fieldErrorCode()) {
+        <p id="capacity-holiday-error" role="alert">
+          {{ 'capacityPlanning.holidays.errors.' + fieldErrorCode() | transloco }}
+        </p>
+      }
+      <button type="button" [disabled]="saving()" (click)="addHoliday()">
+        {{ (saving() ? 'capacityPlanning.holidays.saving' : 'capacityPlanning.holidays.add') | transloco }}
+      </button>
+    </div>
+
+    @if (holidays().length === 0) {
+      <p>{{ 'capacityPlanning.holidays.empty' | transloco }}</p>
+    } @else {
+      <ul class="capacity-holidays__list">
+        @for (holiday of holidays(); track holiday.id) {
+          <li>
+            <span>{{ holiday.date }} — {{ holiday.label }}</span>
+            <button type="button" (click)="deleteHoliday(holiday.id)">
+              {{ 'capacityPlanning.holidays.delete' | transloco }}
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  }
+</section>
