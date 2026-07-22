@@ -1,0 +1,39 @@
+<section class="capacity-team-settings">
+  <h1>{{ 'capacityPlanning.maturity.title' | transloco }}</h1>
+  <p>{{ 'capacityPlanning.maturity.hint' | transloco }}</p>
+
+  @if (loadError()) {
+    <div role="alert">
+      <p>{{ 'capacityPlanning.maturity.loadError' | transloco }}</p>
+      <button type="button" (click)="load()">{{ 'capacityPlanning.maturity.retry' | transloco }}</button>
+    </div>
+  } @else if (setting(); as s) {
+    @if (saveError()) {
+      <p role="alert">{{ 'capacityPlanning.maturity.saveError' | transloco }}</p>
+    }
+
+    <fieldset class="capacity-team-settings__levels">
+      <legend>{{ 'capacityPlanning.maturity.selectLabel' | transloco }}</legend>
+      @for (level of maturityLevels; track level) {
+        <label>
+          <input
+            type="radio"
+            name="maturity-level"
+            [value]="level"
+            [checked]="s.maturity === level"
+            [disabled]="saving()"
+            (change)="selectMaturity(level)"
+          />
+          {{ 'capacityPlanning.maturity.level.' + level | transloco }}
+        </label>
+      }
+    </fieldset>
+
+    <dl class="capacity-team-settings__effective">
+      <dt>{{ 'capacityPlanning.maturity.effectiveFocusLabel' | transloco }}</dt>
+      <dd>{{ s.effectiveFocusFactorPercent }}%</dd>
+      <dt>{{ 'capacityPlanning.maturity.effectiveMarginLabel' | transloco }}</dt>
+      <dd>{{ s.effectiveMarginPercent }}%</dd>
+    </dl>
+  }
+</section>
