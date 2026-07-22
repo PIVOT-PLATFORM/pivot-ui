@@ -62,6 +62,18 @@
     </div>
   }
 
+  <div class="capacity-event-form__field">
+    <label for="capacity-event-focus-factor">{{ 'capacityPlanning.form.focusFactorLabel' | transloco }}</label>
+    <input id="capacity-event-focus-factor" type="number" min="10" max="100" [value]="focusFactorPercent()"
+      (input)="onFocusFactorInput($event)"
+      [attr.aria-invalid]="fieldErrorCode() === 'INVALID_FOCUS_FACTOR'"
+      [attr.aria-describedby]="'capacity-event-focus-factor-hint' + (fieldErrorCode() === 'INVALID_FOCUS_FACTOR' ? ' capacity-event-focus-factor-error' : '')" />
+    <p id="capacity-event-focus-factor-hint">{{ 'capacityPlanning.form.focusFactorHint' | transloco }}</p>
+    @if (fieldErrorCode() === 'INVALID_FOCUS_FACTOR') {
+      <p id="capacity-event-focus-factor-error" role="alert">{{ 'capacityPlanning.form.errors.INVALID_FOCUS_FACTOR' | transloco }}</p>
+    }
+  </div>
+
   <div class="capacity-event-form__actions">
     <button type="button" [disabled]="!canSave()" (click)="save()">
       {{ (saving() ? 'capacityPlanning.form.saving' : 'capacityPlanning.form.save') | transloco }}

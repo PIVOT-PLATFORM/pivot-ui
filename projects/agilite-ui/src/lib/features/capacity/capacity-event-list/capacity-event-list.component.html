@@ -1,6 +1,15 @@
 <section class="capacity-list">
   <h1>{{ 'capacityPlanning.list.title' | transloco }}</h1>
 
+  <nav class="capacity-list__nav" [attr.aria-label]="'capacityPlanning.list.settingsNavLabel' | transloco">
+    <a routerLink="/capacity/holidays">{{ 'capacityPlanning.list.holidaysLink' | transloco }}</a>
+    @if (selectedTeamId() !== null) {
+      <a [routerLink]="['/capacity/teams', selectedTeamId(), 'maturity']">
+        {{ 'capacityPlanning.list.maturityLink' | transloco }}
+      </a>
+    }
+  </nav>
+
   @if (teams().length === 0) {
     @if (loadError()) {
       <div role="alert">
@@ -25,6 +34,7 @@
         <select id="capacity-type-filter" [value]="typeFilter()" (change)="onTypeFilterChange($event)">
           <option value="ALL">{{ 'capacityPlanning.list.typeAll' | transloco }}</option>
           <option value="PI_PLANNING">{{ 'capacityPlanning.type.PI_PLANNING' | transloco }}</option>
+          <option value="INCREMENT">{{ 'capacityPlanning.type.INCREMENT' | transloco }}</option>
           <option value="SPRINT">{{ 'capacityPlanning.type.SPRINT' | transloco }}</option>
           <option value="RELEASE">{{ 'capacityPlanning.type.RELEASE' | transloco }}</option>
           <option value="CUSTOM">{{ 'capacityPlanning.type.CUSTOM' | transloco }}</option>
