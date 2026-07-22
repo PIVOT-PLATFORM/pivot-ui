@@ -9,7 +9,8 @@
       "daily": "Daily",
       "wheel": "Roue d’équipe",
       "capacity": "Capacity",
-      "poker": "Planning Poker"
+      "poker": "Planning Poker",
+      "pi": "PI Planning"
     },
     "daily": {
       "todayTitle": "Daily du jour",
@@ -39,6 +40,11 @@
       "description": "Créez une room d’estimation et partagez le code d’invitation avec votre équipe, ou rejoignez une room existante avec son code.",
       "create": "Créer une room",
       "join": "Rejoindre une room"
+    },
+    "pi": {
+      "title": "Module PI Planning",
+      "description": "Cycles PI SAFe, équipes du Train et Program Board multi-équipes.",
+      "cta": "Ouvrir PI Planning"
     }
   },
   "wheels": {
@@ -543,6 +549,110 @@
       "chartAria": "Temps de parole cumulé par participant",
       "totalSpeaking": "{{seconds}}s cumulées sur {{sessions}} session(s)",
       "duration": "{{seconds}}s"
+    }
+  },
+  "piPlanning": {
+    "status": {
+      "PREPARATION": "Préparation",
+      "ACTIVE": "Actif",
+      "CLOSED": "Clôturé"
+    },
+    "ticketType": {
+      "FEATURE": "Feature",
+      "MILESTONE": "Milestone",
+      "OBJECTIVE": "Objectif",
+      "RISK": "Risque",
+      "STORY": "Story",
+      "ENABLER": "Enabler"
+    },
+    "list": {
+      "title": "Mes cycles PI",
+      "create": "Créer un cycle PI",
+      "loading": "Chargement…",
+      "loadError": "Impossible de charger les cycles.",
+      "retry": "Réessayer",
+      "empty": "Aucun cycle PI accessible.",
+      "iterationCount": "{{count}} itération(s)",
+      "teamCount": "{{count}} équipe(s)",
+      "viewBoard": "Voir le Program Board"
+    },
+    "form": {
+      "title": "Créer un cycle PI",
+      "saveError": "Impossible de créer le cycle.",
+      "nameLabel": "Nom du cycle",
+      "artNameLabel": "Nom de l’ART (optionnel)",
+      "startDateLabel": "Date de début",
+      "iterationCountLabel": "Nombre d’itérations (1 à 12)",
+      "iterationWeeksLabel": "Durée d’une itération (semaines, 1 à 6)",
+      "saving": "Création en cours…",
+      "save": "Créer le cycle",
+      "cancel": "Annuler",
+      "errors": {
+        "INVALID_NAME": "Le nom doit contenir entre 1 et 120 caractères.",
+        "INVALID_ITERATION_PARAMS": "Nombre d’itérations (1-12) ou durée (1-6 semaines) invalide."
+      }
+    },
+    "detail": {
+      "loadError": "Impossible de charger ce cycle.",
+      "retry": "Réessayer",
+      "viewBoard": "Voir le Program Board",
+      "iterationsTitle": "Itérations",
+      "teamsTitle": "Équipes du Train",
+      "manualTeamBadge": "Saisie manuelle",
+      "removeTeam": "Retirer",
+      "importTitle": "Importer des équipes PIVOT",
+      "importLegend": "Équipes disponibles",
+      "import": "Importer la sélection",
+      "importing": "Import en cours…",
+      "manualTeamNameLabel": "Nom de l’équipe (partenaire externe)",
+      "addManualTeam": "Ajouter l’équipe",
+      "addingManualTeam": "Ajout en cours…",
+      "errors": {
+        "NETWORK_ERROR": "Une erreur est survenue. Veuillez réessayer.",
+        "NO_IMPORTABLE_TEAM": "Aucune des équipes sélectionnées n’a pu être importée.",
+        "INVALID_NAME": "Le nom doit contenir entre 1 et 120 caractères."
+      }
+    },
+    "board": {
+      "loadError": "Impossible de charger le Program Board.",
+      "retry": "Réessayer",
+      "refresh": "Actualiser",
+      "linkModeStart": "Lier des tickets",
+      "linkModeStop": "Terminer",
+      "linkModeSelectSource": "Cliquez sur le ticket fournisseur (celui dont on dépend).",
+      "linkModeSelectTarget": "Cliquez sur le ticket qui dépend du premier (demandeur).",
+      "teamsHeader": "Équipes",
+      "unplannedColumn": "Non planifié",
+      "trainRow": "Train",
+      "addTicket": "Ajouter un ticket",
+      "draftTitle": "Détail du ticket",
+      "titleLabel": "Titre",
+      "descriptionLabel": "Description",
+      "typeLabel": "Type",
+      "teamLabel": "Équipe",
+      "iterationLabel": "Itération",
+      "saving": "Enregistrement…",
+      "save": "Enregistrer",
+      "deleteTicket": "Supprimer le ticket",
+      "cancel": "Fermer",
+      "dependencyOk": "Dépendance OK",
+      "dependencyBlocked": "Dépendance bloquante",
+      "dependencyPopoverTitle": "Détail de la dépendance",
+      "statusOk": "OK",
+      "statusBlocked": "Bloquant",
+      "noteLabel": "Note",
+      "deleteDependency": "Supprimer la dépendance",
+      "closePopover": "Fermer",
+      "errors": {
+        "INVALID_TITLE": "Le titre doit contenir entre 1 et 300 caractères.",
+        "INVALID_TICKET_TYPE": "Type de ticket invalide.",
+        "INVALID_CELL": "Cette cellule n’appartient pas à ce cycle.",
+        "SELF_DEPENDENCY": "Un ticket ne peut pas dépendre de lui-même.",
+        "INVALID_TICKET": "Les deux tickets doivent appartenir à ce cycle.",
+        "DUPLICATE_DEPENDENCY": "Cette dépendance existe déjà.",
+        "DEPENDENCY_CYCLE": "Cette dépendance créerait une boucle (cycle).",
+        "NETWORK_ERROR": "Une erreur est survenue. Veuillez réessayer."
+      }
     }
   }
 }
