@@ -2,10 +2,12 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import {
+  CapacityAbsenceImportResponse,
   CapacityEventMemberResponse,
   CapacityEventResponse,
   CapacitySummaryResponse,
   CapacityVelocityAverageResponse,
+  CapacityVelocityForecastResponse,
   CapacityVelocityHistoryEntry,
 } from '../models/capacity.model';
 import { extractErrorCode } from '../services/capacity-error.util';
@@ -13,16 +15,22 @@ import { CapacityApiService } from '../services/capacity-api.service';
 
 const MIN_AVAILABILITY_PERCENT = 10;
 const MAX_AVAILABILITY_PERCENT = 100;
+const MIN_FOCUS_FACTOR_PERCENT = 10;
+const MAX_FOCUS_FACTOR_PERCENT = 100;
 
 /**
- * Detail view of a single capacity event (US11.1.1) — members and their availability/absences
- * (US11.2.1/US11.2.2), parent/children hierarchy (US11.3.1), provisional net-capacity summary
- * (US11.1.2), and — for `SPRINT` events — committed/completed points plus velocity history
- * (US11.4.1), with a link into the burndown chart (US11.4.2).
+ * Detail view of a single capacity event (US11.1.1) — members and their availability/absences/
+ * focus-factor override (US11.2.1/US11.2.2/US11.6.2), parent/children hierarchy with `isIpIteration`
+ * children visually excluded (US11.3.1/US11.5.1), net-capacity summary (US11.1.2, superseded by
+ * the full engine — US11.6.5), CSV absence import (US11.7.1), and — for `SPRINT` events —
+ * committed/completed points, velocity history and forecast (US11.4.1/US11.6.3), with a link into
+ * the burndown chart (US11.4.2).
  *
- * The net-capacity figure is always rendered with an explicit "provisional estimate" badge — see
- * US11.1.2 §Architecture: this is NOT the full F11.6 calculation engine (Sprint 21), it must never
- * be presented as if it were.
+ * The net-capacity figure carries a "provisional estimate" badge whenever the backend reports
+ * `isProvisional: true` (US11.6.5 §Architecture) — meaning no real engine parameter (holidays,
+ * maturity, focus factor) has been configured yet, not a technical limitation. Once any of those
+ * exist, the backend switches to the full formula and the badge becomes a neutral "full
+ * calculation" one instead — never keep showing "provisional" once the engine is actually engaged.
  */
 @Component({
   selector: 'app-capacity-event-detail',
@@ -52,10 +60,22 @@ export class CapacityEventDetailComponent implements OnInit {
   readonly velocitySaving = signal(false);
   readonly velocityHistory = signal<CapacityVelocityHistoryEntry[]>([]);
   readonly velocityAverage = signal<CapacityVelocityAverageResponse | null>(null);
+  readonly velocityForecast = signal<CapacityVelocityForecastResponse | null>(null);
 
   readonly isPiPlanning = computed(() => this.event()?.type === 'PI_PLANNING');
+  readonly isIncrement = computed(() => this.event()?.type === 'INCREMENT');
+  readonly isParentEvent = computed(() => this.isPiPlanning() || this.isIncrement());
   readonly isSprint = computed(() => this.event()?.type === 'SPRINT');
+  /** `isIpIteration` only has meaning — and is only offered — on a SPRINT child of a PI_PLANNING (US11.5.1). */
+  readonly showIpIterationToggle = computed(() => this.isSprint() && this.event()?.parent?.type === 'PI_PLANNING');
   readonly childrenExpanded = signal(true);
+
+  readonly focusFactorDrafts = signal<Record<string, string>>({});
+
+  readonly importFile = signal<File | null>(null);
+  readonly importing = signal(false);
+  readonly importResult = signal<CapacityAbsenceImportResponse | null>(null);
+  readonly importNetworkError = signal(false);
 
   constructor() {
     this.eventId = this.route.snapshot.paramMap.get('eventId') ?? '';
@@ -104,6 +124,77 @@ export class CapacityEventDetailComponent implements OnInit {
   private loadVelocityHistory(teamId: number): void {
     this.capacityApi.getVelocityHistory(teamId).subscribe({ next: history => this.velocityHistory.set(history), error: () => undefined });
     this.capacityApi.getVelocityAverage(teamId).subscribe({ next: average => this.velocityAverage.set(average), error: () => undefined });
+    this.capacityApi.getVelocityForecast(teamId).subscribe({ next: forecast => this.velocityForecast.set(forecast), error: () => undefined });
+  }
+
+  /** Toggles a `SPRINT` child's IP-iteration flag — excludes it from its PI's aggregated capacity (US11.5.1). */
+  toggleIpIteration(event: Event): void {
+    const isIpIteration = (event.target as HTMLInputElement).checked;
+    this.capacityApi.updateEvent(this.eventId, { isIpIteration }).subscribe({
+      next: updated => {
+        this.event.set(updated);
+        this.reloadSummary();
+      },
+      error: () => undefined,
+    });
+  }
+
+  /** Updates a member's focus-factor override draft. */
+  onFocusFactorInput(memberId: string, event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.focusFactorDrafts.update(map => ({ ...map, [memberId]: value }));
+  }
+
+  /** The value to display in a member's focus-factor input — the in-progress draft, or the member's current override. */
+  focusFactorValue(member: CapacityEventMemberResponse): string {
+    const draft = this.focusFactorDrafts()[member.id];
+    if (draft !== undefined) {
+      return draft;
+    }
+    return member.focusFactorPercent !== null ? String(member.focusFactorPercent) : '';
+  }
+
+  /** Saves a member's focus-factor override, clamped to [10, 100] (US11.6.2). */
+  saveFocusFactor(member: CapacityEventMemberResponse): void {
+    const raw = Number(this.focusFactorDrafts()[member.id]);
+    if (!raw) {
+      return;
+    }
+    const clamped = Math.min(MAX_FOCUS_FACTOR_PERCENT, Math.max(MIN_FOCUS_FACTOR_PERCENT, Math.round(raw)));
+    this.capacityApi.updateMember(this.eventId, member.id, { focusFactorPercent: clamped }).subscribe({
+      next: updated => this.replaceMember(updated),
+      error: () => undefined,
+    });
+  }
+
+  /** Captures the CSV file selected for absence import (US11.7.1). */
+  onImportFileChange(event: Event): void {
+    const files = (event.target as HTMLInputElement).files;
+    this.importFile.set(files && files.length > 0 ? files[0] : null);
+  }
+
+  /** Uploads the selected CSV file and reports the per-row outcome, never all-or-nothing. */
+  importAbsencesCsv(): void {
+    const file = this.importFile();
+    if (!file) {
+      return;
+    }
+    this.importing.set(true);
+    this.importResult.set(null);
+    this.importNetworkError.set(false);
+    this.capacityApi.importAbsencesCsv(this.eventId, file).subscribe({
+      next: result => {
+        this.importing.set(false);
+        this.importResult.set(result);
+        this.importFile.set(null);
+        this.loadMembers();
+        this.reloadSummary();
+      },
+      error: () => {
+        this.importing.set(false);
+        this.importNetworkError.set(true);
+      },
+    });
   }
 
   /** Toggles the visibility of a PI Planning event's children list (US11.3.1 A11y — expandable node). */

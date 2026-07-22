@@ -18,6 +18,16 @@
       </p>
     }
 
+    @if (showIpIterationToggle()) {
+      <div class="capacity-detail__ip-toggle">
+        <label for="capacity-ip-iteration">
+          <input id="capacity-ip-iteration" type="checkbox" [checked]="ev.isIpIteration" (change)="toggleIpIteration($event)" />
+          {{ 'capacityPlanning.detail.ipIterationLabel' | transloco }}
+        </label>
+        <span class="capacity-detail__hint">{{ 'capacityPlanning.detail.ipIterationHint' | transloco }}</span>
+      </div>
+    }
+
     @if (summary(); as s) {
       <div class="pv-card capacity-detail__summary">
         <div class="capacity-detail__summary-head">
@@ -25,6 +35,10 @@
           @if (s.isProvisional) {
             <span class="capacity-detail__provisional-badge" [attr.title]="'capacityPlanning.detail.provisionalTooltip' | transloco">
               {{ 'capacityPlanning.detail.provisionalBadge' | transloco }}
+            </span>
+          } @else {
+            <span class="capacity-detail__complete-badge">
+              {{ 'capacityPlanning.detail.completeBadge' | transloco }}
             </span>
           }
         </div>
@@ -41,11 +55,26 @@
             <dt>{{ 'capacityPlanning.detail.netCapacityPoints' | transloco }}</dt>
             <dd>{{ s.netCapacityPoints }}</dd>
           }
+          @if (s.marginPercent !== null) {
+            <dt>{{ 'capacityPlanning.detail.marginLabel' | transloco }}</dt>
+            <dd>
+              {{ s.marginPercent }}%
+              <span class="capacity-detail__margin-source">
+                {{ 'capacityPlanning.detail.marginSource.' + s.maturitySource | transloco }}
+              </span>
+            </dd>
+          }
+          @if (s.forecastPoints !== null) {
+            <dt>{{ 'capacityPlanning.detail.forecastLabel' | transloco }}</dt>
+            <dd>{{ s.forecastPoints }}</dd>
+            <dt>{{ 'capacityPlanning.detail.engagementRecommendedLabel' | transloco }}</dt>
+            <dd>{{ s.engagementRecommendedPoints }}</dd>
+          }
         </dl>
       </div>
     }
 
-    @if (isPiPlanning()) {
+    @if (isParentEvent()) {
       <div class="pv-card capacity-detail__children">
         <button
           type="button"
@@ -63,9 +92,12 @@
             } @else {
               <ul>
                 @for (child of ev.children; track child.id) {
-                  <li>
+                  <li [class.capacity-detail__child--ip]="child.isIpIteration">
                     <a [routerLink]="['/capacity', child.id]">{{ child.name }}</a>
                     <span class="capacity-detail__dates">{{ child.startDate }} – {{ child.endDate }}</span>
+                    @if (child.isIpIteration) {
+                      <span class="capacity-detail__ip-badge">{{ 'capacityPlanning.detail.ipIterationBadge' | transloco }}</span>
+                    }
                   </li>
                 }
               </ul>
@@ -106,6 +138,19 @@
                     (change)="onAvailabilityInput(member, $event)"
                   />
                 </label>
+                <label [for]="'member-focus-factor-' + member.id" class="capacity-detail__focus-factor-label">
+                  {{ 'capacityPlanning.detail.focusFactorOverrideLabel' | transloco }}
+                  <input
+                    [id]="'member-focus-factor-' + member.id"
+                    type="number"
+                    min="10"
+                    max="100"
+                    [placeholder]="'capacityPlanning.detail.focusFactorOverridePlaceholder' | transloco"
+                    [value]="focusFactorValue(member)"
+                    (input)="onFocusFactorInput(member.id, $event)"
+                    (change)="saveFocusFactor(member)"
+                  />
+                </label>
               </div>
 
               @if (member.absences.length > 0) {
@@ -141,6 +186,45 @@
             </li>
           }
         </ul>
+
+        <div class="capacity-detail__import">
+          <span class="capacity-detail__card-title">{{ 'capacityPlanning.detail.importTitle' | transloco }}</span>
+          <p>{{ 'capacityPlanning.detail.importHint' | transloco }}</p>
+          <label for="capacity-import-file">{{ 'capacityPlanning.detail.importFileLabel' | transloco }}</label>
+          <input id="capacity-import-file" type="file" accept=".csv,text/csv" (change)="onImportFileChange($event)" />
+          <button type="button" [disabled]="!importFile() || importing()" (click)="importAbsencesCsv()">
+            {{ (importing() ? 'capacityPlanning.detail.importing' : 'capacityPlanning.detail.importSubmit') | transloco }}
+          </button>
+
+          @if (importNetworkError()) {
+            <p role="alert">{{ 'capacityPlanning.detail.importNetworkError' | transloco }}</p>
+          }
+
+          @if (importResult(); as result) {
+            <div role="status">
+              <p>{{ 'capacityPlanning.detail.importSuccessCount' | transloco: { count: result.imported } }}</p>
+              @if (result.errors.length > 0) {
+                <table class="capacity-detail__import-errors">
+                  <caption>{{ 'capacityPlanning.detail.importErrorsTitle' | transloco }}</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">{{ 'capacityPlanning.detail.importErrorLine' | transloco }}</th>
+                      <th scope="col">{{ 'capacityPlanning.detail.importErrorCode' | transloco }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (rowError of result.errors; track rowError.line) {
+                      <tr>
+                        <td>{{ rowError.line }}</td>
+                        <td>{{ 'capacityPlanning.detail.importErrors.' + rowError.code | transloco }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              }
+            </div>
+          }
+        </div>
       </div>
     }
 
@@ -163,6 +247,22 @@
               {{ 'capacityPlanning.detail.velocitySuggestion' | transloco: { average: avg.averageVelocity, suggested: avg.suggestedCapacity } }}
             </p>
           }
+        }
+
+        @if (velocityForecast(); as forecast) {
+          <div class="capacity-detail__forecast">
+            <span class="capacity-detail__card-title">{{ 'capacityPlanning.detail.forecastTitle' | transloco }}</span>
+            @if (forecast.basis === 'NO_HISTORY') {
+              <p>{{ 'capacityPlanning.detail.forecastNoHistory' | transloco }}</p>
+            } @else {
+              <p>
+                {{ 'capacityPlanning.detail.forecastPointsLabel' | transloco: { points: forecast.forecastPoints } }}
+                <span class="capacity-detail__confidence" [class.capacity-detail__confidence--wide]="forecast.confidenceInterval === 'WIDE'">
+                  {{ 'capacityPlanning.detail.confidence.' + forecast.confidenceInterval | transloco }}
+                </span>
+              </p>
+            }
+          </div>
         }
 
         @if (velocityHistory().length > 0) {
