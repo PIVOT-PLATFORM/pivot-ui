@@ -21,7 +21,7 @@ interface HubApi {
   resultId(): string | null;
   wheelRotation(): number;
   result(): { name: string } | null;
-  select(t: 'daily' | 'wheel' | 'capacity' | 'poker'): void;
+  select(t: 'daily' | 'wheel' | 'capacity' | 'poker' | 'pi'): void;
   spin(): void;
 }
 
@@ -64,6 +64,17 @@ describe('AgiliteHubComponent', () => {
     // Deux points d'entrée reachable vers la feature poker (routes autrement orphelines).
     expect(links.some(h => h?.includes('scrum-poker/rooms/new'))).toBe(true);
     expect(links.some(h => h?.includes('scrum-poker/rooms/join'))).toBe(true);
+  });
+
+  it('l\'onglet PI Planning expose un vrai lien de navigation (US50.1.1, évite l\'orphelinage de route)', () => {
+    const fixture = create();
+    const cmp = fixture.componentInstance as unknown as HubApi;
+    cmp.select('pi');
+    fixture.detectChanges();
+    expect(cmp.tab()).toBe('pi');
+
+    const link = (fixture.nativeElement as HTMLElement).querySelector('a[routerLink="pi"]');
+    expect(link).not.toBeNull();
   });
 
   it('le tirage tourne la roue puis désigne un membre après le délai', () => {

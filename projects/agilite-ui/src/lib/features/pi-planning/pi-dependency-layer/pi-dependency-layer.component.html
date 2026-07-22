@@ -1,0 +1,85 @@
+<div class="pi-dependency-layer" aria-hidden="false">
+  <svg class="pi-dependency-layer__svg">
+    <defs>
+      <marker id="pi-dep-ok" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <path d="M0,0 L8,3 L0,6 Z" class="pi-dependency-layer__marker pi-dependency-layer__marker--ok" />
+      </marker>
+      <marker id="pi-dep-blocked" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <path d="M0,0 L8,3 L0,6 Z" class="pi-dependency-layer__marker pi-dependency-layer__marker--blocked" />
+      </marker>
+    </defs>
+    @for (arrow of arrows(); track arrow.dependency.id) {
+      <g>
+        <title>
+          {{ (arrow.dependency.status === 'BLOCKED' ? 'piPlanning.board.dependencyBlocked' : 'piPlanning.board.dependencyOk') | transloco }}
+          @if (arrow.dependency.note) {
+            — {{ arrow.dependency.note }}
+          }
+        </title>
+        <path
+          [attr.d]="arrow.path"
+          class="pi-dependency-layer__path"
+          [class.pi-dependency-layer__path--blocked]="arrow.dependency.status === 'BLOCKED'"
+          [attr.marker-end]="'url(#' + (arrow.dependency.status === 'BLOCKED' ? 'pi-dep-blocked' : 'pi-dep-ok') + ')'"
+        />
+        <path
+          [attr.d]="arrow.path"
+          class="pi-dependency-layer__hitbox"
+          tabindex="0"
+          role="button"
+          [attr.aria-label]="(arrow.dependency.status === 'BLOCKED' ? 'piPlanning.board.dependencyBlocked' : 'piPlanning.board.dependencyOk') | transloco"
+          (click)="openPopover(arrow.dependency.id)"
+          (keydown.enter)="openPopover(arrow.dependency.id)"
+        />
+      </g>
+    }
+  </svg>
+
+  @if (openArrow(); as arrow) {
+    <div
+      class="pi-dependency-layer__popover"
+      role="dialog"
+      [attr.aria-label]="'piPlanning.board.dependencyPopoverTitle' | transloco"
+      [style.left.px]="arrow.midpoint.x"
+      [style.top.px]="arrow.midpoint.y"
+    >
+      <div class="pi-dependency-layer__status-buttons">
+        <button
+          type="button"
+          [disabled]="!canEdit()"
+          [class.pi-dependency-layer__status-btn--active]="arrow.dependency.status === 'OK'"
+          (click)="setStatus('OK')"
+        >
+          {{ 'piPlanning.board.statusOk' | transloco }}
+        </button>
+        <button
+          type="button"
+          [disabled]="!canEdit()"
+          [class.pi-dependency-layer__status-btn--active]="arrow.dependency.status === 'BLOCKED'"
+          (click)="setStatus('BLOCKED')"
+        >
+          {{ 'piPlanning.board.statusBlocked' | transloco }}
+        </button>
+      </div>
+
+      @if (canEdit()) {
+        <label class="pi-dependency-layer__note-label" [attr.for]="'pi-dep-note-' + arrow.dependency.id">
+          {{ 'piPlanning.board.noteLabel' | transloco }}
+        </label>
+        <textarea
+          [id]="'pi-dep-note-' + arrow.dependency.id"
+          [value]="noteDraft()"
+          (input)="onNoteInput($event)"
+          (blur)="saveNote()"
+          rows="2"
+          maxlength="1000"
+        ></textarea>
+        <button type="button" (click)="deleteOpen()">{{ 'piPlanning.board.deleteDependency' | transloco }}</button>
+      } @else if (arrow.dependency.note) {
+        <p>{{ arrow.dependency.note }}</p>
+      }
+
+      <button type="button" (click)="closePopover()">{{ 'piPlanning.board.closePopover' | transloco }}</button>
+    </div>
+  }
+</div>

@@ -89,6 +89,34 @@ export const AGILITE_ROUTES: Routes = [
       import('./features/standup/standup-runner/standup-runner.component').then(m => m.StandupRunnerComponent),
   },
   {
+    // US50.1.1 — liste des cycles PI accessibles à l'appelant.
+    path: 'pi',
+    loadComponent: () =>
+      import('./features/pi-planning/pi-cycle-list/pi-cycle-list.component').then(m => m.PiCycleListComponent),
+  },
+  {
+    // US50.1.1 — création d'un nouveau cycle PI.
+    path: 'pi/new',
+    loadComponent: () =>
+      import('./features/pi-planning/pi-cycle-form/pi-cycle-form.component').then(m => m.PiCycleFormComponent),
+  },
+  {
+    // US50.3.1/US50.3.2 — Program Board (matrice équipes × itérations, dépendances).
+    path: 'pi/:cycleId/board',
+    loadComponent: () =>
+      import('./features/pi-planning/pi-program-board/pi-program-board.component').then(
+        m => m.PiProgramBoardComponent,
+      ),
+  },
+  {
+    // US50.1.1 — détail d'un cycle PI (itérations, équipes du Train).
+    path: 'pi/:cycleId',
+    loadComponent: () =>
+      import('./features/pi-planning/pi-cycle-detail/pi-cycle-detail.component').then(
+        m => m.PiCycleDetailComponent,
+      ),
+  },
+  {
     path: 'scrum-poker/rooms/new',
     loadComponent: () =>
       import('./features/scrum-poker/create-room/create-room.component').then(

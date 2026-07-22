@@ -16,9 +16,10 @@ const SPIN_MS = 3450;
 
 /**
  * Agilité module landing hub — the aggregated dashboard mounted at the module's `''` route
- * (the shell's `/agilite`, previously empty). Four tabs: **Daily** (standup board + sprint tasks +
+ * (the shell's `/agilite`, previously empty). Five tabs: **Daily** (standup board + sprint tasks +
  * history), **Roue d'équipe** (weighted random draw wheel), **Capacity** (velocity + charge vs
- * capacity), and **Planning Poker** (entry point linking to the real create/join-room screens —
+ * capacity), **Planning Poker** (entry point linking to the real create/join-room screens), and
+ * **PI Planning** (entry point linking to the real PI cycle list — same convention as Daily/Poker:
  * the only nav path to that feature, whose routes were otherwise unreachable).
  *
  * **Data status.** Only the wheel/retro/poker sub-features have a real backend

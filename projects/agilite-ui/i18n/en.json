@@ -9,7 +9,8 @@
       "daily": "Daily",
       "wheel": "Team wheel",
       "capacity": "Capacity",
-      "poker": "Planning Poker"
+      "poker": "Planning Poker",
+      "pi": "PI Planning"
     },
     "daily": {
       "todayTitle": "Today’s daily",
@@ -39,6 +40,11 @@
       "description": "Create an estimation room and share the invite code with your team, or join an existing room with its code.",
       "create": "Create a room",
       "join": "Join a room"
+    },
+    "pi": {
+      "title": "PI Planning module",
+      "description": "SAFe PI cycles, Train teams, and a multi-team Program Board.",
+      "cta": "Open PI Planning"
     }
   },
   "wheels": {
@@ -543,6 +549,110 @@
       "chartAria": "Total speaking time per participant",
       "totalSpeaking": "{{seconds}}s across {{sessions}} session(s)",
       "duration": "{{seconds}}s"
+    }
+  },
+  "piPlanning": {
+    "status": {
+      "PREPARATION": "Preparation",
+      "ACTIVE": "Active",
+      "CLOSED": "Closed"
+    },
+    "ticketType": {
+      "FEATURE": "Feature",
+      "MILESTONE": "Milestone",
+      "OBJECTIVE": "Objective",
+      "RISK": "Risk",
+      "STORY": "Story",
+      "ENABLER": "Enabler"
+    },
+    "list": {
+      "title": "My PI cycles",
+      "create": "Create a PI cycle",
+      "loading": "Loading…",
+      "loadError": "Unable to load cycles.",
+      "retry": "Retry",
+      "empty": "No accessible PI cycle.",
+      "iterationCount": "{{count}} iteration(s)",
+      "teamCount": "{{count}} team(s)",
+      "viewBoard": "View Program Board"
+    },
+    "form": {
+      "title": "Create a PI cycle",
+      "saveError": "Unable to create the cycle.",
+      "nameLabel": "Cycle name",
+      "artNameLabel": "ART name (optional)",
+      "startDateLabel": "Start date",
+      "iterationCountLabel": "Number of iterations (1 to 12)",
+      "iterationWeeksLabel": "Iteration length (weeks, 1 to 6)",
+      "saving": "Creating…",
+      "save": "Create cycle",
+      "cancel": "Cancel",
+      "errors": {
+        "INVALID_NAME": "Name must be between 1 and 120 characters.",
+        "INVALID_ITERATION_PARAMS": "Invalid iteration count (1-12) or length (1-6 weeks)."
+      }
+    },
+    "detail": {
+      "loadError": "Unable to load this cycle.",
+      "retry": "Retry",
+      "viewBoard": "View Program Board",
+      "iterationsTitle": "Iterations",
+      "teamsTitle": "Train teams",
+      "manualTeamBadge": "Manually added",
+      "removeTeam": "Remove",
+      "importTitle": "Import PIVOT teams",
+      "importLegend": "Available teams",
+      "import": "Import selection",
+      "importing": "Importing…",
+      "manualTeamNameLabel": "Team name (external partner)",
+      "addManualTeam": "Add team",
+      "addingManualTeam": "Adding…",
+      "errors": {
+        "NETWORK_ERROR": "Something went wrong. Please try again.",
+        "NO_IMPORTABLE_TEAM": "None of the selected teams could be imported.",
+        "INVALID_NAME": "Name must be between 1 and 120 characters."
+      }
+    },
+    "board": {
+      "loadError": "Unable to load the Program Board.",
+      "retry": "Retry",
+      "refresh": "Refresh",
+      "linkModeStart": "Link tickets",
+      "linkModeStop": "Done",
+      "linkModeSelectSource": "Click the supplier ticket (the one being depended on).",
+      "linkModeSelectTarget": "Click the ticket that depends on the first one.",
+      "teamsHeader": "Teams",
+      "unplannedColumn": "Unplanned",
+      "trainRow": "Train",
+      "addTicket": "Add a ticket",
+      "draftTitle": "Ticket detail",
+      "titleLabel": "Title",
+      "descriptionLabel": "Description",
+      "typeLabel": "Type",
+      "teamLabel": "Team",
+      "iterationLabel": "Iteration",
+      "saving": "Saving…",
+      "save": "Save",
+      "deleteTicket": "Delete ticket",
+      "cancel": "Close",
+      "dependencyOk": "OK dependency",
+      "dependencyBlocked": "Blocking dependency",
+      "dependencyPopoverTitle": "Dependency detail",
+      "statusOk": "OK",
+      "statusBlocked": "Blocking",
+      "noteLabel": "Note",
+      "deleteDependency": "Delete dependency",
+      "closePopover": "Close",
+      "errors": {
+        "INVALID_TITLE": "Title must be between 1 and 300 characters.",
+        "INVALID_TICKET_TYPE": "Invalid ticket type.",
+        "INVALID_CELL": "This cell does not belong to this cycle.",
+        "SELF_DEPENDENCY": "A ticket cannot depend on itself.",
+        "INVALID_TICKET": "Both tickets must belong to this cycle.",
+        "DUPLICATE_DEPENDENCY": "This dependency already exists.",
+        "DEPENDENCY_CYCLE": "This dependency would create a cycle.",
+        "NETWORK_ERROR": "Something went wrong. Please try again."
+      }
     }
   }
 }

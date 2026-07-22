@@ -45,6 +45,16 @@
     >
       {{ 'hub.tabs.poker' | transloco }}
     </button>
+    <button
+      type="button"
+      role="tab"
+      class="agh__tab"
+      [class.agh__tab--active]="tab() === 'pi'"
+      [attr.aria-selected]="tab() === 'pi'"
+      (click)="select('pi')"
+    >
+      {{ 'hub.tabs.pi' | transloco }}
+    </button>
   </div>
 
   <!-- ===== DAILY ===== -->
@@ -209,6 +219,20 @@
             {{ 'hub.poker.join' | transloco }}
           </a>
         </div>
+      </div>
+    </div>
+  }
+
+  <!-- ===== PI PLANNING ===== -->
+  @if (tab() === 'pi') {
+    <!-- US50.1.1/US50.3.1/US50.3.2 — module PI Planning : backend/frontend réels, mêmes
+         conventions que les entrées Daily/Planning Poker ci-dessus (seul chemin de navigation
+         vers ces vraies vues). -->
+    <div class="agh__stack">
+      <div class="pv-card agh__card">
+        <div class="agh__card-title agh__card-title--block">{{ 'hub.pi.title' | transloco }}</div>
+        <p class="agh__row-note">{{ 'hub.pi.description' | transloco }}</p>
+        <a class="btn btn-primary" routerLink="pi">{{ 'hub.pi.cta' | transloco }}</a>
       </div>
     </div>
   }

@@ -1,0 +1,36 @@
+<section class="pi-cycle-list">
+  <h1>{{ 'piPlanning.list.title' | transloco }}</h1>
+
+  <a class="pi-cycle-list__create" [routerLink]="['/pi/new']">
+    {{ 'piPlanning.list.create' | transloco }}
+  </a>
+
+  @if (!loaded()) {
+    <p>{{ 'piPlanning.list.loading' | transloco }}</p>
+  } @else if (loadError()) {
+    <div role="alert">
+      <p>{{ 'piPlanning.list.loadError' | transloco }}</p>
+      <button type="button" (click)="loadCycles()">{{ 'piPlanning.list.retry' | transloco }}</button>
+    </div>
+  } @else if (cycles().length === 0) {
+    <p>{{ 'piPlanning.list.empty' | transloco }}</p>
+  } @else {
+    <ul class="pi-cycle-list__cycles">
+      @for (cycle of cycles(); track cycle.id) {
+        <li>
+          <a [routerLink]="['/pi', cycle.id]">{{ cycle.name }}</a>
+          @if (cycle.artName) {
+            <span class="pi-cycle-list__art">{{ cycle.artName }}</span>
+          }
+          <span class="pi-cycle-list__status">{{ 'piPlanning.status.' + cycle.status | transloco }}</span>
+          <span class="pi-cycle-list__meta">
+            {{ 'piPlanning.list.iterationCount' | transloco: { count: cycle.iterationCount } }}
+            ·
+            {{ 'piPlanning.list.teamCount' | transloco: { count: cycle.teamCount } }}
+          </span>
+          <a [routerLink]="['/pi', cycle.id, 'board']">{{ 'piPlanning.list.viewBoard' | transloco }}</a>
+        </li>
+      }
+    </ul>
+  }
+</section>

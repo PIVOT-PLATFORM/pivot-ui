@@ -1,0 +1,62 @@
+.pi-cycle-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.pi-cycle-detail__head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: flex-start;
+}
+
+.pi-cycle-detail__art,
+.pi-cycle-detail__status {
+  font-size: var(--text-sm);
+  color: var(--color-gray-500);
+}
+
+.pi-cycle-detail__iterations ul,
+.pi-cycle-detail__teams ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--surface-card);
+    border-radius: var(--radius-md);
+  }
+}
+
+.pi-cycle-detail__team-swatch {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.pi-cycle-detail__team-manual {
+  font-size: var(--text-xs);
+  color: var(--color-gray-500);
+}
+
+.pi-cycle-detail__import,
+.pi-cycle-detail__manual-team {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pi-cycle-detail__import-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}

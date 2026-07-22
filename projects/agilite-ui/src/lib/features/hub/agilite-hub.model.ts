@@ -9,7 +9,7 @@
  * and isolated, so swapping demo arrays for API responses touches nothing in the component/template.
  */
 
-export type HubTab = 'daily' | 'wheel' | 'capacity' | 'poker';
+export type HubTab = 'daily' | 'wheel' | 'capacity' | 'poker' | 'pi';
 
 export interface TeamMember {
   readonly id: string;

@@ -1,0 +1,28 @@
+.pi-cycle-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 32rem;
+}
+
+.pi-cycle-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  input {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-gray-300);
+    border-radius: var(--radius-md);
+  }
+
+  [aria-invalid='true'] {
+    border-color: var(--color-danger, #d92d20);
+  }
+}
+
+.pi-cycle-form__actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}

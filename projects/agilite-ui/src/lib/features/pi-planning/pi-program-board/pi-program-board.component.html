@@ -1,0 +1,151 @@
+<section class="pi-program-board">
+  @if (loadError()) {
+    <div role="alert">
+      <p>{{ 'piPlanning.board.loadError' | transloco }}</p>
+      <button type="button" (click)="loadBoard()">{{ 'piPlanning.board.retry' | transloco }}</button>
+    </div>
+  } @else if (board(); as board) {
+    <div class="pi-program-board__toolbar">
+      <ul class="pi-program-board__legend">
+        @for (t of ticketTypes; track t.value) {
+          <li>
+            <span class="pi-program-board__legend-swatch" [style.background]="t.color" aria-hidden="true"></span>
+            {{ 'piPlanning.ticketType.' + t.value | transloco }}
+          </li>
+        }
+      </ul>
+      <button type="button" (click)="loadBoard()">{{ 'piPlanning.board.refresh' | transloco }}</button>
+      <button type="button" [class.pi-program-board__link-btn--active]="linkMode()" (click)="toggleLinkMode()">
+        {{ (linkMode() ? 'piPlanning.board.linkModeStop' : 'piPlanning.board.linkModeStart') | transloco }}
+      </button>
+    </div>
+
+    @if (linkMode()) {
+      <p role="status">
+        {{ (linkSourceId() ? 'piPlanning.board.linkModeSelectTarget' : 'piPlanning.board.linkModeSelectSource') | transloco }}
+      </p>
+    }
+    @if (dependencyError()) {
+      <p role="alert">{{ 'piPlanning.board.errors.' + dependencyError() | transloco }}</p>
+    }
+    @if (moveError()) {
+      <p role="alert">{{ 'piPlanning.board.errors.' + moveError() | transloco }}</p>
+    }
+
+    <div class="pi-program-board__scroll">
+      <div class="pi-program-board__wrapper" #boardWrapper cdkDropListGroup [style.gridTemplateColumns]="gridTemplateColumns()">
+        <div class="pi-program-board__header pi-program-board__header--corner">
+          {{ 'piPlanning.board.teamsHeader' | transloco }}
+        </div>
+        @for (col of columns(); track col.id ?? 'none') {
+          <div class="pi-program-board__header">
+            <span>{{ col.label ?? ('piPlanning.board.unplannedColumn' | transloco) }}</span>
+          </div>
+        }
+
+        @for (row of rows(); track row.id ?? 'train') {
+          <div class="pi-program-board__row-label" [class.pi-program-board__row-label--train]="row.id === null">
+            <span class="pi-program-board__row-swatch" [style.background]="row.color" aria-hidden="true"></span>
+            <span>{{ row.id === null ? ('piPlanning.board.trainRow' | transloco) : row.name }}</span>
+          </div>
+
+          @for (col of columns(); track col.id ?? 'none') {
+            <div
+              class="pi-program-board__cell"
+              [class.pi-program-board__cell--train]="row.id === null"
+              cdkDropList
+              [id]="dropListId({ teamId: row.id, iterationId: col.id })"
+              [cdkDropListData]="ticketsFor({ teamId: row.id, iterationId: col.id })"
+              (cdkDropListDropped)="onDrop($event, { teamId: row.id, iterationId: col.id })"
+              [attr.aria-label]="cellAriaLabel(row.id === null ? ('piPlanning.board.trainRow' | transloco) : row.name, col.label)"
+            >
+              @for (ticket of ticketsFor({ teamId: row.id, iterationId: col.id }); track ticket.id) {
+                <div
+                  cdkDrag
+                  [attr.data-ticket-id]="ticket.id"
+                  class="pi-program-board__ticket"
+                  [class.pi-program-board__ticket--link-source]="linkSourceId() === ticket.id"
+                  [style.borderLeftColor]="ticketColor(ticket.type)"
+                  tabindex="0"
+                  role="button"
+                  [attr.aria-label]="ticket.title"
+                  (click)="onTicketClick(ticket)"
+                  (keydown.enter)="onTicketClick(ticket)"
+                >
+                  <span class="pi-program-board__ticket-type" [style.color]="ticketColor(ticket.type)">
+                    {{ 'piPlanning.ticketType.' + ticket.type | transloco }}
+                  </span>
+                  <p class="pi-program-board__ticket-title">{{ ticket.title }}</p>
+                </div>
+              }
+              @if (!linkMode()) {
+                <button type="button" class="pi-program-board__add" (click)="openCreate({ teamId: row.id, iterationId: col.id })">
+                  {{ 'piPlanning.board.addTicket' | transloco }}
+                </button>
+              }
+            </div>
+          }
+        }
+
+        <app-pi-dependency-layer
+          [dependencies]="board.dependencies"
+          [wrapperElement]="boardWrapper"
+          [revision]="board.tickets.length + ':' + moveError()"
+          [canEdit]="true"
+          (updateDependency)="onUpdateDependency($event.depId, $event.patch)"
+          (deleteDependency)="onDeleteDependency($event)"
+        />
+      </div>
+    </div>
+  }
+
+  @if (draft(); as draft) {
+    <div class="pi-program-board__draft" role="dialog" [attr.aria-label]="'piPlanning.board.draftTitle' | transloco">
+      @if (draftError()) {
+        <p role="alert">{{ 'piPlanning.board.errors.' + draftError() | transloco }}</p>
+      }
+      <label for="pi-draft-title">{{ 'piPlanning.board.titleLabel' | transloco }}</label>
+      <input id="pi-draft-title" type="text" [value]="draft.title" (input)="onDraftTitleInput($event)" />
+
+      <label for="pi-draft-description">{{ 'piPlanning.board.descriptionLabel' | transloco }}</label>
+      <textarea id="pi-draft-description" [value]="draft.description" (input)="onDraftDescriptionInput($event)"></textarea>
+
+      <label for="pi-draft-type">{{ 'piPlanning.board.typeLabel' | transloco }}</label>
+      <select id="pi-draft-type" [value]="draft.type" (change)="onDraftTypeChange($event)">
+        @for (t of ticketTypes; track t.value) {
+          <option [value]="t.value">{{ 'piPlanning.ticketType.' + t.value | transloco }}</option>
+        }
+      </select>
+
+      <label for="pi-draft-team">{{ 'piPlanning.board.teamLabel' | transloco }}</label>
+      <select id="pi-draft-team" [value]="draft.teamId ?? ''" (change)="onDraftTeamChange($event)">
+        <option value="">{{ 'piPlanning.board.trainRow' | transloco }}</option>
+        @for (row of rows(); track row.id ?? 'train') {
+          @if (row.id !== null) {
+            <option [value]="row.id">{{ row.name }}</option>
+          }
+        }
+      </select>
+
+      <label for="pi-draft-iteration">{{ 'piPlanning.board.iterationLabel' | transloco }}</label>
+      <select id="pi-draft-iteration" [value]="draft.iterationId ?? ''" (change)="onDraftIterationChange($event)">
+        <option value="">{{ 'piPlanning.board.unplannedColumn' | transloco }}</option>
+        @for (col of columns(); track col.id ?? 'none') {
+          @if (col.id !== null) {
+            <option [value]="col.id">{{ col.label }}</option>
+          }
+        }
+      </select>
+
+      <div class="pi-program-board__draft-actions">
+        <button type="button" [disabled]="draftSaving() || draft.title.trim().length === 0" (click)="saveDraft()">
+          {{ (draftSaving() ? 'piPlanning.board.saving' : 'piPlanning.board.save') | transloco }}
+        </button>
+        @if (draft.id !== null) {
+          <button type="button" (click)="deleteDraft()">{{ 'piPlanning.board.deleteTicket' | transloco }}</button>
+        }
+        <button type="button" (click)="closeDraft()">{{ 'piPlanning.board.cancel' | transloco }}</button>
+      </div>
+    </div>
+  }
+</section>

@@ -1,0 +1,53 @@
+<section class="pi-cycle-form">
+  <h1>{{ 'piPlanning.form.title' | transloco }}</h1>
+
+  @if (saveNetworkError()) {
+    <div role="alert">
+      <p>{{ 'piPlanning.form.saveError' | transloco }}</p>
+    </div>
+  }
+
+  <div class="pi-cycle-form__field">
+    <label for="pi-cycle-name">{{ 'piPlanning.form.nameLabel' | transloco }}</label>
+    <input id="pi-cycle-name" type="text" [value]="name()" (input)="onNameInput($event)"
+      [attr.aria-invalid]="fieldErrorCode() === 'INVALID_NAME'"
+      [attr.aria-describedby]="fieldErrorCode() === 'INVALID_NAME' ? 'pi-cycle-name-error' : null" />
+    @if (fieldErrorCode() === 'INVALID_NAME') {
+      <p id="pi-cycle-name-error" role="alert">{{ 'piPlanning.form.errors.INVALID_NAME' | transloco }}</p>
+    }
+  </div>
+
+  <div class="pi-cycle-form__field">
+    <label for="pi-cycle-art-name">{{ 'piPlanning.form.artNameLabel' | transloco }}</label>
+    <input id="pi-cycle-art-name" type="text" [value]="artName()" (input)="onArtNameInput($event)" />
+  </div>
+
+  <div class="pi-cycle-form__field">
+    <label for="pi-cycle-start-date">{{ 'piPlanning.form.startDateLabel' | transloco }}</label>
+    <input id="pi-cycle-start-date" type="date" [value]="startDate()" (input)="onStartDateInput($event)" />
+  </div>
+
+  <div class="pi-cycle-form__field">
+    <label for="pi-cycle-iteration-count">{{ 'piPlanning.form.iterationCountLabel' | transloco }}</label>
+    <input id="pi-cycle-iteration-count" type="number" min="1" max="12" [value]="iterationCount()" (input)="onIterationCountInput($event)"
+      [attr.aria-invalid]="fieldErrorCode() === 'INVALID_ITERATION_PARAMS'"
+      [attr.aria-describedby]="fieldErrorCode() === 'INVALID_ITERATION_PARAMS' ? 'pi-cycle-iteration-error' : null" />
+  </div>
+
+  <div class="pi-cycle-form__field">
+    <label for="pi-cycle-iteration-weeks">{{ 'piPlanning.form.iterationWeeksLabel' | transloco }}</label>
+    <input id="pi-cycle-iteration-weeks" type="number" min="1" max="6" [value]="iterationWeeks()" (input)="onIterationWeeksInput($event)"
+      [attr.aria-invalid]="fieldErrorCode() === 'INVALID_ITERATION_PARAMS'"
+      [attr.aria-describedby]="fieldErrorCode() === 'INVALID_ITERATION_PARAMS' ? 'pi-cycle-iteration-error' : null" />
+    @if (fieldErrorCode() === 'INVALID_ITERATION_PARAMS') {
+      <p id="pi-cycle-iteration-error" role="alert">{{ 'piPlanning.form.errors.INVALID_ITERATION_PARAMS' | transloco }}</p>
+    }
+  </div>
+
+  <div class="pi-cycle-form__actions">
+    <button type="button" [disabled]="!canSave()" (click)="save()">
+      {{ (saving() ? 'piPlanning.form.saving' : 'piPlanning.form.save') | transloco }}
+    </button>
+    <a routerLink="/pi">{{ 'piPlanning.form.cancel' | transloco }}</a>
+  </div>
+</section>
