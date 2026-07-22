@@ -65,6 +65,30 @@ export const AGILITE_ROUTES: Routes = [
       ),
   },
   {
+    // US10.1.1 — liste des sessions daily standup de l'équipe sélectionnée.
+    path: 'standup',
+    loadComponent: () =>
+      import('./features/standup/standup-list/standup-list.component').then(m => m.StandupListComponent),
+  },
+  {
+    // US10.1.1 — création d'une nouvelle session daily standup.
+    path: 'standup/new',
+    loadComponent: () =>
+      import('./features/standup/standup-form/standup-form.component').then(m => m.StandupFormComponent),
+  },
+  {
+    // US10.3.1 — statistiques des sessions daily standup terminées.
+    path: 'standup/stats',
+    loadComponent: () =>
+      import('./features/standup/standup-stats/standup-stats.component').then(m => m.StandupStatsComponent),
+  },
+  {
+    // US10.1.2/US10.2.1/US10.2.2 — vue "runner" temps réel d'une session daily standup.
+    path: 'standup/sessions/:sessionId',
+    loadComponent: () =>
+      import('./features/standup/standup-runner/standup-runner.component').then(m => m.StandupRunnerComponent),
+  },
+  {
     path: 'scrum-poker/rooms/new',
     loadComponent: () =>
       import('./features/scrum-poker/create-room/create-room.component').then(

@@ -36,6 +36,12 @@ describe('AgiliteHubComponent', () => {
     expect((fixture.nativeElement as HTMLElement).querySelectorAll('.pv-avatar').length).toBeGreaterThan(0);
   });
 
+  it('expose un vrai lien de navigation vers le module Daily Standup (US10.1.1, évite l\'orphelinage de route)', () => {
+    const fixture = create();
+    const link = (fixture.nativeElement as HTMLElement).querySelector('a[routerLink="standup"]');
+    expect(link).not.toBeNull();
+  });
+
   it('change d\'onglet', () => {
     const fixture = create();
     const cmp = fixture.componentInstance as unknown as HubApi;
