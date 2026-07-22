@@ -1,0 +1,51 @@
+<section class="capacity-burndown">
+  <h1>{{ 'capacityPlanning.burndown.title' | transloco }}</h1>
+
+  @if (loadError()) {
+    <div role="alert">
+      <p>{{ 'capacityPlanning.burndown.loadError' | transloco }}</p>
+      <button type="button" (click)="load()">{{ 'capacityPlanning.burndown.retry' | transloco }}</button>
+    </div>
+  } @else if (burndown(); as b) {
+    @if (b.atRisk) {
+      <p class="capacity-burndown__alert capacity-burndown__alert--risk" role="status">
+        <span aria-hidden="true">⚠️</span> {{ 'capacityPlanning.burndown.atRisk' | transloco }}
+      </p>
+    }
+    @if (b.stale) {
+      <p class="capacity-burndown__alert capacity-burndown__alert--stale" role="status">
+        <span aria-hidden="true">⏱️</span> {{ 'capacityPlanning.burndown.stale' | transloco }}
+      </p>
+    }
+
+    @if (isEmpty()) {
+      <p class="capacity-burndown__empty">{{ 'capacityPlanning.burndown.empty' | transloco }}</p>
+    } @else {
+      <svg [attr.viewBox]="viewBox" class="capacity-burndown__chart" role="img" [attr.aria-label]="'capacityPlanning.burndown.chartLabel' | transloco">
+        @if (idealPolyline()) {
+          <polyline [attr.points]="idealPolyline()" class="capacity-burndown__line capacity-burndown__line--ideal" />
+        }
+        @if (actualPolyline()) {
+          <polyline [attr.points]="actualPolyline()" class="capacity-burndown__line capacity-burndown__line--actual" />
+        }
+      </svg>
+      <ul class="capacity-burndown__legend">
+        <li><span class="capacity-burndown__swatch capacity-burndown__swatch--ideal"></span>{{ 'capacityPlanning.burndown.legendIdeal' | transloco }}</li>
+        <li><span class="capacity-burndown__swatch capacity-burndown__swatch--actual"></span>{{ 'capacityPlanning.burndown.legendActual' | transloco }}</li>
+      </ul>
+    }
+
+    <div class="capacity-burndown__entry-form">
+      <label for="burndown-entry-date">{{ 'capacityPlanning.burndown.entryDateLabel' | transloco }}</label>
+      <input id="burndown-entry-date" type="date" [value]="entryDate()" (input)="onEntryDateInput($event)" />
+      <label for="burndown-entry-points">{{ 'capacityPlanning.burndown.entryPointsLabel' | transloco }}</label>
+      <input id="burndown-entry-points" type="number" min="0" [value]="entryPoints()" (input)="onEntryPointsInput($event)" />
+      <button type="button" (click)="submitEntry()">{{ 'capacityPlanning.burndown.submitEntry' | transloco }}</button>
+    </div>
+    @if (saveError()) {
+      <p role="alert">{{ saveError() | transloco }}</p>
+    }
+  }
+
+  <a routerLink="/capacity">{{ 'capacityPlanning.burndown.back' | transloco }}</a>
+</section>
