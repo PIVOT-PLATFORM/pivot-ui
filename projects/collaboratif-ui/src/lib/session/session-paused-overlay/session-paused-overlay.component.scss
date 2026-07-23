@@ -1,0 +1,17 @@
+.session-paused-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--color-surface, #fff) 90%, transparent);
+  z-index: 10;
+
+  &__message {
+    padding: var(--space-4, 16px) var(--space-6, 24px);
+    border-radius: var(--radius-md, 6px);
+    background: var(--color-warning-100, #fef3c7);
+    color: var(--color-warning-700, #b45309);
+    font-weight: 600;
+  }
+}

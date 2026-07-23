@@ -1,0 +1,29 @@
+<div class="session-activity-wordcloud">
+  <form class="session-activity-wordcloud__form" (ngSubmit)="submit()">
+    <label for="wordcloud-word">{{ 'session.wordcloud.inputLabel' | transloco }}</label>
+    <input
+      id="wordcloud-word"
+      #wordInput
+      type="text"
+      [value]="word()"
+      (input)="word.set(wordInput.value)"
+      maxlength="30"
+      [disabled]="disabled()"
+    />
+    <button type="submit" [disabled]="disabled() || submitting() || word().trim().length === 0">
+      {{ 'session.wordcloud.submit' | transloco }}
+    </button>
+  </form>
+
+  @if (errorMessageKey(); as key) {
+    <p class="session-activity-wordcloud__error" role="alert">{{ key | transloco }}</p>
+  }
+
+  <div class="session-activity-wordcloud__cloud" aria-live="polite">
+    @for (entry of words(); track entry.word) {
+      <span class="session-activity-wordcloud__word" [style.font-size]="fontSizeFor(entry)">
+        {{ entry.word }}
+      </span>
+    }
+  </div>
+</div>

@@ -1,0 +1,47 @@
+<section class="session-join">
+  <h1>{{ 'session.join.title' | transloco }}</h1>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="session-join__field">
+      <label for="session-join-code">{{ 'session.join.codeLabel' | transloco }}</label>
+      <input
+        id="session-join-code"
+        type="text"
+        formControlName="code"
+        maxlength="6"
+        [attr.aria-invalid]="form.controls.code.invalid && form.controls.code.touched ? true : null"
+        aria-describedby="session-join-code-error"
+      />
+      @if (form.controls.code.invalid && form.controls.code.touched) {
+        <span id="session-join-code-error" class="session-join__field-error" role="alert">
+          {{ 'session.join.codeRequired' | transloco }}
+        </span>
+      }
+    </div>
+
+    <div class="session-join__field">
+      <label for="session-join-name">{{ 'session.join.displayNameLabel' | transloco }}</label>
+      <input
+        id="session-join-name"
+        type="text"
+        formControlName="displayName"
+        maxlength="40"
+        [attr.aria-invalid]="form.controls.displayName.invalid && form.controls.displayName.touched ? true : null"
+        aria-describedby="session-join-name-error"
+      />
+      @if (form.controls.displayName.invalid && form.controls.displayName.touched) {
+        <span id="session-join-name-error" class="session-join__field-error" role="alert">
+          {{ 'session.join.displayNameRequired' | transloco }}
+        </span>
+      }
+    </div>
+
+    @if (errorMessageKey(); as key) {
+      <p class="session-join__error" role="alert">{{ key | transloco }}</p>
+    }
+
+    <button type="submit" [disabled]="submitting()">
+      {{ 'session.join.submit' | transloco }}
+    </button>
+  </form>
+</section>

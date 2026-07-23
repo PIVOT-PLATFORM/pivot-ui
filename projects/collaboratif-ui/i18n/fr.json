@@ -755,5 +755,93 @@
       "fitContent": "Ajuster au contenu",
       "fitSelection": "Ajuster à la sélection"
     }
+  },
+  "session": {
+    "list": {
+      "title": "Sessions live",
+      "create": "Créer une session",
+      "statusFilter": "Statut",
+      "statusAll": "Tous",
+      "loadError": "Impossible de charger les sessions.",
+      "empty": "Aucune session pour le moment.",
+      "participants": "{{count}} participant(s)"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "live": "En direct",
+      "paused": "En pause",
+      "completed": "Terminée"
+    },
+    "type": {
+      "QUIZ": "Quiz",
+      "POLL": "Sondage",
+      "WORDCLOUD": "Nuage de mots",
+      "BRAINSTORM": "Brainstorm",
+      "QA": "Questions/Réponses",
+      "VOTE": "Vote"
+    },
+    "form": {
+      "title": "Créer une session live",
+      "titleLabel": "Titre",
+      "typeLabel": "Type d'activité",
+      "saveError": "Impossible de créer la session.",
+      "cancel": "Annuler",
+      "submit": "Créer"
+    },
+    "join": {
+      "title": "Rejoindre une session",
+      "codeLabel": "Code de session",
+      "codeRequired": "Le code doit contenir 6 caractères.",
+      "displayNameLabel": "Votre nom",
+      "displayNameRequired": "Un nom est requis.",
+      "submit": "Rejoindre",
+      "errors": {
+        "notFound": "Code de session invalide ou expiré.",
+        "invalidDisplayName": "Nom invalide.",
+        "invalidRequest": "Requête invalide.",
+        "generic": "Une erreur est survenue.",
+        "sessionExpired": "Votre session a expiré."
+      }
+    },
+    "runner": {
+      "loadError": "Impossible de charger la session.",
+      "joinCode": "Code",
+      "participants": "{{count}} participant(s)",
+      "actionError": "Action impossible.",
+      "start": "Démarrer",
+      "pause": "Mettre en pause",
+      "resume": "Reprendre",
+      "end": "Terminer",
+      "back": "Retour"
+    },
+    "pausedOverlay": {
+      "message": "La session est en pause."
+    },
+    "activityPlaceholder": {
+      "message": "L'activité {{type}} arrive bientôt."
+    },
+    "resultsPlaceholder": {
+      "message": "Les résultats de la session arrivent bientôt.",
+      "back": "Retour aux sessions"
+    },
+    "participantShell": {
+      "loadError": "Impossible de charger la session."
+    },
+    "poll": {
+      "submit": "Valider",
+      "submitError": "Impossible d'enregistrer votre vote.",
+      "confirmed": "Votre vote a été enregistré."
+    },
+    "wordcloud": {
+      "inputLabel": "Ajouter un mot",
+      "submit": "Ajouter",
+      "errors": {
+        "blocked": "Ce mot n'est pas autorisé.",
+        "invalid": "Mot invalide.",
+        "limitReached": "Vous avez atteint votre limite de mots.",
+        "invalidStatus": "Cette activité n'est pas en cours.",
+        "generic": "Une erreur est survenue."
+      }
+    }
   }
 }

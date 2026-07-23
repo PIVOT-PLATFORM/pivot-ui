@@ -1,0 +1,19 @@
+<section class="session-participant-shell">
+  @if (loadError()) {
+    <p class="session-participant-shell__error" role="alert">
+      {{ 'session.participantShell.loadError' | transloco }}
+    </p>
+  } @else if (session(); as s) {
+    <div class="session-participant-shell__activity">
+      @if (activityComponent(); as component) {
+        <ng-container
+          *ngComponentOutlet="component; inputs: activityInputs() ?? {}"
+        ></ng-container>
+      }
+
+      @if (s.status === 'PAUSED') {
+        <app-session-paused-overlay></app-session-paused-overlay>
+      }
+    </div>
+  }
+</section>

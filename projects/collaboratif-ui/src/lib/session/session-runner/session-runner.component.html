@@ -1,0 +1,46 @@
+<section class="session-runner">
+  @if (loadError()) {
+    <p class="session-runner__error" role="alert">{{ 'session.runner.loadError' | transloco }}</p>
+  } @else if (session(); as s) {
+    <header class="session-runner__header">
+      <h1>{{ s.title }}</h1>
+      <span class="session-runner__status">{{ 'session.status.' + s.status.toLowerCase() | transloco }}</span>
+    </header>
+
+    <p class="session-runner__code">
+      {{ 'session.runner.joinCode' | transloco }}: <strong>{{ s.joinCode }}</strong>
+    </p>
+    <p class="session-runner__participants">
+      {{ 'session.runner.participants' | transloco: { count: s.participantCount } }}
+    </p>
+
+    @if (actionError()) {
+      <p class="session-runner__error" role="alert">{{ 'session.runner.actionError' | transloco }}</p>
+    }
+
+    <div class="session-runner__actions">
+      @if (canStart()) {
+        <button type="button" (click)="start()" [disabled]="actionInFlight()">
+          {{ 'session.runner.start' | transloco }}
+        </button>
+      }
+      @if (canPause()) {
+        <button type="button" (click)="pause()" [disabled]="actionInFlight()">
+          {{ 'session.runner.pause' | transloco }}
+        </button>
+      }
+      @if (canResume()) {
+        <button type="button" (click)="resume()" [disabled]="actionInFlight()">
+          {{ 'session.runner.resume' | transloco }}
+        </button>
+      }
+      @if (canEnd()) {
+        <button type="button" (click)="end()" [disabled]="actionInFlight()" class="session-runner__end">
+          {{ 'session.runner.end' | transloco }}
+        </button>
+      }
+    </div>
+
+    <a routerLink="..">{{ 'session.runner.back' | transloco }}</a>
+  }
+</section>

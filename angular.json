@@ -168,7 +168,8 @@
           "options": {
             "tsConfig": "projects/collaboratif-ui/tsconfig.spec.json",
             "setupFiles": ["projects/collaboratif-ui/src/test-setup-vitest.ts"],
-            "isolate": true
+            "isolate": true,
+            "coverageReporters": ["lcov", "text", "html"]
           }
         }
       }

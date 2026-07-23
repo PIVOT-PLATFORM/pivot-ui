@@ -755,5 +755,93 @@
       "fitContent": "Fit to content",
       "fitSelection": "Fit to selection"
     }
+  },
+  "session": {
+    "list": {
+      "title": "Live sessions",
+      "create": "Create a session",
+      "statusFilter": "Status",
+      "statusAll": "All",
+      "loadError": "Could not load sessions.",
+      "empty": "No sessions yet.",
+      "participants": "{{count}} participant(s)"
+    },
+    "status": {
+      "draft": "Draft",
+      "live": "Live",
+      "paused": "Paused",
+      "completed": "Completed"
+    },
+    "type": {
+      "QUIZ": "Quiz",
+      "POLL": "Poll",
+      "WORDCLOUD": "Word cloud",
+      "BRAINSTORM": "Brainstorm",
+      "QA": "Q&A",
+      "VOTE": "Vote"
+    },
+    "form": {
+      "title": "Create a live session",
+      "titleLabel": "Title",
+      "typeLabel": "Activity type",
+      "saveError": "Could not create the session.",
+      "cancel": "Cancel",
+      "submit": "Create"
+    },
+    "join": {
+      "title": "Join a session",
+      "codeLabel": "Session code",
+      "codeRequired": "The code must be 6 characters.",
+      "displayNameLabel": "Your name",
+      "displayNameRequired": "A name is required.",
+      "submit": "Join",
+      "errors": {
+        "notFound": "Invalid or expired session code.",
+        "invalidDisplayName": "Invalid name.",
+        "invalidRequest": "Invalid request.",
+        "generic": "Something went wrong.",
+        "sessionExpired": "Your session expired."
+      }
+    },
+    "runner": {
+      "loadError": "Could not load the session.",
+      "joinCode": "Code",
+      "participants": "{{count}} participant(s)",
+      "actionError": "Action failed.",
+      "start": "Start",
+      "pause": "Pause",
+      "resume": "Resume",
+      "end": "End",
+      "back": "Back"
+    },
+    "pausedOverlay": {
+      "message": "The session is paused."
+    },
+    "activityPlaceholder": {
+      "message": "The {{type}} activity is coming soon."
+    },
+    "resultsPlaceholder": {
+      "message": "Session results are coming soon.",
+      "back": "Back to sessions"
+    },
+    "participantShell": {
+      "loadError": "Could not load the session."
+    },
+    "poll": {
+      "submit": "Submit",
+      "submitError": "Could not save your vote.",
+      "confirmed": "Your vote has been recorded."
+    },
+    "wordcloud": {
+      "inputLabel": "Add a word",
+      "submit": "Add",
+      "errors": {
+        "blocked": "This word is not allowed.",
+        "invalid": "Invalid word.",
+        "limitReached": "You've reached your word limit.",
+        "invalidStatus": "This activity is not currently live.",
+        "generic": "Something went wrong."
+      }
+    }
   }
 }

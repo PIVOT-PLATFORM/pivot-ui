@@ -1,0 +1,42 @@
+<div class="session-activity-poll">
+  <h2>{{ config().question }}</h2>
+
+  <ul class="session-activity-poll__options">
+    @for (option of config().options; track option.id) {
+      <li>
+        <button
+          type="button"
+          class="session-activity-poll__option"
+          [class.session-activity-poll__option--selected]="selectedOptionIds().includes(option.id)"
+          [attr.aria-pressed]="selectedOptionIds().includes(option.id)"
+          [disabled]="disabled() || hasVoted()"
+          (click)="toggleOption(option.id)"
+        >
+          <span>{{ option.label }}</span>
+          @if (resultFor(option.id); as result) {
+            <span class="session-activity-poll__result">
+              {{ result.percent }}% ({{ result.count }})
+            </span>
+          }
+        </button>
+      </li>
+    }
+  </ul>
+
+  @if (submitError()) {
+    <p class="session-activity-poll__error" role="alert">{{ 'session.poll.submitError' | transloco }}</p>
+  }
+
+  @if (!hasVoted()) {
+    <button
+      type="button"
+      class="session-activity-poll__submit"
+      [disabled]="disabled() || submitting() || selectedOptionIds().length === 0"
+      (click)="submit()"
+    >
+      {{ 'session.poll.submit' | transloco }}
+    </button>
+  } @else {
+    <p class="session-activity-poll__confirmed">{{ 'session.poll.confirmed' | transloco }}</p>
+  }
+</div>
