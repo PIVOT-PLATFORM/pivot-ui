@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { RxStompState } from '@stomp/rx-stomp';
 import { Subject } from 'rxjs';
-import { COLLABORATIF_API_URL } from '../../core/whiteboard/config/tokens';
+import { COLLABORATIF_API_URL, COLLABORATIF_BEARER_TOKEN } from '../../core/whiteboard/config/tokens';
 import { SESSION_STOMP_CLIENT_FACTORY, SessionWsService, StompClient } from './session-ws.service';
 
 /**
@@ -12,13 +12,13 @@ import { SESSION_STOMP_CLIENT_FACTORY, SessionWsService, StompClient } from './s
 class FakeRxStomp implements StompClient {
   readonly connectionState$ = new Subject<RxStompState>();
   readonly stompErrors$ = new Subject<unknown>();
-  readonly configureCalls: unknown[] = [];
+  readonly configureCalls: { brokerURL: string; connectHeaders?: Record<string, string> }[] = [];
   activateCalls = 0;
   deactivateCalls = 0;
-  readonly watchCalls: { destination: string; headers?: Record<string, string> }[] = [];
+  readonly watchCalls: string[] = [];
   private readonly watchers = new Map<string, Subject<{ body: string }>>();
 
-  configure(cfg: unknown): void {
+  configure(cfg: { brokerURL: string; connectHeaders?: Record<string, string> }): void {
     this.configureCalls.push(cfg);
   }
 
@@ -31,8 +31,8 @@ class FakeRxStomp implements StompClient {
     return Promise.resolve();
   }
 
-  watch(destination: string, headers?: Record<string, string>) {
-    this.watchCalls.push({ destination, headers });
+  watch(destination: string) {
+    this.watchCalls.push(destination);
     return this.watcher(destination).asObservable();
   }
 
@@ -51,7 +51,7 @@ class FakeRxStomp implements StompClient {
 }
 
 const TOPIC = '/topic/collaboratif/session/s-1';
-const ACCESS_TOKEN = 'opaque-participant-token';
+const GUEST_TOKEN = 'opaque-guest-token';
 const TEST_API_URL = 'http://localhost:8083/api/collaboratif';
 
 describe('SessionWsService', () => {
@@ -76,56 +76,77 @@ describe('SessionWsService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('configures the STOMP client with a ws:// URL derived from COLLABORATIF_API_URL and activates it', () => {
-    service.connect(TOPIC, ACCESS_TOKEN);
+  it('configures the STOMP client with a ws:// URL targeting the shared /ws/whiteboard endpoint', () => {
+    service.connect(TOPIC, GUEST_TOKEN);
 
-    const cfg = fake.configureCalls[0] as { brokerURL: string };
-    expect(cfg.brokerURL).toBe('ws://localhost:8083/api/collaboratif/ws/session');
+    const cfg = fake.configureCalls[0];
+    expect(cfg.brokerURL).toBe('ws://localhost:8083/api/collaboratif/ws/whiteboard');
     expect(fake.activateCalls).toBe(1);
   });
 
-  it('subscribes to the given topic, presenting the access token on the native "access-token" header', () => {
-    service.connect(TOPIC, ACCESS_TOKEN);
+  it('presents the guest token on the CONNECT frame via the native X-Guest-Token header', () => {
+    service.connect(TOPIC, GUEST_TOKEN);
+    expect(fake.configureCalls[0].connectHeaders).toEqual({ 'X-Guest-Token': GUEST_TOKEN });
+  });
 
-    expect(fake.watchCalls).toHaveLength(1);
-    expect(fake.watchCalls[0].destination).toBe(TOPIC);
-    expect(fake.watchCalls[0].headers).toEqual({ 'access-token': ACCESS_TOKEN });
+  it('presents the bearer token on CONNECT (Authorization header) for an authenticated caller (no guest token)', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: SESSION_STOMP_CLIENT_FACTORY, useValue: () => activeFake.current },
+        { provide: COLLABORATIF_API_URL, useValue: TEST_API_URL },
+        { provide: COLLABORATIF_BEARER_TOKEN, useValue: () => 'bearer-abc' },
+      ],
+    });
+    const authService = TestBed.inject(SessionWsService);
+    authService.connect(TOPIC, null);
+    expect(fake.configureCalls[0].connectHeaders).toEqual({ Authorization: 'Bearer bearer-abc' });
+  });
+
+  it('sends no CONNECT headers when neither a guest token nor a bearer token is available', () => {
+    service.connect(TOPIC, null);
+    expect(fake.configureCalls[0].connectHeaders).toEqual({});
+  });
+
+  it('subscribes to the given topic with no per-SUBSCRIBE headers', () => {
+    service.connect(TOPIC, GUEST_TOKEN);
+    expect(fake.watchCalls).toEqual([TOPIC]);
   });
 
   it('starts in the "connecting" status', () => {
-    service.connect(TOPIC, ACCESS_TOKEN);
+    service.connect(TOPIC, GUEST_TOKEN);
     expect(service.status()).toBe('connecting');
   });
 
   it('transitions to "connected" once the STOMP connection opens', () => {
-    service.connect(TOPIC, ACCESS_TOKEN);
+    service.connect(TOPIC, GUEST_TOKEN);
     fake.connectionState$.next(RxStompState.CONNECTING);
     fake.connectionState$.next(RxStompState.OPEN);
     expect(service.status()).toBe('connected');
   });
 
   it('ignores a CLOSED emission before any CONNECTING (initial BehaviorSubject replay)', () => {
-    service.connect(TOPIC, ACCESS_TOKEN);
+    service.connect(TOPIC, GUEST_TOKEN);
     fake.connectionState$.next(RxStompState.CLOSED);
     expect(service.status()).toBe('connecting');
   });
 
   it('transitions to "error" when the connection drops after having connected', () => {
-    service.connect(TOPIC, ACCESS_TOKEN);
+    service.connect(TOPIC, GUEST_TOKEN);
     fake.connectionState$.next(RxStompState.CONNECTING);
     fake.connectionState$.next(RxStompState.OPEN);
     fake.connectionState$.next(RxStompState.CLOSED);
     expect(service.status()).toBe('error');
   });
 
-  it('transitions to "error" on a STOMP ERROR frame (e.g. rejected access token)', () => {
-    service.connect(TOPIC, ACCESS_TOKEN);
+  it('transitions to "error" on a STOMP ERROR frame (e.g. rejected credential)', () => {
+    service.connect(TOPIC, GUEST_TOKEN);
     fake.stompErrors$.next({});
     expect(service.status()).toBe('error');
   });
 
   it('a transient CLOSING state does not change the status', () => {
-    service.connect(TOPIC, ACCESS_TOKEN);
+    service.connect(TOPIC, GUEST_TOKEN);
     fake.connectionState$.next(RxStompState.CONNECTING);
     fake.connectionState$.next(RxStompState.OPEN);
     fake.connectionState$.next(RxStompState.CLOSING);
@@ -141,25 +162,25 @@ describe('SessionWsService', () => {
       ],
     });
     const relService = TestBed.inject(SessionWsService);
-    relService.connect(TOPIC, ACCESS_TOKEN);
-    const cfg = fake.configureCalls[0] as { brokerURL: string };
+    relService.connect(TOPIC, GUEST_TOKEN);
+    const cfg = fake.configureCalls[0];
     const scheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    expect(cfg.brokerURL).toBe(`${scheme}://${window.location.host}/api/collaboratif/ws/session`);
+    expect(cfg.brokerURL).toBe(`${scheme}://${window.location.host}/api/collaboratif/ws/whiteboard`);
   });
 
   it('resets to "connecting" on a fresh connect() call after a prior error', () => {
-    service.connect(TOPIC, ACCESS_TOKEN);
+    service.connect(TOPIC, GUEST_TOKEN);
     fake.connectionState$.next(RxStompState.CONNECTING);
     fake.connectionState$.next(RxStompState.CLOSED);
     expect(service.status()).toBe('error');
 
     activeFake.current = new FakeRxStomp();
-    service.connect(TOPIC, ACCESS_TOKEN);
+    service.connect(TOPIC, GUEST_TOKEN);
     expect(service.status()).toBe('connecting');
   });
 
   it('forwards raw message bodies received on the subscribed topic', () => {
-    service.connect(TOPIC, ACCESS_TOKEN);
+    service.connect(TOPIC, GUEST_TOKEN);
     const received: string[] = [];
     service.messages$.subscribe(body => received.push(body));
 
@@ -169,13 +190,13 @@ describe('SessionWsService', () => {
   });
 
   it('disconnect() deactivates the client', () => {
-    service.connect(TOPIC, ACCESS_TOKEN);
+    service.connect(TOPIC, GUEST_TOKEN);
     service.disconnect();
     expect(fake.deactivateCalls).toBeGreaterThanOrEqual(1);
   });
 
   it('disconnect() stops applying subsequent incoming messages', () => {
-    service.connect(TOPIC, ACCESS_TOKEN);
+    service.connect(TOPIC, GUEST_TOKEN);
     const received: string[] = [];
     service.messages$.subscribe(body => received.push(body));
     service.disconnect();
@@ -189,11 +210,11 @@ describe('SessionWsService', () => {
   });
 
   it('connect() calls disconnect() first, tearing down any prior connection', () => {
-    service.connect(TOPIC, ACCESS_TOKEN);
+    service.connect(TOPIC, GUEST_TOKEN);
     const firstFake = fake;
 
     activeFake.current = new FakeRxStomp();
-    service.connect(TOPIC, ACCESS_TOKEN);
+    service.connect(TOPIC, GUEST_TOKEN);
 
     expect(firstFake.deactivateCalls).toBeGreaterThanOrEqual(1);
   });
