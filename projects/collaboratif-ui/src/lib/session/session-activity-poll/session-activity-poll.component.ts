@@ -8,10 +8,12 @@ import { SessionWsService } from '../services/session-ws.service';
 /**
  * POLL activity participant view (US19.3.2) — option selection (single or multiple per
  * `config.allowMultiple`) plus a live results bar chart, updated from `POLL_UPDATED` broadcasts
- * consumed by the parent {@link SessionParticipantShellComponent} and passed down via
- * {@link results}. `results` is `null` while the facilitator has hidden them
- * (`hide-results`) — the payload itself omits counts/percentages server-side, this component
- * never infers or estimates them client-side.
+ * consumed by the parent {@link SessionParticipantShellComponent}. `results` is always an array
+ * (verified against `PollUpdatedEvent.java`/`PollOptionResult.java`) — while the facilitator has
+ * hidden results (`hide-results`), each entry's `count`/`percent` are simply absent
+ * (`undefined` after `JSON.parse`, never a `null` value present); `resultFor()` treats an entry
+ * with no `count` as "not shown", this component never infers or estimates a hidden tally
+ * client-side.
  */
 @Component({
   selector: 'app-session-activity-poll',
@@ -29,7 +31,7 @@ export class SessionActivityPollComponent implements OnInit, OnDestroy {
   readonly disabled = input(false);
 
   readonly selectedOptionIds = signal<string[]>([]);
-  readonly results = signal<PollOptionResult[] | null>(null);
+  readonly results = signal<PollOptionResult[]>([]);
   readonly submitting = signal(false);
   readonly submitError = signal(false);
   readonly hasVoted = signal(false);
@@ -81,8 +83,10 @@ export class SessionActivityPollComponent implements OnInit, OnDestroy {
       });
   }
 
+  /** `null` when the option has no result yet, or the facilitator has hidden results (no `count`). */
   resultFor(optionId: string): PollOptionResult | null {
-    return this.results()?.find(r => r.optionId === optionId) ?? null;
+    const result = this.results().find(r => r.optionId === optionId);
+    return result && result.count !== undefined ? result : null;
   }
 
   private onMessage(raw: string): void {
@@ -97,7 +101,7 @@ export class SessionActivityPollComponent implements OnInit, OnDestroy {
       parsed !== null &&
       (parsed as { type?: string }).type === 'POLL_UPDATED'
     ) {
-      this.results.set((parsed as { results: PollOptionResult[] | null }).results);
+      this.results.set((parsed as { results: PollOptionResult[] }).results);
     }
   }
 }

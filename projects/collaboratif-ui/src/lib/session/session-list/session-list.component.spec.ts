@@ -19,7 +19,6 @@ const SESSION: SessionSummaryResponse = {
   config: {},
   teamId: null,
   participantCount: 0,
-  createdBy: 1,
   createdAt: '2026-07-22T08:00:00Z',
   startedAt: null,
   endedAt: null,

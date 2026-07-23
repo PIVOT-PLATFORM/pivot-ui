@@ -107,13 +107,13 @@ export class SessionActivityWordcloudComponent implements OnInit, OnDestroy {
     }
     const type = (parsed as { type?: string }).type;
     if (type === 'WORD_ADDED') {
-      const event = parsed as { word: string; frequency: number };
+      const event = parsed as { entry: WordEntry };
       this.words.update(current => {
-        const existing = current.find(w => w.word === event.word);
+        const existing = current.find(w => w.word === event.entry.word);
         if (existing) {
-          return current.map(w => (w.word === event.word ? { ...w, frequency: event.frequency } : w));
+          return current.map(w => (w.word === event.entry.word ? { ...w, frequency: event.entry.frequency } : w));
         }
-        return [...current, { word: event.word, frequency: event.frequency }];
+        return [...current, event.entry];
       });
     } else if (type === 'WORD_REMOVED') {
       const event = parsed as { word: string };

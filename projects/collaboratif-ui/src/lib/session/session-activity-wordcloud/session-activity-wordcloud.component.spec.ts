@@ -21,7 +21,6 @@ const SESSION: SessionResponse = {
   config: WORDCLOUD_CONFIG,
   teamId: null,
   participantCount: 1,
-  createdBy: 1,
   createdAt: '2026-07-22T08:00:00Z',
   startedAt: '2026-07-22T08:01:00Z',
   endedAt: null,
@@ -94,13 +93,13 @@ describe('SessionActivityWordcloudComponent', () => {
     const ws = TestBed.inject(SessionWsService);
 
     ws.messages$.next('not json');
-    ws.messages$.next(JSON.stringify({ type: 'WORD_ADDED', word: 'agile', frequency: 1 }));
+    ws.messages$.next(JSON.stringify({ type: 'WORD_ADDED', sessionId: 's-1', entry: { word: 'agile', frequency: 1 } }));
     expect(fixture.componentInstance.words()).toEqual([{ word: 'agile', frequency: 1 }]);
 
-    ws.messages$.next(JSON.stringify({ type: 'WORD_ADDED', word: 'agile', frequency: 2 }));
+    ws.messages$.next(JSON.stringify({ type: 'WORD_ADDED', sessionId: 's-1', entry: { word: 'agile', frequency: 2 } }));
     expect(fixture.componentInstance.words()).toEqual([{ word: 'agile', frequency: 2 }]);
 
-    ws.messages$.next(JSON.stringify({ type: 'WORD_ADDED', word: 'scrum', frequency: 1 }));
+    ws.messages$.next(JSON.stringify({ type: 'WORD_ADDED', sessionId: 's-1', entry: { word: 'scrum', frequency: 1 } }));
     expect(fixture.componentInstance.words()).toEqual([
       { word: 'agile', frequency: 2 },
       { word: 'scrum', frequency: 1 },
@@ -110,16 +109,16 @@ describe('SessionActivityWordcloudComponent', () => {
   it('removes a word on a WORD_REMOVED event', () => {
     const fixture = createFixture();
     const ws = TestBed.inject(SessionWsService);
-    ws.messages$.next(JSON.stringify({ type: 'WORD_ADDED', word: 'agile', frequency: 1 }));
-    ws.messages$.next(JSON.stringify({ type: 'WORD_REMOVED', word: 'agile' }));
+    ws.messages$.next(JSON.stringify({ type: 'WORD_ADDED', sessionId: 's-1', entry: { word: 'agile', frequency: 1 } }));
+    ws.messages$.next(JSON.stringify({ type: 'WORD_REMOVED', sessionId: 's-1', word: 'agile' }));
     expect(fixture.componentInstance.words()).toEqual([]);
   });
 
   it('fontSizeFor() interpolates linearly between MIN and MAX rem by frequency share of the max', () => {
     const fixture = createFixture();
     const ws = TestBed.inject(SessionWsService);
-    ws.messages$.next(JSON.stringify({ type: 'WORD_ADDED', word: 'agile', frequency: 4 }));
-    ws.messages$.next(JSON.stringify({ type: 'WORD_ADDED', word: 'scrum', frequency: 2 }));
+    ws.messages$.next(JSON.stringify({ type: 'WORD_ADDED', sessionId: 's-1', entry: { word: 'agile', frequency: 4 } }));
+    ws.messages$.next(JSON.stringify({ type: 'WORD_ADDED', sessionId: 's-1', entry: { word: 'scrum', frequency: 2 } }));
 
     expect(fixture.componentInstance.fontSizeFor({ word: 'agile', frequency: 4 })).toBe('3rem');
     expect(fixture.componentInstance.fontSizeFor({ word: 'scrum', frequency: 2 })).toBe('2rem');
@@ -129,7 +128,7 @@ describe('SessionActivityWordcloudComponent', () => {
     const fixture = createFixture();
     const ws = TestBed.inject(SessionWsService);
     fixture.destroy();
-    ws.messages$.next(JSON.stringify({ type: 'WORD_ADDED', word: 'agile', frequency: 1 }));
+    ws.messages$.next(JSON.stringify({ type: 'WORD_ADDED', sessionId: 's-1', entry: { word: 'agile', frequency: 1 } }));
     expect(fixture.componentInstance.words()).toEqual([]);
   });
 });

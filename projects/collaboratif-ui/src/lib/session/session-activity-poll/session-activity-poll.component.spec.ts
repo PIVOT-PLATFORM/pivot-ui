@@ -28,7 +28,6 @@ const SESSION: SessionResponse = {
   config: POLL_CONFIG,
   teamId: null,
   participantCount: 1,
-  createdBy: 1,
   createdAt: '2026-07-22T08:00:00Z',
   startedAt: '2026-07-22T08:01:00Z',
   endedAt: null,
@@ -124,28 +123,45 @@ describe('SessionActivityPollComponent', () => {
 
     ws.messages$.next('not json');
     ws.messages$.next(JSON.stringify({ type: 'PARTICIPANT_JOINED', participantId: 'p-1', displayName: 'Ada' }));
-    expect(fixture.componentInstance.results()).toBeNull();
+    expect(fixture.componentInstance.results()).toEqual([]);
 
     ws.messages$.next(
-      JSON.stringify({ type: 'POLL_UPDATED', results: [{ optionId: 'o-1', count: 3, percentage: 100 }] }),
+      JSON.stringify({
+        type: 'POLL_UPDATED',
+        sessionId: 's-1',
+        results: [{ optionId: 'o-1', label: 'TypeScript', count: 3, percent: 100 }],
+      }),
     );
-    expect(fixture.componentInstance.results()).toEqual([{ optionId: 'o-1', count: 3, percentage: 100 }]);
-    expect(fixture.componentInstance.resultFor('o-1')).toEqual({ optionId: 'o-1', count: 3, percentage: 100 });
+    expect(fixture.componentInstance.results()).toEqual([
+      { optionId: 'o-1', label: 'TypeScript', count: 3, percent: 100 },
+    ]);
+    expect(fixture.componentInstance.resultFor('o-1')).toEqual({
+      optionId: 'o-1',
+      label: 'TypeScript',
+      count: 3,
+      percent: 100,
+    });
     expect(fixture.componentInstance.resultFor('o-2')).toBeNull();
   });
 
-  it('handles results:null (facilitator hid results)', () => {
+  it('treats an entry with no count as hidden (facilitator hide-results — count/percent simply absent)', () => {
     const fixture = createFixture();
     const ws = TestBed.inject(SessionWsService);
-    ws.messages$.next(JSON.stringify({ type: 'POLL_UPDATED', results: null }));
-    expect(fixture.componentInstance.results()).toBeNull();
+    ws.messages$.next(
+      JSON.stringify({
+        type: 'POLL_UPDATED',
+        sessionId: 's-1',
+        results: [{ optionId: 'o-1', label: 'TypeScript' }],
+      }),
+    );
+    expect(fixture.componentInstance.resultFor('o-1')).toBeNull();
   });
 
   it('unsubscribes from WS messages on destroy', () => {
     const fixture = createFixture();
     const ws = TestBed.inject(SessionWsService);
     fixture.destroy();
-    ws.messages$.next(JSON.stringify({ type: 'POLL_UPDATED', results: [] }));
-    expect(fixture.componentInstance.results()).toBeNull();
+    ws.messages$.next(JSON.stringify({ type: 'POLL_UPDATED', sessionId: 's-1', results: [] }));
+    expect(fixture.componentInstance.results()).toEqual([]);
   });
 });
