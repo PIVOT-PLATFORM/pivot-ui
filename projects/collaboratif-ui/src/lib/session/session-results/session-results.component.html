@@ -16,9 +16,31 @@
         >
           {{ (projection() ? 'session.results.exitProjection' : 'session.results.projection') | transloco }}
         </button>
+        @if (status() === 'COMPLETED') {
+          <button
+            type="button"
+            class="session-results__export"
+            [disabled]="exporting()"
+            (click)="downloadResults('json')"
+          >
+            {{ 'session.results.exportJson' | transloco }}
+          </button>
+          <button
+            type="button"
+            class="session-results__export"
+            [disabled]="exporting()"
+            (click)="downloadResults('csv')"
+          >
+            {{ 'session.results.exportCsv' | transloco }}
+          </button>
+        }
         <a class="session-results__back" routerLink="..">{{ 'session.results.back' | transloco }}</a>
       </div>
     </header>
+
+    @if (exportError()) {
+      <p class="session-results__error" role="alert">{{ 'session.results.exportError' | transloco }}</p>
+    }
 
     <div class="session-results__body" aria-live="polite">
       @switch (type()) {

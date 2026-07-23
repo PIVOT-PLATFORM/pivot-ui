@@ -832,7 +832,10 @@
       "wordCount": "cited {{count}} time(s)",
       "uncategorized": "Uncategorized",
       "correctRates": "Correct answers per question",
-      "question": "Q{{number}}"
+      "question": "Q{{number}}",
+      "exportJson": "Export JSON",
+      "exportCsv": "Export CSV",
+      "exportError": "Export failed."
     },
     "participantShell": {
       "loadError": "Could not load the session."
