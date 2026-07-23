@@ -1,0 +1,49 @@
+.session-runner {
+  padding: var(--space-6, 24px);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3, 12px);
+    margin-bottom: var(--space-3, 12px);
+  }
+
+  &__status {
+    padding: var(--space-1, 4px) var(--space-3, 12px);
+    border-radius: var(--radius-full, 999px);
+    background: var(--color-neutral-100, #f3f4f6);
+    font-size: var(--text-sm, 0.875rem);
+  }
+
+  &__code {
+    font-size: var(--text-lg, 1.125rem);
+  }
+
+  &__error {
+    color: var(--color-danger, #dc2626);
+  }
+
+  &__actions {
+    display: flex;
+    gap: var(--space-3, 12px);
+    margin: var(--space-5, 20px) 0;
+
+    button {
+      padding: var(--space-2, 8px) var(--space-5, 20px);
+      border-radius: var(--radius-md, 6px);
+      border: none;
+      background: var(--color-primary, #4f46e5);
+      color: var(--color-on-primary, #fff);
+      cursor: pointer;
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  &__end {
+    background: var(--color-danger, #dc2626) !important;
+  }
+}

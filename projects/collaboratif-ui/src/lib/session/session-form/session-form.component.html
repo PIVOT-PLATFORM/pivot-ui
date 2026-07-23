@@ -1,0 +1,44 @@
+<section class="session-form">
+  <h1>{{ 'session.form.title' | transloco }}</h1>
+
+  <form (ngSubmit)="onSubmit()">
+    <div class="session-form__field">
+      <label for="session-title">{{ 'session.form.titleLabel' | transloco }}</label>
+      <input
+        id="session-title"
+        type="text"
+        [value]="title()"
+        (input)="title.set($any($event.target).value)"
+        maxlength="120"
+        required
+        [attr.aria-invalid]="title().trim().length === 0 ? true : null"
+      />
+    </div>
+
+    <fieldset class="session-form__types">
+      <legend>{{ 'session.form.typeLabel' | transloco }}</legend>
+      <div class="session-form__type-grid">
+        @for (type of types; track type) {
+          <button
+            type="button"
+            class="session-form__type-option"
+            [class.session-form__type-option--selected]="selectedType() === type"
+            [attr.aria-pressed]="selectedType() === type"
+            (click)="selectType(type)"
+          >
+            {{ 'session.type.' + type | transloco }}
+          </button>
+        }
+      </div>
+    </fieldset>
+
+    @if (saveError()) {
+      <p class="session-form__error" role="alert">{{ 'session.form.saveError' | transloco }}</p>
+    }
+
+    <div class="session-form__actions">
+      <a routerLink="..">{{ 'session.form.cancel' | transloco }}</a>
+      <button type="submit" [disabled]="!canSave()">{{ 'session.form.submit' | transloco }}</button>
+    </div>
+  </form>
+</section>

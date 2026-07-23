@@ -1,0 +1,38 @@
+<section class="session-list">
+  <header class="session-list__header">
+    <h1>{{ 'session.list.title' | transloco }}</h1>
+    <a class="session-list__create-link" routerLink="new">{{ 'session.list.create' | transloco }}</a>
+  </header>
+
+  <div class="session-list__filters">
+    <label for="session-status-filter">{{ 'session.list.statusFilter' | transloco }}</label>
+    <select id="session-status-filter" (change)="onStatusFilterChange($event)">
+      <option value="ALL">{{ 'session.list.statusAll' | transloco }}</option>
+      <option value="DRAFT">{{ 'session.status.draft' | transloco }}</option>
+      <option value="LIVE">{{ 'session.status.live' | transloco }}</option>
+      <option value="PAUSED">{{ 'session.status.paused' | transloco }}</option>
+      <option value="COMPLETED">{{ 'session.status.completed' | transloco }}</option>
+    </select>
+  </div>
+
+  @if (loadError()) {
+    <p class="session-list__error" role="alert">{{ 'session.list.loadError' | transloco }}</p>
+  } @else if (sessions().length === 0) {
+    <p class="session-list__empty">{{ 'session.list.empty' | transloco }}</p>
+  } @else {
+    <ul class="session-list__items">
+      @for (session of sessions(); track session.id) {
+        <li class="session-list__item">
+          <a [routerLink]="[session.id]" class="session-list__item-link">
+            <span class="session-list__item-title">{{ session.title }}</span>
+            <span class="session-list__item-type">{{ 'session.type.' + session.type | transloco }}</span>
+            <span class="session-list__item-status" [class]="'session-list__item-status--' + session.status.toLowerCase()">
+              {{ 'session.status.' + session.status.toLowerCase() | transloco }}
+            </span>
+            <span class="session-list__item-count">{{ 'session.list.participants' | transloco: { count: session.participantCount } }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+  }
+</section>
