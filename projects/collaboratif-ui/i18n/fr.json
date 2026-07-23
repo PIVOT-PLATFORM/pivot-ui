@@ -832,7 +832,10 @@
       "wordCount": "cité {{count}} fois",
       "uncategorized": "Sans catégorie",
       "correctRates": "Bonnes réponses par question",
-      "question": "Q{{number}}"
+      "question": "Q{{number}}",
+      "exportJson": "Exporter JSON",
+      "exportCsv": "Exporter CSV",
+      "exportError": "Échec de l'export."
     },
     "participantShell": {
       "loadError": "Impossible de charger la session."

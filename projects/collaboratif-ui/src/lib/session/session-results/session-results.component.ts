@@ -15,7 +15,7 @@ import {
   VoteResults,
   WordEntry,
 } from '../models/session.model';
-import { SessionApiService } from '../services/session-api.service';
+import { SessionApiService, SessionResultsFormat } from '../services/session-api.service';
 import { SessionWsService } from '../services/session-ws.service';
 
 const SESSION_TOPIC_PREFIX = '/topic/collaboratif/session/';
@@ -76,6 +76,9 @@ export class SessionResultsComponent implements OnInit, OnDestroy {
   readonly cards = signal<BrainstormCard[]>([]);
   readonly voteResults = signal<VoteResults | null>(null);
   readonly quizResults = signal<QuizResults | null>(null);
+
+  readonly exporting = signal(false);
+  readonly exportError = signal(false);
 
   private wsSub: Subscription | null = null;
   private connected = false;
@@ -148,6 +151,43 @@ export class SessionResultsComponent implements OnInit, OnDestroy {
 
   toggleProjection(): void {
     this.projection.update(on => !on);
+  }
+
+  /**
+   * Downloads the completed session's results in `format` (US19.4.2). Only meaningful for a
+   * `COMPLETED` session — the export controls are shown only then, and the backend returns `409`
+   * for a session still in progress (surfaced as {@link exportError}).
+   */
+  downloadResults(format: SessionResultsFormat): void {
+    const session = this.session();
+    if (!session || this.exporting()) {
+      return;
+    }
+    this.exporting.set(true);
+    this.exportError.set(false);
+    this.api.exportResults(session.id, format).subscribe({
+      next: blob => {
+        this.exporting.set(false);
+        this.saveBlob(blob, `${session.title}.${format}`);
+      },
+      error: () => {
+        this.exporting.set(false);
+        this.exportError.set(true);
+      },
+    });
+  }
+
+  /** Triggers a browser download of `blob` as `filename` (no-op where the Blob URL API is absent). */
+  private saveBlob(blob: Blob, filename: string): void {
+    if (typeof URL.createObjectURL !== 'function') {
+      return;
+    }
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.click();
+    URL.revokeObjectURL(url);
   }
 
   /** Relative font size (rem) for a WORDCLOUD entry, scaled by its share of the top frequency. */

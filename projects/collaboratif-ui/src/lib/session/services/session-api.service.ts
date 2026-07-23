@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { COLLABORATIF_API_URL } from '../../core/whiteboard/config/tokens';
 import {
@@ -28,6 +28,9 @@ import {
 
 /** Native header carrying a Module Session guest token, mirroring `SessionWsService`'s own constant. */
 const GUEST_TOKEN_HEADER = 'X-Guest-Token';
+
+/** Export format for a completed session's results (US19.4.2). */
+export type SessionResultsFormat = 'json' | 'csv';
 
 /** Query filters for `GET /api/collaboratif/sessions` (US19.1.1). */
 export interface SessionListQuery {
@@ -316,5 +319,17 @@ export class SessionApiService {
   /** Fetches the final quiz results — ranking + per-question correct-rate (US19.3.1). */
   getQuizResults(sessionId: string): Observable<QuizResults> {
     return this.http.get<QuizResults>(`${this.apiUrl}/sessions/${sessionId}/quiz/results`);
+  }
+
+  /**
+   * Downloads a COMPLETED session's aggregated results as a JSON or CSV blob (US19.4.2) — owner /
+   * `ROLE_ADMIN` only (enforced server-side; a non-owner or cross-tenant caller gets `404`). The
+   * session must be `COMPLETED`: the backend returns `409` for a session still in progress.
+   */
+  exportResults(sessionId: string, format: SessionResultsFormat): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/sessions/${sessionId}/results`, {
+      params: new HttpParams().set('format', format),
+      responseType: 'blob',
+    });
   }
 }

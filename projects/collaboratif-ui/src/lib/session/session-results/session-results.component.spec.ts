@@ -223,6 +223,34 @@ describe('SessionResultsComponent', () => {
     expect(fixture.componentInstance.pollResults()).toHaveLength(1);
   });
 
+  it('export: requests the chosen format as a blob for a COMPLETED session', () => {
+    const fixture = mount(sessionResponse('POLL', 'COMPLETED'));
+    httpMock.expectOne(`${SESSION_URL}/poll/results`).flush([]);
+
+    fixture.componentInstance.downloadResults('json');
+    const req = httpMock.expectOne(
+      r => r.url === `${SESSION_URL}/results` && r.params.get('format') === 'json',
+    );
+    expect(req.request.responseType).toBe('blob');
+    req.flush(new Blob(['{}'], { type: 'application/json' }));
+
+    expect(fixture.componentInstance.exporting()).toBe(false);
+    expect(fixture.componentInstance.exportError()).toBe(false);
+  });
+
+  it('export: surfaces exportError when the export fails (e.g. 409)', () => {
+    const fixture = mount(sessionResponse('POLL', 'COMPLETED'));
+    httpMock.expectOne(`${SESSION_URL}/poll/results`).flush([]);
+
+    fixture.componentInstance.downloadResults('csv');
+    httpMock
+      .expectOne(r => r.url === `${SESSION_URL}/results` && r.params.get('format') === 'csv')
+      .flush(null, { status: 409, statusText: 'Conflict' });
+
+    expect(fixture.componentInstance.exportError()).toBe(true);
+    expect(fixture.componentInstance.exporting()).toBe(false);
+  });
+
   it('disconnects and ignores late messages on destroy', () => {
     const fixture = mount(sessionResponse('POLL'));
     httpMock.expectOne(`${SESSION_URL}/poll/results`).flush([]);
