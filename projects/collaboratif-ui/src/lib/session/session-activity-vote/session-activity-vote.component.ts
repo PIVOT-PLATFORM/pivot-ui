@@ -11,7 +11,9 @@ import {
 import { Subscription } from 'rxjs';
 import { TranslocoPipe } from '@jsverse/transloco';
 import {
+  MatrixCriterion,
   ParticipantSessionResponse,
+  SubmitBallotRequest,
   VoteConfig,
   VoteResults,
   VoteType,
@@ -23,12 +25,13 @@ import { SessionWsService } from '../services/session-ws.service';
 const RATINGS: readonly number[] = [0, 1, 2, 3, 4, 5];
 
 const DEFAULT_POINTS = 5;
+const DEFAULT_MAX_SCORE = 5;
 
 /**
- * VOTE activity participant view (US19.3.6) — Fist-to-Five (rate a proposal 0-5) or WEIGHTED
- * (distribute a points budget across options), one ballot per participant. Ballots stay secret:
- * the live count updates from `VOTE_SUBMITTED`, and the tallies (Fist average + consensus level +
- * veto alert, or weighted points per option) appear only once the facilitator closes the vote
+ * VOTE activity participant view (US19.3.6) — Fist-to-Five (rate a proposal 0-5), WEIGHTED
+ * (distribute a points budget across options), or MATRIX (score every option against every weighted
+ * criterion). One ballot per participant. Ballots stay secret: the live count updates from
+ * `VOTE_SUBMITTED`, and the tallies appear only once the facilitator closes the vote
  * (`VOTE_CLOSED`). All labels rendered through interpolation, never `innerHTML`.
  */
 @Component({
@@ -53,9 +56,13 @@ export class SessionActivityVoteComponent implements OnInit, OnDestroy {
   readonly proposal = computed(() => this.config().proposal ?? '');
   readonly options = computed(() => this.config().options ?? []);
   readonly budget = computed(() => this.config().pointsPerParticipant ?? DEFAULT_POINTS);
+  readonly criteria = computed<MatrixCriterion[]>(() => this.config().criteria ?? []);
+  readonly maxScore = computed(() => this.config().maxScore ?? DEFAULT_MAX_SCORE);
 
   readonly selectedRating = signal<number | null>(null);
   readonly allocations = signal<Record<string, number>>({});
+  /** MATRIX ballot grid — `matrixScores[optionIndex][criterionIndex]`. */
+  readonly matrixScores = signal<number[][]>([]);
   readonly hasVoted = signal(false);
   readonly submitting = signal(false);
   readonly submitError = signal(false);
@@ -71,15 +78,23 @@ export class SessionActivityVoteComponent implements OnInit, OnDestroy {
     if (this.disabled() || this.submitting() || this.hasVoted()) {
       return false;
     }
-    return this.voteType() === 'WEIGHTED'
-      ? this.budget() > 0 && this.remaining() === 0
-      : this.selectedRating() !== null;
+    switch (this.voteType()) {
+      case 'WEIGHTED':
+        return this.budget() > 0 && this.remaining() === 0;
+      case 'MATRIX':
+        return this.options().length > 0 && this.criteria().length > 0;
+      default:
+        return this.selectedRating() !== null;
+    }
   });
 
   private messagesSubscription: Subscription | null = null;
 
   ngOnInit(): void {
     this.messagesSubscription = this.sessionWs.messages$.subscribe(raw => this.onMessage(raw));
+    if (this.voteType() === 'MATRIX') {
+      this.matrixScores.set(this.options().map(() => this.criteria().map(() => 0)));
+    }
     this.sessionApi.getVoteResults(this.session().id).subscribe({
       next: results => {
         this.results.set(results);
@@ -108,14 +123,34 @@ export class SessionActivityVoteComponent implements OnInit, OnDestroy {
     return this.allocations()[String(index)] ?? 0;
   }
 
+  matrixScoreAt(optionIndex: number, criterionIndex: number): number {
+    return this.matrixScores()[optionIndex]?.[criterionIndex] ?? 0;
+  }
+
+  setMatrixScore(optionIndex: number, criterionIndex: number, raw: string): void {
+    const clamped = Math.min(this.maxScore(), Math.max(0, Math.trunc(Number(raw) || 0)));
+    this.matrixScores.update(grid =>
+      grid.map((row, i) =>
+        i === optionIndex ? row.map((cell, j) => (j === criterionIndex ? clamped : cell)) : row,
+      ),
+    );
+  }
+
   submit(): void {
     if (!this.canSubmit()) {
       return;
     }
-    const body =
-      this.voteType() === 'WEIGHTED'
-        ? { allocations: this.allocations() }
-        : { value: this.selectedRating() as number };
+    let body: SubmitBallotRequest;
+    switch (this.voteType()) {
+      case 'WEIGHTED':
+        body = { allocations: this.allocations() };
+        break;
+      case 'MATRIX':
+        body = { scores: this.matrixScores() };
+        break;
+      default:
+        body = { value: this.selectedRating() as number };
+    }
 
     this.submitting.set(true);
     this.submitError.set(false);
