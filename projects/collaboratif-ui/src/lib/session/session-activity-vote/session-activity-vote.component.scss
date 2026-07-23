@@ -1,0 +1,118 @@
+.session-activity-vote {
+  padding: var(--space-6, 24px);
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 16px);
+
+  &__proposal {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  &__ratings {
+    display: flex;
+    gap: var(--space-2, 8px);
+  }
+
+  &__rating {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radius-md, 6px);
+    border: 1px solid var(--color-border, #e5e7eb);
+    background: var(--color-surface, #fff);
+    font-weight: 700;
+    cursor: pointer;
+
+    &[aria-checked='true'] {
+      background: var(--color-primary, #4f46e5);
+      color: var(--color-on-primary, #fff);
+      border-color: var(--color-primary, #4f46e5);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+
+  &__options {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2, 8px);
+  }
+
+  &__option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3, 12px);
+
+    input {
+      width: 5rem;
+      padding: var(--space-1, 4px) var(--space-2, 8px);
+      border: 1px solid var(--color-border, #e5e7eb);
+      border-radius: var(--radius-md, 6px);
+    }
+  }
+
+  &__remaining {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  &__submit {
+    align-self: flex-start;
+    padding: var(--space-2, 8px) var(--space-4, 16px);
+    border-radius: var(--radius-md, 6px);
+    border: none;
+    background: var(--color-primary, #4f46e5);
+    color: var(--color-on-primary, #fff);
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  &__error,
+  &__veto {
+    color: var(--color-danger, #dc2626);
+    margin: 0;
+    font-weight: 600;
+  }
+
+  &__voted,
+  &__count {
+    margin: 0;
+    color: var(--color-text-muted, #6b7280);
+  }
+
+  &__results {
+    border-top: 1px solid var(--color-border, #e5e7eb);
+    padding-top: var(--space-4, 16px);
+
+    h3 {
+      margin: 0 0 var(--space-2, 8px);
+    }
+
+    p {
+      margin: var(--space-1, 4px) 0;
+    }
+  }
+
+  &__consensus {
+    font-weight: 600;
+  }
+
+  &__tallies {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+}

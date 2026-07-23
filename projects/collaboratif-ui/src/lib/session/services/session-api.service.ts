@@ -8,6 +8,8 @@ import {
   BrainstormCard,
   BrainstormCardRequest,
   CategorizeCardRequest,
+  SubmitBallotRequest,
+  VoteResults,
   JoinSessionRequest,
   JoinSessionResponse,
   ParticipantSessionResponse,
@@ -243,5 +245,24 @@ export class SessionApiService {
       `${this.apiUrl}/sessions/${sessionId}/brainstorm/cards/${cardId}/category`,
       request,
     );
+  }
+
+  // -----------------------------------------------------------------------------------------
+  // VOTE activity (US19.3.6)
+  // -----------------------------------------------------------------------------------------
+
+  /** Casts the caller's ballot (US19.3.6) — one per participant, a second is a 409 server-side. */
+  submitVoteBallot(sessionId: string, request: SubmitBallotRequest): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/sessions/${sessionId}/vote/ballot`, request);
+  }
+
+  /** Closes the vote and reveals results (facilitator only, US19.3.6). */
+  closeVote(sessionId: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/sessions/${sessionId}/vote/close`, {});
+  }
+
+  /** Fetches the current vote results (US19.3.6) — tally-less until the facilitator closes it. */
+  getVoteResults(sessionId: string): Observable<VoteResults> {
+    return this.http.get<VoteResults>(`${this.apiUrl}/sessions/${sessionId}/vote/results`);
   }
 }
