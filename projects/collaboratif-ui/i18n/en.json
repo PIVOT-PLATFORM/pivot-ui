@@ -812,6 +812,7 @@
       "pause": "Pause",
       "resume": "Resume",
       "end": "End",
+      "viewResults": "View results",
       "back": "Back"
     },
     "pausedOverlay": {
@@ -820,9 +821,18 @@
     "activityPlaceholder": {
       "message": "The {{type}} activity is coming soon."
     },
-    "resultsPlaceholder": {
-      "message": "Session results are coming soon.",
-      "back": "Back to sessions"
+    "results": {
+      "loadError": "Could not load the session results.",
+      "projection": "Projection mode",
+      "exitProjection": "Exit projection",
+      "back": "Back",
+      "empty": "No results yet.",
+      "votes": "{{count}} vote(s)",
+      "answered": "Answered",
+      "wordCount": "cited {{count}} time(s)",
+      "uncategorized": "Uncategorized",
+      "correctRates": "Correct answers per question",
+      "question": "Q{{number}}"
     },
     "participantShell": {
       "loadError": "Could not load the session."

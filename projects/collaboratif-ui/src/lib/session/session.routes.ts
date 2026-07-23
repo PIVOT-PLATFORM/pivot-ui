@@ -38,12 +38,10 @@ export const sessionRoutes: Routes = [
       ),
   },
   {
-    // Results/export (US19.4.1/US19.4.2) — PR2/2 of E19, placeholder only in this PR.
+    // Facilitator real-time results view (US19.4.1) — per-activity tallies + projection mode.
     path: ':sessionId/results',
     loadComponent: () =>
-      import('./session-results-placeholder/session-results-placeholder.component').then(
-        m => m.SessionResultsPlaceholderComponent,
-      ),
+      import('./session-results/session-results.component').then(m => m.SessionResultsComponent),
   },
 ];
 
@@ -84,8 +82,6 @@ export const sessionPublicRoutes: Routes = [
   {
     path: ':sessionId/results',
     loadComponent: () =>
-      import('./session-results-placeholder/session-results-placeholder.component').then(
-        m => m.SessionResultsPlaceholderComponent,
-      ),
+      import('./session-results/session-results.component').then(m => m.SessionResultsComponent),
   },
 ];

@@ -1,0 +1,150 @@
+<section class="session-results" [class.session-results--projection]="projection()">
+  @if (loadError()) {
+    <p class="session-results__error" role="alert">{{ 'session.results.loadError' | transloco }}</p>
+  } @else if (session(); as s) {
+    <header class="session-results__header">
+      <div class="session-results__heading">
+        <h1 class="session-results__title">{{ s.title }}</h1>
+        <span class="session-results__status">{{ 'session.status.' + s.status.toLowerCase() | transloco }}</span>
+      </div>
+      <div class="session-results__actions">
+        <button
+          type="button"
+          class="session-results__projection"
+          [attr.aria-pressed]="projection()"
+          (click)="toggleProjection()"
+        >
+          {{ (projection() ? 'session.results.exitProjection' : 'session.results.projection') | transloco }}
+        </button>
+        <a class="session-results__back" routerLink="..">{{ 'session.results.back' | transloco }}</a>
+      </div>
+    </header>
+
+    <div class="session-results__body" aria-live="polite">
+      @switch (type()) {
+        @case ('POLL') {
+          @if (pollResults().length) {
+            <ul class="session-results__poll">
+              @for (option of pollResults(); track option.optionId) {
+                <li class="session-results__poll-option">
+                  <span class="session-results__poll-bar" [style.width.%]="option.percent ?? 0" aria-hidden="true"></span>
+                  <span class="session-results__poll-label">{{ option.label }}</span>
+                  <span class="session-results__poll-tally">{{ option.percent ?? 0 }}% ({{ option.count ?? 0 }})</span>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="session-results__empty">{{ 'session.results.empty' | transloco }}</p>
+          }
+        }
+
+        @case ('WORDCLOUD') {
+          @if (words().length) {
+            <ul class="session-results__cloud">
+              @for (entry of words(); track entry.word) {
+                <li class="session-results__word" [style.font-size.rem]="wordSize(entry.frequency)">
+                  {{ entry.word }}
+                  <span class="__sr-only">{{ 'session.results.wordCount' | transloco: { count: entry.frequency } }}</span>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="session-results__empty">{{ 'session.results.empty' | transloco }}</p>
+          }
+        }
+
+        @case ('QA') {
+          @if (sortedQuestions().length) {
+            <ul class="session-results__qa">
+              @for (question of sortedQuestions(); track question.id) {
+                <li class="session-results__qa-item" [class.session-results__qa-item--answered]="question.answered">
+                  <span class="session-results__qa-votes">{{ 'session.results.votes' | transloco: { count: question.upvotes } }}</span>
+                  <span class="session-results__qa-text">{{ question.text }}</span>
+                  @if (question.answered) {
+                    <span class="session-results__qa-answered">{{ 'session.results.answered' | transloco }}</span>
+                  }
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="session-results__empty">{{ 'session.results.empty' | transloco }}</p>
+          }
+        }
+
+        @case ('BRAINSTORM') {
+          @if (cardGroups().length) {
+            @for (group of cardGroups(); track group.category) {
+              <section class="session-results__group">
+                <h2 class="session-results__group-title">
+                  {{ group.category ?? ('session.results.uncategorized' | transloco) }}
+                </h2>
+                <ul class="session-results__cards">
+                  @for (card of group.cards; track card.id) {
+                    <li class="session-results__card" [attr.data-color]="card.color">{{ card.text }}</li>
+                  }
+                </ul>
+              </section>
+            }
+          } @else {
+            <p class="session-results__empty">{{ 'session.results.empty' | transloco }}</p>
+          }
+        }
+
+        @case ('VOTE') {
+          @if (voteResults(); as v) {
+            @if (v.voteType === 'FIST_TO_FIVE') {
+              <p>{{ 'session.vote.average' | transloco }} {{ v.average }}</p>
+              @if (v.consensusLevel; as level) {
+                <p class="session-results__consensus">{{ 'session.vote.consensus.' + level | transloco }}</p>
+              }
+              @if (v.veto) {
+                <p class="session-results__veto" role="alert">{{ 'session.vote.veto' | transloco }}</p>
+              }
+            } @else if (v.voteType === 'WEIGHTED') {
+              <ul class="session-results__tallies">
+                @for (option of v.options; track option.optionIndex) {
+                  <li>{{ option.label }} — {{ option.points }} {{ 'session.vote.points' | transloco }}</li>
+                }
+              </ul>
+            } @else {
+              <ol class="session-results__tallies">
+                @for (option of v.matrix; track option.optionIndex) {
+                  <li>{{ option.label }} — {{ option.score }}</li>
+                }
+              </ol>
+            }
+          } @else {
+            <p class="session-results__empty">{{ 'session.results.empty' | transloco }}</p>
+          }
+        }
+
+        @case ('QUIZ') {
+          @if (leaderboard().length) {
+            <ol class="session-results__leaderboard">
+              @for (entry of leaderboard(); track entry.participantId) {
+                <li class="session-results__leaderboard-row">
+                  <span class="session-results__leaderboard-name">{{ entry.displayName }}</span>
+                  <span class="session-results__leaderboard-score">{{ entry.score }}</span>
+                </li>
+              }
+            </ol>
+            @if (quizResults()?.correctRatePerQuestion?.length) {
+              <h2 class="session-results__subtitle">{{ 'session.results.correctRates' | transloco }}</h2>
+              <ul class="session-results__rates">
+                @for (rate of quizResults()!.correctRatePerQuestion; track $index) {
+                  <li class="session-results__rate">
+                    <span class="session-results__rate-label">{{ 'session.results.question' | transloco: { number: $index + 1 } }}</span>
+                    <span class="session-results__rate-bar" [style.width.%]="rate" aria-hidden="true"></span>
+                    <span class="session-results__rate-value">{{ rate }}%</span>
+                  </li>
+                }
+              </ul>
+            }
+          } @else {
+            <p class="session-results__empty">{{ 'session.results.empty' | transloco }}</p>
+          }
+        }
+      }
+    </div>
+  }
+</section>

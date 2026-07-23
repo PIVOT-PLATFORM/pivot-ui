@@ -812,6 +812,7 @@
       "pause": "Mettre en pause",
       "resume": "Reprendre",
       "end": "Terminer",
+      "viewResults": "Voir les résultats",
       "back": "Retour"
     },
     "pausedOverlay": {
@@ -820,9 +821,18 @@
     "activityPlaceholder": {
       "message": "L'activité {{type}} arrive bientôt."
     },
-    "resultsPlaceholder": {
-      "message": "Les résultats de la session arrivent bientôt.",
-      "back": "Retour aux sessions"
+    "results": {
+      "loadError": "Impossible de charger les résultats de la session.",
+      "projection": "Mode projection",
+      "exitProjection": "Quitter la projection",
+      "back": "Retour",
+      "empty": "Aucun résultat pour le moment.",
+      "votes": "{{count}} vote(s)",
+      "answered": "Répondu",
+      "wordCount": "cité {{count}} fois",
+      "uncategorized": "Sans catégorie",
+      "correctRates": "Bonnes réponses par question",
+      "question": "Q{{number}}"
     },
     "participantShell": {
       "loadError": "Impossible de charger la session."

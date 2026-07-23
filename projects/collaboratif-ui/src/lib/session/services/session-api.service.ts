@@ -16,6 +16,7 @@ import {
   JoinSessionRequest,
   JoinSessionResponse,
   ParticipantSessionResponse,
+  PollOptionResult,
   PollVoteRequest,
   QaQuestion,
   QuestionSubmitRequest,
@@ -155,6 +156,16 @@ export class SessionApiService {
     return this.http.post<void>(`${this.apiUrl}/sessions/${sessionId}/poll/show-results`, {});
   }
 
+  /**
+   * Snapshot of the POLL's current tallies for the results view (US19.4.1). Unlike the participant
+   * feed — which is event-sourced over `POLL_UPDATED` and respects the facilitator's hide/show
+   * state — this facilitator-authoritative read always returns `count`/`percent`, so the results
+   * view hydrates correctly even when opened mid-session.
+   */
+  getPollResults(sessionId: string): Observable<PollOptionResult[]> {
+    return this.http.get<PollOptionResult[]>(`${this.apiUrl}/sessions/${sessionId}/poll/results`);
+  }
+
   // -----------------------------------------------------------------------------------------
   // WORDCLOUD activity (US19.3.3)
   // -----------------------------------------------------------------------------------------
@@ -169,6 +180,15 @@ export class SessionApiService {
     return this.http.delete<void>(
       `${this.apiUrl}/sessions/${sessionId}/wordcloud/words/${encodeURIComponent(word)}`,
     );
+  }
+
+  /**
+   * Snapshot of the WORDCLOUD's aggregated entries for the results view (US19.4.1) — the
+   * participant feed is event-sourced (`WORD_ADDED`/`WORD_REMOVED`), so this read lets the results
+   * view render the accumulated cloud when opened mid-session rather than only words seen live.
+   */
+  listWordcloudWords(sessionId: string): Observable<WordEntry[]> {
+    return this.http.get<WordEntry[]>(`${this.apiUrl}/sessions/${sessionId}/wordcloud/words`);
   }
 
   // -----------------------------------------------------------------------------------------
