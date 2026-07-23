@@ -852,6 +852,24 @@
       "upvote": "Voter pour cette question",
       "anonymousAuthor": "Anonyme",
       "answeredBadge": "Répondue"
+    },
+    "brainstorm": {
+      "inputLabel": "Nouvelle idée",
+      "colorLabel": "Couleur du post-it",
+      "add": "Ajouter",
+      "submitError": "Impossible d'ajouter le post-it.",
+      "empty": "Aucune idée pour l'instant. Ajoutez la première.",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "color": {
+        "YELLOW": "Jaune",
+        "PINK": "Rose",
+        "BLUE": "Bleu",
+        "GREEN": "Vert",
+        "ORANGE": "Orange"
+      }
     }
   }
 }

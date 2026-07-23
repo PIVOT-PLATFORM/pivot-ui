@@ -126,7 +126,10 @@ export type SessionEventType =
   | 'WORD_REMOVED'
   | 'QUESTION_ADDED'
   | 'QUESTION_UPVOTED'
-  | 'QUESTION_ANSWERED';
+  | 'QUESTION_ANSWERED'
+  | 'CARD_ADDED'
+  | 'CARD_UPDATED'
+  | 'CARD_REMOVED';
 
 /** `SESSION_STARTED` carries the full, started session (`SessionStartedEvent.java`). */
 export interface SessionStartedEvent {
@@ -274,6 +277,59 @@ export interface QuestionAnsweredEvent {
   readonly questionId: string;
 }
 
+// ---------------------------------------------------------------------------------------------
+// BRAINSTORM activity (US19.3.4)
+// ---------------------------------------------------------------------------------------------
+
+/** The five post-it colours (`BrainstormCardColor.java`). */
+export type BrainstormCardColor = 'YELLOW' | 'PINK' | 'BLUE' | 'GREEN' | 'ORANGE';
+
+/**
+ * A single BRAINSTORM post-it (`BrainstormCardDto.java`). `authorParticipantId` is the
+ * session-scoped participant id (never a user id) — the client compares it to its own participant
+ * id to decide whether to offer edit/delete; the server enforces the same ownership rule.
+ */
+export interface BrainstormCard {
+  readonly id: string;
+  readonly text: string;
+  readonly color: BrainstormCardColor;
+  readonly category: string | null;
+  readonly authorParticipantId: string;
+  readonly createdAt: string;
+}
+
+/** Request body for adding/editing a card (`AddCardRequest`/`UpdateCardRequest`). */
+export interface BrainstormCardRequest {
+  readonly text: string;
+  readonly color: BrainstormCardColor;
+}
+
+/** Request body for `POST .../brainstorm/cards/{cardId}/category` (facilitator). */
+export interface CategorizeCardRequest {
+  readonly category: string | null;
+}
+
+/** `CARD_ADDED` carries the full new card (`CardAddedEvent.java`). */
+export interface CardAddedEvent {
+  readonly type: 'CARD_ADDED';
+  readonly sessionId: string;
+  readonly card: BrainstormCard;
+}
+
+/** `CARD_UPDATED` carries the full updated card — author edit or facilitator re-categorization. */
+export interface CardUpdatedEvent {
+  readonly type: 'CARD_UPDATED';
+  readonly sessionId: string;
+  readonly card: BrainstormCard;
+}
+
+/** `CARD_REMOVED` carries the deleted card id (`CardRemovedEvent.java`). */
+export interface CardRemovedEvent {
+  readonly type: 'CARD_REMOVED';
+  readonly sessionId: string;
+  readonly cardId: string;
+}
+
 /** Union of every event shape that can arrive on a session's STOMP topic. */
 export type SessionTopicEvent =
   | SessionStartedEvent
@@ -284,4 +340,7 @@ export type SessionTopicEvent =
   | WordRemovedEvent
   | QuestionAddedEvent
   | QuestionUpvotedEvent
-  | QuestionAnsweredEvent;
+  | QuestionAnsweredEvent
+  | CardAddedEvent
+  | CardUpdatedEvent
+  | CardRemovedEvent;
