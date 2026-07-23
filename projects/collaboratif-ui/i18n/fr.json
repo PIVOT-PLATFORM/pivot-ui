@@ -888,6 +888,18 @@
         "MODERATE": "Consensus moyen",
         "WEAK": "Consensus faible"
       }
+    },
+    "quiz": {
+      "waiting": "En attente de la prochaine question…",
+      "question": "Question",
+      "timeLeft": "Temps restant :",
+      "answersReceived": "Réponses reçues :",
+      "submit": "Valider",
+      "submitError": "Réponse non enregistrée (temps écoulé ?).",
+      "answered": "Réponse envoyée.",
+      "leaderboardTitle": "Classement",
+      "myScore": "Votre score :",
+      "points": "pts"
     }
   }
 }
