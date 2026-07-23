@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { COLLABORATIF_API_URL } from '../../core/whiteboard/config/tokens';
 import {
@@ -7,12 +7,16 @@ import {
   GuestHeartbeatRequest,
   JoinSessionRequest,
   JoinSessionResponse,
+  ParticipantSessionResponse,
   PollVoteRequest,
   SessionResponse,
   SessionSummaryResponse,
   WordEntry,
   WordSubmitRequest,
 } from '../models/session.model';
+
+/** Native header carrying a Module Session guest token, mirroring `SessionWsService`'s own constant. */
+const GUEST_TOKEN_HEADER = 'X-Guest-Token';
 
 /** Query filters for `GET /api/collaboratif/sessions` (US19.1.1). */
 export interface SessionListQuery {
@@ -46,9 +50,38 @@ export class SessionApiService {
     return this.http.get<SessionSummaryResponse[]>(`${this.apiUrl}/sessions`, { params });
   }
 
-  /** Fetches a single session by id (US19.1.1). */
+  /**
+   * Fetches a single session by id (US19.1.1) — facilitator-oriented, requires a bearer token
+   * (`CollaboratifRequestPrincipal` server-side). Used by the facilitator's session-runner view;
+   * an anonymous `ROLE_GUEST` participant must use {@link getParticipantSessionState} instead.
+   */
   getSession(sessionId: string): Observable<SessionResponse> {
     return this.http.get<SessionResponse>(`${this.apiUrl}/sessions/${sessionId}`);
+  }
+
+  /**
+   * Fetches the participant-safe view of a session's current state (US19.2.2) — reachable by any
+   * caller already joined to this exact session, authenticated or anonymous `ROLE_GUEST` alike.
+   * Used by {@link SessionParticipantShellComponent} to load state on join and reload it on every
+   * STOMP reconnect. Same dual-credential shape as the backend's `SessionCallerResolver`: the
+   * caller's bearer token, if any, is attached ambiently by the shell's HTTP interceptor; an
+   * anonymous guest instead passes the sealed token received from {@link joinSession} explicitly,
+   * carried here as an `X-Guest-Token` header (never both) — the same header {@link
+   * SessionWsService} already sends on STOMP `CONNECT` for the same guest.
+   *
+   * @param sessionId  the session's id
+   * @param guestToken the sealed guest token from the join response, for an anonymous
+   *   `ROLE_GUEST` participant — omit (or pass `null`) for an authenticated caller.
+   */
+  getParticipantSessionState(
+    sessionId: string,
+    guestToken: string | null = null,
+  ): Observable<ParticipantSessionResponse> {
+    const headers = guestToken ? new HttpHeaders({ [GUEST_TOKEN_HEADER]: guestToken }) : undefined;
+    return this.http.get<ParticipantSessionResponse>(
+      `${this.apiUrl}/sessions/${sessionId}/state`,
+      headers ? { headers } : {},
+    );
   }
 
   /** Starts a `DRAFT` session (US19.1.2) — creator or `ROLE_ADMIN` only. */

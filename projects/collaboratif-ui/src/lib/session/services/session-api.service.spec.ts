@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideHttpClient } from '@angular/common/http';
 import { COLLABORATIF_API_URL } from '../../core/whiteboard/config/tokens';
 import { SessionApiService } from './session-api.service';
-import { SessionResponse } from '../models/session.model';
+import { ParticipantSessionResponse, SessionResponse } from '../models/session.model';
 
 const TEST_API_URL = 'http://localhost:8083/api/collaboratif';
 const BASE = `${TEST_API_URL}/sessions`;
@@ -19,6 +19,17 @@ const SESSION: SessionResponse = {
   participantCount: 0,
   createdAt: '2026-07-23T08:00:00Z',
   startedAt: null,
+  endedAt: null,
+};
+
+const PARTICIPANT_SESSION: ParticipantSessionResponse = {
+  id: 's-1',
+  title: 'Sprint retro',
+  type: 'POLL',
+  status: 'LIVE',
+  config: {},
+  participantCount: 1,
+  startedAt: '2026-07-23T08:01:00Z',
   endedAt: null,
 };
 
@@ -69,6 +80,28 @@ describe('SessionApiService', () => {
     const req = httpMock.expectOne(`${BASE}/s-1`);
     expect(req.request.method).toBe('GET');
     req.flush(SESSION);
+  });
+
+  it('getParticipantSessionState() GETs /sessions/{id}/state with no X-Guest-Token header when omitted', () => {
+    service.getParticipantSessionState('s-1').subscribe();
+    const req = httpMock.expectOne(`${BASE}/s-1/state`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.headers.has('X-Guest-Token')).toBe(false);
+    req.flush(PARTICIPANT_SESSION);
+  });
+
+  it('getParticipantSessionState() GETs /sessions/{id}/state with no X-Guest-Token header when null', () => {
+    service.getParticipantSessionState('s-1', null).subscribe();
+    const req = httpMock.expectOne(`${BASE}/s-1/state`);
+    expect(req.request.headers.has('X-Guest-Token')).toBe(false);
+    req.flush(PARTICIPANT_SESSION);
+  });
+
+  it('getParticipantSessionState() attaches the X-Guest-Token header when a guest token is passed', () => {
+    service.getParticipantSessionState('s-1', 'guest-tok').subscribe();
+    const req = httpMock.expectOne(`${BASE}/s-1/state`);
+    expect(req.request.headers.get('X-Guest-Token')).toBe('guest-tok');
+    req.flush(PARTICIPANT_SESSION);
   });
 
   it.each([

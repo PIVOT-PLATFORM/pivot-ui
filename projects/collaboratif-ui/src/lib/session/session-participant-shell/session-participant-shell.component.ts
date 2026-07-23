@@ -12,7 +12,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, interval, switchMap } from 'rxjs';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { SessionResponse, SessionType } from '../models/session.model';
+import { ParticipantSessionResponse, SessionType } from '../models/session.model';
 import { SessionApiService } from '../services/session-api.service';
 import { SessionWsService } from '../services/session-ws.service';
 import { SessionPausedOverlayComponent } from '../session-paused-overlay/session-paused-overlay.component';
@@ -83,12 +83,11 @@ const HEARTBEAT_INTERVAL_MS = 5 * 60 * 1000;
  * user arriving some other way) falls back to connecting with the caller's bearer token instead
  * (`SessionWsService` reads it from `COLLABORATIF_BEARER_TOKEN` when no guest token is passed).
  *
- * **Known backend gap** (`pivot-core` `feat/sprint22-session-infra-backend`, `SessionController`):
- * `GET /sessions/{id}` always requires a bearer token — there is no guest-accessible variant. An
- * anonymous `ROLE_GUEST` participant can therefore reach this page and open the WS connection,
- * but {@link loadAndSync}'s `getSession()` call will 401 and no activity component will ever
- * mount for them until a `pivot-core` follow-up adds a guest-accessible session-detail path
- * (either a guest-token variant of `getById`, or embedding the session in the join response).
+ * {@link loadAndSync} uses {@link SessionApiService.getParticipantSessionState} (US19.2.2,
+ * `GET /sessions/{id}/state`), not the facilitator-only, bearer-only {@link
+ * SessionApiService.getSession} — the same {@link guestToken} handed off by {@link
+ * SessionJoinComponent} is forwarded as the `X-Guest-Token` header, so an anonymous `ROLE_GUEST`
+ * participant's state reload succeeds instead of 401ing.
  */
 @Component({
   selector: 'app-session-participant-shell',
@@ -104,7 +103,7 @@ export class SessionParticipantShellComponent implements OnInit, OnDestroy {
   private readonly sessionApi = inject(SessionApiService);
   protected readonly sessionWs = inject(SessionWsService);
 
-  readonly session = signal<SessionResponse | null>(null);
+  readonly session = signal<ParticipantSessionResponse | null>(null);
   readonly loadError = signal(false);
   readonly activityComponent = signal<Type<unknown> | null>(null);
 
@@ -181,7 +180,7 @@ export class SessionParticipantShellComponent implements OnInit, OnDestroy {
       this.loadError.set(true);
       return;
     }
-    this.sessionApi.getSession(sessionId).subscribe({
+    this.sessionApi.getParticipantSessionState(sessionId, this.guestToken).subscribe({
       next: session => {
         this.session.set(session);
         this.syncActivityComponent(session);
@@ -193,14 +192,14 @@ export class SessionParticipantShellComponent implements OnInit, OnDestroy {
     });
   }
 
-  private syncActivityComponent(session: SessionResponse): void {
+  private syncActivityComponent(session: ParticipantSessionResponse): void {
     ACTIVITY_LOADERS[session.type]().then(component => {
       this.activityComponent.set(component);
       this.activityInputs.set(this.buildActivityInputs(session));
     });
   }
 
-  private buildActivityInputs(session: SessionResponse): ActivityInputs {
+  private buildActivityInputs(session: ParticipantSessionResponse): ActivityInputs {
     if (PLACEHOLDER_TYPES.has(session.type)) {
       return { type: session.type };
     }

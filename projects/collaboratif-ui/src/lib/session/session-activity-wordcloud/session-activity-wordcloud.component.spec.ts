@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { COLLABORATIF_API_URL } from '../../core/whiteboard/config/tokens';
-import { SessionResponse, WordcloudConfig } from '../models/session.model';
+import { ParticipantSessionResponse, WordcloudConfig } from '../models/session.model';
 import { SessionWsService } from '../services/session-ws.service';
 import { SessionActivityWordcloudComponent } from './session-activity-wordcloud.component';
 
@@ -12,16 +12,13 @@ const TEST_API_URL = 'http://localhost:8083/api/collaboratif';
 
 const WORDCLOUD_CONFIG: WordcloudConfig = { maxWordsPerParticipant: 3, blocklist: [] };
 
-const SESSION: SessionResponse = {
+const SESSION: ParticipantSessionResponse = {
   id: 's-1',
   title: 'Rétro mots-clés',
   type: 'WORDCLOUD',
   status: 'LIVE',
-  joinCode: 'ABCDEF',
   config: WORDCLOUD_CONFIG,
-  teamId: null,
   participantCount: 1,
-  createdAt: '2026-07-22T08:00:00Z',
   startedAt: '2026-07-22T08:01:00Z',
   endedAt: null,
 };

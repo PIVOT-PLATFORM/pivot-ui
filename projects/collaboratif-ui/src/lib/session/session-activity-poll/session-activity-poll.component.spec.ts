@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { COLLABORATIF_API_URL } from '../../core/whiteboard/config/tokens';
-import { PollConfig, SessionResponse } from '../models/session.model';
+import { ParticipantSessionResponse, PollConfig } from '../models/session.model';
 import { SessionWsService } from '../services/session-ws.service';
 import { SessionActivityPollComponent } from './session-activity-poll.component';
 
@@ -19,16 +19,13 @@ const POLL_CONFIG: PollConfig = {
   allowMultiple: false,
 };
 
-const SESSION: SessionResponse = {
+const SESSION: ParticipantSessionResponse = {
   id: 's-1',
   title: 'Sprint retro',
   type: 'POLL',
   status: 'LIVE',
-  joinCode: 'ABCDEF',
   config: POLL_CONFIG,
-  teamId: null,
   participantCount: 1,
-  createdAt: '2026-07-22T08:00:00Z',
   startedAt: '2026-07-22T08:01:00Z',
   endedAt: null,
 };

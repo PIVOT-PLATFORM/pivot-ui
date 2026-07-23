@@ -4,14 +4,13 @@
  * and `.session.{poll,wordcloud}.dto`) — field names/shapes below are the verified contract, not
  * AC-spec guesses.
  *
- * KNOWN GAP (cross-repo, not resolvable from this side alone): `SessionController#getById`
- * (`GET /sessions/{id}`) always requires a `CollaboratifRequestPrincipal` (bearer token) — there
- * is no guest-accessible endpoint returning a session's `config` (poll question/options,
- * wordcloud limits, ...). An anonymous `ROLE_GUEST` participant who joins therefore has no REST
- * path to fetch session details today; `SessionApiService.getSession()` cannot be called from a
- * genuinely anonymous participant context. Needs a `pivot-core` follow-up (either a guest-token
- * variant of `getById`, or embedding the session in `JoinSessionResponse`) before the anonymous
- * participant view is functionally complete.
+ * Two distinct session-detail shapes exist server-side, deliberately not unified: {@link
+ * SessionResponse} (`SessionController#getById`, `GET /sessions/{id}`, bearer-only, used by the
+ * facilitator-only {@link SessionRunnerComponent}-equivalent views) and {@link
+ * ParticipantSessionResponse} (`SessionParticipantController#getState`,
+ * `GET /sessions/{id}/state`, US19.2.2 — reachable by any caller, authenticated or anonymous
+ * `ROLE_GUEST`, who has already joined that exact session). The participant shape deliberately
+ * omits `joinCode`/`teamId`/`createdAt` — see that interface's own TSDoc.
  */
 
 /** The six interactive activity types a session can run (US19.1.1). */
@@ -40,6 +39,28 @@ export interface SessionResponse {
 
 /** A session summary row, as returned by the list endpoint (US19.1.1). */
 export type SessionSummaryResponse = SessionResponse;
+
+/**
+ * Participant-safe session-detail shape, as returned by the guest-accessible
+ * `GET /sessions/{id}/state` (US19.2.2, `ParticipantSessionResponse.java`) — reachable by any
+ * caller (authenticated or anonymous `ROLE_GUEST`) already joined to this exact session, used by
+ * {@link SessionParticipantShellComponent} to load/reload state on join and on STOMP reconnect.
+ *
+ * Deliberately narrower than {@link SessionResponse}: no `joinCode` (not needed once already
+ * joined), no `teamId`/`createdAt` (internal/facilitator-only bookkeeping). Never carries other
+ * participants' identities or POLL vote tallies — those arrive exclusively over the session's WS
+ * topic (`PollUpdatedEvent`), which already respects the facilitator's hide/show-results state.
+ */
+export interface ParticipantSessionResponse {
+  readonly id: string;
+  readonly title: string;
+  readonly type: SessionType;
+  readonly status: SessionStatus;
+  readonly config: SessionConfig;
+  readonly participantCount: number;
+  readonly startedAt: string | null;
+  readonly endedAt: string | null;
+}
 
 /** Request body for `POST /api/collaboratif/sessions` (US19.1.1). */
 export interface CreateSessionRequest {

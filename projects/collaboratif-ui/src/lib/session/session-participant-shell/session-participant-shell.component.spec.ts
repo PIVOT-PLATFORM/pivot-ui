@@ -7,7 +7,7 @@ import { RxStompState } from '@stomp/rx-stomp';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { COLLABORATIF_API_URL } from '../../core/whiteboard/config/tokens';
-import { SessionResponse, SessionStatus } from '../models/session.model';
+import { ParticipantSessionResponse, SessionStatus } from '../models/session.model';
 import { SESSION_STOMP_CLIENT_FACTORY, SessionWsService, StompClient } from '../services/session-ws.service';
 import { SessionParticipantShellComponent } from './session-participant-shell.component';
 import { SessionActivityPollComponent } from '../session-activity-poll/session-activity-poll.component';
@@ -40,17 +40,14 @@ class FakeRxStomp implements StompClient {
   }
 }
 
-function session(status: SessionStatus, type: SessionResponse['type'] = 'POLL'): SessionResponse {
+function session(status: SessionStatus, type: ParticipantSessionResponse['type'] = 'POLL'): ParticipantSessionResponse {
   return {
     id: 's-1',
     title: 'Sprint retro',
     type,
     status,
-    joinCode: 'ABCDEF',
     config: { question: 'Q?', options: [], allowMultiple: false },
-    teamId: null,
     participantCount: 1,
-    createdAt: '2026-07-22T08:00:00Z',
     startedAt: '2026-07-22T08:01:00Z',
     endedAt: null,
   };
@@ -87,7 +84,7 @@ describe('SessionParticipantShellComponent', () => {
   async function createFixture(initial = session('LIVE')) {
     const fixture = TestBed.createComponent(SessionParticipantShellComponent);
     fixture.detectChanges();
-    httpMock.expectOne(`${TEST_API_URL}/sessions/s-1`).flush(initial);
+    httpMock.expectOne(`${TEST_API_URL}/sessions/s-1/state`).flush(initial);
     // syncActivityComponent() resolves the activity component via a dynamic import() — a real
     // module load, not merely a microtask — so whenStable() alone is not a reliable enough
     // signal here; wait for a macrotask tick too before asserting on activityComponent()/inputs.
@@ -111,7 +108,7 @@ describe('SessionParticipantShellComponent', () => {
   it('flags loadError when the initial load fails', () => {
     const fixture = TestBed.createComponent(SessionParticipantShellComponent);
     fixture.detectChanges();
-    httpMock.expectOne(`${TEST_API_URL}/sessions/s-1`).flush(null, { status: 500, statusText: 'Server Error' });
+    httpMock.expectOne(`${TEST_API_URL}/sessions/s-1/state`).flush(null, { status: 500, statusText: 'Server Error' });
     expect(fixture.componentInstance.loadError()).toBe(true);
   });
 
@@ -119,7 +116,7 @@ describe('SessionParticipantShellComponent', () => {
     const fixture = TestBed.createComponent(SessionParticipantShellComponent);
     const navigateSpy = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     fixture.detectChanges();
-    httpMock.expectOne(`${TEST_API_URL}/sessions/s-1`).flush(session('COMPLETED'));
+    httpMock.expectOne(`${TEST_API_URL}/sessions/s-1/state`).flush(session('COMPLETED'));
     await fixture.whenStable();
     expect(navigateSpy).toHaveBeenCalledWith(['/session', 's-1', 'results']);
   });
@@ -165,7 +162,7 @@ describe('SessionParticipantShellComponent', () => {
     const ws = TestBed.inject(SessionWsService);
     ws.messages$.next(JSON.stringify({ type: 'SESSION_PAUSED', sessionId: 's-1' }));
     expect(fixture.componentInstance.session()).toBeNull();
-    httpMock.expectOne(`${TEST_API_URL}/sessions/s-1`).flush(session('LIVE'));
+    httpMock.expectOne(`${TEST_API_URL}/sessions/s-1/state`).flush(session('LIVE'));
   });
 
   it('re-fetches session state from REST when the WS link reconnects after an error', async () => {
@@ -182,7 +179,7 @@ describe('SessionParticipantShellComponent', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const req = httpMock.expectOne(`${TEST_API_URL}/sessions/s-1`);
+    const req = httpMock.expectOne(`${TEST_API_URL}/sessions/s-1/state`);
     req.flush(session('LIVE'));
   });
 
@@ -195,7 +192,7 @@ describe('SessionParticipantShellComponent', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    httpMock.expectNone(`${TEST_API_URL}/sessions/s-1`);
+    httpMock.expectNone(`${TEST_API_URL}/sessions/s-1/state`);
   });
 
   it('unsubscribes from WS messages on destroy', async () => {
@@ -218,6 +215,25 @@ describe('SessionParticipantShellComponent', () => {
     expect(fake.activateCalls).toBe(1);
   });
 
+  it('forwards the guest token as X-Guest-Token on the REST session-state call (US19.2.2)', async () => {
+    history.pushState({ participantId: 'p-1', guestToken: 'guest-tok' }, '');
+    const fixture = TestBed.createComponent(SessionParticipantShellComponent);
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${TEST_API_URL}/sessions/s-1/state`);
+    expect(req.request.headers.get('X-Guest-Token')).toBe('guest-tok');
+    req.flush(session('LIVE'));
+  });
+
+  it('sends no X-Guest-Token on the REST session-state call for an authenticated caller', async () => {
+    const fixture = TestBed.createComponent(SessionParticipantShellComponent);
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${TEST_API_URL}/sessions/s-1/state`);
+    expect(req.request.headers.has('X-Guest-Token')).toBe(false);
+    req.flush(session('LIVE'));
+  });
+
   it('connects with no guest token (authenticated caller / no navigation state) when history.state is empty', async () => {
     await createFixture();
     expect(fake.configureCalls[0].connectHeaders).toEqual({});
@@ -236,7 +252,7 @@ describe('SessionParticipantShellComponent', () => {
     try {
       const fixture = TestBed.createComponent(SessionParticipantShellComponent);
       fixture.detectChanges();
-      httpMock.expectOne(`${TEST_API_URL}/sessions/s-1`).flush(session('LIVE'));
+      httpMock.expectOne(`${TEST_API_URL}/sessions/s-1/state`).flush(session('LIVE'));
 
       await vi.advanceTimersByTimeAsync(5 * 60 * 1000);
       httpMock.expectOne(`${TEST_API_URL}/sessions/s-1/participants/p-1/heartbeat`).flush(null);

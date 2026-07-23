@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, inject, input, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { PollConfig, PollOptionResult, SessionResponse } from '../models/session.model';
+import { ParticipantSessionResponse, PollConfig, PollOptionResult } from '../models/session.model';
 import { SessionApiService } from '../services/session-api.service';
 import { SessionWsService } from '../services/session-ws.service';
 
@@ -27,7 +27,7 @@ export class SessionActivityPollComponent implements OnInit, OnDestroy {
   private readonly sessionApi = inject(SessionApiService);
   private readonly sessionWs = inject(SessionWsService);
 
-  readonly session = input.required<SessionResponse>();
+  readonly session = input.required<ParticipantSessionResponse>();
   readonly disabled = input(false);
 
   readonly selectedOptionIds = signal<string[]>([]);

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, inject
 import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { ProblemDetailResponse, SessionResponse, WordEntry } from '../models/session.model';
+import { ParticipantSessionResponse, ProblemDetailResponse, WordEntry } from '../models/session.model';
 import { SessionApiService } from '../services/session-api.service';
 import { SessionWsService } from '../services/session-ws.service';
 
@@ -30,7 +30,7 @@ export class SessionActivityWordcloudComponent implements OnInit, OnDestroy {
   private readonly sessionApi = inject(SessionApiService);
   private readonly sessionWs = inject(SessionWsService);
 
-  readonly session = input.required<SessionResponse>();
+  readonly session = input.required<ParticipantSessionResponse>();
   readonly disabled = input(false);
 
   readonly word = signal('');
