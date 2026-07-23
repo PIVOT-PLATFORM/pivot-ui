@@ -1,0 +1,13 @@
+.session-participant-shell {
+  min-height: 100%;
+
+  &__error {
+    padding: var(--space-6, 24px);
+    color: var(--color-danger, #dc2626);
+  }
+
+  &__activity {
+    position: relative;
+    min-height: 300px;
+  }
+}
