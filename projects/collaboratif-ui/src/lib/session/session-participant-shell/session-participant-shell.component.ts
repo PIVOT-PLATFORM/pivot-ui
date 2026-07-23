@@ -20,8 +20,8 @@ import { SessionJoinNavigationState } from '../session-join/session-join.compone
 
 /**
  * Generic per-type activity component loader — lazy `import()` per {@link SessionType}
- * (US19.2.2 AC: "le composant d'activité adapté est chargé en lazy-load"). POLL, WORDCLOUD and
- * Q&A resolve to their real components; QUIZ/BRAINSTORM/VOTE still resolve to
+ * (US19.2.2 AC: "le composant d'activité adapté est chargé en lazy-load"). POLL, WORDCLOUD, Q&A
+ * and BRAINSTORM resolve to their real components; QUIZ/VOTE still resolve to
  * {@link SessionActivityPlaceholderComponent} pending their own PR — this map is the single
  * place each remaining type is wired in.
  */
@@ -39,8 +39,8 @@ const ACTIVITY_LOADERS: Record<SessionType, () => Promise<Type<unknown>>> = {
       m => m.SessionActivityWordcloudComponent,
     ),
   BRAINSTORM: () =>
-    import('../session-activity-placeholder/session-activity-placeholder.component').then(
-      m => m.SessionActivityPlaceholderComponent,
+    import('../session-activity-brainstorm/session-activity-brainstorm.component').then(
+      m => m.SessionActivityBrainstormComponent,
     ),
   QA: () =>
     import('../session-activity-qa/session-activity-qa.component').then(
@@ -53,13 +53,13 @@ const ACTIVITY_LOADERS: Record<SessionType, () => Promise<Type<unknown>>> = {
 };
 
 /**
- * The types not yet built (QUIZ/BRAINSTORM/VOTE) — resolve to
+ * The types not yet built (QUIZ/VOTE) — resolve to
  * {@link SessionActivityPlaceholderComponent}, which declares only a `type` input.
  * `NgComponentOutlet` throws `NG0303` on any input the mounted component doesn't declare, so the
  * inputs object built for a mounted component must match *exactly* what that component declares
  * — never a single shared shape across every activity type.
  */
-const PLACEHOLDER_TYPES: ReadonlySet<SessionType> = new Set(['QUIZ', 'BRAINSTORM', 'VOTE']);
+const PLACEHOLDER_TYPES: ReadonlySet<SessionType> = new Set(['QUIZ', 'VOTE']);
 
 /** Inputs passed to whichever activity component {@link NgComponentOutlet} mounts. */
 type ActivityInputs = Record<string, unknown>;
@@ -203,7 +203,14 @@ export class SessionParticipantShellComponent implements OnInit, OnDestroy {
     if (PLACEHOLDER_TYPES.has(session.type)) {
       return { type: session.type };
     }
-    return { session, disabled: session.status !== 'LIVE' };
+    const inputs: ActivityInputs = { session, disabled: session.status !== 'LIVE' };
+    // BRAINSTORM is the only activity that needs the caller's own participant id (to gate the
+    // edit/delete controls to their own cards) — NgComponentOutlet throws NG0303 on an input the
+    // mounted component doesn't declare, so it is added for that type only.
+    if (session.type === 'BRAINSTORM') {
+      return { ...inputs, participantId: this.participantId };
+    }
+    return inputs;
   }
 
   private onMessage(raw: string): void {

@@ -1,0 +1,109 @@
+<div class="session-activity-brainstorm">
+  <form class="session-activity-brainstorm__form" (ngSubmit)="add()">
+    <label class="session-activity-brainstorm__label" for="brainstorm-text">
+      {{ 'session.brainstorm.inputLabel' | transloco }}
+    </label>
+    <textarea
+      id="brainstorm-text"
+      #textInput
+      class="session-activity-brainstorm__input"
+      rows="2"
+      [attr.maxlength]="maxLength"
+      [value]="draftText()"
+      [disabled]="disabled()"
+      [attr.aria-describedby]="submitError() ? 'brainstorm-error' : null"
+      (input)="draftText.set(textInput.value)"
+    ></textarea>
+
+    <div
+      class="session-activity-brainstorm__colors"
+      role="radiogroup"
+      [attr.aria-label]="'session.brainstorm.colorLabel' | transloco"
+    >
+      @for (color of colors; track color) {
+        <button
+          type="button"
+          class="session-activity-brainstorm__color"
+          [class]="'session-activity-brainstorm__color--' + color.toLowerCase()"
+          [attr.aria-checked]="draftColor() === color"
+          [attr.aria-label]="'session.brainstorm.color.' + color | transloco"
+          role="radio"
+          [disabled]="disabled()"
+          (click)="draftColor.set(color)"
+        ></button>
+      }
+    </div>
+
+    <button type="submit" class="session-activity-brainstorm__add" [disabled]="!canAdd()">
+      {{ 'session.brainstorm.add' | transloco }}
+    </button>
+
+    @if (submitError()) {
+      <p id="brainstorm-error" class="session-activity-brainstorm__error" role="alert">
+        {{ 'session.brainstorm.submitError' | transloco }}
+      </p>
+    }
+  </form>
+
+  <ul class="session-activity-brainstorm__board" aria-live="polite">
+    @for (card of orderedCards(); track card.id) {
+      <li
+        class="session-activity-brainstorm__card"
+        [class]="'session-activity-brainstorm__card--' + card.color.toLowerCase()"
+      >
+        @if (editingId() === card.id) {
+          <textarea
+            #editInput
+            class="session-activity-brainstorm__input"
+            rows="2"
+            [attr.maxlength]="maxLength"
+            [value]="editText()"
+            (input)="editText.set(editInput.value)"
+          ></textarea>
+          <div
+            class="session-activity-brainstorm__colors"
+            role="radiogroup"
+            [attr.aria-label]="'session.brainstorm.colorLabel' | transloco"
+          >
+            @for (color of colors; track color) {
+              <button
+                type="button"
+                class="session-activity-brainstorm__color"
+                [class]="'session-activity-brainstorm__color--' + color.toLowerCase()"
+                [attr.aria-checked]="editColor() === color"
+                [attr.aria-label]="'session.brainstorm.color.' + color | transloco"
+                role="radio"
+                (click)="editColor.set(color)"
+              ></button>
+            }
+          </div>
+          <div class="session-activity-brainstorm__actions">
+            <button type="button" (click)="saveEdit(card.id)">
+              {{ 'session.brainstorm.save' | transloco }}
+            </button>
+            <button type="button" (click)="cancelEdit()">
+              {{ 'session.brainstorm.cancel' | transloco }}
+            </button>
+          </div>
+        } @else {
+          <p class="session-activity-brainstorm__text">{{ card.text }}</p>
+          @if (card.category) {
+            <p class="session-activity-brainstorm__category">{{ card.category }}</p>
+          }
+          @if (isOwn(card) && !disabled()) {
+            <div class="session-activity-brainstorm__actions">
+              <button type="button" (click)="startEdit(card)">
+                {{ 'session.brainstorm.edit' | transloco }}
+              </button>
+              <button type="button" (click)="remove(card.id)">
+                {{ 'session.brainstorm.delete' | transloco }}
+              </button>
+            </div>
+          }
+        }
+      </li>
+    } @empty {
+      <li class="session-activity-brainstorm__empty">{{ 'session.brainstorm.empty' | transloco }}</li>
+    }
+  </ul>
+</div>

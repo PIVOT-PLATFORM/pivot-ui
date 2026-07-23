@@ -852,6 +852,24 @@
       "upvote": "Upvote this question",
       "anonymousAuthor": "Anonymous",
       "answeredBadge": "Answered"
+    },
+    "brainstorm": {
+      "inputLabel": "New idea",
+      "colorLabel": "Post-it colour",
+      "add": "Add",
+      "submitError": "Could not add the post-it.",
+      "empty": "No ideas yet. Add the first one.",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel",
+      "color": {
+        "YELLOW": "Yellow",
+        "PINK": "Pink",
+        "BLUE": "Blue",
+        "GREEN": "Green",
+        "ORANGE": "Orange"
+      }
     }
   }
 }

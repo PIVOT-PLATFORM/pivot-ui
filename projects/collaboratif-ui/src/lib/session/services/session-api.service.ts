@@ -5,6 +5,9 @@ import { COLLABORATIF_API_URL } from '../../core/whiteboard/config/tokens';
 import {
   CreateSessionRequest,
   GuestHeartbeatRequest,
+  BrainstormCard,
+  BrainstormCardRequest,
+  CategorizeCardRequest,
   JoinSessionRequest,
   JoinSessionResponse,
   ParticipantSessionResponse,
@@ -194,6 +197,51 @@ export class SessionApiService {
     return this.http.post<void>(
       `${this.apiUrl}/sessions/${sessionId}/qa/questions/${questionId}/answered`,
       {},
+    );
+  }
+
+  // -----------------------------------------------------------------------------------------
+  // BRAINSTORM activity (US19.3.4)
+  // -----------------------------------------------------------------------------------------
+
+  /** Lists a session's BRAINSTORM cards (US19.3.4) — participant-accessible, hydrates the view. */
+  listBrainstormCards(sessionId: string): Observable<BrainstormCard[]> {
+    return this.http.get<BrainstormCard[]>(`${this.apiUrl}/sessions/${sessionId}/brainstorm/cards`);
+  }
+
+  /** Adds a post-it (US19.3.4). */
+  addBrainstormCard(sessionId: string, request: BrainstormCardRequest): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/sessions/${sessionId}/brainstorm/cards`, request);
+  }
+
+  /** Edits one of the caller's own post-its (US19.3.4) — a non-author edit is a 403 server-side. */
+  updateBrainstormCard(
+    sessionId: string,
+    cardId: string,
+    request: BrainstormCardRequest,
+  ): Observable<void> {
+    return this.http.patch<void>(
+      `${this.apiUrl}/sessions/${sessionId}/brainstorm/cards/${cardId}`,
+      request,
+    );
+  }
+
+  /** Deletes one of the caller's own post-its (US19.3.4) — a non-author delete is a 403. */
+  deleteBrainstormCard(sessionId: string, cardId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.apiUrl}/sessions/${sessionId}/brainstorm/cards/${cardId}`,
+    );
+  }
+
+  /** Groups a card under a category (facilitator only, US19.3.4). */
+  categorizeBrainstormCard(
+    sessionId: string,
+    cardId: string,
+    request: CategorizeCardRequest,
+  ): Observable<void> {
+    return this.http.post<void>(
+      `${this.apiUrl}/sessions/${sessionId}/brainstorm/cards/${cardId}/category`,
+      request,
     );
   }
 }
