@@ -129,7 +129,9 @@ export type SessionEventType =
   | 'QUESTION_ANSWERED'
   | 'CARD_ADDED'
   | 'CARD_UPDATED'
-  | 'CARD_REMOVED';
+  | 'CARD_REMOVED'
+  | 'VOTE_SUBMITTED'
+  | 'VOTE_CLOSED';
 
 /** `SESSION_STARTED` carries the full, started session (`SessionStartedEvent.java`). */
 export interface SessionStartedEvent {
@@ -330,6 +332,63 @@ export interface CardRemovedEvent {
   readonly cardId: string;
 }
 
+// ---------------------------------------------------------------------------------------------
+// VOTE activity (US19.3.6)
+// ---------------------------------------------------------------------------------------------
+
+/** The supported structured-decision vote modes (`VoteType.java`). MATRIX is a later increment. */
+export type VoteType = 'FIST_TO_FIVE' | 'WEIGHTED';
+
+/** Type-dependent VOTE setup (`config`). */
+export interface VoteConfig extends SessionConfig {
+  readonly voteType?: VoteType;
+  readonly proposal?: string;
+  readonly options?: string[];
+  readonly pointsPerParticipant?: number;
+}
+
+/** Request body for `POST .../vote/ballot` — the field used depends on the vote type. */
+export interface SubmitBallotRequest {
+  readonly value?: number;
+  readonly allocations?: Record<string, number>;
+}
+
+/** A single WEIGHTED option's points total (`WeightedOptionResult.java`). */
+export interface WeightedOptionResult {
+  readonly optionIndex: number;
+  readonly label: string;
+  readonly points: number;
+}
+
+/**
+ * VOTE results (`VoteResultsDto.java`). While `closed` is `false`, only `voteType`/`ballotCount`
+ * are populated — every tally field stays `null`/empty so nothing leaks before the facilitator
+ * closes the vote.
+ */
+export interface VoteResults {
+  readonly voteType: VoteType;
+  readonly closed: boolean;
+  readonly ballotCount: number;
+  readonly average: number | null;
+  readonly consensusLevel: string | null;
+  readonly veto: boolean;
+  readonly options: WeightedOptionResult[];
+}
+
+/** `VOTE_SUBMITTED` carries only the running ballot count, never a value (`VoteSubmittedEvent.java`). */
+export interface VoteSubmittedEvent {
+  readonly type: 'VOTE_SUBMITTED';
+  readonly sessionId: string;
+  readonly ballotCount: number;
+}
+
+/** `VOTE_CLOSED` carries the revealed results (`VoteClosedEvent.java`). */
+export interface VoteClosedEvent {
+  readonly type: 'VOTE_CLOSED';
+  readonly sessionId: string;
+  readonly results: VoteResults;
+}
+
 /** Union of every event shape that can arrive on a session's STOMP topic. */
 export type SessionTopicEvent =
   | SessionStartedEvent
@@ -343,4 +402,6 @@ export type SessionTopicEvent =
   | QuestionAnsweredEvent
   | CardAddedEvent
   | CardUpdatedEvent
-  | CardRemovedEvent;
+  | CardRemovedEvent
+  | VoteSubmittedEvent
+  | VoteClosedEvent;

@@ -20,10 +20,10 @@ import { SessionJoinNavigationState } from '../session-join/session-join.compone
 
 /**
  * Generic per-type activity component loader — lazy `import()` per {@link SessionType}
- * (US19.2.2 AC: "le composant d'activité adapté est chargé en lazy-load"). POLL, WORDCLOUD, Q&A
- * and BRAINSTORM resolve to their real components; QUIZ/VOTE still resolve to
- * {@link SessionActivityPlaceholderComponent} pending their own PR — this map is the single
- * place each remaining type is wired in.
+ * (US19.2.2 AC: "le composant d'activité adapté est chargé en lazy-load"). Every type except QUIZ
+ * resolves to its real component; QUIZ still resolves to
+ * {@link SessionActivityPlaceholderComponent} pending its own PR — this map is the single place
+ * each remaining type is wired in.
  */
 const ACTIVITY_LOADERS: Record<SessionType, () => Promise<Type<unknown>>> = {
   QUIZ: () =>
@@ -47,19 +47,19 @@ const ACTIVITY_LOADERS: Record<SessionType, () => Promise<Type<unknown>>> = {
       m => m.SessionActivityQaComponent,
     ),
   VOTE: () =>
-    import('../session-activity-placeholder/session-activity-placeholder.component').then(
-      m => m.SessionActivityPlaceholderComponent,
+    import('../session-activity-vote/session-activity-vote.component').then(
+      m => m.SessionActivityVoteComponent,
     ),
 };
 
 /**
- * The types not yet built (QUIZ/VOTE) — resolve to
+ * The one type not yet built (QUIZ) — resolves to
  * {@link SessionActivityPlaceholderComponent}, which declares only a `type` input.
  * `NgComponentOutlet` throws `NG0303` on any input the mounted component doesn't declare, so the
  * inputs object built for a mounted component must match *exactly* what that component declares
  * — never a single shared shape across every activity type.
  */
-const PLACEHOLDER_TYPES: ReadonlySet<SessionType> = new Set(['QUIZ', 'VOTE']);
+const PLACEHOLDER_TYPES: ReadonlySet<SessionType> = new Set(['QUIZ']);
 
 /** Inputs passed to whichever activity component {@link NgComponentOutlet} mounts. */
 type ActivityInputs = Record<string, unknown>;

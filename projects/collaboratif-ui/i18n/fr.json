@@ -870,6 +870,24 @@
         "GREEN": "Vert",
         "ORANGE": "Orange"
       }
+    },
+    "vote": {
+      "ratingLabel": "Votre note de 0 (veto) à 5 (accord total)",
+      "weightedLabel": "Répartissez vos points entre les options",
+      "remaining": "Points restants :",
+      "submit": "Voter",
+      "submitError": "Impossible d'enregistrer votre vote.",
+      "voted": "Votre vote a été enregistré.",
+      "ballotsReceived": "Votes reçus :",
+      "resultsTitle": "Résultats",
+      "average": "Score de consensus :",
+      "veto": "⚠️ Veto détecté (au moins un vote à 0).",
+      "points": "points",
+      "consensus": {
+        "STRONG": "Consensus fort",
+        "MODERATE": "Consensus moyen",
+        "WEAK": "Consensus faible"
+      }
     }
   }
 }

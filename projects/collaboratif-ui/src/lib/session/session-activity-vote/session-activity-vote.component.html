@@ -1,0 +1,81 @@
+<div class="session-activity-vote">
+  @if (!hasVoted() && !(results()?.closed)) {
+    @if (voteType() === 'FIST_TO_FIVE') {
+      <p class="session-activity-vote__proposal">{{ proposal() }}</p>
+      <div
+        class="session-activity-vote__ratings"
+        role="radiogroup"
+        [attr.aria-label]="'session.vote.ratingLabel' | transloco"
+      >
+        @for (rating of ratings; track rating) {
+          <button
+            type="button"
+            class="session-activity-vote__rating"
+            role="radio"
+            [attr.aria-checked]="selectedRating() === rating"
+            [disabled]="disabled()"
+            (click)="selectRating(rating)"
+          >
+            {{ rating }}
+          </button>
+        }
+      </div>
+    } @else {
+      <p class="session-activity-vote__weighted-label">{{ 'session.vote.weightedLabel' | transloco }}</p>
+      <ul class="session-activity-vote__options">
+        @for (option of options(); track $index) {
+          <li class="session-activity-vote__option">
+            <label [attr.for]="'vote-option-' + $index">{{ option }}</label>
+            <input
+              #pointsInput
+              [id]="'vote-option-' + $index"
+              type="number"
+              min="0"
+              [value]="allocationFor($index)"
+              [disabled]="disabled()"
+              (input)="setAllocation($index, pointsInput.value)"
+            />
+          </li>
+        }
+      </ul>
+      <p class="session-activity-vote__remaining">
+        {{ 'session.vote.remaining' | transloco }} {{ remaining() }}
+      </p>
+    }
+
+    @if (submitError()) {
+      <p class="session-activity-vote__error" role="alert">{{ 'session.vote.submitError' | transloco }}</p>
+    }
+
+    <button type="button" class="session-activity-vote__submit" [disabled]="!canSubmit()" (click)="submit()">
+      {{ 'session.vote.submit' | transloco }}
+    </button>
+  } @else if (hasVoted() && !(results()?.closed)) {
+    <p class="session-activity-vote__voted" role="status">{{ 'session.vote.voted' | transloco }}</p>
+  }
+
+  <p class="session-activity-vote__count" aria-live="polite">
+    {{ 'session.vote.ballotsReceived' | transloco }} {{ ballotCount() }}
+  </p>
+
+  @if (results()?.closed; as _closed) {
+    <section class="session-activity-vote__results" aria-live="polite">
+      <h3>{{ 'session.vote.resultsTitle' | transloco }}</h3>
+      @if (results()!.voteType === 'FIST_TO_FIVE') {
+        <p>{{ 'session.vote.average' | transloco }} {{ results()!.average }}</p>
+        @if (results()!.consensusLevel; as level) {
+          <p class="session-activity-vote__consensus">{{ 'session.vote.consensus.' + level | transloco }}</p>
+        }
+        @if (results()!.veto) {
+          <p class="session-activity-vote__veto" role="alert">{{ 'session.vote.veto' | transloco }}</p>
+        }
+      } @else {
+        <ul class="session-activity-vote__tallies">
+          @for (option of results()!.options; track option.optionIndex) {
+            <li>{{ option.label }} — {{ option.points }} {{ 'session.vote.points' | transloco }}</li>
+          }
+        </ul>
+      }
+    </section>
+  }
+</div>
