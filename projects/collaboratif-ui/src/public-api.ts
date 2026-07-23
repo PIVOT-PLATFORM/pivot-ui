@@ -17,3 +17,9 @@ export { whiteboardRoutes as COLLABORATIF_ROUTES } from './lib/whiteboard/whiteb
 // config entry point, this is the same `collaboratif` backend module (`fr.pivot.collaboratif`),
 // just a different route subtree.
 export { sessionRoutes as SESSION_ROUTES } from './lib/session/session.routes';
+
+// Participant-facing subset of SESSION_ROUTES (join, :sessionId/play, :sessionId/results),
+// unguarded — mounted a second time at the shell's public route fallback level so an anonymous
+// ROLE_GUEST participant (US19.2.1, no PIVOT account, no bearer token) can actually reach it. See
+// `sessionPublicRoutes`'s own TSDoc in session.routes.ts for the full rationale.
+export { sessionPublicRoutes as SESSION_PUBLIC_ROUTES } from './lib/session/session.routes';

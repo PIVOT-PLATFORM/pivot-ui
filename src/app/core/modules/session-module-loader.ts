@@ -38,3 +38,29 @@ export function loadSessionModule(): Promise<Routes> {
     )
     .catch(() => MODULE_LOAD_ERROR_ROUTES);
 }
+
+/**
+ * Loads the **public**, unguarded participant subset of the Module Session live routes
+ * (`SESSION_PUBLIC_ROUTES` — join, `:sessionId/play`, `:sessionId/results`) — US19.2.1's AC
+ * requires `session/join` to be reachable with no PIVOT account and no bearer token at all
+ * (anonymous `ROLE_GUEST` participation), which `loadSessionModule`'s `SESSION_ROUTE` cannot
+ * satisfy: it sits inside the shell's authenticated route tree (`authMatchGuard`) AND behind
+ * `moduleGuard('session')` (itself a bearer-token-gated status check). See `app.routes.ts`'s
+ * `SESSION_PUBLIC_ROUTE` (registered as a top-level public-fallback sibling, unguarded — same
+ * pattern already used for `contact`/`legal`/`account/deletion/cancel`) and `collaboratif-ui`'s
+ * `sessionPublicRoutes` TSDoc for the full rationale.
+ */
+export function loadSessionPublicModule(): Promise<Routes> {
+  return import('@pivot-platform/collaboratif-ui')
+    .then(
+      m =>
+        [
+          {
+            path: '',
+            providers: [m.provideCollaboratifUi({ apiUrl: environment.collaboratifApiUrl })],
+            children: m.SESSION_PUBLIC_ROUTES,
+          },
+        ] satisfies Routes,
+    )
+    .catch(() => MODULE_LOAD_ERROR_ROUTES);
+}

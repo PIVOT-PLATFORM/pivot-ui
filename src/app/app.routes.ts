@@ -7,7 +7,7 @@ import { superAdminGuard } from './core/auth/guard/super-admin.guard';
 import { moduleGuard } from './core/modules/module.guard';
 import { loadWhiteboardModule } from './core/modules/whiteboard-module-loader';
 import { loadAgiliteModule } from './core/modules/agilite-module-loader';
-import { loadSessionModule } from './core/modules/session-module-loader';
+import { loadSessionModule, loadSessionPublicModule } from './core/modules/session-module-loader';
 
 /**
  * Cible de redirection pour toute route inexistante (US01.1.4) :
@@ -82,6 +82,25 @@ const SESSION_ROUTE: Routes = [
     path: 'session',
     canActivate: [moduleGuard('session')],
     loadChildren: loadSessionModule,
+  },
+];
+
+/**
+ * `/session/{join,:sessionId/play,:sessionId/results}` — US19.2.1. Public, unguarded duplicate of
+ * the participant-facing subset of `SESSION_ROUTE` above, registered as a top-level sibling in
+ * the "Public fallback routes" section below (same `contact`/`legal`/`account/deletion/cancel`
+ * pattern: reached when `authMatchGuard` returns `false` and the Router falls through past the
+ * authenticated shell). An anonymous `ROLE_GUEST` participant (no PIVOT account, no bearer token)
+ * has no other way to reach `session/join` — `SESSION_ROUTE` sits inside the authenticated shell
+ * AND behind `moduleGuard('session')` (a bearer-token-gated status check), neither of which an
+ * anonymous caller can pass. Not gated by `moduleGuard` here: joining is scoped by the session's
+ * own code, not the visitor's own tenant. See `collaboratif-ui`'s `sessionPublicRoutes` TSDoc for
+ * the full rationale.
+ */
+const SESSION_PUBLIC_ROUTE: Routes = [
+  {
+    path: 'session',
+    loadChildren: loadSessionPublicModule,
   },
 ];
 
@@ -281,5 +300,7 @@ export const routes: Routes = [
     path: 'plan-du-site',
     loadComponent: () => import('./features/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
   },
+  // US19.2.1 — anonymous ROLE_GUEST session participation, same public-fallback pattern as above.
+  ...SESSION_PUBLIC_ROUTE,
   { path: '**', redirectTo: notFoundRedirect },
 ];
