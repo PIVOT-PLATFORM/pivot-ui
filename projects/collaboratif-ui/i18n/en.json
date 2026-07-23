@@ -879,6 +879,7 @@
     "vote": {
       "ratingLabel": "Your rating from 0 (veto) to 5 (full agreement)",
       "weightedLabel": "Distribute your points across the options",
+      "matrixLabel": "Score each option against each criterion",
       "remaining": "Points remaining:",
       "overBudget": "You have exceeded the points budget.",
       "submit": "Vote",

@@ -339,8 +339,14 @@ export interface CardRemovedEvent {
 // VOTE activity (US19.3.6)
 // ---------------------------------------------------------------------------------------------
 
-/** The supported structured-decision vote modes (`VoteType.java`). MATRIX is a later increment. */
-export type VoteType = 'FIST_TO_FIVE' | 'WEIGHTED';
+/** The supported structured-decision vote modes (`VoteType.java`). */
+export type VoteType = 'FIST_TO_FIVE' | 'WEIGHTED' | 'MATRIX';
+
+/** A MATRIX criterion (`config.criteria[]`). */
+export interface MatrixCriterion {
+  readonly label: string;
+  readonly weight: number;
+}
 
 /** Type-dependent VOTE setup (`config`). */
 export interface VoteConfig extends SessionConfig {
@@ -348,12 +354,15 @@ export interface VoteConfig extends SessionConfig {
   readonly proposal?: string;
   readonly options?: string[];
   readonly pointsPerParticipant?: number;
+  readonly criteria?: MatrixCriterion[];
+  readonly maxScore?: number;
 }
 
 /** Request body for `POST .../vote/ballot` — the field used depends on the vote type. */
 export interface SubmitBallotRequest {
   readonly value?: number;
   readonly allocations?: Record<string, number>;
+  readonly scores?: number[][];
 }
 
 /** A single WEIGHTED option's points total (`WeightedOptionResult.java`). */
@@ -361,6 +370,13 @@ export interface WeightedOptionResult {
   readonly optionIndex: number;
   readonly label: string;
   readonly points: number;
+}
+
+/** A single MATRIX option's weighted mean score (`MatrixOptionResult.java`). */
+export interface MatrixOptionResult {
+  readonly optionIndex: number;
+  readonly label: string;
+  readonly score: number;
 }
 
 /**
@@ -376,6 +392,7 @@ export interface VoteResults {
   readonly consensusLevel: string | null;
   readonly veto: boolean;
   readonly options: WeightedOptionResult[];
+  readonly matrix: MatrixOptionResult[];
 }
 
 /** `VOTE_SUBMITTED` carries only the running ballot count, never a value (`VoteSubmittedEvent.java`). */

@@ -19,7 +19,7 @@
           </button>
         }
       </div>
-    } @else {
+    } @else if (voteType() === 'WEIGHTED') {
       <p class="session-activity-vote__weighted-label">{{ 'session.vote.weightedLabel' | transloco }}</p>
       <ul class="session-activity-vote__options">
         @for (option of options(); track $index) {
@@ -43,6 +43,39 @@
       @if (remaining() < 0) {
         <p class="session-activity-vote__error" role="alert">{{ 'session.vote.overBudget' | transloco }}</p>
       }
+    } @else {
+      <p class="session-activity-vote__matrix-label">{{ 'session.vote.matrixLabel' | transloco }}</p>
+      <table class="session-activity-vote__matrix">
+        <thead>
+          <tr>
+            <td></td>
+            @for (criterion of criteria(); track $index) {
+              <th scope="col">{{ criterion.label }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (option of options(); track $index; let oi = $index) {
+            <tr>
+              <th scope="row">{{ option }}</th>
+              @for (criterion of criteria(); track $index; let ci = $index) {
+                <td>
+                  <input
+                    #cell
+                    type="number"
+                    min="0"
+                    [max]="maxScore()"
+                    [attr.aria-label]="option + ' — ' + criterion.label"
+                    [value]="matrixScoreAt(oi, ci)"
+                    [disabled]="disabled()"
+                    (input)="setMatrixScore(oi, ci, cell.value)"
+                  />
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
     }
 
     @if (submitError()) {
@@ -71,12 +104,18 @@
         @if (results()!.veto) {
           <p class="session-activity-vote__veto" role="alert">{{ 'session.vote.veto' | transloco }}</p>
         }
-      } @else {
+      } @else if (results()!.voteType === 'WEIGHTED') {
         <ul class="session-activity-vote__tallies">
           @for (option of results()!.options; track option.optionIndex) {
             <li>{{ option.label }} — {{ option.points }} {{ 'session.vote.points' | transloco }}</li>
           }
         </ul>
+      } @else {
+        <ol class="session-activity-vote__tallies">
+          @for (option of results()!.matrix; track option.optionIndex) {
+            <li>{{ option.label }} — {{ option.score }}</li>
+          }
+        </ol>
       }
     </section>
   }
