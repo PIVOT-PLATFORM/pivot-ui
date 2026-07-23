@@ -3,9 +3,10 @@
     <label for="wordcloud-word">{{ 'session.wordcloud.inputLabel' | transloco }}</label>
     <input
       id="wordcloud-word"
+      #wordInput
       type="text"
       [value]="word()"
-      (input)="word.set($any($event.target).value)"
+      (input)="word.set(wordInput.value)"
       maxlength="30"
       [disabled]="disabled()"
     />

@@ -6,9 +6,10 @@
       <label for="session-title">{{ 'session.form.titleLabel' | transloco }}</label>
       <input
         id="session-title"
+        #titleInput
         type="text"
         [value]="title()"
-        (input)="title.set($any($event.target).value)"
+        (input)="title.set(titleInput.value)"
         maxlength="120"
         required
         [attr.aria-invalid]="title().trim().length === 0 ? true : null"
