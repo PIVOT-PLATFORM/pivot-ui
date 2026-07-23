@@ -12,6 +12,8 @@
   }
 
   &__option {
+    position: relative;
+    overflow: hidden;
     width: 100%;
     display: flex;
     align-items: center;
@@ -33,7 +35,23 @@
     }
   }
 
+  // Proportional fill behind the option content — the visual bar of the live results.
+  &__bar {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: var(--color-primary-50, #eef2ff);
+    transition: width 0.3s ease;
+    z-index: 0;
+  }
+
+  &__label {
+    position: relative;
+    z-index: 1;
+  }
+
   &__result {
+    position: relative;
+    z-index: 1;
     font-weight: 600;
     color: var(--color-text-secondary, #6b7280);
   }

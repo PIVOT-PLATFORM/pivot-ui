@@ -62,6 +62,9 @@ export class SessionActivityBrainstormComponent implements OnInit, OnDestroy {
   readonly editText = signal('');
   readonly editColor = signal<BrainstormCardColor>('YELLOW');
 
+  /** The card currently awaiting delete confirmation (a two-step delete guards against misclicks). */
+  readonly confirmDeleteId = signal<string | null>(null);
+
   private readonly cards = signal<BrainstormCard[]>([]);
 
   /** Cards in stable creation order. */
@@ -135,7 +138,19 @@ export class SessionActivityBrainstormComponent implements OnInit, OnDestroy {
       .subscribe({ next: () => this.editingId.set(null) });
   }
 
-  remove(cardId: string): void {
+  /** Arms the delete confirmation for a card — the actual delete needs a second, explicit click. */
+  requestDelete(cardId: string): void {
+    this.confirmDeleteId.set(cardId);
+  }
+
+  /** Cancels a pending delete confirmation. */
+  cancelDelete(): void {
+    this.confirmDeleteId.set(null);
+  }
+
+  /** Confirms and performs the delete (US19.3.4). The card is removed live via `CARD_REMOVED`. */
+  confirmDelete(cardId: string): void {
+    this.confirmDeleteId.set(null);
     this.sessionApi.deleteBrainstormCard(this.session().id, cardId).subscribe();
   }
 
@@ -171,6 +186,9 @@ export class SessionActivityBrainstormComponent implements OnInit, OnDestroy {
     this.cards.update(current => current.filter(c => c.id !== cardId));
     if (this.editingId() === cardId) {
       this.editingId.set(null);
+    }
+    if (this.confirmDeleteId() === cardId) {
+      this.confirmDeleteId.set(null);
     }
   }
 }

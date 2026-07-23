@@ -17,7 +17,7 @@
 
     <div
       class="session-activity-brainstorm__colors"
-      role="radiogroup"
+      role="group"
       [attr.aria-label]="'session.brainstorm.colorLabel' | transloco"
     >
       @for (color of colors; track color) {
@@ -25,9 +25,8 @@
           type="button"
           class="session-activity-brainstorm__color"
           [class]="'session-activity-brainstorm__color--' + color.toLowerCase()"
-          [attr.aria-checked]="draftColor() === color"
+          [attr.aria-pressed]="draftColor() === color"
           [attr.aria-label]="'session.brainstorm.color.' + color | transloco"
-          role="radio"
           [disabled]="disabled()"
           (click)="draftColor.set(color)"
         ></button>
@@ -62,7 +61,7 @@
           ></textarea>
           <div
             class="session-activity-brainstorm__colors"
-            role="radiogroup"
+            role="group"
             [attr.aria-label]="'session.brainstorm.colorLabel' | transloco"
           >
             @for (color of colors; track color) {
@@ -70,9 +69,8 @@
                 type="button"
                 class="session-activity-brainstorm__color"
                 [class]="'session-activity-brainstorm__color--' + color.toLowerCase()"
-                [attr.aria-checked]="editColor() === color"
+                [attr.aria-pressed]="editColor() === color"
                 [attr.aria-label]="'session.brainstorm.color.' + color | transloco"
-                role="radio"
                 (click)="editColor.set(color)"
               ></button>
             }
@@ -91,14 +89,38 @@
             <p class="session-activity-brainstorm__category">{{ card.category }}</p>
           }
           @if (isOwn(card) && !disabled()) {
-            <div class="session-activity-brainstorm__actions">
-              <button type="button" (click)="startEdit(card)">
-                {{ 'session.brainstorm.edit' | transloco }}
-              </button>
-              <button type="button" (click)="remove(card.id)">
-                {{ 'session.brainstorm.delete' | transloco }}
-              </button>
-            </div>
+            @if (confirmDeleteId() === card.id) {
+              <div class="session-activity-brainstorm__actions">
+                <span>{{ 'session.brainstorm.confirmDelete' | transloco }}</span>
+                <button
+                  type="button"
+                  [attr.aria-label]="'session.brainstorm.confirmDeleteAction' | transloco: { text: card.text }"
+                  (click)="confirmDelete(card.id)"
+                >
+                  {{ 'session.brainstorm.confirm' | transloco }}
+                </button>
+                <button type="button" (click)="cancelDelete()">
+                  {{ 'session.brainstorm.cancel' | transloco }}
+                </button>
+              </div>
+            } @else {
+              <div class="session-activity-brainstorm__actions">
+                <button
+                  type="button"
+                  [attr.aria-label]="'session.brainstorm.editCard' | transloco: { text: card.text }"
+                  (click)="startEdit(card)"
+                >
+                  {{ 'session.brainstorm.edit' | transloco }}
+                </button>
+                <button
+                  type="button"
+                  [attr.aria-label]="'session.brainstorm.deleteCard' | transloco: { text: card.text }"
+                  (click)="requestDelete(card.id)"
+                >
+                  {{ 'session.brainstorm.delete' | transloco }}
+                </button>
+              </div>
+            }
           }
         }
       </li>

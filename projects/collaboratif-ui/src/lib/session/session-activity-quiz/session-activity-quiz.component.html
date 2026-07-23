@@ -9,10 +9,13 @@
     <h2 class="session-activity-quiz__text">{{ questionText() }}</h2>
 
     @if (!ended()) {
-      <p class="session-activity-quiz__timer" aria-live="polite">
-        {{ 'session.quiz.timeLeft' | transloco }} {{ remaining() }}
-      </p>
+      <p class="session-activity-quiz__timer">{{ 'session.quiz.timeLeft' | transloco }} {{ remaining() }}</p>
     }
+    <span class="session-activity-quiz__sr-only" aria-live="assertive">
+      @if (timeUp()) {
+        {{ 'session.quiz.timeUp' | transloco }}
+      }
+    </span>
 
     <ul class="session-activity-quiz__options">
       @for (option of options(); track $index) {
