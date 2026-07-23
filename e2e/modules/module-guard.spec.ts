@@ -15,13 +15,16 @@
  * - disabled → guard denies before the Router resolves the dynamic import → redirects
  *   to `/home`, which is already loaded → zero additional script requests (verified at
  *   the network level, the only way to check this AC).
- * - enabled (still-placeholder module, e.g. `/session`) → guard allows → exactly one
+ * - enabled (still-placeholder module, e.g. `/roadmap`) → guard allows → exactly one
  *   new script chunk is fetched (the shared ComingSoonComponent bundle) and the
  *   placeholder renders.
  * - `/whiteboard` itself is EN17.10's real module now (no longer a placeholder) — the
  *   disabled-guard and interstitial-loading cases below still exercise it directly (guard
  *   behavior is unchanged by EN17.10), but real-content rendering and the dynamic-import
  *   failure fallback are covered in the dedicated `whiteboard-shell-wiring.spec.ts`.
+ * - `/session` was also a placeholder module id, but US19.2.2 (E19, EN19.3) wired it to its
+ *   real `@pivot-platform/collaboratif-ui` module — same reason `/whiteboard` and `/agilite`
+ *   dropped out earlier, see `MODULE_IDS` in `app.routes.ts` for the current placeholder set.
  *
  * This avoids depending on chunk filenames, which are content-hashed in the production
  * build CI actually exercises (`chunk-XXXX.js` — no readable component name in the URL,
@@ -124,13 +127,14 @@ test.describe('EN03.2 / US03.2.2 — moduleGuard bundle isolation', () => {
   test('enabled module (still a placeholder) — exactly one new script chunk is requested and the placeholder page renders', async ({
     page,
   }) => {
-    // 'session' (not 'whiteboard') — EN17.10 wired `/whiteboard` to the real
-    // `@pivot-platform/collaboratif-ui` module, so it no longer renders ComingSoonComponent;
-    // 'session' is still a plain placeholder route and exercises the exact same generic
-    // moduleGuard + loadComponent() mechanism this test targets. See
-    // e2e/modules/whiteboard-shell-wiring.spec.ts for the real-module-render coverage.
+    // 'roadmap' (not 'whiteboard', 'agilite', or 'session') — those three graduated to real
+    // modules (EN17.10, EN18, US19.2.2/EN19.3 respectively) and no longer render
+    // ComingSoonComponent; 'roadmap' is still a plain placeholder route (see MODULE_IDS in
+    // app.routes.ts) and exercises the exact same generic moduleGuard + loadComponent()
+    // mechanism this test targets. See e2e/modules/whiteboard-shell-wiring.spec.ts for the
+    // real-module-render coverage.
     await stubAuthenticatedSession(page);
-    await stubModuleStatus(page, 'session', true);
+    await stubModuleStatus(page, 'roadmap', true);
 
     await page.goto(HOME_URL);
     await expect(page).toHaveURL(/\/home/, { timeout: 10_000 });
@@ -140,10 +144,10 @@ test.describe('EN03.2 / US03.2.2 — moduleGuard bundle isolation', () => {
       if (req.resourceType() === 'script') scriptRequests.push(req.url());
     });
 
-    await navigateInApp(page, '/session');
+    await navigateInApp(page, '/roadmap');
 
-    // Guard allows → Router resolves loadComponent() → placeholder renders on /session.
-    await expect(page).toHaveURL(/\/session/, { timeout: 10_000 });
+    // Guard allows → Router resolves loadComponent() → placeholder renders on /roadmap.
+    await expect(page).toHaveURL(/\/roadmap/, { timeout: 10_000 });
     await expect(page.locator('.coming-soon')).toBeVisible();
 
     // Exactly one new chunk was fetched — the module route's own bundle (shared
