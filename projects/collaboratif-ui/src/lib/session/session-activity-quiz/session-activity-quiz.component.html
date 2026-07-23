@@ -1,0 +1,73 @@
+<div class="session-activity-quiz">
+  @if (!started()) {
+    <p class="session-activity-quiz__waiting" role="status">{{ 'session.quiz.waiting' | transloco }}</p>
+  } @else {
+    <p class="session-activity-quiz__progress">
+      {{ 'session.quiz.question' | transloco }} {{ questionIndex() + 1 }} / {{ totalQuestions() }}
+    </p>
+
+    <h2 class="session-activity-quiz__text">{{ questionText() }}</h2>
+
+    @if (!ended()) {
+      <p class="session-activity-quiz__timer" aria-live="polite">
+        {{ 'session.quiz.timeLeft' | transloco }} {{ remaining() }}
+      </p>
+    }
+
+    <ul class="session-activity-quiz__options">
+      @for (option of options(); track $index) {
+        <li>
+          <button
+            type="button"
+            class="session-activity-quiz__option"
+            [class.session-activity-quiz__option--selected]="isSelected($index)"
+            [class.session-activity-quiz__option--correct]="isCorrect($index)"
+            [attr.aria-pressed]="isSelected($index)"
+            [disabled]="disabled() || ended() || answered() || remaining() <= 0"
+            (click)="toggleOption($index)"
+          >
+            {{ option }}
+          </button>
+        </li>
+      }
+    </ul>
+
+    @if (!ended()) {
+      <p class="session-activity-quiz__answers" aria-live="polite">
+        {{ 'session.quiz.answersReceived' | transloco }} {{ answerCount() }}
+      </p>
+
+      @if (submitError()) {
+        <p class="session-activity-quiz__error" role="alert">{{ 'session.quiz.submitError' | transloco }}</p>
+      }
+
+      @if (!answered()) {
+        <button
+          type="button"
+          class="session-activity-quiz__submit"
+          [disabled]="!canSubmit()"
+          (click)="submit()"
+        >
+          {{ 'session.quiz.submit' | transloco }}
+        </button>
+      } @else {
+        <p class="session-activity-quiz__answered" role="status">{{ 'session.quiz.answered' | transloco }}</p>
+      }
+    } @else {
+      <section class="session-activity-quiz__leaderboard" aria-live="polite">
+        <h3>{{ 'session.quiz.leaderboardTitle' | transloco }}</h3>
+        <ol>
+          @for (entry of leaderboard(); track entry.participantId) {
+            <li [class.session-activity-quiz__me]="isOwnRow(entry)">
+              {{ entry.displayName }} — {{ entry.score }} {{ 'session.quiz.points' | transloco }}
+            </li>
+          }
+        </ol>
+      </section>
+    }
+
+    <p class="session-activity-quiz__score">
+      {{ 'session.quiz.myScore' | transloco }} {{ myScore() }} {{ 'session.quiz.points' | transloco }}
+    </p>
+  }
+</div>

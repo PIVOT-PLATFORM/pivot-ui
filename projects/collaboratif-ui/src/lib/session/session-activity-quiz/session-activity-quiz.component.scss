@@ -1,0 +1,104 @@
+.session-activity-quiz {
+  padding: var(--space-6, 24px);
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 12px);
+
+  &__waiting {
+    text-align: center;
+    color: var(--color-text-muted, #6b7280);
+    padding: var(--space-6, 24px);
+  }
+
+  &__progress {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--color-text-muted, #6b7280);
+  }
+
+  &__text {
+    margin: 0;
+  }
+
+  &__timer {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.25rem;
+  }
+
+  &__options {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2, 8px);
+  }
+
+  &__option {
+    width: 100%;
+    text-align: left;
+    padding: var(--space-3, 12px);
+    border: 1px solid var(--color-border, #e5e7eb);
+    border-radius: var(--radius-md, 6px);
+    background: var(--color-surface, #fff);
+    cursor: pointer;
+    font: inherit;
+
+    &--selected {
+      border-color: var(--color-primary, #4f46e5);
+      background: var(--color-primary-soft, #eef2ff);
+    }
+
+    &--correct {
+      border-color: var(--color-success, #16a34a);
+      background: var(--color-success-soft, #dcfce7);
+    }
+
+    &:disabled {
+      cursor: default;
+    }
+  }
+
+  &__answers,
+  &__score,
+  &__answered {
+    margin: 0;
+    color: var(--color-text-muted, #6b7280);
+  }
+
+  &__error {
+    margin: 0;
+    color: var(--color-danger, #dc2626);
+    font-weight: 600;
+  }
+
+  &__submit {
+    align-self: flex-start;
+    padding: var(--space-2, 8px) var(--space-4, 16px);
+    border-radius: var(--radius-md, 6px);
+    border: none;
+    background: var(--color-primary, #4f46e5);
+    color: var(--color-on-primary, #fff);
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  &__leaderboard {
+    ol {
+      margin: 0;
+      padding-left: var(--space-5, 20px);
+    }
+  }
+
+  &__me {
+    font-weight: 700;
+    color: var(--color-primary, #4f46e5);
+  }
+}

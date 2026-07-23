@@ -10,6 +10,9 @@ import {
   CategorizeCardRequest,
   SubmitBallotRequest,
   VoteResults,
+  QuizResults,
+  QuizState,
+  SubmitAnswerRequest,
   JoinSessionRequest,
   JoinSessionResponse,
   ParticipantSessionResponse,
@@ -264,5 +267,34 @@ export class SessionApiService {
   /** Fetches the current vote results (US19.3.6) — tally-less until the facilitator closes it. */
   getVoteResults(sessionId: string): Observable<VoteResults> {
     return this.http.get<VoteResults>(`${this.apiUrl}/sessions/${sessionId}/vote/results`);
+  }
+
+  // -----------------------------------------------------------------------------------------
+  // QUIZ activity (US19.3.1)
+  // -----------------------------------------------------------------------------------------
+
+  /** Opens the next question (facilitator only, US19.3.1). */
+  quizNext(sessionId: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/sessions/${sessionId}/quiz/next`, {});
+  }
+
+  /** Ends the current question, revealing the answer + leaderboard (facilitator only, US19.3.1). */
+  quizEnd(sessionId: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/sessions/${sessionId}/quiz/end`, {});
+  }
+
+  /** Submits the caller's answer to the live question (US19.3.1) — one per question. */
+  submitQuizAnswer(sessionId: string, request: SubmitAnswerRequest): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/sessions/${sessionId}/quiz/answer`, request);
+  }
+
+  /** Fetches the caller's reconnect snapshot (US19.3.1) — current question, own score, answered. */
+  getQuizState(sessionId: string): Observable<QuizState> {
+    return this.http.get<QuizState>(`${this.apiUrl}/sessions/${sessionId}/quiz/state`);
+  }
+
+  /** Fetches the final quiz results — ranking + per-question correct-rate (US19.3.1). */
+  getQuizResults(sessionId: string): Observable<QuizResults> {
+    return this.http.get<QuizResults>(`${this.apiUrl}/sessions/${sessionId}/quiz/results`);
   }
 }

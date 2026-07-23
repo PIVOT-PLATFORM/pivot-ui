@@ -888,6 +888,18 @@
         "MODERATE": "Moderate consensus",
         "WEAK": "Weak consensus"
       }
+    },
+    "quiz": {
+      "waiting": "Waiting for the next question…",
+      "question": "Question",
+      "timeLeft": "Time left:",
+      "answersReceived": "Answers received:",
+      "submit": "Submit",
+      "submitError": "Answer not recorded (time up?).",
+      "answered": "Answer submitted.",
+      "leaderboardTitle": "Leaderboard",
+      "myScore": "Your score:",
+      "points": "pts"
     }
   }
 }

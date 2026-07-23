@@ -11,7 +11,6 @@ import { ParticipantSessionResponse, SessionStatus } from '../models/session.mod
 import { SESSION_STOMP_CLIENT_FACTORY, SessionWsService, StompClient } from '../services/session-ws.service';
 import { SessionParticipantShellComponent } from './session-participant-shell.component';
 import { SessionActivityPollComponent } from '../session-activity-poll/session-activity-poll.component';
-import { SessionActivityPlaceholderComponent } from '../session-activity-placeholder/session-activity-placeholder.component';
 
 const TEST_API_URL = 'http://localhost:8083/api/collaboratif';
 const TOPIC = '/topic/collaboratif/session/s-1';
@@ -100,10 +99,6 @@ describe('SessionParticipantShellComponent', () => {
     expect(fixture.componentInstance.activityComponent()).toBe(SessionActivityPollComponent);
   });
 
-  it('falls back to the placeholder component for a not-yet-built activity type', async () => {
-    const fixture = await createFixture(session('LIVE', 'QUIZ'));
-    expect(fixture.componentInstance.activityComponent()).toBe(SessionActivityPlaceholderComponent);
-  });
 
   it('flags loadError when the initial load fails', () => {
     const fixture = TestBed.createComponent(SessionParticipantShellComponent);

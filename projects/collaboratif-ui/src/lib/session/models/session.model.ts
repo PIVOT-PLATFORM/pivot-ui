@@ -131,7 +131,10 @@ export type SessionEventType =
   | 'CARD_UPDATED'
   | 'CARD_REMOVED'
   | 'VOTE_SUBMITTED'
-  | 'VOTE_CLOSED';
+  | 'VOTE_CLOSED'
+  | 'QUESTION_STARTED'
+  | 'QUESTION_ENDED'
+  | 'QUIZ_ANSWERED';
 
 /** `SESSION_STARTED` carries the full, started session (`SessionStartedEvent.java`). */
 export interface SessionStartedEvent {
@@ -389,6 +392,80 @@ export interface VoteClosedEvent {
   readonly results: VoteResults;
 }
 
+// ---------------------------------------------------------------------------------------------
+// QUIZ activity (US19.3.1)
+// ---------------------------------------------------------------------------------------------
+
+/** One leaderboard row (`LeaderboardEntry.java`) — `participantId` lets a client highlight its own. */
+export interface LeaderboardEntry {
+  readonly participantId: string;
+  readonly displayName: string;
+  readonly score: number;
+}
+
+/** Request body for `POST .../quiz/answer` (US19.3.1). */
+export interface SubmitAnswerRequest {
+  readonly questionIndex: number;
+  readonly selectedIndices: number[];
+}
+
+/**
+ * A reconnecting player's QUIZ snapshot (`QuizStateDto.java`) — current question (its correct
+ * answer withheld until ended), own score, whether already answered; correct indices and
+ * leaderboard only once the question has ended.
+ */
+export interface QuizState {
+  readonly started: boolean;
+  readonly currentQuestionIndex: number;
+  readonly totalQuestions: number;
+  readonly questionText: string | null;
+  readonly options: string[];
+  readonly durationSeconds: number | null;
+  readonly questionStartedAt: string | null;
+  readonly questionEnded: boolean;
+  readonly hasAnswered: boolean;
+  readonly myScore: number;
+  readonly correctIndices: number[];
+  readonly leaderboard: LeaderboardEntry[];
+}
+
+/** Final QUIZ results (`QuizResultsDto.java`). */
+export interface QuizResults {
+  readonly leaderboard: LeaderboardEntry[];
+  readonly correctRatePerQuestion: number[];
+}
+
+/**
+ * `QUESTION_STARTED` opens a question (`QuestionStartedEvent.java`) — carries the options but never
+ * the correct answer, revealed only at `QUESTION_ENDED`.
+ */
+export interface QuestionStartedEvent {
+  readonly type: 'QUESTION_STARTED';
+  readonly sessionId: string;
+  readonly questionIndex: number;
+  readonly totalQuestions: number;
+  readonly text: string;
+  readonly options: string[];
+  readonly durationSeconds: number;
+}
+
+/** `QUESTION_ENDED` reveals the correct indices + refreshed leaderboard (`QuestionEndedEvent.java`). */
+export interface QuestionEndedEvent {
+  readonly type: 'QUESTION_ENDED';
+  readonly sessionId: string;
+  readonly questionIndex: number;
+  readonly correctIndices: number[];
+  readonly leaderboard: LeaderboardEntry[];
+}
+
+/** `QUIZ_ANSWERED` carries only the running answer count (`QuizAnsweredEvent.java`). */
+export interface QuizAnsweredEvent {
+  readonly type: 'QUIZ_ANSWERED';
+  readonly sessionId: string;
+  readonly questionIndex: number;
+  readonly answerCount: number;
+}
+
 /** Union of every event shape that can arrive on a session's STOMP topic. */
 export type SessionTopicEvent =
   | SessionStartedEvent
@@ -404,4 +481,7 @@ export type SessionTopicEvent =
   | CardUpdatedEvent
   | CardRemovedEvent
   | VoteSubmittedEvent
-  | VoteClosedEvent;
+  | VoteClosedEvent
+  | QuestionStartedEvent
+  | QuestionEndedEvent
+  | QuizAnsweredEvent;
