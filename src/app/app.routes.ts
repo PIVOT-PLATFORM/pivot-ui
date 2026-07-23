@@ -7,6 +7,7 @@ import { superAdminGuard } from './core/auth/guard/super-admin.guard';
 import { moduleGuard } from './core/modules/module.guard';
 import { loadWhiteboardModule } from './core/modules/whiteboard-module-loader';
 import { loadAgiliteModule } from './core/modules/agilite-module-loader';
+import { loadSessionModule } from './core/modules/session-module-loader';
 
 /**
  * Cible de redirection pour toute route inexistante (US01.1.4) :
@@ -24,10 +25,13 @@ export const notFoundRedirect = (): string =>
  * integration time — this shell only owns the guarded route entry point and its
  * lazy-loading boundary.
  *
- * `whiteboard` is no longer in this list — EN17.10 replaced its placeholder with the real
- * module, see `WHITEBOARD_ROUTE` below.
+ * `whiteboard` and `agilite` are no longer in this list — EN17.10/EN18 replaced their
+ * placeholders with the real modules, see `WHITEBOARD_ROUTE`/`AGILITE_ROUTE` below. `session`
+ * is no longer in this list either — US19.2.2 (EN19.3) replaced its placeholder with the real
+ * module, see `SESSION_ROUTE` below. The moduleId itself was corrected from a stub's earlier
+ * (wrong) `'collaboratif'` to the real `'session'` at Gate 1 — see the US19.2.2 AC file.
  */
-const MODULE_IDS = ['session', 'roadmap', 'survey', 'quiz'] as const;
+const MODULE_IDS = ['roadmap', 'survey', 'quiz'] as const;
 
 const MODULE_CHILDREN: Routes = MODULE_IDS.map(id => ({
   path: id,
@@ -64,6 +68,20 @@ const AGILITE_ROUTE: Routes = [
     path: 'agilite',
     canActivate: [moduleGuard('agilite')],
     loadChildren: loadAgiliteModule,
+  },
+];
+
+/**
+ * `/session` — US19.2.2 (E19, EN19.3). Real module (`@pivot-platform/collaboratif-ui`'s
+ * `SESSION_ROUTES`), same pattern as whiteboard/agilite. `moduleGuard('session')` is unchanged
+ * from the placeholder era — only the routed target changes, from `ComingSoonComponent` to the
+ * real lazy-loaded module.
+ */
+const SESSION_ROUTE: Routes = [
+  {
+    path: 'session',
+    canActivate: [moduleGuard('session')],
+    loadChildren: loadSessionModule,
   },
 ];
 
@@ -221,6 +239,7 @@ export const routes: Routes = [
       },
       ...WHITEBOARD_ROUTE,
       ...AGILITE_ROUTE,
+      ...SESSION_ROUTE,
       ...MODULE_CHILDREN,
       { path: 'legal', children: LEGAL_CHILDREN },
       {
