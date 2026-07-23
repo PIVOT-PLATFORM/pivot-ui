@@ -1,7 +1,7 @@
 <div class="session-activity-poll">
   <h2>{{ config().question }}</h2>
 
-  <ul class="session-activity-poll__options">
+  <ul class="session-activity-poll__options" aria-live="polite">
     @for (option of config().options; track option.id) {
       <li>
         <button
@@ -12,11 +12,16 @@
           [disabled]="disabled() || hasVoted()"
           (click)="toggleOption(option.id)"
         >
-          <span>{{ option.label }}</span>
           @if (resultFor(option.id); as result) {
-            <span class="session-activity-poll__result">
-              {{ result.percent }}% ({{ result.count }})
-            </span>
+            <span
+              class="session-activity-poll__bar"
+              [style.width.%]="result.percent ?? 0"
+              aria-hidden="true"
+            ></span>
+          }
+          <span class="session-activity-poll__label">{{ option.label }}</span>
+          @if (resultFor(option.id); as result) {
+            <span class="session-activity-poll__result">{{ result.percent }}% ({{ result.count }})</span>
           }
         </button>
       </li>

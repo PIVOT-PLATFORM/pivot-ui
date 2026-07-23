@@ -84,6 +84,15 @@ export class SessionActivityQuizComponent implements OnInit, OnDestroy {
       this.selected().length > 0,
   );
 
+  /**
+   * `true` at the single moment the window closes on an unanswered live question — the only
+   * time-related event worth announcing to assistive tech. The per-second countdown itself is
+   * intentionally NOT in a live region (it would flood a screen reader).
+   */
+  readonly timeUp = computed(
+    () => this.started() && !this.ended() && !this.answered() && this.remaining() === 0,
+  );
+
   private messagesSubscription: Subscription | null = null;
   private tickSubscription: Subscription | null = null;
 

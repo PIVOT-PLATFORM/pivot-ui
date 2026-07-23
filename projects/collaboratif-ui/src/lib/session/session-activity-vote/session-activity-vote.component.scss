@@ -26,7 +26,7 @@
     font-weight: 700;
     cursor: pointer;
 
-    &[aria-checked='true'] {
+    &[aria-pressed='true'] {
       background: var(--color-primary, #4f46e5);
       color: var(--color-on-primary, #fff);
       border-color: var(--color-primary, #4f46e5);

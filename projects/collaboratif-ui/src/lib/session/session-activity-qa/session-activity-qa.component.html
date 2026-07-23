@@ -49,7 +49,7 @@
           class="session-activity-qa__upvote"
           [disabled]="disabled() || hasUpvoted(question.id)"
           [attr.aria-pressed]="hasUpvoted(question.id)"
-          [attr.aria-label]="'session.qa.upvote' | transloco"
+          [attr.aria-label]="'session.qa.upvote' | transloco: { text: question.text }"
           (click)="upvote(question.id)"
         >
           <span aria-hidden="true">▲</span>

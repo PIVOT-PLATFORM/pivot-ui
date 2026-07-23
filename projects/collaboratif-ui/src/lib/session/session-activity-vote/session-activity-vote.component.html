@@ -4,15 +4,14 @@
       <p class="session-activity-vote__proposal">{{ proposal() }}</p>
       <div
         class="session-activity-vote__ratings"
-        role="radiogroup"
+        role="group"
         [attr.aria-label]="'session.vote.ratingLabel' | transloco"
       >
         @for (rating of ratings; track rating) {
           <button
             type="button"
             class="session-activity-vote__rating"
-            role="radio"
-            [attr.aria-checked]="selectedRating() === rating"
+            [attr.aria-pressed]="selectedRating() === rating"
             [disabled]="disabled()"
             (click)="selectRating(rating)"
           >
@@ -38,9 +37,12 @@
           </li>
         }
       </ul>
-      <p class="session-activity-vote__remaining">
+      <p class="session-activity-vote__remaining" aria-live="polite">
         {{ 'session.vote.remaining' | transloco }} {{ remaining() }}
       </p>
+      @if (remaining() < 0) {
+        <p class="session-activity-vote__error" role="alert">{{ 'session.vote.overBudget' | transloco }}</p>
+      }
     }
 
     @if (submitError()) {

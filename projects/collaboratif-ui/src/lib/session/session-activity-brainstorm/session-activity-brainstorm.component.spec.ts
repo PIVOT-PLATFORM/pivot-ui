@@ -130,12 +130,28 @@ describe('SessionActivityBrainstormComponent', () => {
     expect(fixture.componentInstance.editingId()).toBeNull();
   });
 
-  it('remove() DELETEs the card', () => {
+  it('delete is two-step: requestDelete arms confirmation, confirmDelete performs the DELETE', () => {
     const fixture = createFixture([card({ id: 'c-1' })]);
-    fixture.componentInstance.remove('c-1');
+
+    // First click only arms the confirmation — no request yet.
+    fixture.componentInstance.requestDelete('c-1');
+    expect(fixture.componentInstance.confirmDeleteId()).toBe('c-1');
+    httpMock.expectNone(`${CARDS_URL}/c-1`);
+
+    // Confirming performs the DELETE and clears the confirmation.
+    fixture.componentInstance.confirmDelete('c-1');
     const req = httpMock.expectOne(`${CARDS_URL}/c-1`);
     expect(req.request.method).toBe('DELETE');
     req.flush(null);
+    expect(fixture.componentInstance.confirmDeleteId()).toBeNull();
+  });
+
+  it('cancelDelete disarms the confirmation without deleting', () => {
+    const fixture = createFixture([card({ id: 'c-1' })]);
+    fixture.componentInstance.requestDelete('c-1');
+    fixture.componentInstance.cancelDelete();
+    expect(fixture.componentInstance.confirmDeleteId()).toBeNull();
+    httpMock.expectNone(`${CARDS_URL}/c-1`);
   });
 
   it('applies CARD_ADDED / CARD_UPDATED / CARD_REMOVED WS messages', () => {
