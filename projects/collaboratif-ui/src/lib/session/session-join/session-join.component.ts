@@ -1,12 +1,10 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { Subscription, interval, switchMap } from 'rxjs';
-import { JoinSessionResponse, ProblemDetailResponse } from '../models/session.model';
+import { ProblemDetailResponse, sessionIdFromTopic } from '../models/session.model';
 import { SessionApiService } from '../services/session-api.service';
-import { SessionWsService } from '../services/session-ws.service';
 
 /** Exact join-code length accepted by the backend (US19.1.1's `JoinCodeGenerator`). */
 const CODE_LENGTH = 6;
@@ -15,14 +13,19 @@ const CODE_LENGTH = 6;
 const DISPLAY_NAME_MAX_LENGTH = 40;
 
 /**
- * Heartbeat interval — a comfortable margin under the backend's guest-session TTL. Sent
- * regardless of whether the caller joined authenticated or as `ROLE_GUEST` (the backend contract
- * treats it as a no-op for an authenticated participant, US19.2.1's heartbeat AC scopes the
- * *requirement* to guests, not the *call itself*) since this component has no reliable,
- * library-independent way to know which flow the backend resolved without depending on a
- * concrete `AuthService` — see `collaboratif-ui`'s own architecture notes on that seam.
+ * Router-navigation state handed to {@link SessionParticipantShellComponent} on a successful
+ * join — the WS connection and (guest-only) heartbeat are owned by the shell, not this
+ * component, so they survive past this component's destruction on navigation. See
+ * `session-participant-shell.component.ts`'s TSDoc for why: an earlier draft had this component
+ * call `SessionWsService.connect()`/start the heartbeat itself, then immediately tear both down
+ * again in its own `ngOnDestroy()` the instant `router.navigate()` succeeded — the live
+ * connection never actually survived to reach the page meant to use it.
  */
-const HEARTBEAT_INTERVAL_MS = 5 * 60 * 1000;
+export interface SessionJoinNavigationState {
+  readonly participantId: string;
+  /** `null` for an authenticated join — the shell then connects with the caller's bearer token. */
+  readonly guestToken: string | null;
+}
 
 /**
  * "Join a live session by code" form (US19.2.1) — a single join call handles both the
@@ -38,12 +41,11 @@ const HEARTBEAT_INTERVAL_MS = 5 * 60 * 1000;
   templateUrl: './session-join.component.html',
   styleUrl: './session-join.component.scss',
 })
-export class SessionJoinComponent implements OnInit, OnDestroy {
+export class SessionJoinComponent implements OnInit {
   private readonly sessionApi = inject(SessionApiService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  protected readonly sessionWs = inject(SessionWsService);
 
   protected readonly form = this.formBuilder.nonNullable.group({
     code: ['', [Validators.required, Validators.minLength(CODE_LENGTH), Validators.maxLength(CODE_LENGTH)]],
@@ -53,19 +55,12 @@ export class SessionJoinComponent implements OnInit, OnDestroy {
   protected readonly submitting = signal(false);
   protected readonly errorMessageKey = signal<string | null>(null);
 
-  private heartbeatSubscription: Subscription | null = null;
-
   /** Pre-fills the code from a `?code=` query param (shared session link). */
   ngOnInit(): void {
     const code = this.route.snapshot.queryParamMap.get('code');
     if (code) {
       this.form.controls.code.setValue(code.trim().toUpperCase().slice(0, CODE_LENGTH));
     }
-  }
-
-  ngOnDestroy(): void {
-    this.sessionWs.disconnect();
-    this.stopHeartbeat();
   }
 
   onSubmit(): void {
@@ -83,38 +78,18 @@ export class SessionJoinComponent implements OnInit, OnDestroy {
       .subscribe({
         next: response => {
           this.submitting.set(false);
-          this.sessionWs.connect(response.wsTopic, response.token);
-          this.startHeartbeat(response);
-          void this.router.navigate(['/session', response.sessionId, 'play']);
+          const sessionId = sessionIdFromTopic(response.wsTopic);
+          const state: SessionJoinNavigationState = {
+            participantId: response.participantId,
+            guestToken: response.token,
+          };
+          void this.router.navigate(['/session', sessionId, 'play'], { state });
         },
         error: (error: HttpErrorResponse) => {
           this.submitting.set(false);
           this.errorMessageKey.set(this.resolveErrorMessageKey(error));
         },
       });
-  }
-
-  private startHeartbeat(response: JoinSessionResponse): void {
-    this.stopHeartbeat();
-    this.heartbeatSubscription = interval(HEARTBEAT_INTERVAL_MS)
-      .pipe(
-        switchMap(() =>
-          this.sessionApi.guestHeartbeat(response.sessionId, response.participantId, {
-            token: response.token,
-          }),
-        ),
-      )
-      .subscribe({
-        error: () => {
-          this.sessionWs.disconnect();
-          this.errorMessageKey.set('session.join.errors.sessionExpired');
-        },
-      });
-  }
-
-  private stopHeartbeat(): void {
-    this.heartbeatSubscription?.unsubscribe();
-    this.heartbeatSubscription = null;
   }
 
   /**

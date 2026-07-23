@@ -10,12 +10,13 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, interval, switchMap } from 'rxjs';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { SessionResponse, SessionType } from '../models/session.model';
 import { SessionApiService } from '../services/session-api.service';
 import { SessionWsService } from '../services/session-ws.service';
 import { SessionPausedOverlayComponent } from '../session-paused-overlay/session-paused-overlay.component';
+import { SessionJoinNavigationState } from '../session-join/session-join.component';
 
 /**
  * Generic per-type activity component loader — lazy `import()` per {@link SessionType}
@@ -63,12 +64,31 @@ const PLACEHOLDER_TYPES: ReadonlySet<SessionType> = new Set(['QUIZ', 'BRAINSTORM
 /** Inputs passed to whichever activity component {@link NgComponentOutlet} mounts. */
 type ActivityInputs = Record<string, unknown>;
 
+/** Heartbeat interval — a comfortable margin under the backend's guest-session rolling TTL. */
+const HEARTBEAT_INTERVAL_MS = 5 * 60 * 1000;
+
 /**
  * Generic participant shell (US19.2.2) — the contract every activity type shares regardless of
  * `session.type`: loads the right activity component, overlays {@link SessionPausedOverlayComponent}
  * on `SESSION_PAUSED`, redirects to the results view on `SESSION_ENDED`, and — on STOMP
  * reconnection — reloads session state from REST *before* trusting the WS stream again, so no
  * stale visual state is ever shown between a network drop and recovery.
+ *
+ * Owns the WS connection and the (guest-only) heartbeat — not {@link SessionJoinComponent},
+ * which is destroyed the instant navigation here succeeds; a connection opened by a component
+ * about to be destroyed never survives to be usable by the page that needs it. Credentials from a
+ * fresh join arrive via `router.navigate(..., { state })` (read from `history.state`, since
+ * `Router.getCurrentNavigation()` is already `null` by the time `ngOnInit` runs) — see
+ * {@link SessionJoinNavigationState}. Absent state (direct navigation, reload, or an authenticated
+ * user arriving some other way) falls back to connecting with the caller's bearer token instead
+ * (`SessionWsService` reads it from `COLLABORATIF_BEARER_TOKEN` when no guest token is passed).
+ *
+ * **Known backend gap** (`pivot-core` `feat/sprint22-session-infra-backend`, `SessionController`):
+ * `GET /sessions/{id}` always requires a bearer token — there is no guest-accessible variant. An
+ * anonymous `ROLE_GUEST` participant can therefore reach this page and open the WS connection,
+ * but {@link loadAndSync}'s `getSession()` call will 401 and no activity component will ever
+ * mount for them until a `pivot-core` follow-up adds a guest-accessible session-detail path
+ * (either a guest-token variant of `getById`, or embedding the session in the join response).
  */
 @Component({
   selector: 'app-session-participant-shell',
@@ -91,7 +111,10 @@ export class SessionParticipantShellComponent implements OnInit, OnDestroy {
   protected readonly activityInputs = signal<ActivityInputs | null>(null);
 
   private messagesSubscription: Subscription | null = null;
+  private heartbeatSubscription: Subscription | null = null;
   private wasDisconnected = false;
+  private guestToken: string | null = null;
+  private participantId: string | null = null;
 
   constructor() {
     // Reconnection detection lives on the WS status signal itself, not on message arrival —
@@ -109,12 +132,47 @@ export class SessionParticipantShellComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    const navigationState = history.state as Partial<SessionJoinNavigationState> | undefined;
+    this.guestToken = navigationState?.guestToken ?? null;
+    this.participantId = navigationState?.participantId ?? null;
+
     this.loadAndSync();
+    this.connectWs();
     this.messagesSubscription = this.sessionWs.messages$.subscribe(raw => this.onMessage(raw));
+    if (this.guestToken) {
+      this.startHeartbeat(this.guestToken);
+    }
   }
 
   ngOnDestroy(): void {
     this.messagesSubscription?.unsubscribe();
+    this.stopHeartbeat();
+    this.sessionWs.disconnect();
+  }
+
+  private connectWs(): void {
+    const sessionId = this.route.snapshot.paramMap.get('sessionId');
+    if (!sessionId) {
+      return;
+    }
+    this.sessionWs.connect(`/topic/collaboratif/session/${sessionId}`, this.guestToken);
+  }
+
+  private startHeartbeat(guestToken: string): void {
+    const sessionId = this.route.snapshot.paramMap.get('sessionId');
+    if (!sessionId || !this.participantId) {
+      return;
+    }
+    const participantId = this.participantId;
+    this.stopHeartbeat();
+    this.heartbeatSubscription = interval(HEARTBEAT_INTERVAL_MS)
+      .pipe(switchMap(() => this.sessionApi.guestHeartbeat(sessionId, participantId, { token: guestToken })))
+      .subscribe({ error: () => this.sessionWs.disconnect() });
+  }
+
+  private stopHeartbeat(): void {
+    this.heartbeatSubscription?.unsubscribe();
+    this.heartbeatSubscription = null;
   }
 
   private loadAndSync(): void {
