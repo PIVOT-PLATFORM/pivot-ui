@@ -842,6 +842,16 @@
         "invalidStatus": "This activity is not currently live.",
         "generic": "Something went wrong."
       }
+    },
+    "qa": {
+      "inputLabel": "Ask a question",
+      "anonymousLabel": "Ask anonymously",
+      "submit": "Send",
+      "submitError": "Could not send your question.",
+      "empty": "No questions yet. Be the first to ask one.",
+      "upvote": "Upvote this question",
+      "anonymousAuthor": "Anonymous",
+      "answeredBadge": "Answered"
     }
   }
 }

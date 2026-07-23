@@ -1,0 +1,77 @@
+<div class="session-activity-qa">
+  <form class="session-activity-qa__form" (ngSubmit)="submit()">
+    <label class="session-activity-qa__label" for="qa-question">
+      {{ 'session.qa.inputLabel' | transloco }}
+    </label>
+    <textarea
+      id="qa-question"
+      #questionInput
+      class="session-activity-qa__input"
+      rows="2"
+      [attr.maxlength]="maxLength"
+      [value]="draft()"
+      [disabled]="disabled()"
+      [attr.aria-describedby]="submitError() ? 'qa-submit-error' : null"
+      (input)="draft.set(questionInput.value)"
+    ></textarea>
+
+    <div class="session-activity-qa__controls">
+      <label class="session-activity-qa__anonymous">
+        <input
+          type="checkbox"
+          [checked]="anonymous()"
+          [disabled]="disabled()"
+          (change)="toggleAnonymous()"
+        />
+        {{ 'session.qa.anonymousLabel' | transloco }}
+      </label>
+
+      <button type="submit" class="session-activity-qa__submit" [disabled]="!canSubmit()">
+        {{ 'session.qa.submit' | transloco }}
+      </button>
+    </div>
+
+    @if (submitError()) {
+      <p id="qa-submit-error" class="session-activity-qa__error" role="alert">
+        {{ 'session.qa.submitError' | transloco }}
+      </p>
+    }
+  </form>
+
+  <ul class="session-activity-qa__list" aria-live="polite">
+    @for (question of sortedQuestions(); track question.id) {
+      <li
+        class="session-activity-qa__item"
+        [class.session-activity-qa__item--answered]="question.answered"
+      >
+        <button
+          type="button"
+          class="session-activity-qa__upvote"
+          [disabled]="disabled() || hasUpvoted(question.id)"
+          [attr.aria-pressed]="hasUpvoted(question.id)"
+          [attr.aria-label]="'session.qa.upvote' | transloco"
+          (click)="upvote(question.id)"
+        >
+          <span aria-hidden="true">▲</span>
+          <span class="session-activity-qa__upvote-count">{{ question.upvotes }}</span>
+        </button>
+
+        <div class="session-activity-qa__body">
+          <p class="session-activity-qa__text">{{ question.text }}</p>
+          <p class="session-activity-qa__meta">
+            @if (question.anonymous || !question.authorName) {
+              <span class="session-activity-qa__author">{{ 'session.qa.anonymousAuthor' | transloco }}</span>
+            } @else {
+              <span class="session-activity-qa__author">{{ question.authorName }}</span>
+            }
+            @if (question.answered) {
+              <span class="session-activity-qa__answered">{{ 'session.qa.answeredBadge' | transloco }}</span>
+            }
+          </p>
+        </div>
+      </li>
+    } @empty {
+      <li class="session-activity-qa__empty">{{ 'session.qa.empty' | transloco }}</li>
+    }
+  </ul>
+</div>

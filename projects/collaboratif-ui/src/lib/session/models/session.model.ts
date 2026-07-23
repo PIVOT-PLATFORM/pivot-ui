@@ -123,7 +123,10 @@ export type SessionEventType =
   | 'PARTICIPANT_JOINED'
   | 'POLL_UPDATED'
   | 'WORD_ADDED'
-  | 'WORD_REMOVED';
+  | 'WORD_REMOVED'
+  | 'QUESTION_ADDED'
+  | 'QUESTION_UPVOTED'
+  | 'QUESTION_ANSWERED';
 
 /** `SESSION_STARTED` carries the full, started session (`SessionStartedEvent.java`). */
 export interface SessionStartedEvent {
@@ -221,6 +224,56 @@ export interface WordRemovedEvent {
   readonly word: string;
 }
 
+// ---------------------------------------------------------------------------------------------
+// Q&A activity (US19.3.5)
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * A single Q&A question (`QaQuestionDto.java`). `authorName` is `null` when the question was
+ * submitted anonymously — the author's display name is withheld server-side, never sent over the
+ * wire; the authoring participant id is never exposed at all.
+ */
+export interface QaQuestion {
+  readonly id: string;
+  readonly text: string;
+  readonly authorName: string | null;
+  readonly anonymous: boolean;
+  readonly answered: boolean;
+  readonly upvotes: number;
+  readonly createdAt: string;
+}
+
+/** Request body for `POST .../sessions/{id}/qa/questions` (US19.3.5). */
+export interface QuestionSubmitRequest {
+  readonly text: string;
+  readonly anonymous: boolean;
+}
+
+/** `QUESTION_ADDED` carries the full new question (`QuestionAddedEvent.java`). */
+export interface QuestionAddedEvent {
+  readonly type: 'QUESTION_ADDED';
+  readonly sessionId: string;
+  readonly question: QaQuestion;
+}
+
+/**
+ * `QUESTION_UPVOTED` carries only the affected question id and its new tally
+ * (`QuestionUpvotedEvent.java`) — clients update a single row and re-sort, no full refetch.
+ */
+export interface QuestionUpvotedEvent {
+  readonly type: 'QUESTION_UPVOTED';
+  readonly sessionId: string;
+  readonly questionId: string;
+  readonly upvotes: number;
+}
+
+/** `QUESTION_ANSWERED` carries the answered question id (`QuestionAnsweredEvent.java`). */
+export interface QuestionAnsweredEvent {
+  readonly type: 'QUESTION_ANSWERED';
+  readonly sessionId: string;
+  readonly questionId: string;
+}
+
 /** Union of every event shape that can arrive on a session's STOMP topic. */
 export type SessionTopicEvent =
   | SessionStartedEvent
@@ -228,4 +281,7 @@ export type SessionTopicEvent =
   | ParticipantJoinedEvent
   | PollUpdatedEvent
   | WordAddedEvent
-  | WordRemovedEvent;
+  | WordRemovedEvent
+  | QuestionAddedEvent
+  | QuestionUpvotedEvent
+  | QuestionAnsweredEvent;

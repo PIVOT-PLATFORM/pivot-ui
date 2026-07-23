@@ -20,10 +20,10 @@ import { SessionJoinNavigationState } from '../session-join/session-join.compone
 
 /**
  * Generic per-type activity component loader — lazy `import()` per {@link SessionType}
- * (US19.2.2 AC: "le composant d'activité adapté est chargé en lazy-load"). QUIZ/BRAINSTORM/QA/
- * VOTE resolve to {@link SessionActivityPlaceholderComponent} in this PR (1/2 of E19) —
- * PR2 replaces each of those four entries with its real component, this map is the single
- * place that changes.
+ * (US19.2.2 AC: "le composant d'activité adapté est chargé en lazy-load"). POLL, WORDCLOUD and
+ * Q&A resolve to their real components; QUIZ/BRAINSTORM/VOTE still resolve to
+ * {@link SessionActivityPlaceholderComponent} pending their own PR — this map is the single
+ * place each remaining type is wired in.
  */
 const ACTIVITY_LOADERS: Record<SessionType, () => Promise<Type<unknown>>> = {
   QUIZ: () =>
@@ -43,8 +43,8 @@ const ACTIVITY_LOADERS: Record<SessionType, () => Promise<Type<unknown>>> = {
       m => m.SessionActivityPlaceholderComponent,
     ),
   QA: () =>
-    import('../session-activity-placeholder/session-activity-placeholder.component').then(
-      m => m.SessionActivityPlaceholderComponent,
+    import('../session-activity-qa/session-activity-qa.component').then(
+      m => m.SessionActivityQaComponent,
     ),
   VOTE: () =>
     import('../session-activity-placeholder/session-activity-placeholder.component').then(
@@ -53,13 +53,13 @@ const ACTIVITY_LOADERS: Record<SessionType, () => Promise<Type<unknown>>> = {
 };
 
 /**
- * The four types not yet built in this PR (PR2/2 of E19) — resolve to
+ * The types not yet built (QUIZ/BRAINSTORM/VOTE) — resolve to
  * {@link SessionActivityPlaceholderComponent}, which declares only a `type` input.
  * `NgComponentOutlet` throws `NG0303` on any input the mounted component doesn't declare, so the
  * inputs object built for a mounted component must match *exactly* what that component declares
  * — never a single shared shape across every activity type.
  */
-const PLACEHOLDER_TYPES: ReadonlySet<SessionType> = new Set(['QUIZ', 'BRAINSTORM', 'QA', 'VOTE']);
+const PLACEHOLDER_TYPES: ReadonlySet<SessionType> = new Set(['QUIZ', 'BRAINSTORM', 'VOTE']);
 
 /** Inputs passed to whichever activity component {@link NgComponentOutlet} mounts. */
 type ActivityInputs = Record<string, unknown>;

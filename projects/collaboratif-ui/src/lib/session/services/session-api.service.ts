@@ -9,6 +9,8 @@ import {
   JoinSessionResponse,
   ParticipantSessionResponse,
   PollVoteRequest,
+  QaQuestion,
+  QuestionSubmitRequest,
   SessionResponse,
   SessionSummaryResponse,
   WordEntry,
@@ -158,6 +160,40 @@ export class SessionApiService {
   removeWord(sessionId: string, word: string): Observable<void> {
     return this.http.delete<void>(
       `${this.apiUrl}/sessions/${sessionId}/wordcloud/words/${encodeURIComponent(word)}`,
+    );
+  }
+
+  // -----------------------------------------------------------------------------------------
+  // Q&A activity (US19.3.5)
+  // -----------------------------------------------------------------------------------------
+
+  /**
+   * Lists a session's Q&A questions, most-upvoted first (US19.3.5) — participant-accessible, used
+   * to hydrate the participant view on join. Server-sorted; the client re-sorts on every live
+   * `QUESTION_UPVOTED`/`QUESTION_ADDED` broadcast.
+   */
+  listQaQuestions(sessionId: string): Observable<QaQuestion[]> {
+    return this.http.get<QaQuestion[]>(`${this.apiUrl}/sessions/${sessionId}/qa/questions`);
+  }
+
+  /** Submits a question to the session's Q&A (US19.3.5) — optionally anonymous. */
+  submitQaQuestion(sessionId: string, request: QuestionSubmitRequest): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/sessions/${sessionId}/qa/questions`, request);
+  }
+
+  /** Upvotes a question (US19.3.5) — one upvote per participant, a repeat is a 409 server-side. */
+  upvoteQaQuestion(sessionId: string, questionId: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.apiUrl}/sessions/${sessionId}/qa/questions/${questionId}/upvote`,
+      {},
+    );
+  }
+
+  /** Marks a question as answered (facilitator only, US19.3.5). */
+  markQaQuestionAnswered(sessionId: string, questionId: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.apiUrl}/sessions/${sessionId}/qa/questions/${questionId}/answered`,
+      {},
     );
   }
 }

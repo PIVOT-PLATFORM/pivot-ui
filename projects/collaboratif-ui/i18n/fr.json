@@ -842,6 +842,16 @@
         "invalidStatus": "Cette activité n'est pas en cours.",
         "generic": "Une erreur est survenue."
       }
+    },
+    "qa": {
+      "inputLabel": "Poser une question",
+      "anonymousLabel": "Poser anonymement",
+      "submit": "Envoyer",
+      "submitError": "Impossible d'envoyer votre question.",
+      "empty": "Aucune question pour l'instant. Soyez le premier à en poser une.",
+      "upvote": "Voter pour cette question",
+      "anonymousAuthor": "Anonyme",
+      "answeredBadge": "Répondue"
     }
   }
 }
