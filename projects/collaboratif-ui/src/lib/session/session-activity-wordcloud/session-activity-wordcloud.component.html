@@ -7,7 +7,7 @@
       type="text"
       [value]="word()"
       (input)="word.set(wordInput.value)"
-      maxlength="30"
+      [attr.maxlength]="maxLength"
       [disabled]="disabled()"
     />
     <button type="submit" [disabled]="disabled() || submitting() || word().trim().length === 0">
