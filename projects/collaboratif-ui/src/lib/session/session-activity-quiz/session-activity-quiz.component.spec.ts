@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslocoTestingModule } from '@jsverse/transloco';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { COLLABORATIF_API_URL } from '../../core/whiteboard/config/tokens';
 import { ParticipantSessionResponse, QuizState } from '../models/session.model';
 import { SessionWsService } from '../services/session-ws.service';
@@ -174,6 +174,37 @@ describe('SessionActivityQuizComponent', () => {
     const fixture = createFixture(NOT_STARTED, 'p-me');
     expect(fixture.componentInstance.isOwnRow({ participantId: 'p-me', displayName: 'Me', score: 1 })).toBe(true);
     expect(fixture.componentInstance.isOwnRow({ participantId: 'p-x', displayName: 'X', score: 1 })).toBe(false);
+  });
+
+  it('closes the answer window (server-authoritative) when the display timer elapses', async () => {
+    vi.useFakeTimers();
+    try {
+      const fixture = createFixture(NOT_STARTED);
+      startQuestion(); // a 30s question
+      fixture.componentInstance.toggleOption(0);
+      expect(fixture.componentInstance.canSubmit()).toBe(true);
+      expect(fixture.componentInstance.timeUp()).toBe(false);
+
+      await vi.advanceTimersByTimeAsync(31_000);
+
+      expect(fixture.componentInstance.remaining()).toBe(0);
+      expect(fixture.componentInstance.canSubmit()).toBe(false); // late answer gated client-side
+      expect(fixture.componentInstance.timeUp()).toBe(true); // the assertive "time up" a11y cue
+      fixture.componentInstance.toggleOption(1); // no-op once the window closed
+      expect(fixture.componentInstance.canSubmit()).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('degrades to not-started when the reconnect state GET fails', () => {
+    const fixture = TestBed.createComponent(SessionActivityQuizComponent);
+    fixture.componentRef.setInput('session', SESSION);
+    fixture.componentRef.setInput('participantId', 'p-me');
+    fixture.detectChanges();
+    httpMock.expectOne(STATE_URL).flush(null, { status: 500, statusText: 'Server Error' });
+    fixtures.push(fixture);
+    expect(fixture.componentInstance.started()).toBe(false);
   });
 
   it('unsubscribes from WS messages on destroy', () => {

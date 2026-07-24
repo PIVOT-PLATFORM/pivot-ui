@@ -33,6 +33,9 @@ export class SessionActivityWordcloudComponent implements OnInit, OnDestroy {
   readonly session = input.required<ParticipantSessionResponse>();
   readonly disabled = input(false);
 
+  /** Max word length — bound to the input's `maxlength` so the HTML cap can't drift from `submit()`. */
+  readonly maxLength = MAX_WORD_LENGTH;
+
   readonly word = signal('');
   readonly words = signal<WordEntry[]>([]);
   readonly submitting = signal(false);

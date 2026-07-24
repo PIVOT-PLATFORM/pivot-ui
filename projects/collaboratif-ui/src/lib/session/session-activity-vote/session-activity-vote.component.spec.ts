@@ -127,6 +127,24 @@ describe('SessionActivityVoteComponent', () => {
     expect(fixture.componentInstance.hasVoted()).toBe(true);
   });
 
+  it('weighted: an over-budget allocation blocks submit', () => {
+    const fixture = createFixture(WEIGHTED_SESSION);
+    fixture.componentInstance.setAllocation(0, '4');
+    fixture.componentInstance.setAllocation(1, '3'); // 7 > budget of 5
+    expect(fixture.componentInstance.remaining()).toBe(-2);
+    expect(fixture.componentInstance.canSubmit()).toBe(false);
+    fixture.componentInstance.submit();
+    httpMock.expectNone(BALLOT_URL);
+  });
+
+  it('degrades to no results when the initial results GET fails', () => {
+    const fixture = TestBed.createComponent(SessionActivityVoteComponent);
+    fixture.componentRef.setInput('session', FIST_SESSION);
+    fixture.detectChanges();
+    httpMock.expectOne(RESULTS_URL).flush(null, { status: 500, statusText: 'Server Error' });
+    expect(fixture.componentInstance.results()).toBeNull();
+  });
+
   it('updates the live count from a VOTE_SUBMITTED message', () => {
     const fixture = createFixture(FIST_SESSION);
     const ws = TestBed.inject(SessionWsService);
