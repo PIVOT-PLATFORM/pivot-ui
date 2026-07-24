@@ -82,6 +82,27 @@ describe('SessionActivityBrainstormComponent', () => {
     httpMock.expectNone(CARDS_URL);
   });
 
+  it('saveEdit fires a single PATCH even on a rapid double-click', () => {
+    const component = createFixture([card()]).componentInstance;
+    component.startEdit(card());
+    component.editText.set('edited');
+    component.saveEdit('c-1');
+    component.saveEdit('c-1'); // second click is guarded — expectOne below fails if it fires
+    const req = httpMock.expectOne(`${CARDS_URL}/c-1`);
+    expect(req.request.method).toBe('PATCH');
+    req.flush(null);
+  });
+
+  it('confirmDelete fires a single DELETE even on a rapid double-click', () => {
+    const component = createFixture([card()]).componentInstance;
+    component.requestDelete('c-1');
+    component.confirmDelete('c-1');
+    component.confirmDelete('c-1'); // guarded
+    const req = httpMock.expectOne(`${CARDS_URL}/c-1`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+  });
+
   it('add() posts the card and clears the text on success', () => {
     const fixture = createFixture();
     fixture.componentInstance.draftText.set('  new idea ');
