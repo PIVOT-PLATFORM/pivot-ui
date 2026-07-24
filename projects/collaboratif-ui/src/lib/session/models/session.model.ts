@@ -384,12 +384,19 @@ export interface MatrixOptionResult {
  * are populated — every tally field stays `null`/empty so nothing leaks before the facilitator
  * closes the vote.
  */
+/**
+ * Fist-to-Five consensus tier (`ConsensusLevel.java`): STRONG ≥ 4 · MODERATE 3–4 · WEAK < 3. The
+ * closed domain is pinned here so a value the i18n map doesn't cover can't reach the template as a
+ * raw key — a new tier is a coordinated contract change (add it here + to `session.vote.consensus.*`).
+ */
+export type ConsensusLevel = 'STRONG' | 'MODERATE' | 'WEAK';
+
 export interface VoteResults {
   readonly voteType: VoteType;
   readonly closed: boolean;
   readonly ballotCount: number;
   readonly average: number | null;
-  readonly consensusLevel: string | null;
+  readonly consensusLevel: ConsensusLevel | null;
   readonly veto: boolean;
   readonly options: WeightedOptionResult[];
   readonly matrix: MatrixOptionResult[];
