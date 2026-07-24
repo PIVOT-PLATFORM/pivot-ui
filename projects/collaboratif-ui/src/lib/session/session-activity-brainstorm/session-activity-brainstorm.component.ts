@@ -56,6 +56,8 @@ export class SessionActivityBrainstormComponent implements OnInit, OnDestroy {
   readonly draftText = signal('');
   readonly draftColor = signal<BrainstormCardColor>('YELLOW');
   readonly submitting = signal(false);
+  /** In-flight guard for a card edit/delete, so a rapid double-click can't fire two mutations. */
+  readonly mutating = signal(false);
   readonly submitError = signal(false);
 
   readonly editingId = signal<string | null>(null);
@@ -127,15 +129,22 @@ export class SessionActivityBrainstormComponent implements OnInit, OnDestroy {
   }
 
   saveEdit(cardId: string): void {
-    if (this.editText().trim().length === 0) {
+    if (this.mutating() || this.editText().trim().length === 0) {
       return;
     }
+    this.mutating.set(true);
     this.sessionApi
       .updateBrainstormCard(this.session().id, cardId, {
         text: this.editText().trim(),
         color: this.editColor(),
       })
-      .subscribe({ next: () => this.editingId.set(null) });
+      .subscribe({
+        next: () => {
+          this.mutating.set(false);
+          this.editingId.set(null);
+        },
+        error: () => this.mutating.set(false),
+      });
   }
 
   /** Arms the delete confirmation for a card — the actual delete needs a second, explicit click. */
@@ -150,8 +159,15 @@ export class SessionActivityBrainstormComponent implements OnInit, OnDestroy {
 
   /** Confirms and performs the delete (US19.3.4). The card is removed live via `CARD_REMOVED`. */
   confirmDelete(cardId: string): void {
+    if (this.mutating()) {
+      return;
+    }
     this.confirmDeleteId.set(null);
-    this.sessionApi.deleteBrainstormCard(this.session().id, cardId).subscribe();
+    this.mutating.set(true);
+    this.sessionApi.deleteBrainstormCard(this.session().id, cardId).subscribe({
+      next: () => this.mutating.set(false),
+      error: () => this.mutating.set(false),
+    });
   }
 
   private onMessage(raw: string): void {

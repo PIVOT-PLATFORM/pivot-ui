@@ -36,6 +36,8 @@ export class SessionRunnerComponent implements OnInit, OnDestroy {
   });
 
   private pollHandle: ReturnType<typeof setInterval> | null = null;
+  /** Bumped on every successful lifecycle action so a poll issued before it can discard its stale result. */
+  private actionGeneration = 0;
 
   ngOnInit(): void {
     this.load();
@@ -57,8 +59,15 @@ export class SessionRunnerComponent implements OnInit, OnDestroy {
       this.loadError.set(true);
       return;
     }
+    const generation = this.actionGeneration;
     this.sessionApi.getSession(sessionId).subscribe({
-      next: session => this.session.set(session),
+      next: session => {
+        // Discard a poll whose fetch started before a lifecycle action that has since completed —
+        // its status is stale and would otherwise revert the freshly-applied transition.
+        if (generation === this.actionGeneration) {
+          this.session.set(session);
+        }
+      },
       error: () => this.loadError.set(true),
     });
   }
@@ -91,6 +100,7 @@ export class SessionRunnerComponent implements OnInit, OnDestroy {
     call(current.id).subscribe({
       next: updated => {
         this.actionInFlight.set(false);
+        this.actionGeneration++;
         this.session.set(updated);
       },
       error: () => {

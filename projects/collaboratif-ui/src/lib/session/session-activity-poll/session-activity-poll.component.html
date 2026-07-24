@@ -1,7 +1,7 @@
 <div class="session-activity-poll">
   <h2>{{ config().question }}</h2>
 
-  <ul class="session-activity-poll__options" aria-live="polite">
+  <ul class="session-activity-poll__options">
     @for (option of config().options; track option.id) {
       <li>
         <button
@@ -27,6 +27,12 @@
       </li>
     }
   </ul>
+
+  @if (resultsVisible()) {
+    <p class="__sr-only" aria-live="polite">
+      {{ 'session.poll.resultsSummary' | transloco: { count: totalVotes() } }}
+    </p>
+  }
 
   @if (submitError()) {
     <p class="session-activity-poll__error" role="alert">{{ 'session.poll.submitError' | transloco }}</p>

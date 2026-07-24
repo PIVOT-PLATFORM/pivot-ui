@@ -843,11 +843,13 @@
     "poll": {
       "submit": "Submit",
       "submitError": "Could not save your vote.",
-      "confirmed": "Your vote has been recorded."
+      "confirmed": "Your vote has been recorded.",
+      "resultsSummary": "Results updated: {{count}} vote(s)"
     },
     "wordcloud": {
       "inputLabel": "Add a word",
       "submit": "Add",
+      "wordCount": "cited {{count}} time(s)",
       "errors": {
         "blocked": "This word is not allowed.",
         "invalid": "Invalid word.",

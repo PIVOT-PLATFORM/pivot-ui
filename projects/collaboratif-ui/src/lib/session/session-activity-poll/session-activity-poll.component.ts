@@ -38,6 +38,11 @@ export class SessionActivityPollComponent implements OnInit, OnDestroy {
 
   readonly config = computed<PollConfig>(() => this.session().config as PollConfig);
 
+  /** True once the facilitator is showing tallies (an entry carries a `count`). */
+  readonly resultsVisible = computed(() => this.results().some(result => result.count !== undefined));
+  /** Total votes shown — a single concise SR announcement, vs. re-reading every option per update. */
+  readonly totalVotes = computed(() => this.results().reduce((sum, result) => sum + (result.count ?? 0), 0));
+
   private messagesSubscription: Subscription | null = null;
 
   ngOnInit(): void {

@@ -154,6 +154,29 @@ describe('SessionActivityPollComponent', () => {
     expect(fixture.componentInstance.resultFor('o-1')).toBeNull();
   });
 
+  it('exposes resultsVisible + totalVotes for a single concise SR announcement', () => {
+    const fixture = createFixture();
+    const ws = TestBed.inject(SessionWsService);
+    expect(fixture.componentInstance.resultsVisible()).toBe(false);
+
+    // Hidden results (no count) → still not "visible" for announcement.
+    ws.messages$.next(JSON.stringify({ type: 'POLL_UPDATED', sessionId: 's-1', results: [{ optionId: 'o-1', label: 'A' }] }));
+    expect(fixture.componentInstance.resultsVisible()).toBe(false);
+
+    ws.messages$.next(
+      JSON.stringify({
+        type: 'POLL_UPDATED',
+        sessionId: 's-1',
+        results: [
+          { optionId: 'o-1', label: 'A', count: 3, percent: 60 },
+          { optionId: 'o-2', label: 'B', count: 2, percent: 40 },
+        ],
+      }),
+    );
+    expect(fixture.componentInstance.resultsVisible()).toBe(true);
+    expect(fixture.componentInstance.totalVotes()).toBe(5);
+  });
+
   it('unsubscribes from WS messages on destroy', () => {
     const fixture = createFixture();
     const ws = TestBed.inject(SessionWsService);

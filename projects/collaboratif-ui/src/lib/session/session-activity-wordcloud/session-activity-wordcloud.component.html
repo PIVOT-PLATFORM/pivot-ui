@@ -23,6 +23,7 @@
     @for (entry of words(); track entry.word) {
       <span class="session-activity-wordcloud__word" [style.font-size]="fontSizeFor(entry)">
         {{ entry.word }}
+        <span class="__sr-only">{{ 'session.wordcloud.wordCount' | transloco: { count: entry.frequency } }}</span>
       </span>
     }
   </div>
