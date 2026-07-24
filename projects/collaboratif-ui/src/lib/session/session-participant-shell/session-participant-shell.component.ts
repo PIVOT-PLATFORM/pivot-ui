@@ -10,7 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription, interval, switchMap } from 'rxjs';
+import { EMPTY, Subscription, catchError, interval, switchMap } from 'rxjs';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ParticipantSessionResponse, SessionType } from '../models/session.model';
 import { SessionApiService } from '../services/session-api.service';
@@ -163,8 +163,17 @@ export class SessionParticipantShellComponent implements OnInit, OnDestroy {
     const participantId = this.participantId;
     this.stopHeartbeat();
     this.heartbeatSubscription = interval(HEARTBEAT_INTERVAL_MS)
-      .pipe(switchMap(() => this.sessionApi.guestHeartbeat(sessionId, participantId, { token: guestToken })))
-      .subscribe({ error: () => this.sessionWs.disconnect() });
+      .pipe(
+        // A transient heartbeat failure (proxy blip, brief drop) must not tear down the live
+        // session — swallow it per tick so the interval keeps firing; the presence TTL is refreshed
+        // on the next successful beat. Only a definitive teardown (component destroy) disconnects.
+        switchMap(() =>
+          this.sessionApi
+            .guestHeartbeat(sessionId, participantId, { token: guestToken })
+            .pipe(catchError(() => EMPTY)),
+        ),
+      )
+      .subscribe();
   }
 
   private stopHeartbeat(): void {

@@ -257,6 +257,31 @@ describe('SessionParticipantShellComponent', () => {
     }
   });
 
+  it('survives a transient heartbeat failure: keeps beating and does not disconnect', async () => {
+    history.pushState({ participantId: 'p-1', guestToken: 'guest-tok' }, '');
+    vi.useFakeTimers();
+    try {
+      const fixture = TestBed.createComponent(SessionParticipantShellComponent);
+      fixture.detectChanges();
+      httpMock.expectOne(`${TEST_API_URL}/sessions/s-1/state`).flush(session('LIVE'));
+      const deactivateBefore = fake.deactivateCalls;
+
+      // First beat fails (transient 502) — must NOT tear down the live session.
+      await vi.advanceTimersByTimeAsync(5 * 60 * 1000);
+      httpMock
+        .expectOne(`${TEST_API_URL}/sessions/s-1/participants/p-1/heartbeat`)
+        .flush(null, { status: 502, statusText: 'Bad Gateway' });
+      expect(fake.deactivateCalls).toBe(deactivateBefore);
+
+      // The interval survived the error — the next beat still fires.
+      await vi.advanceTimersByTimeAsync(5 * 60 * 1000);
+      httpMock.expectOne(`${TEST_API_URL}/sessions/s-1/participants/p-1/heartbeat`).flush(null);
+      fixture.destroy();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('does not start a heartbeat when no guest token was handed off', async () => {
     const fixture = await createFixture();
     vi.useFakeTimers();
