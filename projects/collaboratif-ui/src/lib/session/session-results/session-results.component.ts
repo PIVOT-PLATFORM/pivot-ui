@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -82,6 +82,24 @@ export class SessionResultsComponent implements OnInit, OnDestroy {
 
   private wsSub: Subscription | null = null;
   private connected = false;
+  private wasDisconnected = false;
+
+  constructor() {
+    // On WS reconnect (error → connected), re-hydrate: every tally broadcast during the outage is
+    // otherwise permanently missed on the projected results screen (mirrors the participant shell).
+    effect(() => {
+      const status = this.ws.status();
+      if (status === 'error') {
+        this.wasDisconnected = true;
+      } else if (status === 'connected' && this.wasDisconnected) {
+        this.wasDisconnected = false;
+        const session = this.session();
+        if (session) {
+          this.hydrate(session);
+        }
+      }
+    });
+  }
 
   readonly type = computed(() => this.session()?.type ?? null);
   readonly status = computed(() => this.session()?.status ?? null);
@@ -290,11 +308,21 @@ export class SessionResultsComponent implements OnInit, OnDestroy {
         break;
       case 'SESSION_PAUSED':
       case 'SESSION_RESUMED':
-      case 'SESSION_ENDED':
         this.session.update(session =>
           session ? { ...session, status: statusForLifecycle(event.type) } : session,
         );
         break;
+      case 'SESSION_ENDED': {
+        const ended = this.session();
+        if (ended) {
+          const completed = { ...ended, status: 'COMPLETED' as const };
+          this.session.set(completed);
+          // Results are frozen at end — re-fetch the final per-type snapshot (e.g. QUIZ
+          // correctRatePerQuestion, final VOTE tallies) that the live events don't carry.
+          this.hydrate(completed);
+        }
+        break;
+      }
     }
   }
 

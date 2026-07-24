@@ -251,6 +251,38 @@ describe('SessionResultsComponent', () => {
     expect(fixture.componentInstance.exporting()).toBe(false);
   });
 
+  it('re-hydrates the snapshot on WS reconnect (error → connected)', () => {
+    const fixture = mount(sessionResponse('POLL'));
+    httpMock.expectOne(`${SESSION_URL}/poll/results`).flush([{ optionId: 'a', label: 'A', count: 1, percent: 100 }]);
+
+    // Each transition flushed separately (effects observe the settled value, so a synchronous
+    // error→connected would coalesce and skip 'error') — mirrors the real async status stream.
+    const wsService = ws();
+    wsService.status.set('error');
+    fixture.detectChanges();
+    wsService.status.set('connected');
+    fixture.detectChanges();
+
+    // A fresh snapshot fetch is issued so tallies broadcast during the outage aren't lost.
+    httpMock.expectOne(`${SESSION_URL}/poll/results`).flush([]);
+    expect(fixture.componentInstance.pollResults()).toEqual([]);
+  });
+
+  it('re-hydrates the final snapshot when the session ends (SESSION_ENDED)', () => {
+    const fixture = mount(sessionResponse('QUIZ'));
+    httpMock.expectOne(`${SESSION_URL}/quiz/results`).flush({ leaderboard: [], correctRatePerQuestion: [] });
+
+    ws().messages$.next(JSON.stringify({ type: 'SESSION_ENDED', sessionId: 's-1' }));
+    expect(fixture.componentInstance.status()).toBe('COMPLETED');
+
+    // The end transition re-fetches final results the live events don't carry (per-question rates).
+    httpMock.expectOne(`${SESSION_URL}/quiz/results`).flush({
+      leaderboard: [{ participantId: 'p1', displayName: 'Ana', score: 10 }],
+      correctRatePerQuestion: [80],
+    });
+    expect(fixture.componentInstance.quizResults()?.correctRatePerQuestion).toEqual([80]);
+  });
+
   it('disconnects and ignores late messages on destroy', () => {
     const fixture = mount(sessionResponse('POLL'));
     httpMock.expectOne(`${SESSION_URL}/poll/results`).flush([]);
