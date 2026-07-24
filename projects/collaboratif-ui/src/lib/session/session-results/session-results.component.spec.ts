@@ -208,6 +208,47 @@ describe('SessionResultsComponent', () => {
     expect(fixture.componentInstance.quizResults()?.correctRatePerQuestion).toEqual([80]);
   });
 
+  it('QA: applies QUESTION_ADDED then re-sorts on QUESTION_UPVOTED', () => {
+    const fixture = mount(sessionResponse('QA'));
+    httpMock.expectOne(`${SESSION_URL}/qa/questions`).flush([
+      { id: 'q1', text: 'First', authorName: null, anonymous: true, answered: false, upvotes: 1, createdAt: '2026-07-23T08:00:00Z' },
+    ]);
+
+    ws().messages$.next(
+      JSON.stringify({
+        type: 'QUESTION_ADDED',
+        sessionId: 's-1',
+        question: { id: 'q2', text: 'Second', authorName: 'Bo', anonymous: false, answered: false, upvotes: 0, createdAt: '2026-07-23T08:05:00Z' },
+      }),
+    );
+    expect(fixture.componentInstance.sortedQuestions().map(q => q.id)).toEqual(['q1', 'q2']);
+
+    ws().messages$.next(JSON.stringify({ type: 'QUESTION_UPVOTED', sessionId: 's-1', questionId: 'q2', upvotes: 9 }));
+    expect(fixture.componentInstance.sortedQuestions().map(q => q.id)).toEqual(['q2', 'q1']);
+  });
+
+  it('BRAINSTORM: applies CARD_ADDED / CARD_UPDATED / CARD_REMOVED live', () => {
+    const fixture = mount(sessionResponse('BRAINSTORM'));
+    httpMock.expectOne(`${SESSION_URL}/brainstorm/cards`).flush([]);
+    const base = { color: 'YELLOW', category: null, authorParticipantId: 'p1', createdAt: 't1' };
+
+    ws().messages$.next(JSON.stringify({ type: 'CARD_ADDED', sessionId: 's-1', card: { id: 'c1', text: 'Idea', ...base } }));
+    expect(fixture.componentInstance.cards().map(c => c.id)).toEqual(['c1']);
+
+    ws().messages$.next(JSON.stringify({ type: 'CARD_UPDATED', sessionId: 's-1', card: { id: 'c1', text: 'Edited', ...base, category: 'Risks' } }));
+    expect(fixture.componentInstance.cards()[0].text).toBe('Edited');
+    expect(fixture.componentInstance.cardGroups()[0].category).toBe('Risks');
+
+    ws().messages$.next(JSON.stringify({ type: 'CARD_REMOVED', sessionId: 's-1', cardId: 'c1' }));
+    expect(fixture.componentInstance.cards()).toEqual([]);
+  });
+
+  it('degrades to an empty/null snapshot when a per-type hydrate GET fails', () => {
+    const fixture = mount(sessionResponse('VOTE'));
+    httpMock.expectOne(`${SESSION_URL}/vote/results`).flush(null, { status: 500, statusText: 'Server Error' });
+    expect(fixture.componentInstance.voteResults()).toBeNull();
+  });
+
   it('toggles projection mode', () => {
     const fixture = mount(sessionResponse('POLL'));
     httpMock.expectOne(`${SESSION_URL}/poll/results`).flush([]);
