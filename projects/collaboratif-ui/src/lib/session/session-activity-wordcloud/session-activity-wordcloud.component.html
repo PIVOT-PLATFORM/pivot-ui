@@ -10,9 +10,13 @@
       [attr.maxlength]="maxLength"
       [disabled]="disabled()"
     />
-    <button type="submit" [disabled]="disabled() || submitting() || word().trim().length === 0">
+    <pivot-ds-button
+      type="submit"
+      [disabled]="disabled() || word().trim().length === 0"
+      [loading]="submitting()"
+    >
       {{ 'session.wordcloud.submit' | transloco }}
-    </button>
+    </pivot-ds-button>
   </form>
 
   @if (errorMessageKey(); as key) {

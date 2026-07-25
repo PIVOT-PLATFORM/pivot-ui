@@ -8,12 +8,15 @@ import {
   input,
   signal,
 } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { ButtonComponent } from '@pivot-platform/design-system';
 import {
   BrainstormCard,
   BrainstormCardColor,
   ParticipantSessionResponse,
+  ProblemDetailResponse,
 } from '../models/session.model';
 import { SessionApiService } from '../services/session-api.service';
 import { SessionWsService } from '../services/session-ws.service';
@@ -37,7 +40,7 @@ const MAX_TEXT_LENGTH = 280;
   selector: 'app-session-activity-brainstorm',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe],
+  imports: [TranslocoPipe, ButtonComponent],
   templateUrl: './session-activity-brainstorm.component.html',
   styleUrl: './session-activity-brainstorm.component.scss',
 })
@@ -58,7 +61,11 @@ export class SessionActivityBrainstormComponent implements OnInit, OnDestroy {
   readonly submitting = signal(false);
   /** In-flight guard for a card edit/delete, so a rapid double-click can't fire two mutations. */
   readonly mutating = signal(false);
-  readonly submitError = signal(false);
+  readonly errorMessageKey = signal<string | null>(null);
+  /** Error from a card edit/delete (T10, deferred ergonomics polish) — distinct from {@link errorMessageKey}
+   *  (the "add" form's own error) since both can be visible at once (editing one card while the add
+   *  form still shows a stale error). */
+  readonly mutationErrorKey = signal<string | null>(null);
 
   readonly editingId = signal<string | null>(null);
   readonly editText = signal('');
@@ -103,7 +110,7 @@ export class SessionActivityBrainstormComponent implements OnInit, OnDestroy {
       return;
     }
     this.submitting.set(true);
-    this.submitError.set(false);
+    this.errorMessageKey.set(null);
     this.sessionApi
       .addBrainstormCard(this.session().id, { text: this.draftText().trim(), color: this.draftColor() })
       .subscribe({
@@ -111,11 +118,31 @@ export class SessionActivityBrainstormComponent implements OnInit, OnDestroy {
           this.submitting.set(false);
           this.draftText.set('');
         },
-        error: () => {
+        error: (error: HttpErrorResponse) => {
           this.submitting.set(false);
-          this.submitError.set(true);
+          this.errorMessageKey.set(this.resolveErrorKey(error));
         },
       });
+  }
+
+  /**
+   * Maps the backend's `ProblemDetail.code` to a specific i18n key (T10, deferred ergonomics
+   * polish) — mirrors {@code SessionActivityWordcloudComponent}'s `resolveErrorKey`. Codes come
+   * from {@code fr.pivot.collaboratif.session.brainstorm.BrainstormActivityService}.
+   *
+   * @param error the failed request's HTTP error
+   * @returns the i18n key to display
+   */
+  private resolveErrorKey(error: HttpErrorResponse): string {
+    const body = error.error as ProblemDetailResponse | null;
+    switch (body?.code) {
+      case 'INVALID_CARD':
+        return 'session.brainstorm.errors.invalidCard';
+      case 'NOT_CARD_OWNER':
+        return 'session.brainstorm.errors.notOwner';
+      default:
+        return 'session.brainstorm.errors.generic';
+    }
   }
 
   startEdit(card: BrainstormCard): void {
@@ -133,6 +160,7 @@ export class SessionActivityBrainstormComponent implements OnInit, OnDestroy {
       return;
     }
     this.mutating.set(true);
+    this.mutationErrorKey.set(null);
     this.sessionApi
       .updateBrainstormCard(this.session().id, cardId, {
         text: this.editText().trim(),
@@ -143,7 +171,10 @@ export class SessionActivityBrainstormComponent implements OnInit, OnDestroy {
           this.mutating.set(false);
           this.editingId.set(null);
         },
-        error: () => this.mutating.set(false),
+        error: (error: HttpErrorResponse) => {
+          this.mutating.set(false);
+          this.mutationErrorKey.set(this.resolveErrorKey(error));
+        },
       });
   }
 
@@ -164,9 +195,13 @@ export class SessionActivityBrainstormComponent implements OnInit, OnDestroy {
     }
     this.confirmDeleteId.set(null);
     this.mutating.set(true);
+    this.mutationErrorKey.set(null);
     this.sessionApi.deleteBrainstormCard(this.session().id, cardId).subscribe({
       next: () => this.mutating.set(false),
-      error: () => this.mutating.set(false),
+      error: (error: HttpErrorResponse) => {
+        this.mutating.set(false);
+        this.mutationErrorKey.set(this.resolveErrorKey(error));
+      },
     });
   }
 

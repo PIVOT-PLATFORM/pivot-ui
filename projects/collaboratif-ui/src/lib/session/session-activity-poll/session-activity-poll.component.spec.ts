@@ -105,12 +105,17 @@ describe('SessionActivityPollComponent', () => {
     expect(fixture.componentInstance.hasVoted()).toBe(true);
   });
 
-  it('submit() surfaces submitError on failure', () => {
+  it.each([
+    [400, { code: 'INVALID_POLL_VOTE' }, 'session.poll.errors.invalidVote'],
+    [400, { code: 'OTHER' }, 'session.poll.errors.generic'],
+    [500, undefined, 'session.poll.errors.generic'],
+  ] as const)('maps a %s error (%o) to %s', (status, body, expectedKey) => {
     const fixture = createFixture();
     fixture.componentInstance.toggleOption('o-1');
     fixture.componentInstance.submit();
-    httpMock.expectOne(`${TEST_API_URL}/sessions/s-1/poll/vote`).flush(null, { status: 500, statusText: 'Server Error' });
-    expect(fixture.componentInstance.submitError()).toBe(true);
+    httpMock.expectOne(`${TEST_API_URL}/sessions/s-1/poll/vote`).flush(body ?? null, { status, statusText: 'Error' });
+    expect(fixture.componentInstance.errorMessageKey()).toBe(expectedKey);
+    expect(fixture.componentInstance.submitting()).toBe(false);
     expect(fixture.componentInstance.hasVoted()).toBe(false);
   });
 

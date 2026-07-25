@@ -9,7 +9,13 @@
     <h2 class="session-activity-quiz__text">{{ questionText() }}</h2>
 
     @if (!ended()) {
-      <p class="session-activity-quiz__timer">{{ 'session.quiz.timeLeft' | transloco }} {{ remaining() }}</p>
+      <p
+        class="session-activity-quiz__timer"
+        [class.session-activity-quiz__timer--warning]="timerUrgency() === 'warning'"
+        [class.session-activity-quiz__timer--danger]="timerUrgency() === 'danger'"
+      >
+        {{ 'session.quiz.timeLeft' | transloco }} {{ remaining() }}
+      </p>
     }
     <span class="session-activity-quiz__sr-only" aria-live="assertive">
       @if (timeUp()) {
@@ -40,19 +46,20 @@
         {{ 'session.quiz.answersReceived' | transloco }} {{ answerCount() }}
       </p>
 
-      @if (submitError()) {
-        <p class="session-activity-quiz__error" role="alert">{{ 'session.quiz.submitError' | transloco }}</p>
+      @if (errorMessageKey(); as key) {
+        <p class="session-activity-quiz__error" role="alert">{{ key | transloco }}</p>
       }
 
       @if (!answered()) {
-        <button
+        <pivot-ds-button
           type="button"
           class="session-activity-quiz__submit"
           [disabled]="!canSubmit()"
+          [loading]="submitting()"
           (click)="submit()"
         >
           {{ 'session.quiz.submit' | transloco }}
-        </button>
+        </pivot-ds-button>
       } @else {
         <p class="session-activity-quiz__answered" role="status">{{ 'session.quiz.answered' | transloco }}</p>
       }

@@ -21,6 +21,11 @@
     border: 1px solid var(--color-border, #e5e7eb);
     border-radius: var(--radius-md, 6px);
     font: inherit;
+
+    &:focus-visible {
+      outline: 2px solid var(--color-brand-500);
+      outline-offset: 2px;
+    }
   }
 
   &__colors {
@@ -37,6 +42,11 @@
 
     &[aria-pressed='true'] {
       border-color: var(--color-text, #111827);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-brand-500);
+      outline-offset: 2px;
     }
 
     &--yellow {
@@ -56,19 +66,10 @@
     }
   }
 
+  // pivot-ds-button's host is `display: contents` (no box of its own) — its look comes entirely
+  // from the design system's own `.btn`/`.btn-primary` classes, this selector only positions it.
   &__add {
     align-self: flex-start;
-    padding: var(--space-2, 8px) var(--space-4, 16px);
-    border-radius: var(--radius-md, 6px);
-    border: none;
-    background: var(--color-primary, #4f46e5);
-    color: var(--color-on-primary, #fff);
-    cursor: pointer;
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
   }
 
   &__error {
@@ -133,6 +134,11 @@
       border-radius: var(--radius-sm, 4px);
       background: var(--color-surface, #fff);
       cursor: pointer;
+
+      &:focus-visible {
+        outline: 2px solid var(--color-brand-500);
+        outline-offset: 2px;
+      }
     }
   }
 

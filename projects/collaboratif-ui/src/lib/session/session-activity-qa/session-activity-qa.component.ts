@@ -8,9 +8,11 @@ import {
   input,
   signal,
 } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { ParticipantSessionResponse, QaQuestion } from '../models/session.model';
+import { ButtonComponent } from '@pivot-platform/design-system';
+import { ParticipantSessionResponse, ProblemDetailResponse, QaQuestion } from '../models/session.model';
 import { SessionApiService } from '../services/session-api.service';
 import { SessionWsService } from '../services/session-ws.service';
 
@@ -32,7 +34,7 @@ const MAX_QUESTION_LENGTH = 500;
   selector: 'app-session-activity-qa',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe],
+  imports: [TranslocoPipe, ButtonComponent],
   templateUrl: './session-activity-qa.component.html',
   styleUrl: './session-activity-qa.component.scss',
 })
@@ -48,7 +50,7 @@ export class SessionActivityQaComponent implements OnInit, OnDestroy {
   readonly draft = signal('');
   readonly anonymous = signal(false);
   readonly submitting = signal(false);
-  readonly submitError = signal(false);
+  readonly errorMessageKey = signal<string | null>(null);
 
   private readonly questions = signal<QaQuestion[]>([]);
   private readonly upvotedIds = signal<ReadonlySet<string>>(new Set());
@@ -99,7 +101,7 @@ export class SessionActivityQaComponent implements OnInit, OnDestroy {
       return;
     }
     this.submitting.set(true);
-    this.submitError.set(false);
+    this.errorMessageKey.set(null);
     this.sessionApi
       .submitQaQuestion(this.session().id, { text: this.draft().trim(), anonymous: this.anonymous() })
       .subscribe({
@@ -110,11 +112,30 @@ export class SessionActivityQaComponent implements OnInit, OnDestroy {
           this.draft.set('');
           this.anonymous.set(false);
         },
-        error: () => {
+        error: (error: HttpErrorResponse) => {
           this.submitting.set(false);
-          this.submitError.set(true);
+          this.errorMessageKey.set(this.resolveErrorKey(error));
         },
       });
+  }
+
+  /**
+   * Maps the backend's `ProblemDetail.code` to a specific i18n key (T10, deferred ergonomics
+   * polish) — mirrors {@code SessionActivityWordcloudComponent}'s `resolveErrorKey`. Codes come
+   * from {@code fr.pivot.collaboratif.session.qa.QaActivityService#submitQuestion}.
+   *
+   * <p>Not used by {@link #upvote} — a 409 there ({@code ALREADY_UPVOTED}) is treated as success
+   * (the vote already exists), never surfaced as an error, see that method's own comment.
+   *
+   * @param error the failed submission's HTTP error
+   * @returns the i18n key to display
+   */
+  private resolveErrorKey(error: HttpErrorResponse): string {
+    const body = error.error as ProblemDetailResponse | null;
+    if (body?.code === 'INVALID_QUESTION') {
+      return 'session.qa.errors.invalidQuestion';
+    }
+    return 'session.qa.errors.generic';
   }
 
   upvote(questionId: string): void {

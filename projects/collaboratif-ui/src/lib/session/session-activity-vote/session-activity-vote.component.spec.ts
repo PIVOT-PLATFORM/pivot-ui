@@ -102,12 +102,19 @@ describe('SessionActivityVoteComponent', () => {
     expect(fixture.componentInstance.hasVoted()).toBe(true);
   });
 
-  it('fist: submit() surfaces submitError on failure', () => {
+  it.each([
+    [400, { code: 'INVALID_BALLOT' }, 'session.vote.errors.invalidBallot'],
+    [409, { code: 'VOTE_CLOSED' }, 'session.vote.errors.voteClosed'],
+    [409, { code: 'ALREADY_VOTED' }, 'session.vote.errors.alreadyVoted'],
+    [409, { code: 'OTHER' }, 'session.vote.errors.generic'],
+    [500, undefined, 'session.vote.errors.generic'],
+  ] as const)('fist: maps a %s error (%o) to %s', (status, body, expectedKey) => {
     const fixture = createFixture(FIST_SESSION);
     fixture.componentInstance.selectRating(3);
     fixture.componentInstance.submit();
-    httpMock.expectOne(BALLOT_URL).flush(null, { status: 409, statusText: 'Conflict' });
-    expect(fixture.componentInstance.submitError()).toBe(true);
+    httpMock.expectOne(BALLOT_URL).flush(body ?? null, { status, statusText: 'Error' });
+    expect(fixture.componentInstance.errorMessageKey()).toBe(expectedKey);
+    expect(fixture.componentInstance.submitting()).toBe(false);
   });
 
   it('weighted: can only submit once points are fully allocated', () => {

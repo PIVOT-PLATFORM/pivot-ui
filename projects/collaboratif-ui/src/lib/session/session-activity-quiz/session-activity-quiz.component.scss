@@ -38,6 +38,16 @@
     margin: 0;
     font-weight: 700;
     font-size: 1.25rem;
+    color: var(--color-text, inherit);
+    transition: color 0.2s ease;
+
+    &--warning {
+      color: var(--color-warning, #f59e0b);
+    }
+
+    &--danger {
+      color: var(--color-error, #dc2626);
+    }
   }
 
   &__options {
@@ -72,6 +82,11 @@
     &:disabled {
       cursor: default;
     }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-brand-500);
+      outline-offset: 2px;
+    }
   }
 
   &__answers,
@@ -87,19 +102,10 @@
     font-weight: 600;
   }
 
+  // pivot-ds-button's host is `display: contents` (no box of its own) — its look comes entirely
+  // from the design system's own `.btn`/`.btn-primary` classes, this selector only positions it.
   &__submit {
     align-self: flex-start;
-    padding: var(--space-2, 8px) var(--space-4, 16px);
-    border-radius: var(--radius-md, 6px);
-    border: none;
-    background: var(--color-primary, #4f46e5);
-    color: var(--color-on-primary, #fff);
-    cursor: pointer;
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
   }
 
   &__leaderboard {

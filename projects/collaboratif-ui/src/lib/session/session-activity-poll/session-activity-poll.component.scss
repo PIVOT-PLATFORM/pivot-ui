@@ -33,6 +33,11 @@
       cursor: not-allowed;
       opacity: 0.7;
     }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-brand-500);
+      outline-offset: 2px;
+    }
   }
 
   // Proportional fill behind the option content — the visual bar of the live results.
@@ -58,20 +63,6 @@
 
   &__error {
     color: var(--color-danger, #dc2626);
-  }
-
-  &__submit {
-    padding: var(--space-2, 8px) var(--space-5, 20px);
-    border-radius: var(--radius-md, 6px);
-    border: none;
-    background: var(--color-primary, #4f46e5);
-    color: var(--color-on-primary, #fff);
-    cursor: pointer;
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
   }
 
   &__confirmed {
