@@ -2,6 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, CanMatchFn, Router } from '@angular/router';
 import { AuthService } from '../service/auth.service';
 import { PostLoginRedirectService } from '../service/post-login-redirect.service';
+import { DEFAULT_POST_LOGIN_URL } from '../util/return-url';
 
 /**
  * Bloque les routes protégées pour les visiteurs non authentifiés.
@@ -41,5 +42,5 @@ export const guestGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
   if (!auth.isAuthenticated()) return true;
-  return router.createUrlTree(['/dashboard']);
+  return router.createUrlTree([DEFAULT_POST_LOGIN_URL]);
 };
