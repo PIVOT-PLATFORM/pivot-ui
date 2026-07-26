@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, inject
 import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { ButtonComponent } from '@pivot-platform/design-system';
 import { ParticipantSessionResponse, ProblemDetailResponse, WordEntry } from '../models/session.model';
 import { SessionApiService } from '../services/session-api.service';
 import { SessionWsService } from '../services/session-ws.service';
@@ -22,7 +23,7 @@ const MAX_FONT_REM = 3;
   selector: 'app-session-activity-wordcloud',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe],
+  imports: [TranslocoPipe, ButtonComponent],
   templateUrl: './session-activity-wordcloud.component.html',
   styleUrl: './session-activity-wordcloud.component.scss',
 })

@@ -15,5 +15,12 @@
         <app-session-paused-overlay></app-session-paused-overlay>
       }
     </div>
+  } @else {
+    <div class="session-participant-shell__skeleton" aria-busy="true" aria-live="polite">
+      <span class="__sr-only">{{ 'session.participantShell.loading' | transloco }}</span>
+      <div class="pv-skeleton session-participant-shell__skeleton-line session-participant-shell__skeleton-line--title"></div>
+      <div class="pv-skeleton session-participant-shell__skeleton-line session-participant-shell__skeleton-line--body"></div>
+      <div class="pv-skeleton session-participant-shell__skeleton-line session-participant-shell__skeleton-line--body"></div>
+    </div>
   }
 </section>

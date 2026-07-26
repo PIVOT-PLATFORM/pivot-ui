@@ -838,11 +838,15 @@
       "exportError": "Export failed."
     },
     "participantShell": {
-      "loadError": "Could not load the session."
+      "loadError": "Could not load the session.",
+      "loading": "Loading the session…"
     },
     "poll": {
       "submit": "Submit",
-      "submitError": "Could not save your vote.",
+      "errors": {
+        "invalidVote": "Invalid selection — please choose a valid option.",
+        "generic": "Could not save your vote."
+      },
       "confirmed": "Your vote has been recorded.",
       "resultsSummary": "Results updated: {{count}} vote(s)"
     },
@@ -862,7 +866,10 @@
       "inputLabel": "Ask a question",
       "anonymousLabel": "Ask anonymously",
       "submit": "Send",
-      "submitError": "Could not send your question.",
+      "errors": {
+        "invalidQuestion": "Your question must be 1 to 500 characters.",
+        "generic": "Could not send your question."
+      },
       "empty": "No questions yet. Be the first to ask one.",
       "upvote": "Upvote the question: {{ text }}",
       "anonymousAuthor": "Anonymous",
@@ -872,7 +879,11 @@
       "inputLabel": "New idea",
       "colorLabel": "Post-it colour",
       "add": "Add",
-      "submitError": "Could not add the post-it.",
+      "errors": {
+        "invalidCard": "Post-it text must be 1 to 280 characters.",
+        "notOwner": "You can only edit or delete your own post-its.",
+        "generic": "Could not add the post-it."
+      },
       "empty": "No ideas yet. Add the first one.",
       "edit": "Edit",
       "delete": "Delete",
@@ -898,7 +909,12 @@
       "remaining": "Points remaining:",
       "overBudget": "You have exceeded the points budget.",
       "submit": "Vote",
-      "submitError": "Could not record your vote.",
+      "errors": {
+        "invalidBallot": "Your ballot is invalid.",
+        "voteClosed": "The vote is closed.",
+        "alreadyVoted": "You have already voted.",
+        "generic": "Could not record your vote."
+      },
       "voted": "Your vote has been recorded.",
       "ballotsReceived": "Votes received:",
       "resultsTitle": "Results",
@@ -918,7 +934,12 @@
       "timeUp": "Time's up.",
       "answersReceived": "Answers received:",
       "submit": "Submit",
-      "submitError": "Answer not recorded (time up?).",
+      "errors": {
+        "wrongQuestion": "This isn't the current question anymore.",
+        "questionClosed": "Time's up — the answer window has closed.",
+        "alreadyAnswered": "You already answered this question.",
+        "generic": "Answer not recorded (time up?)."
+      },
       "answered": "Answer submitted.",
       "leaderboardTitle": "Leaderboard",
       "myScore": "Your score:",

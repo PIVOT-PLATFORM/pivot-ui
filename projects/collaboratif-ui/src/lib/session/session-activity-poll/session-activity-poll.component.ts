@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, inject, input, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { ParticipantSessionResponse, PollConfig, PollOptionResult } from '../models/session.model';
+import { ButtonComponent } from '@pivot-platform/design-system';
+import { ParticipantSessionResponse, PollConfig, PollOptionResult, ProblemDetailResponse } from '../models/session.model';
 import { SessionApiService } from '../services/session-api.service';
 import { SessionWsService } from '../services/session-ws.service';
 
@@ -19,7 +21,7 @@ import { SessionWsService } from '../services/session-ws.service';
   selector: 'app-session-activity-poll',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe],
+  imports: [TranslocoPipe, ButtonComponent],
   templateUrl: './session-activity-poll.component.html',
   styleUrl: './session-activity-poll.component.scss',
 })
@@ -33,7 +35,7 @@ export class SessionActivityPollComponent implements OnInit, OnDestroy {
   readonly selectedOptionIds = signal<string[]>([]);
   readonly results = signal<PollOptionResult[]>([]);
   readonly submitting = signal(false);
-  readonly submitError = signal(false);
+  readonly errorMessageKey = signal<string | null>(null);
   readonly hasVoted = signal(false);
 
   readonly config = computed<PollConfig>(() => this.session().config as PollConfig);
@@ -73,7 +75,7 @@ export class SessionActivityPollComponent implements OnInit, OnDestroy {
       return;
     }
     this.submitting.set(true);
-    this.submitError.set(false);
+    this.errorMessageKey.set(null);
     this.sessionApi
       .submitPollVote(this.session().id, { optionIds: this.selectedOptionIds() })
       .subscribe({
@@ -81,11 +83,28 @@ export class SessionActivityPollComponent implements OnInit, OnDestroy {
           this.submitting.set(false);
           this.hasVoted.set(true);
         },
-        error: () => {
+        error: (error: HttpErrorResponse) => {
           this.submitting.set(false);
-          this.submitError.set(true);
+          this.errorMessageKey.set(this.resolveErrorKey(error));
         },
       });
+  }
+
+  /**
+   * Maps the backend's `ProblemDetail.code` to a specific i18n key (T10, deferred ergonomics
+   * polish) — mirrors {@code SessionActivityWordcloudComponent}'s `resolveErrorKey`. The only
+   * code {@code fr.pivot.collaboratif.session.poll.PollActivityService#recordVote} throws is
+   * `INVALID_POLL_VOTE` (400).
+   *
+   * @param error the failed submission's HTTP error
+   * @returns the i18n key to display
+   */
+  private resolveErrorKey(error: HttpErrorResponse): string {
+    const body = error.error as ProblemDetailResponse | null;
+    if (body?.code === 'INVALID_POLL_VOTE') {
+      return 'session.poll.errors.invalidVote';
+    }
+    return 'session.poll.errors.generic';
   }
 
   /** `null` when the option has no result yet, or the facilitator has hidden results (no `count`). */

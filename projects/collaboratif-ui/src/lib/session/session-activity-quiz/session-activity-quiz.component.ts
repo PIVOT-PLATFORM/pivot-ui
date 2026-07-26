@@ -8,11 +8,14 @@ import {
   input,
   signal,
 } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription, interval } from 'rxjs';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { ButtonComponent } from '@pivot-platform/design-system';
 import {
   LeaderboardEntry,
   ParticipantSessionResponse,
+  ProblemDetailResponse,
   QuizState,
 } from '../models/session.model';
 import { SessionApiService } from '../services/session-api.service';
@@ -31,7 +34,7 @@ import { SessionWsService } from '../services/session-ws.service';
   selector: 'app-session-activity-quiz',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe],
+  imports: [TranslocoPipe, ButtonComponent],
   templateUrl: './session-activity-quiz.component.html',
   styleUrl: './session-activity-quiz.component.scss',
 })
@@ -58,7 +61,7 @@ export class SessionActivityQuizComponent implements OnInit, OnDestroy {
   readonly answerCount = signal(0);
   readonly selected = signal<number[]>([]);
   readonly submitting = signal(false);
-  readonly submitError = signal(false);
+  readonly errorMessageKey = signal<string | null>(null);
 
   private readonly startedAtMs = signal<number | null>(null);
   private readonly nowMs = signal(Date.now());
@@ -92,6 +95,26 @@ export class SessionActivityQuizComponent implements OnInit, OnDestroy {
   readonly timeUp = computed(
     () => this.started() && !this.ended() && !this.answered() && this.remaining() === 0,
   );
+
+  /**
+   * Visual urgency tier of the countdown (T12, deferred ergonomics polish) — `'danger'` at 25%
+   * of the window or less, `'warning'` at 50% or less, `'normal'` otherwise. `0` duration (not
+   * yet hydrated) stays `'normal'` to avoid a false-urgent flash before the first question.
+   */
+  readonly timerUrgency = computed<'normal' | 'warning' | 'danger'>(() => {
+    const duration = this.durationSeconds();
+    if (duration <= 0) {
+      return 'normal';
+    }
+    const ratio = this.remaining() / duration;
+    if (ratio <= 0.25) {
+      return 'danger';
+    }
+    if (ratio <= 0.5) {
+      return 'warning';
+    }
+    return 'normal';
+  });
 
   private messagesSubscription: Subscription | null = null;
   private tickSubscription: Subscription | null = null;
@@ -136,7 +159,7 @@ export class SessionActivityQuizComponent implements OnInit, OnDestroy {
       return;
     }
     this.submitting.set(true);
-    this.submitError.set(false);
+    this.errorMessageKey.set(null);
     this.sessionApi
       .submitQuizAnswer(this.session().id, {
         questionIndex: this.questionIndex(),
@@ -147,11 +170,33 @@ export class SessionActivityQuizComponent implements OnInit, OnDestroy {
           this.submitting.set(false);
           this.answered.set(true);
         },
-        error: () => {
+        error: (error: HttpErrorResponse) => {
           this.submitting.set(false);
-          this.submitError.set(true);
+          this.errorMessageKey.set(this.resolveErrorKey(error));
         },
       });
+  }
+
+  /**
+   * Maps the backend's `ProblemDetail.code` to a specific i18n key (T10, deferred ergonomics
+   * polish) — mirrors {@code SessionActivityWordcloudComponent}'s `resolveErrorKey`. Codes come
+   * from {@code fr.pivot.collaboratif.session.quiz.QuizActivityService#recordAnswer}.
+   *
+   * @param error the failed submission's HTTP error
+   * @returns the i18n key to display
+   */
+  private resolveErrorKey(error: HttpErrorResponse): string {
+    const body = error.error as ProblemDetailResponse | null;
+    switch (body?.code) {
+      case 'WRONG_QUESTION':
+        return 'session.quiz.errors.wrongQuestion';
+      case 'QUESTION_CLOSED':
+        return 'session.quiz.errors.questionClosed';
+      case 'ALREADY_ANSWERED':
+        return 'session.quiz.errors.alreadyAnswered';
+      default:
+        return 'session.quiz.errors.generic';
+    }
   }
 
   private hydrate(state: QuizState): void {

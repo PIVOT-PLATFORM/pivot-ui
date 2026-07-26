@@ -11,7 +11,7 @@
       [attr.maxlength]="maxLength"
       [value]="draftText()"
       [disabled]="disabled()"
-      [attr.aria-describedby]="submitError() ? 'brainstorm-error' : null"
+      [attr.aria-describedby]="errorMessageKey() ? 'brainstorm-error' : null"
       (input)="draftText.set(textInput.value)"
     ></textarea>
 
@@ -33,16 +33,25 @@
       }
     </div>
 
-    <button type="submit" class="session-activity-brainstorm__add" [disabled]="!canAdd()">
+    <pivot-ds-button
+      type="submit"
+      class="session-activity-brainstorm__add"
+      [disabled]="!canAdd()"
+      [loading]="submitting()"
+    >
       {{ 'session.brainstorm.add' | transloco }}
-    </button>
+    </pivot-ds-button>
 
-    @if (submitError()) {
+    @if (errorMessageKey(); as key) {
       <p id="brainstorm-error" class="session-activity-brainstorm__error" role="alert">
-        {{ 'session.brainstorm.submitError' | transloco }}
+        {{ key | transloco }}
       </p>
     }
   </form>
+
+  @if (mutationErrorKey(); as key) {
+    <p class="session-activity-brainstorm__error" role="alert">{{ key | transloco }}</p>
+  }
 
   <ul class="session-activity-brainstorm__board" aria-live="polite">
     @for (card of orderedCards(); track card.id) {

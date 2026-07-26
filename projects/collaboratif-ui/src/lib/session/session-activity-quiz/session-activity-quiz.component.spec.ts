@@ -124,13 +124,20 @@ describe('SessionActivityQuizComponent', () => {
     expect(fixture.componentInstance.answered()).toBe(true);
   });
 
-  it('submit() surfaces submitError on failure (e.g. a late 409)', () => {
+  it.each([
+    [400, { code: 'WRONG_QUESTION' }, 'session.quiz.errors.wrongQuestion'],
+    [409, { code: 'QUESTION_CLOSED' }, 'session.quiz.errors.questionClosed'],
+    [409, { code: 'ALREADY_ANSWERED' }, 'session.quiz.errors.alreadyAnswered'],
+    [409, { code: 'OTHER' }, 'session.quiz.errors.generic'],
+    [500, undefined, 'session.quiz.errors.generic'],
+  ] as const)('maps a %s error (%o) to %s', (status, body, expectedKey) => {
     const fixture = createFixture();
     startQuestion();
     fixture.componentInstance.toggleOption(0);
     fixture.componentInstance.submit();
-    httpMock.expectOne(ANSWER_URL).flush(null, { status: 409, statusText: 'Conflict' });
-    expect(fixture.componentInstance.submitError()).toBe(true);
+    httpMock.expectOne(ANSWER_URL).flush(body ?? null, { status, statusText: 'Error' });
+    expect(fixture.componentInstance.errorMessageKey()).toBe(expectedKey);
+    expect(fixture.componentInstance.submitting()).toBe(false);
   });
 
   it('updates the live answer count from a QUIZ_ANSWERED message', () => {
@@ -192,6 +199,23 @@ describe('SessionActivityQuizComponent', () => {
       expect(fixture.componentInstance.timeUp()).toBe(true); // the assertive "time up" a11y cue
       fixture.componentInstance.toggleOption(1); // no-op once the window closed
       expect(fixture.componentInstance.canSubmit()).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('escalates timerUrgency as the 30s window runs down (T12 visual urgency)', async () => {
+    vi.useFakeTimers();
+    try {
+      const fixture = createFixture(NOT_STARTED);
+      startQuestion(); // a 30s question
+      expect(fixture.componentInstance.timerUrgency()).toBe('normal');
+
+      await vi.advanceTimersByTimeAsync(16_000); // remaining ~14s -> 14/30 <= 0.5
+      expect(fixture.componentInstance.timerUrgency()).toBe('warning');
+
+      await vi.advanceTimersByTimeAsync(9_000); // remaining ~5s -> 5/30 <= 0.25
+      expect(fixture.componentInstance.timerUrgency()).toBe('danger');
     } finally {
       vi.useRealTimers();
     }

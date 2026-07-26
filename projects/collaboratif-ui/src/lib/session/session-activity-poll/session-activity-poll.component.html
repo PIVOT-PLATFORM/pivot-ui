@@ -34,19 +34,19 @@
     </p>
   }
 
-  @if (submitError()) {
-    <p class="session-activity-poll__error" role="alert">{{ 'session.poll.submitError' | transloco }}</p>
+  @if (errorMessageKey(); as key) {
+    <p class="session-activity-poll__error" role="alert">{{ key | transloco }}</p>
   }
 
   @if (!hasVoted()) {
-    <button
+    <pivot-ds-button
       type="button"
-      class="session-activity-poll__submit"
       [disabled]="disabled() || submitting() || selectedOptionIds().length === 0"
+      [loading]="submitting()"
       (click)="submit()"
     >
       {{ 'session.poll.submit' | transloco }}
-    </button>
+    </pivot-ds-button>
   } @else {
     <p class="session-activity-poll__confirmed">{{ 'session.poll.confirmed' | transloco }}</p>
   }
