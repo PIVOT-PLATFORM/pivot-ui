@@ -15,6 +15,7 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { AuthService } from '../../core/auth/service/auth.service';
 import { ModuleRegistryService } from '../../core/modules/module-registry.service';
@@ -76,7 +77,7 @@ import { ModuleRegistryService } from '../../core/modules/module-registry.servic
                     class="module-card__icon"
                     [style.background]="hexToRgba(mod.color, 0.1)"
                     [style.color]="mod.color"
-                    [innerHTML]="mod.icon"
+                    [innerHTML]="trustIcon(mod.icon)"
                     aria-hidden="true"
                   ></div>
                   <div class="module-card__body">
@@ -131,7 +132,7 @@ import { ModuleRegistryService } from '../../core/modules/module-registry.servic
                   <div
                     class="module-card__icon"
                     aria-hidden="true"
-                    [innerHTML]="mod.icon"
+                    [innerHTML]="trustIcon(mod.icon)"
                   ></div>
                   <div class="module-card__body">
                     <p class="module-card__name">{{ mod.name }}</p>
@@ -152,6 +153,7 @@ import { ModuleRegistryService } from '../../core/modules/module-registry.servic
 export class HomeComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly moduleRegistry = inject(ModuleRegistryService);
+  private readonly sanitizer = inject(DomSanitizer);
 
   readonly user = this.auth.currentUser;
   readonly activeModules = this.moduleRegistry.activeModules;
@@ -174,4 +176,14 @@ export class HomeComponent implements OnInit {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
+  /**
+   * Marks a module's icon markup as trusted so Angular's default HTML sanitizer stops
+   * stripping the inline `<svg>` before binding it via `[innerHTML]` (SVG isn't in Angular's
+   * safe-HTML allowlist, so without this every module card rendered an empty icon slot).
+   * Safe here: `mod.icon` only ever comes from this app's own static `MODULE_METADATA`/
+   * `defaultMeta()` (see module-metadata.ts) — never from user input or the backend DTO.
+   */
+  trustIcon(icon: string): SafeHtml {
+    return this.sanitizer.bypassSecurityTrustHtml(icon);
+  }
 }
