@@ -42,6 +42,14 @@ export class MeetingParticipantShellComponent implements OnInit, OnDestroy {
   readonly overtimeAnnouncement = signal<string | null>(null);
   private wasOvertime = false;
 
+  /** Announced once per current-item change — never on the very first load (AC-A1). */
+  readonly currentItemAnnouncement = signal<string | null>(null);
+  /** Announced once the meeting transitions to ENDED (AC-A1). */
+  readonly endedAnnouncement = signal(false);
+  private previousAgendaItemId: string | null = null;
+  private hasLoadedOnce = false;
+  private wasEnded = false;
+
   readonly currentItem = computed<AgendaItemState | null>(() => {
     const state = this.liveState();
     if (!state || state.currentIndex === undefined) {
@@ -102,6 +110,9 @@ export class MeetingParticipantShellComponent implements OnInit, OnDestroy {
       this.timer.reset();
     }
     this.checkOvertimeTransition(state.overtime, state.overtimeSeconds);
+    this.checkCurrentItemTransition(state);
+    this.checkEndedTransition(state.status);
+    this.hasLoadedOnce = true;
   }
 
   private checkOvertimeTransition(overtime: boolean, overtimeSeconds: number): void {
@@ -111,6 +122,29 @@ export class MeetingParticipantShellComponent implements OnInit, OnDestroy {
       this.overtimeAnnouncement.set(null);
     }
     this.wasOvertime = overtime;
+  }
+
+  /**
+   * Announces "Point courant : {titre}" (AC-A1) once per current-item change — never on the very
+   * first load/join, only on a genuine transition a participant should be alerted to.
+   */
+  private checkCurrentItemTransition(state: MeetingLiveState): void {
+    const newItemId = state.currentAgendaItemId ?? null;
+    if (this.hasLoadedOnce && newItemId !== null && newItemId !== this.previousAgendaItemId) {
+      const title =
+        state.currentIndex !== undefined ? (state.agendaItems[state.currentIndex]?.title ?? null) : null;
+      this.currentItemAnnouncement.set(title);
+    } else {
+      this.currentItemAnnouncement.set(null);
+    }
+    this.previousAgendaItemId = newItemId;
+  }
+
+  /** Announces "Réunion terminée" (AC-A1) once, on the transition into ENDED. */
+  private checkEndedTransition(status: string): void {
+    const ended = status === 'ENDED';
+    this.endedAnnouncement.set(ended && !this.wasEnded);
+    this.wasEnded = ended;
   }
 
   private onMessage(raw: string): void {

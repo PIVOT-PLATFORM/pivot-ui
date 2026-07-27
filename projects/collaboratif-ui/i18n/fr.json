@@ -1000,6 +1000,7 @@
       "end": "Terminer la réunion",
       "actionError": "Action impossible.",
       "currentItem": "Point en cours",
+      "currentItemAnnounce": "Point courant : {{title}}",
       "itemProgress": "Point {{index}} sur {{total}}",
       "addActionTitle": "Ajouter une action",
       "actionLabel": "Description de l'action",

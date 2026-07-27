@@ -1000,6 +1000,7 @@
       "end": "End the meeting",
       "actionError": "Action failed.",
       "currentItem": "Current item",
+      "currentItemAnnounce": "Current item: {{title}}",
       "itemProgress": "Item {{index}} of {{total}}",
       "addActionTitle": "Add an action",
       "actionLabel": "Action description",

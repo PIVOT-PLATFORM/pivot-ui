@@ -2,6 +2,19 @@
   @if (loadError()) {
     <p class="meeting-participant__error" role="alert">{{ 'meeting.participant.loadError' | transloco }}</p>
   } @else if (liveState(); as state) {
+    <!-- AC-A1: the only significant transitions are announced — current item changed, entry into
+         overtime, closure — all via one polite region, kept mounted across every state (including
+         the closure transition, which unmounts the current-item block below). -->
+    <div class="meeting-participant__sr-only" aria-live="polite" role="status">
+      @if (overtimeAnnouncement(); as seconds) {
+        {{ 'meeting.timer.overtimeAnnounce' | transloco: { seconds } }}
+      } @else if (currentItemAnnouncement(); as title) {
+        {{ 'meeting.runner.currentItemAnnounce' | transloco: { title } }}
+      } @else if (endedAnnouncement()) {
+        {{ 'meeting.participant.ended' | transloco }}
+      }
+    </div>
+
     @if (currentItem(); as item) {
       <div class="meeting-participant__current">
         <p class="meeting-participant__current-label">{{ 'meeting.participant.currentItem' | transloco }}</p>
@@ -13,13 +26,14 @@
           }}
         </p>
 
-        <!-- AC-A1: timer exposed in an aria-live="polite" region with role="timer". -->
+        <!-- AC-A1: the countdown changes every second — aria-live="off" so it is never announced
+             per tick; only role="timer" exposes it on demand. -->
         <div
           class="meeting-participant__timer"
           [class.meeting-participant__timer--overtime]="timer.state().overtime"
           role="timer"
           [attr.aria-label]="'meeting.timer.ariaLabel' | transloco"
-          aria-live="polite"
+          aria-live="off"
         >
           @if (timer.state().overtime) {
             <span class="meeting-participant__overtime-badge">
@@ -28,13 +42,6 @@
             </span>
           } @else {
             <span>{{ 'meeting.timer.remaining' | transloco }}: {{ timer.state().remainingSeconds }}s</span>
-          }
-        </div>
-
-        <!-- AC-A1: overtime transition announced assertively, separately from the polite countdown. -->
-        <div class="meeting-participant__sr-only" aria-live="assertive" role="status">
-          @if (overtimeAnnouncement(); as seconds) {
-            {{ 'meeting.timer.overtimeAnnounce' | transloco: { seconds } }}
           }
         </div>
       </div>
@@ -51,6 +58,7 @@
           class="meeting-participant__agenda-item"
           [class.meeting-participant__agenda-item--current]="agendaItem.itemStatus === 'CURRENT'"
           [class.meeting-participant__agenda-item--done]="agendaItem.itemStatus === 'DONE'"
+          [attr.aria-current]="agendaItem.itemStatus === 'CURRENT' ? 'step' : null"
         >
           <span class="meeting-participant__agenda-item-title">{{ agendaItem.title }}</span>
           <span class="meeting-participant__agenda-item-status">

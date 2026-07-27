@@ -155,7 +155,27 @@ describe('MeetingParticipantShellComponent', () => {
     expect(fixture.componentInstance.currentItem()).toBeNull();
   });
 
-  it('announces an overtime transition once via the assertive live region signal', () => {
+  it('AC-A1: announces the meeting ending once, not on the very first load', () => {
+    const fixture = createFixture();
+    expect(fixture.componentInstance.endedAnnouncement()).toBe(false);
+
+    fake.emit('/topic/collaboratif/meeting/m-1', JSON.stringify({ type: 'MEETING_ENDED', meetingId: 'm-1' }));
+    httpMock.expectOne(LIVE_URL).flush(liveState({ status: 'ENDED', currentIndex: undefined, currentAgendaItemId: undefined }));
+
+    expect(fixture.componentInstance.endedAnnouncement()).toBe(true);
+  });
+
+  it('AC-A1: announces the new current item title on an agenda change, not on the very first load', () => {
+    const fixture = createFixture();
+    expect(fixture.componentInstance.currentItemAnnouncement()).toBeNull();
+
+    fake.emit('/topic/collaboratif/meeting/m-1', JSON.stringify({ type: 'AGENDA_ITEM_CHANGED', meetingId: 'm-1' }));
+    httpMock.expectOne(LIVE_URL).flush(liveState({ currentIndex: 1, currentAgendaItemId: 'ai-2' }));
+
+    expect(fixture.componentInstance.currentItemAnnouncement()).toBe('Point B');
+  });
+
+  it('announces an overtime transition once via the polite live region signal', () => {
     const fixture = createFixture();
 
     fake.emit(
