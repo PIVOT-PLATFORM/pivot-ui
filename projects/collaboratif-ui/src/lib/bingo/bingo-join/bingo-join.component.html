@@ -1,0 +1,49 @@
+<section class="bingo-join">
+  <h1>{{ 'bingo.join.title' | transloco }}</h1>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="bingo-join__field">
+      <label for="bingo-join-code">{{ 'bingo.join.codeLabel' | transloco }}</label>
+      <input
+        id="bingo-join-code"
+        type="text"
+        formControlName="code"
+        maxlength="6"
+        [attr.aria-invalid]="form.controls.code.invalid && form.controls.code.touched ? true : null"
+        aria-describedby="bingo-join-code-error"
+      />
+      @if (form.controls.code.invalid && form.controls.code.touched) {
+        <span id="bingo-join-code-error" class="bingo-join__field-error" role="alert">
+          {{ 'bingo.join.codeRequired' | transloco }}
+        </span>
+      }
+    </div>
+
+    @if (isAnonymous) {
+      <div class="bingo-join__field">
+        <label for="bingo-join-name">{{ 'bingo.join.displayNameLabel' | transloco }}</label>
+        <input
+          id="bingo-join-name"
+          type="text"
+          formControlName="displayName"
+          maxlength="30"
+          [attr.aria-invalid]="form.controls.displayName.invalid && form.controls.displayName.touched ? true : null"
+          aria-describedby="bingo-join-name-error"
+        />
+        @if (form.controls.displayName.invalid && form.controls.displayName.touched) {
+          <span id="bingo-join-name-error" class="bingo-join__field-error" role="alert">
+            {{ 'bingo.join.displayNameRequired' | transloco }}
+          </span>
+        }
+      </div>
+    }
+
+    @if (errorMessageKey(); as key) {
+      <p class="bingo-join__error" role="alert">{{ key | transloco }}</p>
+    }
+
+    <button type="submit" [disabled]="submitting()" [attr.aria-busy]="submitting() ? true : null">
+      {{ 'bingo.join.submit' | transloco }}
+    </button>
+  </form>
+</section>

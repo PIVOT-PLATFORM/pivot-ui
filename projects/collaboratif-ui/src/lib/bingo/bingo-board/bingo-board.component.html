@@ -1,0 +1,46 @@
+<section class="bingo-board">
+  @if (winner(); as win) {
+    <p class="bingo-board__bingo" role="alert">
+      {{ 'bingo.board.bingoAnnouncement' | transloco: { name: win.displayName } }}
+    </p>
+  } @else if (isFinished()) {
+    <p class="bingo-board__bingo" role="alert">{{ 'bingo.board.finished' | transloco }}</p>
+  }
+
+  @if (errorMessageKey(); as key) {
+    <p class="bingo-board__error" role="alert">{{ key | transloco }}</p>
+  }
+
+  @if (isSpectator()) {
+    <p class="bingo-board__spectator-notice">{{ 'bingo.board.spectatorNotice' | transloco }}</p>
+  } @else {
+    <div class="bingo-board__grid" role="grid" [attr.aria-label]="'bingo.board.gridLabel' | transloco">
+      @for (row of [0, 1, 2, 3, 4]; track row) {
+        <div class="bingo-board__row" role="row">
+          @for (cell of cells().slice(row * 5, row * 5 + 5); track cell.cellIndex) {
+            <div role="gridcell">
+              <button
+                type="button"
+                class="bingo-board__cell"
+                [class.bingo-board__cell--marked]="cell.marked"
+                [attr.aria-pressed]="cell.marked"
+                [attr.aria-label]="cell.phrase"
+                [disabled]="isFinished()"
+                (click)="onCellClick(cell)"
+              >
+                {{ cell.phrase }}
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <h2>{{ 'bingo.board.progressTitle' | transloco }}</h2>
+  <ul class="bingo-board__progress" aria-live="polite">
+    @for (row of progressRows(); track row.participantId) {
+      <li>{{ row.displayName }} — {{ 'bingo.board.markedCount' | transloco: { count: row.markedCount } }}</li>
+    }
+  </ul>
+</section>

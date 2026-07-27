@@ -1,0 +1,30 @@
+<section class="bingo-create">
+  <h1>{{ 'bingo.create.title' | transloco }}</h1>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="bingo-create__field">
+      <label for="bingo-create-name">{{ 'bingo.create.nameLabel' | transloco }}</label>
+      <input
+        id="bingo-create-name"
+        type="text"
+        formControlName="name"
+        maxlength="80"
+        [attr.aria-invalid]="form.controls.name.invalid && form.controls.name.touched ? true : null"
+        aria-describedby="bingo-create-name-error"
+      />
+      @if (form.controls.name.invalid && form.controls.name.touched) {
+        <span id="bingo-create-name-error" class="bingo-create__field-error" role="alert">
+          {{ 'bingo.create.nameRequired' | transloco }}
+        </span>
+      }
+    </div>
+
+    @if (errorMessageKey(); as key) {
+      <p class="bingo-create__error" role="alert">{{ key | transloco }}</p>
+    }
+
+    <button type="submit" [disabled]="submitting()" [attr.aria-busy]="submitting() ? true : null">
+      {{ 'bingo.create.submit' | transloco }}
+    </button>
+  </form>
+</section>

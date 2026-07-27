@@ -945,5 +945,45 @@
       "myScore": "Votre score :",
       "points": "pts"
     }
+  },
+  "bingo": {
+    "create": {
+      "title": "Créer une partie de Bingo des réunions",
+      "nameLabel": "Nom de la partie",
+      "nameRequired": "Le nom est requis.",
+      "submit": "Créer",
+      "errors": {
+        "generic": "Une erreur est survenue."
+      }
+    },
+    "join": {
+      "title": "Rejoindre une partie de Bingo des réunions",
+      "codeLabel": "Code de la partie",
+      "codeRequired": "Le code doit contenir 6 caractères.",
+      "displayNameLabel": "Votre pseudonyme",
+      "displayNameRequired": "Un pseudonyme de 2 à 30 caractères est requis.",
+      "submit": "Rejoindre",
+      "errors": {
+        "notFound": "Code invalide ou partie expirée.",
+        "invalidDisplayName": "Pseudonyme invalide.",
+        "invalidCode": "Code invalide.",
+        "invalidRequest": "Requête invalide.",
+        "generic": "Une erreur est survenue."
+      }
+    },
+    "board": {
+      "gridLabel": "Grille de Bingo",
+      "progressTitle": "Progression",
+      "markedCount": "{{count}} case(s) cochée(s)",
+      "bingoAnnouncement": "Bingo ! {{name}} a gagné.",
+      "finished": "La partie est terminée.",
+      "spectatorNotice": "Partie complète — mode spectateur. Vous suivez la progression et l'annonce de victoire, sans grille.",
+      "errors": {
+        "SPECTATOR_CANNOT_MARK": "Les spectateurs ne peuvent pas cocher de case.",
+        "INVALID_CELL": "Case invalide.",
+        "ROOM_FINISHED": "La partie est déjà terminée.",
+        "generic": "Une erreur est survenue."
+      }
+    }
   }
 }
