@@ -984,6 +984,35 @@
       "INFO": "Info",
       "DISCUSSION": "Discussion",
       "DECISION": "Decision"
+    },
+    "validation": {
+      "title": "Validate the meeting time",
+      "slotsLabel": "Proposed time slots",
+      "recommendedBadge": "Recommended",
+      "conflictBadge": "Conflict",
+      "confirmButton": "Validate",
+      "confirming": "Validating…",
+      "confirmed": "The meeting time has been confirmed. Invitations have been sent.",
+      "adjustButton": "Adjust manually",
+      "adjustStartLabel": "Start",
+      "adjustEndLabel": "End",
+      "adjustSave": "Save adjustment",
+      "adjustCancel": "Cancel",
+      "adjusted": "The proposed slot has been updated.",
+      "liveUpdate": "The proposed slots were just updated.",
+      "loadError": "Unable to load this meeting.",
+      "connectionStatus": {
+        "connecting": "Connecting to live updates…",
+        "connected": "Live updates connected.",
+        "error": "Live updates unavailable — showing the last known state."
+      },
+      "errors": {
+        "ALREADY_CONFIRMED": "This meeting has already been confirmed.",
+        "NOT_FOUND": "This meeting could not be found.",
+        "FORBIDDEN": "Only the meeting organizer can perform this action.",
+        "SLOT_INVALID": "This time slot is no longer valid. Please pick another one.",
+        "NETWORK_ERROR": "A network error occurred. Please try again."
+      }
     }
   }
 }

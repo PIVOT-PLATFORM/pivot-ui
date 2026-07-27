@@ -4,7 +4,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { COLLABORATIF_API_URL } from '../../core/whiteboard/config/tokens';
 import { MeetingApiService } from './meeting-api.service';
-import { MeetingResponse } from '../models/meeting.model';
+import { MeetingBookingResponse, MeetingResponse } from '../models/meeting.model';
 
 const TEST_API_URL = 'http://localhost:8083/api/collaboratif';
 const BASE = `${TEST_API_URL}/meetings`;
@@ -18,6 +18,30 @@ const MEETING: MeetingResponse = {
   teamId: null,
   agendaItems: [],
   createdAt: '2026-07-27T08:00:00Z',
+};
+
+const BOOKING_MEETING: MeetingBookingResponse = {
+  id: 'm-2',
+  status: 'PRE_RESERVED',
+  title: 'Sprint Review',
+  scheduledAt: '2026-08-03T09:00:00Z',
+  totalDurationMinutes: 30,
+  bookingWindowStart: '2026-08-03T09:00:00Z',
+  bookingWindowEnd: '2026-08-03T11:00:00Z',
+  eventRef: 'evt-1',
+  projectRef: 'proj-1',
+  rescheduleRequested: false,
+  proposedSlots: [
+    {
+      id: 'slot-1',
+      start: '2026-08-03T09:00:00Z',
+      end: '2026-08-03T09:30:00Z',
+      rank: 1,
+      hasConflict: false,
+      conflictReason: null,
+      recommended: true,
+    },
+  ],
 };
 
 describe('MeetingApiService', () => {
@@ -66,5 +90,36 @@ describe('MeetingApiService', () => {
     expect(req.request.body.teamId).toBe(42);
     expect(req.request.body.agendaItems).toEqual([{ title: 'Point A', durationMinutes: 10, type: 'INFO' }]);
     req.flush(MEETING);
+  });
+
+  it('getMeeting() GETs /meetings/{id}', () => {
+    service.getMeeting('m-2').subscribe(response => {
+      expect(response).toEqual(BOOKING_MEETING);
+    });
+    const req = httpMock.expectOne(`${BASE}/m-2`);
+    expect(req.request.method).toBe('GET');
+    req.flush(BOOKING_MEETING);
+  });
+
+  it('confirmSlot() POSTs the slotId to /meetings/{id}/confirm', () => {
+    service.confirmSlot('m-2', { slotId: 'slot-1' }).subscribe();
+    const req = httpMock.expectOne(`${BASE}/m-2/confirm`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ slotId: 'slot-1' });
+    req.flush({ ...BOOKING_MEETING, status: 'CONFIRMED' });
+  });
+
+  it('adjustSlot() PATCHes the new boundaries to /meetings/{id}/slot', () => {
+    service
+      .adjustSlot('m-2', { slotId: 'slot-1', start: '2026-08-03T14:00:00Z', end: '2026-08-03T14:30:00Z' })
+      .subscribe();
+    const req = httpMock.expectOne(`${BASE}/m-2/slot`);
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual({
+      slotId: 'slot-1',
+      start: '2026-08-03T14:00:00Z',
+      end: '2026-08-03T14:30:00Z',
+    });
+    req.flush(BOOKING_MEETING);
   });
 });

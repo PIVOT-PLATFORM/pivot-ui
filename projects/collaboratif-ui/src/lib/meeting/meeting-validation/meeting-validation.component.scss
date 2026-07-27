@@ -1,0 +1,159 @@
+.meeting-validation {
+  padding: var(--space-6, 24px);
+  max-width: 720px;
+
+  &__meeting-title {
+    margin-top: 0;
+  }
+
+  // Visually hidden but present in the accessibility tree — the status text is redundant with
+  // the aria-live announcement above it for sighted users navigating by mouse, but keeps a
+  // permanent, focusable status readout for keyboard/screen-reader users who missed the
+  // transient live-region announcement (WCAG 2.1 AA — status not conveyed by content alone).
+  &__connection-status {
+    font-size: 0.875rem;
+    color: var(--color-text-muted, #4b5563);
+    margin-bottom: var(--space-3, 12px);
+  }
+
+  &__live-region {
+    // Visually hidden (not display:none — an aria-live region must stay in the accessibility
+    // tree to be announced) while not affecting sighted layout.
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  &__listbox {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2, 8px);
+    margin-bottom: var(--space-4, 16px);
+  }
+
+  &__slot {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2, 8px);
+    padding: var(--space-3, 12px);
+    // #374151 on #ffffff is ~10.3:1 — comfortably AA (and AAA) for normal text.
+    border: 1px solid var(--color-border, #d1d5db);
+    border-radius: var(--radius-md, 6px);
+    color: var(--color-text, #1f2937);
+    background: var(--color-surface, #fff);
+    cursor: pointer;
+
+    &--selected {
+      // #4338ca on #eef2ff is ~7.3:1 — AA for normal text, comfortably above the 3:1 non-text
+      // contrast requirement for the selection border/background itself.
+      border-color: var(--color-primary, #4338ca);
+      background: var(--color-primary-subtle, #eef2ff);
+    }
+
+    &--conflict {
+      border-style: dashed;
+    }
+
+    // Visible keyboard focus indicator (WCAG 2.1 AA 2.4.7) — a 2px solid outline offset from the
+    // element's own border, so it stays visible on both the plain and --selected background.
+    &:focus-visible {
+      outline: 2px solid var(--color-focus, #1d4ed8);
+      outline-offset: 2px;
+    }
+  }
+
+  &__slot-time {
+    font-weight: 600;
+  }
+
+  &__badge {
+    padding: 2px var(--space-2, 8px);
+    border-radius: var(--radius-full, 999px);
+    font-size: 0.75rem;
+    font-weight: 600;
+
+    &--recommended {
+      // #14532d on #dcfce7 is ~7.6:1 — AA for normal text.
+      color: var(--color-success-text, #14532d);
+      background: var(--color-success-subtle, #dcfce7);
+    }
+
+    &--conflict {
+      // #92400e on #fef3c7 is ~5.8:1 — AA for normal text.
+      color: var(--color-warning-text, #92400e);
+      background: var(--color-warning-subtle, #fef3c7);
+    }
+  }
+
+  &__confirmed {
+    padding: var(--space-4, 16px);
+    border: 1px solid var(--color-success, #16a34a);
+    border-radius: var(--radius-md, 6px);
+  }
+
+  &__error {
+    color: var(--color-danger, #dc2626);
+    margin-bottom: var(--space-3, 12px);
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3, 12px);
+    margin-bottom: var(--space-4, 16px);
+
+    button {
+      padding: var(--space-2, 8px) var(--space-5, 20px);
+      border-radius: var(--radius-md, 6px);
+      background: var(--color-primary, #4338ca);
+      color: var(--color-on-primary, #fff);
+      border: none;
+      cursor: pointer;
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--color-focus, #1d4ed8);
+        outline-offset: 2px;
+      }
+    }
+  }
+
+  &__adjust-form {
+    padding: var(--space-4, 16px);
+    border: 1px solid var(--color-border, #d1d5db);
+    border-radius: var(--radius-md, 6px);
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1, 4px);
+    margin-bottom: var(--space-4, 16px);
+
+    label {
+      font-weight: 600;
+    }
+
+    input {
+      padding: var(--space-2, 8px);
+      border: 1px solid var(--color-border, #d1d5db);
+      border-radius: var(--radius-md, 6px);
+
+      &:focus-visible {
+        outline: 2px solid var(--color-focus, #1d4ed8);
+        outline-offset: 2px;
+      }
+    }
+  }
+}
