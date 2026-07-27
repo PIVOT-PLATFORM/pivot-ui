@@ -46,4 +46,13 @@ export class MeetingReportService {
       responseType: 'text',
     });
   }
+
+  /**
+   * Explicitly shares a closed meeting's compte-rendu with the team (US12.3.1 AC7/AC8) —
+   * organizer or `ROLE_ADMIN` only server-side; a `409 MEETING_NOT_CLOSED` before closure, `403`
+   * for a non-organizer caller.
+   */
+  share(meetingId: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/meetings/${meetingId}/report/share`, null);
+  }
 }

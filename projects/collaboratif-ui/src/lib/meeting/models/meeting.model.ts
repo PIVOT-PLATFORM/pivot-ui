@@ -185,6 +185,15 @@ export interface MeetingReportReadyEvent {
   readonly draft: boolean;
 }
 
+/** `MEETING_REPORT_SHARED` broadcast (US12.3.1 AC7/AC8) — sent every time the organizer triggers
+ *  `POST .../report/share`, distinct from the automatic once-only `MEETING_REPORT_READY`. */
+export interface MeetingReportSharedEvent {
+  readonly type: 'MEETING_REPORT_SHARED';
+  readonly meetingId: string;
+  readonly sharedBy: number;
+  readonly sharedAt: string;
+}
+
 /** Union of every message shape received on `/topic/collaboratif/meeting/{id}` (US12.2.1/US12.3.1). */
 export type MeetingEvent =
   | MeetingStartedEvent
@@ -192,7 +201,8 @@ export type MeetingEvent =
   | AgendaItemChangedEvent
   | MeetingEndedEvent
   | MeetingActionAddedEvent
-  | MeetingReportReadyEvent;
+  | MeetingReportReadyEvent
+  | MeetingReportSharedEvent;
 
 // ---------------------------------------------------------------------------------------------
 // Compte-rendu (US12.3.1)

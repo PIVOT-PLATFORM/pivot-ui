@@ -41,6 +41,10 @@ export class MeetingReportComponent implements OnInit, OnDestroy {
   readonly exportError = signal(false);
   readonly exportingMarkdown = signal(false);
   readonly exportingJson = signal(false);
+  readonly sharing = signal(false);
+  readonly shareError = signal(false);
+  /** Announced via `aria-live="polite"` once the share request succeeds (AC A11y). */
+  readonly shareConfirmation = signal(false);
 
   private messagesSubscription: Subscription | null = null;
 
@@ -91,6 +95,30 @@ export class MeetingReportComponent implements OnInit, OnDestroy {
       error: () => {
         this.exportingJson.set(false);
         this.exportError.set(true);
+      },
+    });
+  }
+
+  /** Explicitly shares the compte-rendu with the team (AC7/AC8) — organizer or `ROLE_ADMIN` only
+   *  server-side; a non-organizer caller gets a generic {@link shareError} (the button itself is
+   *  not hidden from non-organizers, per AC nominal, but the server enforcement is authoritative,
+   *  never bypassed or duplicated client-side). */
+  share(): void {
+    const id = this.meetingId();
+    if (!id || this.sharing()) {
+      return;
+    }
+    this.sharing.set(true);
+    this.shareError.set(false);
+    this.shareConfirmation.set(false);
+    this.reportApi.share(id).subscribe({
+      next: () => {
+        this.sharing.set(false);
+        this.shareConfirmation.set(true);
+      },
+      error: () => {
+        this.sharing.set(false);
+        this.shareError.set(true);
       },
     });
   }

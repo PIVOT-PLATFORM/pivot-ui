@@ -34,6 +34,16 @@
     @if (exportError()) {
       <p class="meeting-report__error" role="alert">{{ 'meeting.report.exportError' | transloco }}</p>
     }
+    @if (shareError()) {
+      <p class="meeting-report__error" role="alert">{{ 'meeting.report.shareError' | transloco }}</p>
+    }
+
+    <!-- AC A11y: the share confirmation is announced via aria-live="polite", not just visually. -->
+    <p class="meeting-report__sr-only" aria-live="polite" role="status">
+      @if (shareConfirmation()) {
+        {{ 'meeting.report.shareConfirmation' | transloco }}
+      }
+    </p>
 
     <div class="meeting-report__export-actions">
       <button
@@ -52,6 +62,16 @@
       >
         {{ 'meeting.report.exportJson' | transloco }}
       </button>
+      @if (!r.draft) {
+        <button
+          type="button"
+          (click)="share()"
+          [disabled]="sharing()"
+          [attr.aria-label]="'meeting.report.shareAriaLabel' | transloco"
+        >
+          {{ 'meeting.report.share' | transloco }}
+        </button>
+      }
     </div>
 
     <section aria-labelledby="meeting-report-participants-heading">

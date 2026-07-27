@@ -145,6 +145,32 @@ describe('MeetingReportComponent', () => {
     expect(fixture.componentInstance.exportingMarkdown()).toBe(false);
   });
 
+  it('share() posts to .../report/share and announces the confirmation', () => {
+    const fixture = createFixture();
+    fixture.componentInstance.share();
+    expect(fixture.componentInstance.sharing()).toBe(true);
+
+    const req = httpMock.expectOne(`${TEST_API_URL}/meetings/m-1/report/share`);
+    expect(req.request.method).toBe('POST');
+    req.flush(null);
+
+    expect(fixture.componentInstance.sharing()).toBe(false);
+    expect(fixture.componentInstance.shareConfirmation()).toBe(true);
+    expect(fixture.componentInstance.shareError()).toBe(false);
+  });
+
+  it('surfaces shareError (e.g. 403 non-organizer, 409 not-closed) without a confirmation', () => {
+    const fixture = createFixture();
+    fixture.componentInstance.share();
+    httpMock
+      .expectOne(`${TEST_API_URL}/meetings/m-1/report/share`)
+      .flush(null, { status: 403, statusText: 'Forbidden' });
+
+    expect(fixture.componentInstance.shareError()).toBe(true);
+    expect(fixture.componentInstance.shareConfirmation()).toBe(false);
+    expect(fixture.componentInstance.sharing()).toBe(false);
+  });
+
   it('a WS MEETING_REPORT_READY message triggers a fresh GET .../report', () => {
     const fixture = createFixture();
 
@@ -192,6 +218,14 @@ describe('MeetingReportComponent', () => {
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
     expect(text).toContain('meeting.report.finalBadge');
     expect(text).not.toContain('meeting.report.draftBadge');
+  });
+
+  it('AC7: the share button only appears for a final (non-draft) report', () => {
+    const draftFixture = createFixture(report({ draft: true }));
+    expect((draftFixture.nativeElement as HTMLElement).textContent ?? '').not.toContain('meeting.report.share');
+
+    const finalFixture = createFixture(report({ draft: false, status: 'ENDED' }));
+    expect((finalFixture.nativeElement as HTMLElement).textContent ?? '').toContain('meeting.report.share');
   });
 
   it('renders empty-state text for participants/agenda/decisions/actions when all are empty', () => {
