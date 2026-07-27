@@ -113,6 +113,50 @@ describe('MeetingFormComponent', () => {
     expect(component.agendaItems().map(i => i.title)).toEqual(['Point B']);
   });
 
+  it('renders an always-mounted aria-live region, not one only inserted once content exists', () => {
+    const fixture = TestBed.createComponent(MeetingFormComponent);
+    fixture.detectChanges();
+    const liveRegion: HTMLElement | null = fixture.nativeElement.querySelector(
+      '.meeting-form__sr-only[aria-live="polite"]',
+    );
+    expect(liveRegion).toBeTruthy();
+    expect(liveRegion?.textContent?.trim()).toBe('');
+  });
+
+  it('shifts focus to the move-down button when a move-up reaches the top boundary', async () => {
+    const fixture = TestBed.createComponent(MeetingFormComponent);
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    component.addAgendaItem();
+    component.addAgendaItem();
+    fixture.detectChanges();
+    const [, second] = component.agendaItems();
+
+    component.moveUp(1);
+    fixture.detectChanges();
+    await Promise.resolve();
+
+    const target = fixture.nativeElement.querySelector(`#meeting-item-movedown-${second.key}`);
+    expect(document.activeElement).toBe(target);
+  });
+
+  it('shifts focus to the move-up button when a move-down reaches the bottom boundary', async () => {
+    const fixture = TestBed.createComponent(MeetingFormComponent);
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    component.addAgendaItem();
+    component.addAgendaItem();
+    fixture.detectChanges();
+    const [first] = component.agendaItems();
+
+    component.moveDown(0);
+    fixture.detectChanges();
+    await Promise.resolve();
+
+    const target = fixture.nativeElement.querySelector(`#meeting-item-moveup-${first.key}`);
+    expect(document.activeElement).toBe(target);
+  });
+
   it('cannot save when an agenda item has a blank title or non-positive duration', () => {
     const fixture = TestBed.createComponent(MeetingFormComponent);
     fixture.detectChanges();

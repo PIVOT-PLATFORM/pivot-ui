@@ -158,27 +158,48 @@ export class MeetingFormComponent {
     );
   }
 
-  /** Moves an agenda item one position earlier in the display order (keyboard-accessible, AC10). */
+  /** Moves an agenda item one position earlier in the display order (keyboard-accessible, AC10).
+   *  When the move lands the item at the top (disabling this same "move up" button), focus shifts
+   *  to that item's "move down" button instead of being dropped by the browser onto `<body>`. */
   moveUp(index: number): void {
     if (index <= 0) {
       return;
     }
+    const key = this.agendaItems()[index].key;
     this.agendaItems.update(items => {
       const next = [...items];
       [next[index - 1], next[index]] = [next[index], next[index - 1]];
       return next;
     });
+    if (index - 1 === 0) {
+      this.focusAgendaItemButton(key, 'down');
+    }
   }
 
-  /** Moves an agenda item one position later in the display order (keyboard-accessible, AC10). */
+  /** Moves an agenda item one position later in the display order (keyboard-accessible, AC10).
+   *  When the move lands the item at the bottom (disabling this same "move down" button), focus
+   *  shifts to that item's "move up" button instead of being dropped by the browser onto `<body>`. */
   moveDown(index: number): void {
-    this.agendaItems.update(items => {
-      if (index >= items.length - 1) {
-        return items;
-      }
-      const next = [...items];
+    const items = this.agendaItems();
+    if (index >= items.length - 1) {
+      return;
+    }
+    const key = items[index].key;
+    this.agendaItems.update(current => {
+      const next = [...current];
       [next[index], next[index + 1]] = [next[index + 1], next[index]];
       return next;
+    });
+    if (index + 1 === items.length - 1) {
+      this.focusAgendaItemButton(key, 'up');
+    }
+  }
+
+  /** Focuses the given agenda item's move button on the next microtask, once Angular has
+   *  re-rendered the reordered list (the target button must exist in the DOM to be focusable). */
+  private focusAgendaItemButton(key: number, direction: 'up' | 'down'): void {
+    queueMicrotask(() => {
+      document.getElementById(`meeting-item-move${direction}-${key}`)?.focus();
     });
   }
 

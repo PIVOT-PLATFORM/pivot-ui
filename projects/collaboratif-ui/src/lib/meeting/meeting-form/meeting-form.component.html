@@ -1,11 +1,29 @@
 <section class="meeting-form">
   <h1>{{ 'meeting.form.title' | transloco }}</h1>
 
+  <!-- AC10: creation (and the AC3 duration-mismatch warning, when present) is announced via this
+       always-mounted aria-live="polite" region — a region only inserted into the DOM once its
+       content already exists is not reliably announced by screen readers, which must observe the
+       node before the mutation to fire (only its inner content is conditionally rendered). -->
+  <p class="meeting-form__sr-only" role="status" aria-live="polite">
+    @if (created(); as meeting) {
+      {{ 'meeting.form.created' | transloco: { title: meeting.title } }}
+      @if (meeting.agendaDurationMismatch; as mismatch) {
+        {{
+          'meeting.form.mismatch'
+            | transloco
+              : {
+                  expected: mismatch.expectedMinutes,
+                  sum: mismatch.sumMinutes,
+                  delta: mismatch.deltaMinutes
+                }
+        }}
+      }
+    }
+  </p>
+
   @if (created(); as meeting) {
-    <!-- AC10: the AC3 duration-mismatch warning (when present) is announced to screen readers via
-         this aria-live="polite" / role="status" region — this region always exists once a meeting
-         has just been created, whether or not a mismatch warning is present. -->
-    <div class="meeting-form__confirmation" role="status" aria-live="polite">
+    <div class="meeting-form__confirmation">
       <p>{{ 'meeting.form.created' | transloco: { title: meeting.title } }}</p>
       @if (meeting.agendaDurationMismatch; as mismatch) {
         <p class="meeting-form__mismatch">
@@ -187,10 +205,20 @@
                 </div>
 
                 <div class="meeting-form__agenda-item-actions">
-                  <button type="button" [disabled]="i === 0" (click)="moveUp(i)">
+                  <button
+                    type="button"
+                    [id]="'meeting-item-moveup-' + item.key"
+                    [disabled]="i === 0"
+                    (click)="moveUp(i)"
+                  >
                     {{ 'meeting.form.moveUp' | transloco }}
                   </button>
-                  <button type="button" [disabled]="i === agendaItems().length - 1" (click)="moveDown(i)">
+                  <button
+                    type="button"
+                    [id]="'meeting-item-movedown-' + item.key"
+                    [disabled]="i === agendaItems().length - 1"
+                    (click)="moveDown(i)"
+                  >
                     {{ 'meeting.form.moveDown' | transloco }}
                   </button>
                   <button type="button" (click)="removeAgendaItem(item.key)">
