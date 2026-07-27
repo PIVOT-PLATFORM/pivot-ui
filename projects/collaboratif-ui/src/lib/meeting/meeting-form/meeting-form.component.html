@@ -1,0 +1,215 @@
+<section class="meeting-form">
+  <h1>{{ 'meeting.form.title' | transloco }}</h1>
+
+  @if (created(); as meeting) {
+    <!-- AC10: the AC3 duration-mismatch warning (when present) is announced to screen readers via
+         this aria-live="polite" / role="status" region — this region always exists once a meeting
+         has just been created, whether or not a mismatch warning is present. -->
+    <div class="meeting-form__confirmation" role="status" aria-live="polite">
+      <p>{{ 'meeting.form.created' | transloco: { title: meeting.title } }}</p>
+      @if (meeting.agendaDurationMismatch; as mismatch) {
+        <p class="meeting-form__mismatch">
+          {{
+            'meeting.form.mismatch'
+              | transloco
+                : {
+                    expected: mismatch.expectedMinutes,
+                    sum: mismatch.sumMinutes,
+                    delta: mismatch.deltaMinutes
+                  }
+          }}
+        </p>
+      }
+      <button type="button" (click)="dismissConfirmation()">
+        {{ 'meeting.form.createAnother' | transloco }}
+      </button>
+    </div>
+  } @else {
+    @if (moduleDisabled()) {
+      <p class="meeting-form__error" role="alert">{{ 'meeting.form.moduleDisabled' | transloco }}</p>
+    }
+    @if (saveNetworkError()) {
+      <div class="meeting-form__error" role="alert">
+        <p>{{ 'meeting.form.saveError' | transloco }}</p>
+        <button type="button" (click)="save()">{{ 'meeting.form.retry' | transloco }}</button>
+      </div>
+    }
+
+    <form (ngSubmit)="save()">
+      <div class="meeting-form__field">
+        <label for="meeting-title">{{ 'meeting.form.titleLabel' | transloco }}</label>
+        <input
+          id="meeting-title"
+          type="text"
+          [value]="title()"
+          (input)="onTitleInput($event)"
+          maxlength="200"
+          required
+          [attr.aria-invalid]="fieldErrorCode() === 'INVALID_TITLE' ? true : null"
+          [attr.aria-describedby]="fieldErrorCode() === 'INVALID_TITLE' ? 'meeting-title-error' : null"
+        />
+        @if (fieldErrorCode() === 'INVALID_TITLE') {
+          <p id="meeting-title-error" role="alert">{{ 'meeting.form.errors.INVALID_TITLE' | transloco }}</p>
+        }
+      </div>
+
+      <div class="meeting-form__field">
+        <label for="meeting-scheduled-at">{{ 'meeting.form.scheduledAtLabel' | transloco }}</label>
+        <input
+          id="meeting-scheduled-at"
+          type="datetime-local"
+          [value]="scheduledAt()"
+          (input)="onScheduledAtInput($event)"
+          required
+          [attr.aria-invalid]="
+            fieldErrorCode() === 'INVALID_SCHEDULED_AT' || fieldErrorCode() === 'INVALID_REQUEST_BODY'
+              ? true
+              : null
+          "
+          [attr.aria-describedby]="
+            fieldErrorCode() === 'INVALID_SCHEDULED_AT' || fieldErrorCode() === 'INVALID_REQUEST_BODY'
+              ? 'meeting-scheduled-at-error'
+              : null
+          "
+        />
+        @if (fieldErrorCode() === 'INVALID_SCHEDULED_AT' || fieldErrorCode() === 'INVALID_REQUEST_BODY') {
+          <p id="meeting-scheduled-at-error" role="alert">
+            {{ 'meeting.form.errors.INVALID_SCHEDULED_AT' | transloco }}
+          </p>
+        }
+      </div>
+
+      <div class="meeting-form__field">
+        <label for="meeting-total-duration">{{ 'meeting.form.totalDurationLabel' | transloco }}</label>
+        <input
+          id="meeting-total-duration"
+          type="number"
+          min="1"
+          max="1440"
+          [value]="totalDurationMinutes()"
+          (input)="onTotalDurationInput($event)"
+          required
+          [attr.aria-invalid]="fieldErrorCode() === 'INVALID_TOTAL_DURATION_MINUTES' ? true : null"
+          [attr.aria-describedby]="
+            fieldErrorCode() === 'INVALID_TOTAL_DURATION_MINUTES' ? 'meeting-total-duration-error' : null
+          "
+        />
+        @if (fieldErrorCode() === 'INVALID_TOTAL_DURATION_MINUTES') {
+          <p id="meeting-total-duration-error" role="alert">
+            {{ 'meeting.form.errors.INVALID_TOTAL_DURATION_MINUTES' | transloco }}
+          </p>
+        }
+      </div>
+
+      <fieldset class="meeting-form__agenda">
+        <legend id="meeting-agenda-legend">{{ 'meeting.form.agendaTitle' | transloco }}</legend>
+
+        @if (
+          fieldErrorCode() === 'INVALID_AGENDA_ITEM_TITLE' ||
+          fieldErrorCode() === 'INVALID_AGENDA_ITEM_DURATION' ||
+          fieldErrorCode() === 'INVALID_AGENDA_ITEM_TYPE' ||
+          fieldErrorCode() === 'INVALID_AGENDA_ITEM_FACILITATOR'
+        ) {
+          <p id="meeting-agenda-error" role="alert">
+            {{ 'meeting.form.errors.' + fieldErrorCode() | transloco }}
+          </p>
+        }
+
+        @if (agendaItems().length === 0) {
+          <p id="meeting-agenda-empty" role="status">{{ 'meeting.form.agendaEmpty' | transloco }}</p>
+        } @else {
+          <ol class="meeting-form__agenda-list">
+            @for (item of agendaItems(); track item.key; let i = $index) {
+              <li class="meeting-form__agenda-item">
+                <div class="meeting-form__field">
+                  <label [attr.for]="'meeting-item-title-' + item.key">
+                    {{ 'meeting.form.itemTitleLabel' | transloco }}
+                  </label>
+                  <input
+                    [id]="'meeting-item-title-' + item.key"
+                    type="text"
+                    [value]="item.title"
+                    (input)="updateItemTitle(item.key, $event)"
+                    maxlength="200"
+                    required
+                    [attr.aria-describedby]="
+                      fieldErrorCode() === 'INVALID_AGENDA_ITEM_TITLE' ? 'meeting-agenda-error' : null
+                    "
+                  />
+                </div>
+
+                <div class="meeting-form__field">
+                  <label [attr.for]="'meeting-item-duration-' + item.key">
+                    {{ 'meeting.form.itemDurationLabel' | transloco }}
+                  </label>
+                  <input
+                    [id]="'meeting-item-duration-' + item.key"
+                    type="number"
+                    min="1"
+                    [value]="item.durationMinutes"
+                    (input)="updateItemDuration(item.key, $event)"
+                    required
+                    [attr.aria-describedby]="
+                      fieldErrorCode() === 'INVALID_AGENDA_ITEM_DURATION' ? 'meeting-agenda-error' : null
+                    "
+                  />
+                </div>
+
+                <div class="meeting-form__field">
+                  <label [attr.for]="'meeting-item-type-' + item.key">
+                    {{ 'meeting.form.itemTypeLabel' | transloco }}
+                  </label>
+                  <select
+                    [id]="'meeting-item-type-' + item.key"
+                    [value]="item.type"
+                    (change)="updateItemType(item.key, $event)"
+                    [attr.aria-describedby]="
+                      fieldErrorCode() === 'INVALID_AGENDA_ITEM_TYPE' ? 'meeting-agenda-error' : null
+                    "
+                  >
+                    @for (type of types; track type) {
+                      <option [value]="type">{{ 'meeting.itemType.' + type | transloco }}</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="meeting-form__field">
+                  <label [attr.for]="'meeting-item-facilitator-' + item.key">
+                    {{ 'meeting.form.itemFacilitatorLabel' | transloco }}
+                  </label>
+                  <input
+                    [id]="'meeting-item-facilitator-' + item.key"
+                    type="text"
+                    [value]="item.facilitator"
+                    (input)="updateItemFacilitator(item.key, $event)"
+                    maxlength="200"
+                  />
+                </div>
+
+                <div class="meeting-form__agenda-item-actions">
+                  <button type="button" [disabled]="i === 0" (click)="moveUp(i)">
+                    {{ 'meeting.form.moveUp' | transloco }}
+                  </button>
+                  <button type="button" [disabled]="i === agendaItems().length - 1" (click)="moveDown(i)">
+                    {{ 'meeting.form.moveDown' | transloco }}
+                  </button>
+                  <button type="button" (click)="removeAgendaItem(item.key)">
+                    {{ 'meeting.form.removeItem' | transloco }}
+                  </button>
+                </div>
+              </li>
+            }
+          </ol>
+        }
+
+        <button type="button" (click)="addAgendaItem()">{{ 'meeting.form.addItem' | transloco }}</button>
+      </fieldset>
+
+      <div class="meeting-form__actions">
+        <button type="submit" [disabled]="!canSave()">
+          {{ (saving() ? 'meeting.form.saving' : 'meeting.form.save') | transloco }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

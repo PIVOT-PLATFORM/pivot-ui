@@ -945,5 +945,45 @@
       "myScore": "Votre score :",
       "points": "pts"
     }
+  },
+  "meeting": {
+    "form": {
+      "title": "Créer une réunion",
+      "titleLabel": "Titre",
+      "scheduledAtLabel": "Date et heure",
+      "totalDurationLabel": "Durée totale (minutes)",
+      "agendaTitle": "Agenda",
+      "agendaEmpty": "Aucun point à l'ordre du jour pour l'instant.",
+      "itemTitleLabel": "Titre du point",
+      "itemDurationLabel": "Durée (minutes)",
+      "itemTypeLabel": "Type",
+      "itemFacilitatorLabel": "Animateur",
+      "addItem": "Ajouter un point",
+      "removeItem": "Supprimer",
+      "moveUp": "Monter",
+      "moveDown": "Descendre",
+      "save": "Créer la réunion",
+      "saving": "Création en cours…",
+      "saveError": "Impossible de créer la réunion.",
+      "retry": "Réessayer",
+      "moduleDisabled": "Le module MeetOps n'est pas actif pour votre organisation.",
+      "created": "Réunion « {{title}} » créée.",
+      "mismatch": "Attention : la somme des durées des points ({{sum}} min) diffère de la durée totale prévue ({{expected}} min), écart de {{delta}} min.",
+      "createAnother": "Créer une autre réunion",
+      "errors": {
+        "INVALID_TITLE": "Le titre doit contenir entre 1 et 200 caractères.",
+        "INVALID_SCHEDULED_AT": "La date et l'heure sont obligatoires et doivent être valides.",
+        "INVALID_TOTAL_DURATION_MINUTES": "La durée totale doit être comprise entre 1 et 1440 minutes.",
+        "INVALID_AGENDA_ITEM_TITLE": "Le titre d'un point doit contenir entre 1 et 200 caractères.",
+        "INVALID_AGENDA_ITEM_DURATION": "La durée d'un point doit être un nombre entier positif.",
+        "INVALID_AGENDA_ITEM_TYPE": "Le type d'un point doit être Information, Discussion ou Décision.",
+        "INVALID_AGENDA_ITEM_FACILITATOR": "Le nom de l'animateur ne doit pas dépasser 200 caractères."
+      }
+    },
+    "itemType": {
+      "INFO": "Information",
+      "DISCUSSION": "Discussion",
+      "DECISION": "Décision"
+    }
   }
 }
