@@ -1,0 +1,108 @@
+<section class="meeting-runner">
+  @if (loadError()) {
+    <p class="meeting-runner__error" role="alert">{{ 'meeting.runner.notFound' | transloco }}</p>
+  } @else if (liveState(); as state) {
+    <header class="meeting-runner__header">
+      <span class="meeting-runner__status">{{ 'meeting.itemStatus.' + (currentItem()?.itemStatus ?? 'PENDING') | transloco }}</span>
+    </header>
+
+    @if (actionError()) {
+      <p class="meeting-runner__error" role="alert">{{ 'meeting.runner.actionError' | transloco }}</p>
+    }
+
+    @if (currentItem(); as item) {
+      <div class="meeting-runner__current">
+        <p class="meeting-runner__current-label">{{ 'meeting.runner.currentItem' | transloco }}</p>
+        <h2>{{ item.title }}</h2>
+        <p class="meeting-runner__progress">
+          {{ 'meeting.runner.itemProgress' | transloco: { index: (state.currentIndex ?? 0) + 1, total: state.totalItems } }}
+        </p>
+
+        <!-- AC-A1: timer exposed in an aria-live="polite" region with role="timer". -->
+        <div
+          class="meeting-runner__timer"
+          [class.meeting-runner__timer--overtime]="timer.state().overtime"
+          role="timer"
+          [attr.aria-label]="'meeting.timer.ariaLabel' | transloco"
+          aria-live="polite"
+        >
+          @if (timer.state().overtime) {
+            <span class="meeting-runner__overtime-badge">
+              <span aria-hidden="true">⚠</span>
+              {{ 'meeting.timer.overtime' | transloco }} — {{ timer.state().overtimeSeconds }}s
+            </span>
+          } @else {
+            <span>{{ 'meeting.timer.remaining' | transloco }}: {{ timer.state().remainingSeconds }}s</span>
+          }
+        </div>
+
+        <!-- AC-A1: overtime transition announced assertively, separately from the polite countdown. -->
+        <div class="meeting-runner__sr-only" aria-live="assertive" role="status">
+          @if (overtimeAnnouncement(); as seconds) {
+            {{ 'meeting.timer.overtimeAnnounce' | transloco: { seconds } }}
+          }
+        </div>
+      </div>
+    } @else if (hasEnded()) {
+      <p>{{ 'meeting.runner.ended' | transloco }}</p>
+    } @else {
+      <p>{{ 'meeting.runner.notStarted' | transloco }}</p>
+    }
+
+    <div class="meeting-runner__actions">
+      @if (canStart()) {
+        <button type="button" (click)="start()" [disabled]="actionInFlight()">
+          {{ 'meeting.runner.start' | transloco }}
+        </button>
+      }
+      @if (canAnimate()) {
+        <button type="button" (click)="next()" [disabled]="actionInFlight()">
+          {{ 'meeting.runner.next' | transloco }}
+        </button>
+        <button type="button" (click)="end()" [disabled]="actionInFlight()" class="meeting-runner__end">
+          {{ 'meeting.runner.end' | transloco }}
+        </button>
+      }
+    </div>
+
+    @if (canAnimate()) {
+      <form class="meeting-runner__action-form" (ngSubmit)="submitAction()">
+        <h3>{{ 'meeting.runner.addActionTitle' | transloco }}</h3>
+        @if (actionSaveError()) {
+          <p class="meeting-runner__error" role="alert">{{ 'meeting.runner.actionSaveError' | transloco }}</p>
+        }
+        @if (actionAddedAnnouncement(); as label) {
+          <p role="status">{{ 'meeting.runner.actionAdded' | transloco: { label } }}</p>
+        }
+        <label for="meeting-action-label">{{ 'meeting.runner.actionLabel' | transloco }}</label>
+        <input
+          id="meeting-action-label"
+          type="text"
+          [value]="actionLabel()"
+          (input)="actionLabel.set($any($event.target).value)"
+        />
+
+        <label for="meeting-action-owner">{{ 'meeting.runner.actionOwner' | transloco }}</label>
+        <input
+          id="meeting-action-owner"
+          type="text"
+          inputmode="numeric"
+          [value]="actionOwnerUserId()"
+          (input)="actionOwnerUserId.set($any($event.target).value)"
+        />
+
+        <label for="meeting-action-due-date">{{ 'meeting.runner.actionDueDate' | transloco }}</label>
+        <input
+          id="meeting-action-due-date"
+          type="date"
+          [value]="actionDueDate()"
+          (input)="actionDueDate.set($any($event.target).value)"
+        />
+
+        <button type="submit" [disabled]="actionInFlight() || !actionLabel().trim()">
+          {{ 'meeting.runner.addAction' | transloco }}
+        </button>
+      </form>
+    }
+  }
+</section>

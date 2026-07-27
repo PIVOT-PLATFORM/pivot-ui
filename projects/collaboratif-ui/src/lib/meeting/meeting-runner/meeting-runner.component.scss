@@ -1,0 +1,135 @@
+.meeting-runner {
+  padding: var(--space-6, 24px);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3, 12px);
+    margin-bottom: var(--space-3, 12px);
+  }
+
+  &__status {
+    padding: var(--space-1, 4px) var(--space-3, 12px);
+    border-radius: var(--radius-full, 999px);
+    background: var(--color-neutral-100, #f3f4f6);
+    color: var(--color-neutral-900, #111827);
+    font-size: var(--text-sm, 0.875rem);
+  }
+
+  &__error {
+    color: var(--color-danger, #b91c1c);
+  }
+
+  &__current {
+    margin: var(--space-5, 20px) 0;
+  }
+
+  &__current-label {
+    font-size: var(--text-sm, 0.875rem);
+    color: var(--color-neutral-600, #4b5563);
+  }
+
+  &__progress {
+    color: var(--color-neutral-600, #4b5563);
+  }
+
+  // AC-A2: text/indicator contrast >= 4.5:1 in both light and dark themes.
+  &__timer {
+    font-size: var(--text-2xl, 1.75rem);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-neutral-900, #111827);
+    margin: var(--space-3, 12px) 0;
+
+    &--overtime {
+      color: var(--color-danger, #b91c1c);
+    }
+  }
+
+  &__overtime-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2, 8px);
+    font-weight: 600;
+  }
+
+  &__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  &__actions {
+    display: flex;
+    gap: var(--space-3, 12px);
+    margin: var(--space-5, 20px) 0;
+  }
+
+  &__action-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2, 8px);
+    max-width: 28rem;
+    margin-top: var(--space-5, 20px);
+
+    input {
+      padding: var(--space-2, 8px);
+      border: 1px solid var(--color-neutral-300, #d1d5db);
+      border-radius: var(--radius-md, 6px);
+      background: var(--color-surface, #fff);
+      color: var(--color-neutral-900, #111827);
+    }
+  }
+
+  button {
+    padding: var(--space-2, 8px) var(--space-5, 20px);
+    border-radius: var(--radius-md, 6px);
+    border: none;
+    background: var(--color-primary, #4f46e5);
+    color: var(--color-on-primary, #fff);
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    // AC-A2: keyboard focus must always be visible, high-contrast outline in both themes.
+    &:focus-visible {
+      outline: 2px solid var(--color-focus, #2563eb);
+      outline-offset: 2px;
+    }
+  }
+
+  &__end {
+    background: var(--color-danger, #b91c1c) !important;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .meeting-runner {
+    &__status {
+      background: var(--color-neutral-800, #1f2937);
+      color: var(--color-neutral-100, #f3f4f6);
+    }
+
+    &__timer {
+      color: var(--color-neutral-100, #f3f4f6);
+
+      &--overtime {
+        color: var(--color-danger-light, #f87171);
+      }
+    }
+
+    &__action-form input {
+      background: var(--color-surface-dark, #111827);
+      color: var(--color-neutral-100, #f3f4f6);
+      border-color: var(--color-neutral-600, #4b5563);
+    }
+  }
+}
