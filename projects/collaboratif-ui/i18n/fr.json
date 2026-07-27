@@ -1002,6 +1002,7 @@
       "currentItem": "Point en cours",
       "currentItemAnnounce": "Point courant : {{title}}",
       "itemProgress": "Point {{index}} sur {{total}}",
+      "agendaTitle": "Ordre du jour",
       "addActionTitle": "Ajouter une action",
       "actionLabel": "Description de l'action",
       "actionOwner": "Responsable (id utilisateur, optionnel)",

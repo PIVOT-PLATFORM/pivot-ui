@@ -18,6 +18,13 @@
     color: var(--color-neutral-600, #4b5563);
   }
 
+  &__item-type {
+    font-size: var(--text-sm, 0.875rem);
+    font-weight: 400;
+    color: var(--color-neutral-600, #4b5563);
+    margin-inline-start: var(--space-2, 8px);
+  }
+
   // AC-A2: text/indicator contrast >= 4.5:1 in both light and dark themes.
   &__timer {
     font-size: var(--text-2xl, 1.75rem);
@@ -92,6 +99,12 @@
     &__agenda-item {
       background: var(--color-neutral-800, #1f2937);
       color: var(--color-neutral-100, #f3f4f6);
+    }
+
+    &__item-type,
+    &__progress,
+    &__current-label {
+      color: var(--color-neutral-400, #9ca3af);
     }
   }
 }

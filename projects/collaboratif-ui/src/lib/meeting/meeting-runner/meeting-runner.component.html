@@ -27,7 +27,10 @@
     @if (currentItem(); as item) {
       <div class="meeting-runner__current">
         <p class="meeting-runner__current-label">{{ 'meeting.runner.currentItem' | transloco }}</p>
-        <h2>{{ item.title }}</h2>
+        <h2>
+          {{ item.title }}
+          <span class="meeting-runner__item-type">{{ 'meeting.itemType.' + item.type | transloco }}</span>
+        </h2>
         <p class="meeting-runner__progress">
           {{ 'meeting.runner.itemProgress' | transloco: { index: (state.currentIndex ?? 0) + 1, total: state.totalItems } }}
         </p>
@@ -56,6 +59,23 @@
     } @else {
       <p>{{ 'meeting.runner.notStarted' | transloco }}</p>
     }
+
+    <h3>{{ 'meeting.runner.agendaTitle' | transloco }}</h3>
+    <ol class="meeting-runner__agenda">
+      @for (agendaItem of state.agendaItems; track agendaItem.id) {
+        <li
+          class="meeting-runner__agenda-item"
+          [class.meeting-runner__agenda-item--current]="agendaItem.itemStatus === 'CURRENT'"
+          [class.meeting-runner__agenda-item--done]="agendaItem.itemStatus === 'DONE'"
+          [attr.aria-current]="agendaItem.itemStatus === 'CURRENT' ? 'step' : null"
+        >
+          <span class="meeting-runner__agenda-item-title">{{ agendaItem.title }}</span>
+          <span class="meeting-runner__agenda-item-status">
+            {{ 'meeting.itemStatus.' + agendaItem.itemStatus | transloco }}
+          </span>
+        </li>
+      }
+    </ol>
 
     <div class="meeting-runner__actions">
       @if (canStart()) {

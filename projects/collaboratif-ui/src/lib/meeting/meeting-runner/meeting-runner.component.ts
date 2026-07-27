@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { Observable, Subscription } from 'rxjs';
@@ -79,6 +79,22 @@ export class MeetingRunnerComponent implements OnInit, OnDestroy {
   readonly hasEnded = computed(() => this.liveState()?.status === 'ENDED');
 
   private messagesSubscription: Subscription | null = null;
+  private hasConnectedOnce = false;
+
+  /**
+   * AC-FE6: on STOMP reconnection (not the very first connect), re-call `GET .../live` to
+   * resynchronise — a client resumes from whatever it locally rendered while disconnected, and a
+   * missed event during the outage (e.g. an `AGENDA_ITEM_CHANGED`) would otherwise never self-heal.
+   */
+  private readonly reconnectEffect = effect(() => {
+    const status = this.meetingWs.status();
+    if (status === 'connected') {
+      if (this.hasConnectedOnce) {
+        this.load();
+      }
+      this.hasConnectedOnce = true;
+    }
+  });
 
   ngOnInit(): void {
     this.load();

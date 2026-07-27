@@ -18,7 +18,10 @@
     @if (currentItem(); as item) {
       <div class="meeting-participant__current">
         <p class="meeting-participant__current-label">{{ 'meeting.participant.currentItem' | transloco }}</p>
-        <h2>{{ item.title }}</h2>
+        <h2>
+          {{ item.title }}
+          <span class="meeting-participant__item-type">{{ 'meeting.itemType.' + item.type | transloco }}</span>
+        </h2>
         <p class="meeting-participant__progress">
           {{
             'meeting.participant.itemProgress'

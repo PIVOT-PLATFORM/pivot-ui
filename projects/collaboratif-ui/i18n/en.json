@@ -1002,6 +1002,7 @@
       "currentItem": "Current item",
       "currentItemAnnounce": "Current item: {{title}}",
       "itemProgress": "Item {{index}} of {{total}}",
+      "agendaTitle": "Agenda",
       "addActionTitle": "Add an action",
       "actionLabel": "Action description",
       "actionOwner": "Owner (user id, optional)",
