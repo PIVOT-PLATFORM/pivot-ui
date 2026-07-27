@@ -48,6 +48,10 @@ const ACTIVITY_LOADERS: Record<SessionType, () => Promise<Type<unknown>>> = {
     import('../session-activity-vote/session-activity-vote.component').then(
       m => m.SessionActivityVoteComponent,
     ),
+  POSTIT_RUSH: () =>
+    import('../session-activity-postit-rush/session-activity-postit-rush.component').then(
+      m => m.SessionActivityPostitRushComponent,
+    ),
 };
 
 /**
@@ -211,11 +215,11 @@ export class SessionParticipantShellComponent implements OnInit, OnDestroy {
       return { type: session.type };
     }
     const inputs: ActivityInputs = { session, disabled: session.status !== 'LIVE' };
-    // BRAINSTORM and QUIZ are the activities that need the caller's own participant id (to gate
-    // BRAINSTORM's edit/delete controls to their own cards, and to highlight QUIZ's own
-    // leaderboard row) — NgComponentOutlet throws NG0303 on an input the mounted component doesn't
-    // declare, so it is added for those types only.
-    if (session.type === 'BRAINSTORM' || session.type === 'QUIZ') {
+    // BRAINSTORM, QUIZ and POSTIT_RUSH are the activities that need the caller's own participant
+    // id (to gate BRAINSTORM's edit/delete controls to their own cards, and to highlight the
+    // caller's own QUIZ/POSTIT_RUSH leaderboard row) — NgComponentOutlet throws NG0303 on an
+    // input the mounted component doesn't declare, so it is added for those types only.
+    if (session.type === 'BRAINSTORM' || session.type === 'QUIZ' || session.type === 'POSTIT_RUSH') {
       return { ...inputs, participantId: this.participantId };
     }
     return inputs;

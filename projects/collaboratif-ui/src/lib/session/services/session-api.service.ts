@@ -8,6 +8,8 @@ import {
   BrainstormCard,
   BrainstormCardRequest,
   CategorizeCardRequest,
+  ClickPostitRequest,
+  ClickPostitResponse,
   SubmitBallotRequest,
   VoteResults,
   QuizResults,
@@ -18,6 +20,8 @@ import {
   ParticipantSessionResponse,
   PollOptionResult,
   PollVoteRequest,
+  PostitRushResults,
+  PostitRushState,
   QaQuestion,
   QuestionSubmitRequest,
   SessionResponse,
@@ -319,6 +323,42 @@ export class SessionApiService {
   /** Fetches the final quiz results — ranking + per-question correct-rate (US19.3.1). */
   getQuizResults(sessionId: string): Observable<QuizResults> {
     return this.http.get<QuizResults>(`${this.apiUrl}/sessions/${sessionId}/quiz/results`);
+  }
+
+  // -----------------------------------------------------------------------------------------
+  // POSTIT_RUSH activity (US47.2.1, E47/F47.2)
+  // -----------------------------------------------------------------------------------------
+
+  /**
+   * Triggers a new round (facilitator only, US47.2.1) — server-authoritative clock; defined for
+   * contract completeness but not yet wired to a facilitator control UI, same as this service's
+   * own {@link quizNext}/{@link quizEnd} (US19.3.1) — deferred to a future US, not a US47.2.1 gap.
+   */
+  startPostitRushRound(sessionId: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/sessions/${sessionId}/postit-rush/start`, {});
+  }
+
+  /**
+   * Records the caller's click on a live post-it (US47.2.1) — server-authoritative scoring; the
+   * request carries only the {@link ClickPostitRequest.postitId}, never a score.
+   */
+  clickPostit(sessionId: string, request: ClickPostitRequest): Observable<ClickPostitResponse> {
+    return this.http.post<ClickPostitResponse>(
+      `${this.apiUrl}/sessions/${sessionId}/postit-rush/click`,
+      request,
+    );
+  }
+
+  /** Fetches the caller's reconnect snapshot (US47.2.1) — remaining time, live post-its, own score/combo. */
+  getPostitRushState(sessionId: string): Observable<PostitRushState> {
+    return this.http.get<PostitRushState>(`${this.apiUrl}/sessions/${sessionId}/postit-rush/state`);
+  }
+
+  /** Fetches the final standings of the most recently played round (US47.2.1). */
+  getPostitRushResults(sessionId: string): Observable<PostitRushResults> {
+    return this.http.get<PostitRushResults>(
+      `${this.apiUrl}/sessions/${sessionId}/postit-rush/results`,
+    );
   }
 
   /**

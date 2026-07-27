@@ -778,7 +778,8 @@
       "WORDCLOUD": "Nuage de mots",
       "BRAINSTORM": "Brainstorm",
       "QA": "Questions/Réponses",
-      "VOTE": "Vote"
+      "VOTE": "Vote",
+      "POSTIT_RUSH": "Post-it Rush"
     },
     "form": {
       "title": "Créer une session live",
@@ -944,6 +945,33 @@
       "leaderboardTitle": "Classement",
       "myScore": "Votre score :",
       "points": "pts"
+    },
+    "postitRush": {
+      "waiting": "En attente du début de la manche…",
+      "timeLeft": "Temps restant :",
+      "boardLabel": "Plateau Post-it Rush",
+      "postitLabel": "Post-it {{color}}, cliquez pour le réclamer",
+      "myScore": "Votre score :",
+      "myCombo": "Combo :",
+      "leaderboardTitle": "Classement",
+      "resultsTitle": "Résultats finaux",
+      "points": "pts",
+      "hits": "réussites",
+      "bestCombo": "meilleur combo",
+      "feedback": {
+        "hit": "Bien joué !",
+        "miss": "Raté — combo réinitialisé."
+      },
+      "errors": {
+        "unavailable": "Ce post-it n'est plus disponible.",
+        "roundNotActive": "Aucune manche n'est en cours.",
+        "rateLimited": "Doucement — trop de clics.",
+        "generic": "Clic non enregistré."
+      },
+      "announcements": {
+        "roundStarted": "Manche démarrée.",
+        "timeUp": "Temps écoulé."
+      }
     }
   }
 }
