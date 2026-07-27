@@ -1,0 +1,166 @@
+<section class="meeting-report">
+  @if (loadError()) {
+    <p class="meeting-report__error" role="alert">{{ 'meeting.report.notFound' | transloco }}</p>
+  } @else if (report(); as r) {
+    <header class="meeting-report__header">
+      <h1>{{ r.title }}</h1>
+
+      <!-- AC-A3: draft is never color-only — icon + text + role="status". -->
+      @if (r.draft) {
+        <p class="meeting-report__badge meeting-report__badge--draft" role="status">
+          <span aria-hidden="true">✎</span>
+          {{ 'meeting.report.draftBadge' | transloco }}
+        </p>
+      } @else {
+        <p class="meeting-report__badge meeting-report__badge--final" role="status">
+          <span aria-hidden="true">✓</span>
+          {{ 'meeting.report.finalBadge' | transloco }}
+        </p>
+      }
+
+      <p class="meeting-report__meta">
+        {{ 'meeting.report.lifecycleStatus.' + r.status | transloco }}
+      </p>
+      @if (r.actualDurationSeconds !== undefined) {
+        <p class="meeting-report__meta">
+          {{ 'meeting.report.actualDuration' | transloco: { seconds: r.actualDurationSeconds } }}
+        </p>
+      }
+      <p class="meeting-report__meta">
+        {{ 'meeting.report.generatedAt' | transloco: { date: r.generatedAt } }}
+      </p>
+    </header>
+
+    @if (exportError()) {
+      <p class="meeting-report__error" role="alert">{{ 'meeting.report.exportError' | transloco }}</p>
+    }
+
+    <div class="meeting-report__export-actions">
+      <button
+        type="button"
+        (click)="exportMarkdown()"
+        [disabled]="exportingMarkdown()"
+        [attr.aria-label]="'meeting.report.exportMarkdownAriaLabel' | transloco"
+      >
+        {{ 'meeting.report.exportMarkdown' | transloco }}
+      </button>
+      <button
+        type="button"
+        (click)="exportJson()"
+        [disabled]="exportingJson()"
+        [attr.aria-label]="'meeting.report.exportJsonAriaLabel' | transloco"
+      >
+        {{ 'meeting.report.exportJson' | transloco }}
+      </button>
+    </div>
+
+    <section aria-labelledby="meeting-report-participants-heading">
+      <h2 id="meeting-report-participants-heading">{{ 'meeting.report.participantsTitle' | transloco }}</h2>
+      @if (r.participants.length === 0) {
+        <p>{{ 'meeting.report.participantsEmpty' | transloco }}</p>
+      } @else {
+        <ul class="meeting-report__participants">
+          @for (p of r.participants; track p.userId) {
+            <li>
+              {{ 'meeting.report.participantLabel' | transloco: { userId: p.userId } }}
+              @if (p.organizer) {
+                <span class="meeting-report__organizer-tag">{{ 'meeting.report.organizer' | transloco }}</span>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <section aria-labelledby="meeting-report-agenda-heading">
+      <h2 id="meeting-report-agenda-heading">{{ 'meeting.report.agendaTitle' | transloco }}</h2>
+      @if (r.agendaItems.length === 0) {
+        <p>{{ 'meeting.report.agendaEmpty' | transloco }}</p>
+      } @else {
+        <table class="meeting-report__table">
+          <caption class="meeting-report__sr-only">{{ 'meeting.report.agendaTableCaption' | transloco }}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{{ 'meeting.report.agendaColTitle' | transloco }}</th>
+              <th scope="col">{{ 'meeting.report.agendaColPlanned' | transloco }}</th>
+              <th scope="col">{{ 'meeting.report.agendaColActual' | transloco }}</th>
+              <th scope="col">{{ 'meeting.report.agendaColOvertime' | transloco }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of r.agendaItems; track item.id) {
+              <tr>
+                <td>{{ item.title }}</td>
+                <td>{{ item.plannedDurationMinutes }} min</td>
+                <td>
+                  @if (item.actualDurationSeconds !== undefined) {
+                    {{ item.actualDurationSeconds }} s
+                  } @else {
+                    &mdash;
+                  }
+                </td>
+                <td>
+                  <!-- AC-A3: overtime is never color-only — icon + text + role="status". -->
+                  @if (item.overtime) {
+                    <span class="meeting-report__overtime-badge" role="status">
+                      <span aria-hidden="true">⚠</span>
+                      {{ 'meeting.report.overtimeBadge' | transloco }}
+                    </span>
+                  } @else {
+                    <span>{{ 'meeting.report.onTimeBadge' | transloco }}</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </section>
+
+    <section aria-labelledby="meeting-report-decisions-heading">
+      <h2 id="meeting-report-decisions-heading">{{ 'meeting.report.decisionsTitle' | transloco }}</h2>
+      @if (r.decisions.length === 0) {
+        <p>{{ 'meeting.report.decisionsEmpty' | transloco }}</p>
+      } @else {
+        <ul>
+          @for (d of r.decisions; track d.id) {
+            <li>{{ d.label }}</li>
+          }
+        </ul>
+      }
+    </section>
+
+    <section aria-labelledby="meeting-report-actions-heading">
+      <h2 id="meeting-report-actions-heading">{{ 'meeting.report.actionsTitle' | transloco }}</h2>
+      @if (r.actions.length === 0) {
+        <p>{{ 'meeting.report.actionsEmpty' | transloco }}</p>
+      } @else {
+        <table class="meeting-report__table">
+          <caption class="meeting-report__sr-only">{{ 'meeting.report.actionsTableCaption' | transloco }}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{{ 'meeting.report.actionsColAction' | transloco }}</th>
+              <th scope="col">{{ 'meeting.report.actionsColOwner' | transloco }}</th>
+              <th scope="col">{{ 'meeting.report.actionsColDueDate' | transloco }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of r.actions; track a.id) {
+              <tr>
+                <td>{{ a.label }}</td>
+                <td>
+                  @if (a.ownerUserId !== undefined) {
+                    {{ 'meeting.report.participantLabel' | transloco: { userId: a.ownerUserId } }}
+                  } @else {
+                    &mdash;
+                  }
+                </td>
+                <td>{{ a.dueDate ?? '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </section>
+  }
+</section>

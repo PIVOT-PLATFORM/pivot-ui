@@ -1025,6 +1025,45 @@
       "remaining": "Remaining time",
       "overtime": "Overtime",
       "overtimeAnnounce": "The allotted time for this item has been exceeded by {{seconds}} seconds."
+    },
+    "report": {
+      "notFound": "Report not found or access not allowed.",
+      "draftBadge": "Draft",
+      "finalBadge": "Final report",
+      "lifecycleStatus": {
+        "DRAFT": "Meeting not started",
+        "CONFIRMED": "Meeting confirmed",
+        "IN_PROGRESS": "Meeting in progress",
+        "ENDED": "Meeting ended"
+      },
+      "actualDuration": "Actual duration: {{seconds}} s",
+      "generatedAt": "Generated on {{date}}",
+      "exportError": "Export failed.",
+      "exportMarkdown": "Export as Markdown",
+      "exportMarkdownAriaLabel": "Export the report as Markdown",
+      "exportJson": "Export as JSON",
+      "exportJsonAriaLabel": "Export the report as JSON",
+      "participantsTitle": "Participants",
+      "participantsEmpty": "No participants.",
+      "participantLabel": "User #{{userId}}",
+      "organizer": "Organizer",
+      "agendaTitle": "Agenda",
+      "agendaEmpty": "No agenda items.",
+      "agendaColTitle": "Item",
+      "agendaColPlanned": "Planned duration",
+      "agendaColActual": "Actual duration",
+      "agendaColOvertime": "Overtime",
+      "agendaTableCaption": "Agenda items with planned duration, actual duration and overtime",
+      "overtimeBadge": "Overtime",
+      "onTimeBadge": "On time",
+      "decisionsTitle": "Decisions",
+      "decisionsEmpty": "No decisions recorded.",
+      "actionsTitle": "Actions",
+      "actionsEmpty": "No actions captured.",
+      "actionsColAction": "Action",
+      "actionsColOwner": "Owner",
+      "actionsColDueDate": "Due date",
+      "actionsTableCaption": "Actions with owner and due date"
     }
   }
 }

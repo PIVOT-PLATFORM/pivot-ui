@@ -175,10 +175,82 @@ export interface MeetingActionAddedEvent {
   readonly action: MeetingActionResponse;
 }
 
-/** Union of every message shape received on `/topic/collaboratif/meeting/{id}` (US12.2.1). */
+/** `MEETING_REPORT_READY` broadcast (US12.3.1 AC nominal) — sent once, at closure. Deliberately
+ *  minimal (no report content on the bus, AC Security); a subscriber refetches via
+ *  `MeetingReportService.getReport`. */
+export interface MeetingReportReadyEvent {
+  readonly type: 'MEETING_REPORT_READY';
+  readonly meetingId: string;
+  readonly generatedAt: string;
+  readonly draft: boolean;
+}
+
+/** Union of every message shape received on `/topic/collaboratif/meeting/{id}` (US12.2.1/US12.3.1). */
 export type MeetingEvent =
   | MeetingStartedEvent
   | TimerTickEvent
   | AgendaItemChangedEvent
   | MeetingEndedEvent
-  | MeetingActionAddedEvent;
+  | MeetingActionAddedEvent
+  | MeetingReportReadyEvent;
+
+// ---------------------------------------------------------------------------------------------
+// Compte-rendu (US12.3.1)
+// ---------------------------------------------------------------------------------------------
+
+/** A participant present at the meeting (US12.3.1 AC nominal) — see backend `MeetingReportDto`'s
+ *  own doc for the "no dedicated attendance log" interpretation this is derived from. */
+export interface ParticipantReport {
+  readonly userId: number;
+  readonly organizer: boolean;
+}
+
+/** One agenda point's report line (US12.3.1 AC nominal). */
+export interface AgendaItemReport {
+  readonly id: string;
+  readonly title: string;
+  readonly plannedDurationMinutes: number;
+  /** Absent while the item is still `PENDING`. */
+  readonly actualDurationSeconds?: number;
+  readonly overtime: boolean;
+}
+
+/** One recorded decision (US12.3.1 AC nominal). */
+export interface DecisionReport {
+  readonly id: string;
+  readonly label: string;
+  readonly decidedAt: string;
+}
+
+/** One captured action (US12.3.1 AC nominal). */
+export interface ActionReport {
+  readonly id: string;
+  readonly label: string;
+  readonly ownerUserId?: number;
+  /** ISO-8601 date (`yyyy-MM-dd`), or absent if unassigned/no due date. */
+  readonly dueDate?: string;
+}
+
+/**
+ * Full compte-rendu shape (US12.3.1) — returned by `GET .../report` and
+ * `GET .../report/export?format=json`. `draft=true` for a live, not-yet-closed meeting
+ * (derived on every read, never persisted); `draft=false` for the frozen snapshot written once,
+ * at closure — immutable from that point on even if a decision/action is edited afterward
+ * (US12.3.2).
+ */
+export interface MeetingReport {
+  readonly meetingId: string;
+  readonly title: string;
+  readonly status: MeetingLifecycleStatus;
+  readonly draft: boolean;
+  readonly participants: ParticipantReport[];
+  readonly agendaItems: AgendaItemReport[];
+  readonly decisions: DecisionReport[];
+  readonly actions: ActionReport[];
+  /** Absent until the meeting has started. */
+  readonly actualDurationSeconds?: number;
+  readonly generatedAt: string;
+}
+
+/** Supported `GET .../report/export` formats (US12.3.1 AC nominal / AC error case). */
+export type MeetingReportExportFormat = 'json' | 'markdown';
