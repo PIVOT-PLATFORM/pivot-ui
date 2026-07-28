@@ -132,7 +132,7 @@ export class MeetingReportComponent implements OnInit, OnDestroy {
     if (!id) {
       return;
     }
-    this.meetingWs.connect(`/topic/collaboratif/meeting/${id}`);
+    this.meetingWs.connect(id);
   }
 
   private load(): void {
