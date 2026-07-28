@@ -1,0 +1,118 @@
+.meeting-form {
+  padding: var(--space-6, 24px);
+  max-width: 720px;
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1, 4px);
+    margin-bottom: var(--space-4, 16px);
+
+    label {
+      font-weight: 600;
+    }
+
+    input,
+    select {
+      padding: var(--space-2, 8px);
+      border: 1px solid var(--color-border, #e5e7eb);
+      border-radius: var(--radius-md, 6px);
+    }
+  }
+
+  &__agenda {
+    border: none;
+    padding: 0;
+    margin: 0 0 var(--space-4, 16px);
+
+    legend {
+      font-weight: 600;
+      margin-bottom: var(--space-2, 8px);
+    }
+  }
+
+  &__agenda-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-3, 12px);
+  }
+
+  &__agenda-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--space-3, 12px);
+    padding: var(--space-3, 12px);
+    border: 1px solid var(--color-border, #e5e7eb);
+    border-radius: var(--radius-md, 6px);
+    margin-bottom: var(--space-3, 12px);
+  }
+
+  &__agenda-item-actions {
+    display: flex;
+    gap: var(--space-2, 8px);
+    margin-left: auto;
+
+    button {
+      padding: var(--space-2, 8px) var(--space-3, 12px);
+      border-radius: var(--radius-md, 6px);
+      border: 1px solid var(--color-border, #e5e7eb);
+      background: var(--color-surface, #fff);
+      cursor: pointer;
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  &__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  &__confirmation {
+    padding: var(--space-4, 16px);
+    border: 1px solid var(--color-success, #16a34a);
+    border-radius: var(--radius-md, 6px);
+    margin-bottom: var(--space-4, 16px);
+  }
+
+  &__mismatch {
+    color: var(--color-warning-text, #92400e);
+  }
+
+  &__error {
+    color: var(--color-danger, #dc2626);
+    margin-bottom: var(--space-3, 12px);
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-3, 12px);
+
+    button {
+      padding: var(--space-2, 8px) var(--space-5, 20px);
+      border-radius: var(--radius-md, 6px);
+      background: var(--color-primary, #4f46e5);
+      color: var(--color-on-primary, #fff);
+      border: none;
+      cursor: pointer;
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
