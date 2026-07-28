@@ -3,7 +3,8 @@ import { RxStomp, RxStompState } from '@stomp/rx-stomp';
 import { Observable, Subject, Subscription } from 'rxjs';
 import { COLLABORATIF_API_URL, COLLABORATIF_BEARER_TOKEN } from '../../core/whiteboard/config/tokens';
 
-/** UI connection status for the STOMP link opened while animating/watching a meeting (US12.2.1). */
+/** UI connection status for the STOMP link opened while animating/watching a meeting (US12.2.1),
+ *  or for a meeting's booking room (US12.4.1) — same shared channel, see the class doc. */
 export type MeetingConnectionStatus = 'connecting' | 'connected' | 'error';
 
 /**
@@ -27,17 +28,25 @@ export const MEETING_STOMP_CLIENT_FACTORY = new InjectionToken<() => MeetingStom
 );
 
 /**
- * Minimal STOMP client wrapper for a single animated meeting (US12.2.1) — subscribes to
- * `/topic/collaboratif/meeting/{id}` on the **shared** `collaboratif` real-time endpoint
- * (`/ws/whiteboard`, same multiplexed connection `SessionWsService` uses — MeetOps has no
- * dedicated WebSocket endpoint of its own). Watch-only: every mutating animation action (start,
- * agenda/next, end, actions) is a plain REST call via {@link MeetingApiService}; the WS link
- * exists solely to receive broadcast events (`MEETING_STARTED`/`TIMER_TICK`/
- * `AGENDA_ITEM_CHANGED`/`MEETING_ENDED`/`MEETING_ACTION_ADDED`).
+ * Minimal STOMP client wrapper for a single meeting's real-time room — animation (US12.2.1:
+ * `MEETING_STARTED`/`TIMER_TICK`/`AGENDA_ITEM_CHANGED`/`MEETING_ENDED`/`MEETING_ACTION_ADDED`) and
+ * booking-flow state pushes (US12.4.1 "Temps réel") alike, both multiplexed on the same
+ * `/topic/collaboratif/meeting/{id}` destination. Subscribes on the **shared** `collaboratif`
+ * real-time endpoint (`/ws/whiteboard` — MeetOps has no dedicated endpoint of its own, mirroring
+ * `SessionWsService`'s identical multiplexing over that one connection). Watch-only: every
+ * mutating action (animation's start/agenda-next/end/actions, booking's confirm/adjust) is a
+ * plain REST call via {@link import('./meeting-api.service').MeetingApiService}; the WS link
+ * exists solely to receive broadcast pushes so a consuming view's `aria-live` region can announce
+ * them.
  *
  * Unlike {@link SessionWsService}, MeetOps has no guest-token concept — every meeting participant
  * is an authenticated bearer-token caller (`CollaboratifRequestPrincipal` server-side), so
  * `connect` only ever sends `Authorization: Bearer <token>` (from {@link COLLABORATIF_BEARER_TOKEN}).
+ *
+ * Reconnection back-off relies on `RxStomp`'s own built-in retry behaviour — this service does not
+ * set its own `reconnectDelay`/`reconnectTimeMode`, deferring to whatever the injected {@link
+ * MEETING_STOMP_CLIENT_FACTORY} instance is constructed with (production default: `RxStomp`'s own
+ * built-in retry).
  */
 @Injectable({ providedIn: 'root' })
 export class MeetingWsService {
@@ -45,7 +54,7 @@ export class MeetingWsService {
   private readonly apiUrl = inject(COLLABORATIF_API_URL);
   private readonly bearerToken = inject(COLLABORATIF_BEARER_TOKEN);
 
-  /** Current connection status. */
+  /** Current connection status — surfaced by the consuming view's `aria-live` region. */
   readonly status = signal<MeetingConnectionStatus>('connecting');
 
   /** Raw STOMP message bodies received on the subscribed meeting topic. */
@@ -62,9 +71,9 @@ export class MeetingWsService {
    * Connects and subscribes to the given meeting's topic. Safe to call once per join; call
    * {@link disconnect} first to switch meetings on the same service instance.
    *
-   * @param topic the meeting's STOMP destination (`/topic/collaboratif/meeting/{id}`)
+   * @param meetingId the meeting's id — builds `/topic/collaboratif/meeting/{meetingId}`
    */
-  connect(topic: string): void {
+  connect(meetingId: string): void {
     this.disconnect();
     this.everConnecting = false;
     this.status.set('connecting');
@@ -75,7 +84,9 @@ export class MeetingWsService {
 
     this.stateSubscription = client.connectionState$.subscribe(state => this.onStateChange(state));
     this.stompErrorSubscription = client.stompErrors$.subscribe(() => this.status.set('error'));
-    this.topicSubscription = client.watch(topic).subscribe(message => this.messages$.next(message.body));
+    this.topicSubscription = client
+      .watch(`/topic/collaboratif/meeting/${meetingId}`)
+      .subscribe(message => this.messages$.next(message.body));
 
     client.activate();
   }
@@ -112,6 +123,7 @@ export class MeetingWsService {
     }
   }
 
+  /** `Authorization: Bearer <token>` for the authenticated caller. */
   private buildConnectHeaders(): Record<string, string> {
     const token = this.bearerToken();
     return token ? { Authorization: `Bearer ${token}` } : {};
@@ -119,9 +131,9 @@ export class MeetingWsService {
 
   /**
    * Derives the WebSocket URL from the injected {@link COLLABORATIF_API_URL} — same handling of
-   * absolute dev vs. relative production URLs as `SessionWsService.buildWsUrl`. Targets the
-   * shared `/ws/whiteboard` endpoint (`CollaboratifWebSocketConfig`) — MeetOps has no `/ws/meeting`
-   * endpoint of its own.
+   * absolute dev vs. relative production URLs as `SessionWsService.buildWsUrl`/
+   * `StompBoardTransport.buildWsUrl`. Targets the shared `/ws/whiteboard` endpoint
+   * (`CollaboratifWebSocketConfig`).
    */
   private buildWsUrl(): string {
     const apiUrl = this.apiUrl;

@@ -64,12 +64,12 @@ export interface MeetingProblemDetailResponse {
 // ---------------------------------------------------------------------------------------------
 
 /**
- * Full lifecycle status of a meeting (US12.2.1) — widens {@link MeetingResponse.status}'s
- * creation-time-only `'DRAFT'` literal for every animation-aware view. `CONFIRMED` is not yet
- * producible by any endpoint (US12.4.1's future booking flow) but is a legal value the backend
- * `MeetingStatus` enum already accepts for `POST .../start` (see backend `MeetingStatus` JavaDoc).
+ * Full lifecycle status of a meeting (US12.2.1, extended by US12.4.1's booking flow) — widens
+ * {@link MeetingResponse.status}'s creation-time-only `'DRAFT'` literal for every animation-aware
+ * view. `PRE_RESERVED` is a booking-flow-only status (a manually-created meeting never reaches
+ * it); `CONFIRMED` is reachable from either flow — see backend `MeetingStatus` JavaDoc.
  */
-export type MeetingLifecycleStatus = 'DRAFT' | 'CONFIRMED' | 'IN_PROGRESS' | 'ENDED';
+export type MeetingLifecycleStatus = 'DRAFT' | 'PRE_RESERVED' | 'CONFIRMED' | 'IN_PROGRESS' | 'ENDED';
 
 /** Animation status of a single agenda item within its meeting (US12.2.1). */
 export type AgendaItemStatus = 'PENDING' | 'CURRENT' | 'DONE';
@@ -264,3 +264,61 @@ export interface MeetingReport {
 
 /** Supported `GET .../report/export` formats (US12.3.1 AC nominal / AC error case). */
 export type MeetingReportExportFormat = 'json' | 'markdown';
+
+// ---------------------------------------------------------------------------
+// Booking flow (US12.4.1) — pre-reservation from a roadmap event window +
+// best-slot proposal + organizer confirmation.
+// ---------------------------------------------------------------------------
+
+/** A single ranked candidate slot (US12.4.1 "Meilleur créneau"). */
+export interface ProposedSlotResponse {
+  readonly id: string;
+  /** ISO-8601 date/time string. */
+  readonly start: string;
+  /** ISO-8601 date/time string. */
+  readonly end: string;
+  /** 1-based rank; `1` is the recommended slot. */
+  readonly rank: number;
+  readonly hasConflict: boolean;
+  readonly conflictReason: string | null;
+  /** `true` only for the `rank === 1` candidate — pre-selected by default in the validation UI. */
+  readonly recommended: boolean;
+}
+
+/**
+ * API response shape for a booking-flow meeting's state + proposed slots (US12.4.1) — returned by
+ * `GET .../meetings/{id}`, `POST .../meetings/{id}/confirm` and `PATCH .../meetings/{id}/slot`,
+ * and pushed on `/topic/collaboratif/meeting/{id}`.
+ */
+export interface MeetingBookingResponse {
+  readonly id: string;
+  readonly status: MeetingLifecycleStatus;
+  readonly title: string;
+  /** ISO-8601 date/time string. */
+  readonly scheduledAt: string;
+  readonly totalDurationMinutes: number;
+  /** ISO-8601 date/time string, or `null` for a manually-created (non-booking-flow) meeting. */
+  readonly bookingWindowStart: string | null;
+  /** ISO-8601 date/time string, or `null` for a manually-created (non-booking-flow) meeting. */
+  readonly bookingWindowEnd: string | null;
+  readonly eventRef: string | null;
+  readonly projectRef: string | null;
+  /** `true` when a `window.updated`/`window.deleted` arrived while already `CONFIRMED`. */
+  readonly rescheduleRequested: boolean;
+  /** Ranked candidates, rank ascending (possibly empty). */
+  readonly proposedSlots: ProposedSlotResponse[];
+}
+
+/** Request body for `POST /api/collaboratif/meetings/{id}/confirm` (US12.4.1). */
+export interface ConfirmSlotRequest {
+  readonly slotId: string;
+}
+
+/** Request body for `PATCH /api/collaboratif/meetings/{id}/slot` (US12.4.1). */
+export interface AdjustSlotRequest {
+  readonly slotId: string;
+  /** ISO-8601 date/time string. */
+  readonly start: string;
+  /** ISO-8601 date/time string. */
+  readonly end: string;
+}

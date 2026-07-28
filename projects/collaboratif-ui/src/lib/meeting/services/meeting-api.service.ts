@@ -4,17 +4,20 @@ import { Observable } from 'rxjs';
 import { COLLABORATIF_API_URL } from '../../core/whiteboard/config/tokens';
 import {
   AddMeetingActionRequest,
+  AdjustSlotRequest,
+  ConfirmSlotRequest,
   CreateMeetingRequest,
   MeetingActionResponse,
+  MeetingBookingResponse,
   MeetingLiveState,
   MeetingResponse,
 } from '../models/meeting.model';
 
 /**
- * HTTP client for the MeetOps meeting resource (E12, US12.1.1/US12.2.1). Tenant isolation is
- * handled server-side — no `tenantId`/`userId` ever sent from Angular. Shares
- * `COLLABORATIF_API_URL` with the whiteboard/session features — same `collaboratif` backend
- * module (`fr.pivot.collaboratif`), just a different resource.
+ * HTTP client for the MeetOps meeting resource (E12, US12.1.1/US12.2.1 creation + animation,
+ * US12.4.1 booking flow). Tenant isolation is handled server-side — no `tenantId`/`userId` ever
+ * sent from Angular. Shares `COLLABORATIF_API_URL` with the whiteboard/session features — same
+ * `collaboratif` backend module (`fr.pivot.collaboratif`), just a different resource.
  */
 @Injectable({ providedIn: 'root' })
 export class MeetingApiService {
@@ -60,5 +63,24 @@ export class MeetingApiService {
    */
   live(meetingId: string): Observable<MeetingLiveState> {
     return this.http.get<MeetingLiveState>(`${this.apiUrl}/meetings/${meetingId}/live`);
+  }
+
+  // -----------------------------------------------------------------------------------------
+  // Booking flow (US12.4.1)
+  // -----------------------------------------------------------------------------------------
+
+  /** Fetches a booking-flow meeting's current state and ranked proposed slots (US12.4.1). */
+  getMeeting(meetingId: string): Observable<MeetingBookingResponse> {
+    return this.http.get<MeetingBookingResponse>(`${this.apiUrl}/meetings/${meetingId}`);
+  }
+
+  /** Confirms a proposed (or manually adjusted) slot — organizer-only (US12.4.1). */
+  confirmSlot(meetingId: string, request: ConfirmSlotRequest): Observable<MeetingBookingResponse> {
+    return this.http.post<MeetingBookingResponse>(`${this.apiUrl}/meetings/${meetingId}/confirm`, request);
+  }
+
+  /** Manually adjusts a proposed slot's boundaries while still pre-reserved (US12.4.1). */
+  adjustSlot(meetingId: string, request: AdjustSlotRequest): Observable<MeetingBookingResponse> {
+    return this.http.patch<MeetingBookingResponse>(`${this.apiUrl}/meetings/${meetingId}/slot`, request);
   }
 }

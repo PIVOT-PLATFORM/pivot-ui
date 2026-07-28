@@ -1068,6 +1068,35 @@
       "actionsColOwner": "Responsable",
       "actionsColDueDate": "Échéance",
       "actionsTableCaption": "Actions avec responsable et échéance"
+    },
+    "validation": {
+      "title": "Valider le créneau de la réunion",
+      "slotsLabel": "Créneaux proposés",
+      "recommendedBadge": "Recommandé",
+      "conflictBadge": "Conflit",
+      "confirmButton": "Valider",
+      "confirming": "Validation en cours…",
+      "confirmed": "Le créneau de la réunion a été confirmé. Les invitations ont été envoyées.",
+      "adjustButton": "Ajuster manuellement",
+      "adjustStartLabel": "Début",
+      "adjustEndLabel": "Fin",
+      "adjustSave": "Enregistrer l'ajustement",
+      "adjustCancel": "Annuler",
+      "adjusted": "Le créneau proposé a été mis à jour.",
+      "liveUpdate": "Les créneaux proposés viennent d'être mis à jour.",
+      "loadError": "Impossible de charger cette réunion.",
+      "connectionStatus": {
+        "connecting": "Connexion aux mises à jour en temps réel…",
+        "connected": "Mises à jour en temps réel connectées.",
+        "error": "Mises à jour en temps réel indisponibles — affichage du dernier état connu."
+      },
+      "errors": {
+        "ALREADY_CONFIRMED": "Cette réunion a déjà été confirmée.",
+        "NOT_FOUND": "Cette réunion est introuvable.",
+        "FORBIDDEN": "Seul l'organisateur de la réunion peut effectuer cette action.",
+        "SLOT_INVALID": "Ce créneau n'est plus valide. Veuillez en choisir un autre.",
+        "NETWORK_ERROR": "Une erreur réseau est survenue. Veuillez réessayer."
+      }
     }
   }
 }
