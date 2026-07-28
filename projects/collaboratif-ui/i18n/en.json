@@ -984,6 +984,47 @@
       "INFO": "Info",
       "DISCUSSION": "Discussion",
       "DECISION": "Decision"
+    },
+    "itemStatus": {
+      "PENDING": "Upcoming",
+      "CURRENT": "Current",
+      "DONE": "Done"
+    },
+    "runner": {
+      "loadError": "Unable to load the meeting.",
+      "notFound": "Meeting not found or action not allowed.",
+      "notStarted": "The meeting has not started yet.",
+      "ended": "The meeting has ended.",
+      "start": "Start the meeting",
+      "next": "Next item",
+      "end": "End the meeting",
+      "actionError": "Action failed.",
+      "currentItem": "Current item",
+      "currentItemAnnounce": "Current item: {{title}}",
+      "itemProgress": "Item {{index}} of {{total}}",
+      "agendaTitle": "Agenda",
+      "addActionTitle": "Add an action",
+      "actionLabel": "Action description",
+      "actionOwner": "Owner (user id, optional)",
+      "actionDueDate": "Due date (optional)",
+      "addAction": "Add action",
+      "actionAdded": "Action \"{{label}}\" added.",
+      "actionSaveError": "Unable to add the action."
+    },
+    "participant": {
+      "loadError": "Unable to load the meeting.",
+      "notStarted": "The meeting has not started yet.",
+      "ended": "The meeting has ended.",
+      "currentItem": "Current item",
+      "itemProgress": "Item {{index}} of {{total}}",
+      "agendaTitle": "Agenda"
+    },
+    "timer": {
+      "ariaLabel": "Current item timer",
+      "elapsed": "Elapsed time",
+      "remaining": "Remaining time",
+      "overtime": "Overtime",
+      "overtimeAnnounce": "The allotted time for this item has been exceeded by {{seconds}} seconds."
     }
   }
 }

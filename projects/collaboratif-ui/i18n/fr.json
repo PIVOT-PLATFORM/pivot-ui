@@ -984,6 +984,47 @@
       "INFO": "Information",
       "DISCUSSION": "Discussion",
       "DECISION": "Décision"
+    },
+    "itemStatus": {
+      "PENDING": "À venir",
+      "CURRENT": "En cours",
+      "DONE": "Terminé"
+    },
+    "runner": {
+      "loadError": "Impossible de charger la réunion.",
+      "notFound": "Réunion introuvable ou action non autorisée.",
+      "notStarted": "La réunion n'a pas encore démarré.",
+      "ended": "La réunion est terminée.",
+      "start": "Démarrer la réunion",
+      "next": "Point suivant",
+      "end": "Terminer la réunion",
+      "actionError": "Action impossible.",
+      "currentItem": "Point en cours",
+      "currentItemAnnounce": "Point courant : {{title}}",
+      "itemProgress": "Point {{index}} sur {{total}}",
+      "agendaTitle": "Ordre du jour",
+      "addActionTitle": "Ajouter une action",
+      "actionLabel": "Description de l'action",
+      "actionOwner": "Responsable (id utilisateur, optionnel)",
+      "actionDueDate": "Échéance (optionnelle)",
+      "addAction": "Ajouter l'action",
+      "actionAdded": "Action « {{label}} » ajoutée.",
+      "actionSaveError": "Impossible d'ajouter l'action."
+    },
+    "participant": {
+      "loadError": "Impossible de charger la réunion.",
+      "notStarted": "La réunion n'a pas encore démarré.",
+      "ended": "La réunion est terminée.",
+      "currentItem": "Point en cours",
+      "itemProgress": "Point {{index}} sur {{total}}",
+      "agendaTitle": "Ordre du jour"
+    },
+    "timer": {
+      "ariaLabel": "Minuteur du point en cours",
+      "elapsed": "Temps écoulé",
+      "remaining": "Temps restant",
+      "overtime": "Dépassement",
+      "overtimeAnnounce": "Le temps imparti pour ce point est dépassé de {{seconds}} secondes."
     }
   }
 }
