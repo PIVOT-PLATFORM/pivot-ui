@@ -1,9 +1,10 @@
 import { Routes } from '@angular/router';
 
 /**
- * MeetOps (E12) route tree — creation form (US12.1.1 AC1) plus animation (US12.2.1): the
- * animator's `runner` view (start/agenda-next/end/actions) and the read-only participant `live`
- * view. Exported for the consuming shell (`pivot-ui`) to mount under a guarded path once EN12.2
+ * MeetOps (E12) route tree — creation form (US12.1.1 AC1), animation (US12.2.1): the animator's
+ * `runner` view (start/agenda-next/end/actions) and the read-only participant `live` view, plus
+ * the compte-rendu `report` view (US12.3.1, draft/frozen + Markdown/JSON export). Exported for
+ * the consuming shell (`pivot-ui`) to mount under a guarded path once EN12.2
  * ("Guard Angular module meetops") registers the `meetops` module id in the shell's module
  * registry/guard — see this US's pivot-docs "Dépendances" note. Not wired into `pivot-ui`'s
  * `app.routes.ts` by this US: doing so before EN12.2 exists would make the route permanently
@@ -27,5 +28,10 @@ export const meetingRoutes: Routes = [
       import('./meeting-participant-shell/meeting-participant-shell.component').then(
         m => m.MeetingParticipantShellComponent,
       ),
+  },
+  {
+    path: 'report/:meetingId',
+    loadComponent: () =>
+      import('./meeting-report/meeting-report.component').then(m => m.MeetingReportComponent),
   },
 ];
