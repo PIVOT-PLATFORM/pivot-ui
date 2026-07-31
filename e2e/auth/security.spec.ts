@@ -12,7 +12,7 @@ import { test, expect, type Page } from '@playwright/test';
 
 const API = 'http://localhost:8080/api';
 const LOGIN_URL = '/auth/login';
-const DASHBOARD_URL = '/dashboard';
+const HOME_URL = '/home';
 
 async function stubRefreshUnauthorized(page: Page): Promise<void> {
   await page.route(`${API}/auth/refresh`, (route) =>
@@ -108,9 +108,9 @@ test.describe('US-AUTH-002 — Security & RGPD', () => {
   // ---------------------------------------------------------------------------
   // Auth guard
   // ---------------------------------------------------------------------------
-  test('unauthenticated user accessing /dashboard is redirected to /auth/login', async ({ page }) => {
+  test('unauthenticated user accessing /home is redirected to /auth/login', async ({ page }) => {
     await stubRefreshUnauthorized(page);
-    await page.goto(DASHBOARD_URL);
+    await page.goto(HOME_URL);
     await expect(page).toHaveURL(new RegExp(LOGIN_URL), { timeout: 8_000 });
     await expect(page.locator('#email')).toBeVisible();
   });

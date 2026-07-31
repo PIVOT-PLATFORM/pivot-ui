@@ -33,7 +33,7 @@ export interface PivotModuleDto {
  * Used by components and guards — never sent to the API.
  */
 export interface PivotModuleUi extends PivotModuleDto {
-  /** Inline SVG string (viewBox 0 0 24 24, Heroicons/Lucide-compatible). */
+  /** `IconRegistry` name (see `module-icons.ts`), rendered via `<pivot-ds-icon [name]="icon" />`. */
   icon: string;
   /** Short description shown in module cards, max ~80 characters. */
   description: string;

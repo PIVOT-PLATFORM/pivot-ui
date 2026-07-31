@@ -1,0 +1,117 @@
+<section class="meeting-validation">
+  <h1>{{ 'meeting.validation.title' | transloco }}</h1>
+
+  <!-- US12.4.1 A11y AC: real-time pushes / connection status / action outcomes are announced
+       through this single polite aria-live region, never by silently re-rendering content under
+       a keyboard/screen-reader user's focus. -->
+  <p class="meeting-validation__live-region" role="status" aria-live="polite">{{ liveMessage() }}</p>
+
+  @if (loadError()) {
+    <p class="meeting-validation__error" role="alert">{{ 'meeting.validation.loadError' | transloco }}</p>
+  } @else if (meeting(); as meeting) {
+    <p class="meeting-validation__connection-status">
+      @switch (connectionStatus()) {
+        @case ('connecting') {
+          {{ 'meeting.validation.connectionStatus.connecting' | transloco }}
+        }
+        @case ('connected') {
+          {{ 'meeting.validation.connectionStatus.connected' | transloco }}
+        }
+        @case ('error') {
+          {{ 'meeting.validation.connectionStatus.error' | transloco }}
+        }
+      }
+    </p>
+
+    <h2 class="meeting-validation__meeting-title">{{ meeting.title }}</h2>
+
+    @if (isConfirmed()) {
+      <div class="meeting-validation__confirmed" role="status">
+        <p>{{ 'meeting.validation.confirmed' | transloco }}</p>
+      </div>
+    } @else {
+      <div
+        class="meeting-validation__listbox"
+        role="listbox"
+        [attr.aria-label]="'meeting.validation.slotsLabel' | transloco"
+        (keydown)="onListboxKeydown($event)"
+      >
+        @for (slot of slots(); track slot.id) {
+          <div
+            [id]="'meeting-slot-' + slot.id"
+            class="meeting-validation__slot"
+            [class.meeting-validation__slot--selected]="selectedSlotId() === slot.id"
+            [class.meeting-validation__slot--conflict]="slot.hasConflict"
+            role="option"
+            [attr.aria-selected]="selectedSlotId() === slot.id"
+            [attr.tabindex]="isTabStop(slot.id) ? 0 : -1"
+            (click)="selectSlot(slot.id)"
+          >
+            <span class="meeting-validation__slot-time">{{ slot.start }} – {{ slot.end }}</span>
+            @if (slot.recommended) {
+              <span class="meeting-validation__badge meeting-validation__badge--recommended">
+                {{ 'meeting.validation.recommendedBadge' | transloco }}
+              </span>
+            }
+            @if (slot.hasConflict) {
+              <span class="meeting-validation__badge meeting-validation__badge--conflict">
+                {{ 'meeting.validation.conflictBadge' | transloco }}: {{ slot.conflictReason }}
+              </span>
+            }
+          </div>
+        }
+      </div>
+
+      @if (confirmError()) {
+        <p class="meeting-validation__error" role="alert">
+          {{ 'meeting.validation.errors.' + confirmError() | transloco }}
+        </p>
+      }
+
+      <div class="meeting-validation__actions">
+        <button type="button" [disabled]="!selectedSlotId() || confirming()" (click)="confirm()">
+          {{ (confirming() ? 'meeting.validation.confirming' : 'meeting.validation.confirmButton') | transloco }}
+        </button>
+        <button type="button" [disabled]="!selectedSlotId() || adjusting()" (click)="openAdjust()">
+          {{ 'meeting.validation.adjustButton' | transloco }}
+        </button>
+      </div>
+
+      @if (adjusting()) {
+        <form class="meeting-validation__adjust-form" (ngSubmit)="saveAdjust()">
+          <div class="meeting-validation__field">
+            <label for="meeting-adjust-start">{{ 'meeting.validation.adjustStartLabel' | transloco }}</label>
+            <input
+              id="meeting-adjust-start"
+              type="datetime-local"
+              [value]="adjustStart()"
+              (input)="onAdjustStartInput($event)"
+              required
+            />
+          </div>
+          <div class="meeting-validation__field">
+            <label for="meeting-adjust-end">{{ 'meeting.validation.adjustEndLabel' | transloco }}</label>
+            <input
+              id="meeting-adjust-end"
+              type="datetime-local"
+              [value]="adjustEnd()"
+              (input)="onAdjustEndInput($event)"
+              required
+            />
+          </div>
+          @if (adjustError()) {
+            <p class="meeting-validation__error" role="alert">
+              {{ 'meeting.validation.errors.' + adjustError() | transloco }}
+            </p>
+          }
+          <div class="meeting-validation__actions">
+            <button type="submit" [disabled]="adjustSaving()">
+              {{ (adjustSaving() ? 'meeting.validation.confirming' : 'meeting.validation.adjustSave') | transloco }}
+            </button>
+            <button type="button" (click)="cancelAdjust()">{{ 'meeting.validation.adjustCancel' | transloco }}</button>
+          </div>
+        </form>
+      }
+    }
+  }
+</section>

@@ -23,3 +23,9 @@ export { sessionRoutes as SESSION_ROUTES } from './lib/session/session.routes';
 // ROLE_GUEST participant (US19.2.1, no PIVOT account, no bearer token) can actually reach it. See
 // `sessionPublicRoutes`'s own TSDoc in session.routes.ts for the full rationale.
 export { sessionPublicRoutes as SESSION_PUBLIC_ROUTES } from './lib/session/session.routes';
+
+// MeetOps (E12) — meeting creation form (US12.1.1). Not yet mounted by the shell's
+// `app.routes.ts`: EN12.2 ("Guard Angular module meetops") registers the `meetops` moduleGuard
+// entry this route tree depends on — see `meeting.routes.ts`'s own TSDoc. Exported now so EN12.2
+// only has to wire the guard + loader, mirroring `SESSION_ROUTES`'s own history.
+export { meetingRoutes as MEETING_ROUTES } from './lib/meeting/meeting.routes';

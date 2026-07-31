@@ -19,7 +19,6 @@
     "help": "Help",
     "bug_report": "Report a bug",
     "home": "Home",
-    "modules": "Modules",
     "teams": "My teams",
     "theme_to_dark": "Switch to dark mode",
     "theme_to_light": "Switch to light mode",
@@ -44,12 +43,6 @@
     "superadmin_tenants": "Tenants",
     "expand": "Expand",
     "collapse": "Collapse"
-  },
-  "dashboard": {
-    "greeting": "Hello, {{ name }}!",
-    "subtitle": "Welcome to your PIVOT dashboard.",
-    "card_role": "Role",
-    "card_org": "Organisation"
   },
   "footer": {
     "copy": "Made by the PIVOT team",
