@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { TranslocoTestingModule } from '@jsverse/transloco';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { TEAM } from './agilite-hub.model';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { AgiliteHubComponent } from './agilite-hub.component';
 
 function create(): ComponentFixture<AgiliteHubComponent> {
@@ -17,38 +16,38 @@ function create(): ComponentFixture<AgiliteHubComponent> {
 
 interface HubApi {
   tab(): string;
-  spinning(): boolean;
-  resultId(): string | null;
-  wheelRotation(): number;
-  result(): { name: string } | null;
   select(t: 'daily' | 'wheel' | 'capacity' | 'poker' | 'pi'): void;
-  spin(): void;
 }
 
 describe('AgiliteHubComponent', () => {
   beforeEach(() => TestBed.resetTestingModule());
-  afterEach(() => vi.useRealTimers());
 
-  it('démarre sur l\'onglet Daily et rend le board d\'équipe', () => {
+  it('démarre sur l\'onglet Daily et expose un vrai lien de navigation (US10.1.1, évite l\'orphelinage de route)', () => {
     const fixture = create();
     const cmp = fixture.componentInstance as unknown as HubApi;
     expect(cmp.tab()).toBe('daily');
-    expect((fixture.nativeElement as HTMLElement).querySelectorAll('.pv-avatar').length).toBeGreaterThan(0);
-  });
-
-  it('expose un vrai lien de navigation vers le module Daily Standup (US10.1.1, évite l\'orphelinage de route)', () => {
-    const fixture = create();
     const link = (fixture.nativeElement as HTMLElement).querySelector('a[routerLink="standup"]');
     expect(link).not.toBeNull();
   });
 
-  it('change d\'onglet', () => {
+  it('l\'onglet Roue d\'équipe expose un vrai lien de navigation (évite l\'orphelinage de route)', () => {
+    const fixture = create();
+    const cmp = fixture.componentInstance as unknown as HubApi;
+    cmp.select('wheel');
+    fixture.detectChanges();
+    expect(cmp.tab()).toBe('wheel');
+    const link = (fixture.nativeElement as HTMLElement).querySelector('a[routerLink="wheels"]');
+    expect(link).not.toBeNull();
+  });
+
+  it('l\'onglet Capacity expose un vrai lien de navigation (US11.1.1, évite l\'orphelinage de route)', () => {
     const fixture = create();
     const cmp = fixture.componentInstance as unknown as HubApi;
     cmp.select('capacity');
     fixture.detectChanges();
     expect(cmp.tab()).toBe('capacity');
-    expect((fixture.nativeElement as HTMLElement).querySelector('.agh__velocity')).not.toBeNull();
+    const link = (fixture.nativeElement as HTMLElement).querySelector('a[routerLink="capacity"]');
+    expect(link).not.toBeNull();
   });
 
   it('l\'onglet Planning Poker expose les liens vers créer et rejoindre une room', () => {
@@ -75,32 +74,5 @@ describe('AgiliteHubComponent', () => {
 
     const link = (fixture.nativeElement as HTMLElement).querySelector('a[routerLink="pi"]');
     expect(link).not.toBeNull();
-  });
-
-  it('le tirage tourne la roue puis désigne un membre après le délai', () => {
-    vi.useFakeTimers();
-    vi.spyOn(Math, 'random').mockReturnValue(0); // → premier membre, déterministe
-    const fixture = create();
-    const cmp = fixture.componentInstance as unknown as HubApi;
-
-    cmp.spin();
-    expect(cmp.spinning()).toBe(true);
-    expect(cmp.resultId()).toBeNull();
-    expect(cmp.wheelRotation()).toBeGreaterThan(0);
-
-    vi.runAllTimers();
-    expect(cmp.spinning()).toBe(false);
-    expect(cmp.resultId()).toBe(TEAM[0].id);
-    expect(cmp.result()?.name).toBe(TEAM[0].name);
-  });
-
-  it('ignore un second tirage tant que le premier tourne', () => {
-    vi.useFakeTimers();
-    const fixture = create();
-    const cmp = fixture.componentInstance as unknown as HubApi;
-    cmp.spin();
-    const rotation = cmp.wheelRotation();
-    cmp.spin(); // no-op car spinning
-    expect(cmp.wheelRotation()).toBe(rotation);
   });
 });

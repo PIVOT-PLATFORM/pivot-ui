@@ -78,13 +78,19 @@
       </table>
     }
 
-    @if (submitError()) {
-      <p class="session-activity-vote__error" role="alert">{{ 'session.vote.submitError' | transloco }}</p>
+    @if (errorMessageKey(); as key) {
+      <p class="session-activity-vote__error" role="alert">{{ key | transloco }}</p>
     }
 
-    <button type="button" class="session-activity-vote__submit" [disabled]="!canSubmit()" (click)="submit()">
+    <pivot-ds-button
+      type="button"
+      class="session-activity-vote__submit"
+      [disabled]="!canSubmit()"
+      [loading]="submitting()"
+      (click)="submit()"
+    >
       {{ 'session.vote.submit' | transloco }}
-    </button>
+    </pivot-ds-button>
   } @else if (hasVoted() && !(results()?.closed)) {
     <p class="session-activity-vote__voted" role="status">{{ 'session.vote.voted' | transloco }}</p>
   }

@@ -117,12 +117,42 @@ describe('SessionActivityBrainstormComponent', () => {
     expect(fixture.componentInstance.draftText()).toBe('');
   });
 
-  it('add() surfaces submitError on failure', () => {
+  it.each([
+    [400, { code: 'INVALID_CARD' }, 'session.brainstorm.errors.invalidCard'],
+    [403, { code: 'NOT_CARD_OWNER' }, 'session.brainstorm.errors.notOwner'],
+    [409, { code: 'INVALID_SESSION_STATUS' }, 'session.brainstorm.errors.generic'],
+    [500, undefined, 'session.brainstorm.errors.generic'],
+  ] as const)('add() maps a %s error (%o) to %s', (status, body, expectedKey) => {
     const fixture = createFixture();
     fixture.componentInstance.draftText.set('idea');
     fixture.componentInstance.add();
-    httpMock.expectOne(CARDS_URL).flush(null, { status: 500, statusText: 'Server Error' });
-    expect(fixture.componentInstance.submitError()).toBe(true);
+    httpMock.expectOne(CARDS_URL).flush(body ?? null, { status, statusText: 'Error' });
+    expect(fixture.componentInstance.errorMessageKey()).toBe(expectedKey);
+    expect(fixture.componentInstance.submitting()).toBe(false);
+  });
+
+  it('saveEdit() surfaces a NOT_CARD_OWNER mutationErrorKey without exiting edit mode', () => {
+    const fixture = createFixture([card({ id: 'c-1' })]);
+    fixture.componentInstance.startEdit(card({ id: 'c-1' }));
+    fixture.componentInstance.editText.set('edited');
+    fixture.componentInstance.saveEdit('c-1');
+
+    httpMock.expectOne(`${CARDS_URL}/c-1`).flush({ code: 'NOT_CARD_OWNER' }, { status: 403, statusText: 'Forbidden' });
+
+    expect(fixture.componentInstance.mutationErrorKey()).toBe('session.brainstorm.errors.notOwner');
+    expect(fixture.componentInstance.editingId()).toBe('c-1');
+    expect(fixture.componentInstance.mutating()).toBe(false);
+  });
+
+  it('confirmDelete() surfaces a mutationErrorKey on failure', () => {
+    const fixture = createFixture([card({ id: 'c-1' })]);
+    fixture.componentInstance.requestDelete('c-1');
+    fixture.componentInstance.confirmDelete('c-1');
+
+    httpMock.expectOne(`${CARDS_URL}/c-1`).flush({ code: 'NOT_CARD_OWNER' }, { status: 403, statusText: 'Forbidden' });
+
+    expect(fixture.componentInstance.mutationErrorKey()).toBe('session.brainstorm.errors.notOwner');
+    expect(fixture.componentInstance.mutating()).toBe(false);
   });
 
   it('isOwn() is true only for the caller-authored cards', () => {

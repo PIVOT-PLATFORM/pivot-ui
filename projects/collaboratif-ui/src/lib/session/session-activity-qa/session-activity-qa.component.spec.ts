@@ -102,12 +102,17 @@ describe('SessionActivityQaComponent', () => {
     expect(fixture.componentInstance.anonymous()).toBe(false);
   });
 
-  it('submit() surfaces submitError on failure', () => {
+  it.each([
+    [400, { code: 'INVALID_QUESTION' }, 'session.qa.errors.invalidQuestion'],
+    [400, { code: 'OTHER' }, 'session.qa.errors.generic'],
+    [500, undefined, 'session.qa.errors.generic'],
+  ] as const)('maps a %s error (%o) to %s', (status, body, expectedKey) => {
     const fixture = createFixture();
     fixture.componentInstance.draft.set('Why?');
     fixture.componentInstance.submit();
-    httpMock.expectOne(QUESTIONS_URL).flush(null, { status: 500, statusText: 'Server Error' });
-    expect(fixture.componentInstance.submitError()).toBe(true);
+    httpMock.expectOne(QUESTIONS_URL).flush(body ?? null, { status, statusText: 'Error' });
+    expect(fixture.componentInstance.errorMessageKey()).toBe(expectedKey);
+    expect(fixture.componentInstance.submitting()).toBe(false);
   });
 
   it('upvote() posts, locks the button, and keeps it locked on a 409', () => {

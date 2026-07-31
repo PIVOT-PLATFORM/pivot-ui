@@ -11,7 +11,7 @@
       [attr.maxlength]="maxLength"
       [value]="draft()"
       [disabled]="disabled()"
-      [attr.aria-describedby]="submitError() ? 'qa-submit-error' : null"
+      [attr.aria-describedby]="errorMessageKey() ? 'qa-submit-error' : null"
       (input)="draft.set(questionInput.value)"
     ></textarea>
 
@@ -26,14 +26,14 @@
         {{ 'session.qa.anonymousLabel' | transloco }}
       </label>
 
-      <button type="submit" class="session-activity-qa__submit" [disabled]="!canSubmit()">
+      <pivot-ds-button type="submit" class="session-activity-qa__submit" [disabled]="!canSubmit()" [loading]="submitting()">
         {{ 'session.qa.submit' | transloco }}
-      </button>
+      </pivot-ds-button>
     </div>
 
-    @if (submitError()) {
+    @if (errorMessageKey(); as key) {
       <p id="qa-submit-error" class="session-activity-qa__error" role="alert">
-        {{ 'session.qa.submitError' | transloco }}
+        {{ key | transloco }}
       </p>
     }
   </form>

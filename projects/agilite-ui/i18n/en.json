@@ -13,27 +13,14 @@
       "pi": "PI Planning"
     },
     "daily": {
-      "todayTitle": "Today’s daily",
-      "sprintTasks": "Current sprint tasks",
-      "history": "Daily history",
       "realFeatureIntro": "Create and run real daily standup sessions for your team.",
       "realFeatureCta": "View my Daily Standup sessions"
     },
     "wheel": {
-      "goalLabel": "Random draw:",
-      "goalTarget": "Daily facilitator",
-      "spinning": "Spinning…",
-      "spin": "Spin the wheel",
-      "resultLabel": "Daily facilitator drawn",
-      "history": "Draw history"
+      "realFeatureIntro": "Run real random draws for your team.",
+      "realFeatureCta": "View the Team wheel"
     },
     "capacity": {
-      "velocity": "Velocity — last 6 sprints",
-      "chargeTitle": "Load vs capacity",
-      "legendOver": "Overloaded",
-      "legendBalanced": "Balanced",
-      "legendUnder": "Underloaded",
-      "days": "{{charge}}d / {{capacity}}d",
       "realFeatureIntro": "Create real capacity events (PI Planning, Sprint, Release) for your team.",
       "realFeatureCta": "View my capacity events"
     },

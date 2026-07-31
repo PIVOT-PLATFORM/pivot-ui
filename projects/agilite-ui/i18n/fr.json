@@ -13,27 +13,14 @@
       "pi": "PI Planning"
     },
     "daily": {
-      "todayTitle": "Daily du jour",
-      "sprintTasks": "Tâches du sprint en cours",
-      "history": "Historique des dailies",
       "realFeatureIntro": "Créez et animez de vraies sessions de daily standup pour votre équipe.",
       "realFeatureCta": "Voir mes sessions Daily Standup"
     },
     "wheel": {
-      "goalLabel": "Tirage au sort :",
-      "goalTarget": "Animateur du daily",
-      "spinning": "Tirage en cours…",
-      "spin": "Lancer le tirage",
-      "resultLabel": "Animateur du daily désigné",
-      "history": "Historique des tirages"
+      "realFeatureIntro": "Lancez de vrais tirages au sort pour votre équipe.",
+      "realFeatureCta": "Voir la Roue d’équipe"
     },
     "capacity": {
-      "velocity": "Vélocité — 6 derniers sprints",
-      "chargeTitle": "Charge vs capacité",
-      "legendOver": "Surcharge",
-      "legendBalanced": "Équilibré",
-      "legendUnder": "Sous-charge",
-      "days": "{{charge}}j / {{capacity}}j",
       "realFeatureIntro": "Créez de vrais événements de capacité (PI Planning, Sprint, Release) pour votre équipe.",
       "realFeatureCta": "Voir mes événements de capacité"
     },

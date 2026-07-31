@@ -8,11 +8,14 @@ import {
   input,
   signal,
 } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { ButtonComponent } from '@pivot-platform/design-system';
 import {
   MatrixCriterion,
   ParticipantSessionResponse,
+  ProblemDetailResponse,
   SubmitBallotRequest,
   VoteConfig,
   VoteResults,
@@ -38,7 +41,7 @@ const DEFAULT_MAX_SCORE = 5;
   selector: 'app-session-activity-vote',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe],
+  imports: [TranslocoPipe, ButtonComponent],
   templateUrl: './session-activity-vote.component.html',
   styleUrl: './session-activity-vote.component.scss',
 })
@@ -65,7 +68,7 @@ export class SessionActivityVoteComponent implements OnInit, OnDestroy {
   readonly matrixScores = signal<number[][]>([]);
   readonly hasVoted = signal(false);
   readonly submitting = signal(false);
-  readonly submitError = signal(false);
+  readonly errorMessageKey = signal<string | null>(null);
   readonly ballotCount = signal(0);
   readonly results = signal<VoteResults | null>(null);
 
@@ -153,17 +156,39 @@ export class SessionActivityVoteComponent implements OnInit, OnDestroy {
     }
 
     this.submitting.set(true);
-    this.submitError.set(false);
+    this.errorMessageKey.set(null);
     this.sessionApi.submitVoteBallot(this.session().id, body).subscribe({
       next: () => {
         this.submitting.set(false);
         this.hasVoted.set(true);
       },
-      error: () => {
+      error: (error: HttpErrorResponse) => {
         this.submitting.set(false);
-        this.submitError.set(true);
+        this.errorMessageKey.set(this.resolveErrorKey(error));
       },
     });
+  }
+
+  /**
+   * Maps the backend's `ProblemDetail.code` to a specific i18n key (T10, deferred ergonomics
+   * polish) — mirrors {@code SessionActivityWordcloudComponent}'s `resolveErrorKey`. Codes come
+   * from {@code fr.pivot.collaboratif.session.vote.VoteActivityService#recordBallot}.
+   *
+   * @param error the failed submission's HTTP error
+   * @returns the i18n key to display
+   */
+  private resolveErrorKey(error: HttpErrorResponse): string {
+    const body = error.error as ProblemDetailResponse | null;
+    switch (body?.code) {
+      case 'INVALID_BALLOT':
+        return 'session.vote.errors.invalidBallot';
+      case 'VOTE_CLOSED':
+        return 'session.vote.errors.voteClosed';
+      case 'ALREADY_VOTED':
+        return 'session.vote.errors.alreadyVoted';
+      default:
+        return 'session.vote.errors.generic';
+    }
   }
 
   private onMessage(raw: string): void {

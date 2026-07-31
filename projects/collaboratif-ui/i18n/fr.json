@@ -838,11 +838,15 @@
       "exportError": "Échec de l'export."
     },
     "participantShell": {
-      "loadError": "Impossible de charger la session."
+      "loadError": "Impossible de charger la session.",
+      "loading": "Chargement de la session…"
     },
     "poll": {
       "submit": "Valider",
-      "submitError": "Impossible d'enregistrer votre vote.",
+      "errors": {
+        "invalidVote": "Sélection invalide — veuillez choisir une option valide.",
+        "generic": "Impossible d'enregistrer votre vote."
+      },
       "confirmed": "Votre vote a été enregistré.",
       "resultsSummary": "Résultats mis à jour : {{count}} vote(s)"
     },
@@ -862,7 +866,10 @@
       "inputLabel": "Poser une question",
       "anonymousLabel": "Poser anonymement",
       "submit": "Envoyer",
-      "submitError": "Impossible d'envoyer votre question.",
+      "errors": {
+        "invalidQuestion": "Votre question doit contenir entre 1 et 500 caractères.",
+        "generic": "Impossible d'envoyer votre question."
+      },
       "empty": "Aucune question pour l'instant. Soyez le premier à en poser une.",
       "upvote": "Voter pour la question : {{ text }}",
       "anonymousAuthor": "Anonyme",
@@ -872,7 +879,11 @@
       "inputLabel": "Nouvelle idée",
       "colorLabel": "Couleur du post-it",
       "add": "Ajouter",
-      "submitError": "Impossible d'ajouter le post-it.",
+      "errors": {
+        "invalidCard": "Le texte du post-it doit contenir entre 1 et 280 caractères.",
+        "notOwner": "Vous ne pouvez modifier ou supprimer que vos propres post-its.",
+        "generic": "Impossible d'ajouter le post-it."
+      },
       "empty": "Aucune idée pour l'instant. Ajoutez la première.",
       "edit": "Modifier",
       "delete": "Supprimer",
@@ -898,7 +909,12 @@
       "remaining": "Points restants :",
       "overBudget": "Vous avez dépassé le budget de points.",
       "submit": "Voter",
-      "submitError": "Impossible d'enregistrer votre vote.",
+      "errors": {
+        "invalidBallot": "Votre bulletin de vote est invalide.",
+        "voteClosed": "Le vote est fermé.",
+        "alreadyVoted": "Vous avez déjà voté.",
+        "generic": "Impossible d'enregistrer votre vote."
+      },
       "voted": "Votre vote a été enregistré.",
       "ballotsReceived": "Votes reçus :",
       "resultsTitle": "Résultats",
@@ -918,7 +934,12 @@
       "timeUp": "Temps écoulé.",
       "answersReceived": "Réponses reçues :",
       "submit": "Valider",
-      "submitError": "Réponse non enregistrée (temps écoulé ?).",
+      "errors": {
+        "wrongQuestion": "Ce n'est plus la question en cours.",
+        "questionClosed": "Temps écoulé — la fenêtre de réponse est fermée.",
+        "alreadyAnswered": "Vous avez déjà répondu à cette question.",
+        "generic": "Réponse non enregistrée (temps écoulé ?)."
+      },
       "answered": "Réponse envoyée.",
       "leaderboardTitle": "Classement",
       "myScore": "Votre score :",
