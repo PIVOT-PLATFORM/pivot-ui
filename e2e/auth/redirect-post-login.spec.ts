@@ -2,8 +2,8 @@
  * E2E specs — US01.1.4 : Redirection post-login
  *
  * Couverture :
- * 1. Happy path — un utilisateur non authentifié tente /dashboard, est renvoyé
- *    au login, puis est redirigé vers /dashboard après authentification.
+ * 1. Happy path — un utilisateur non authentifié tente /contact, est renvoyé
+ *    au login, puis est redirigé vers /contact après authentification.
  * 2. Open redirect bloqué — un returnUrl externe (https://evil.com) est ignoré
  *    et l'utilisateur atterrit sur /home.
  *
@@ -77,21 +77,21 @@ test.describe('US01.1.4 — Redirection post-login', () => {
   // -------------------------------------------------------------------------
   // 1. Happy path — le contexte de navigation est restauré après login
   // -------------------------------------------------------------------------
-  test('accès à /dashboard non authentifié → login → redirection vers /dashboard', async ({
+  test('accès à /contact non authentifié → login → redirection vers /contact', async ({
     page,
     context,
   }) => {
     await stubLoginOk(page, context);
 
     // Tentative d'accès à une route protégée sans session
-    await page.goto('/dashboard');
+    await page.goto('/contact');
     await expect(page).toHaveURL(new RegExp(LOGIN_URL), { timeout: 8_000 });
 
     await expect(page.locator('#email')).toBeVisible();
     await fillAndSubmitLogin(page);
 
     // L'URL d'origine est restaurée (session Angular alimentée par le guard)
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 10_000 });
+    await expect(page).toHaveURL(/\/contact/, { timeout: 10_000 });
   });
 
   // -------------------------------------------------------------------------
