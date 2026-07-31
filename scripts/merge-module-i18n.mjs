@@ -1,18 +1,29 @@
 // Merge each activatable module's translation catalogue into the shell's global
-// Transloco catalogue at build time.
+// Transloco catalogue.
 //
 // The shell loads a single global `/assets/i18n/{lang}.json` (no per-module Transloco
 // scope). Each `projects/{module}-ui` internal library ships its own translations under
 // `i18n/{lang}.json` (see each project's ng-package.json `assets`). EN53.4 (Vague 4
 // modulith) — these libs are no longer npm packages fetched into `node_modules`, they're
-// internal workspace projects resolved straight from source; this postbuild step now reads
-// their catalogues directly from `projects/` and deep-merges them into the built catalogue
-// in `dist`, so module labels resolve without hand-copying keys into the shell.
+// internal workspace projects resolved straight from source; this step reads their
+// catalogues directly from `projects/` and deep-merges them into the target catalogue,
+// so module labels resolve without hand-copying keys into the shell.
 //
-// Runs as the `postbuild` npm script — i.e. after `ng build` has copied the shell's own
-// base catalogue (public/assets/i18n) into dist. The shell's own keys always win on a
-// leaf conflict; a module that ships no i18n is skipped (graceful — labels fall back to
-// raw keys, exactly as before this mechanism existed).
+// Runs as both:
+// - the `postbuild` npm script (target: `dist/frontend/browser/assets/i18n`) — i.e. after
+//   `ng build` has copied the shell's own base catalogue (public/assets/i18n) into dist;
+// - the `prestart` npm script (target: `public/assets/i18n`, the default below) — `ng serve`
+//   has no build/postbuild step of its own and serves this folder's JSON directly from disk,
+//   so without this the whole module namespace (`hub.*`, `whiteboard.*`, `session.*`, …)
+//   rendered as raw untranslated keys under local dev only (never in a real build/deploy).
+//   Safe to run repeatedly against the tracked source file: `deepMerge` only fills in keys
+//   absent from the destination, so a second run is a no-op — but it does mean
+//   `public/assets/i18n/{fr,en}.json` shows as modified in `git status` after `npm start`;
+//   that's expected, not a regression to chase — `git checkout -- public/assets/i18n` before
+//   committing an unrelated change if the diff is in the way.
+//
+// The shell's own keys always win on a leaf conflict; a module that ships no i18n is skipped
+// (graceful — labels fall back to raw keys, exactly as before this mechanism existed).
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -24,7 +35,8 @@ const MODULES = ['collaboratif-ui', 'agilite-ui'];
 // Dev-harness-only namespaces shipped by a module but irrelevant to the shell.
 const SKIP_TOP = new Set(['app']);
 
-const distDir = join(root, 'dist/frontend/browser/assets/i18n');
+const targetArg = process.argv.find((a) => a.startsWith('--target='));
+const distDir = join(root, targetArg ? targetArg.slice('--target='.length) : 'dist/frontend/browser/assets/i18n');
 const isObj = (x) => x && typeof x === 'object' && !Array.isArray(x);
 
 /** Add keys from `src` into `dst`; `dst` (shell) wins on a leaf conflict. */
