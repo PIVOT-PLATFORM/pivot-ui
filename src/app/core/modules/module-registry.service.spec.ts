@@ -125,7 +125,7 @@ describe('ModuleRegistryService', () => {
       const enriched = service.enrichedModules();
       const wb = enriched.find(m => m.id === 'whiteboard');
       expect(wb).toBeDefined();
-      expect(wb!.icon).toContain('<svg');
+      expect(wb!.icon).toBe('module-whiteboard');
       expect(wb!.color).toBe('#8B5CF6');
       expect(wb!.route).toBe('/whiteboard');
     });
@@ -157,7 +157,7 @@ describe('ModuleRegistryService', () => {
       httpMock.expectOne(`${environment.apiUrl}/modules`).flush([makeDto('roadmap')]);
 
       const enriched = service.enrichedModules();
-      expect(enriched[0].icon).toContain('<svg');
+      expect(enriched[0].icon).toBe('module-roadmap');
       expect(enriched[0].route).toBe('/roadmap');
       expect(enriched[0].description).toBe('Roadmap et Gantt intégré');
     });

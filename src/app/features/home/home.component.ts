@@ -15,8 +15,8 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { IconComponent } from '@pivot-platform/design-system';
 import { AuthService } from '../../core/auth/service/auth.service';
 import { ModuleRegistryService } from '../../core/modules/module-registry.service';
 
@@ -24,7 +24,7 @@ import { ModuleRegistryService } from '../../core/modules/module-registry.servic
   selector: 'piv-home',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslocoPipe],
+  imports: [RouterLink, TranslocoPipe, IconComponent],
   template: `
     <main class="home" [attr.aria-label]="'home.aria_label' | transloco">
 
@@ -77,9 +77,8 @@ import { ModuleRegistryService } from '../../core/modules/module-registry.servic
                     class="module-card__icon"
                     [style.background]="hexToRgba(mod.color, 0.1)"
                     [style.color]="mod.color"
-                    [innerHTML]="trustIcon(mod.icon)"
                     aria-hidden="true"
-                  ></div>
+                  ><pivot-ds-icon [name]="mod.icon" [size]="24" /></div>
                   <div class="module-card__body">
                     <p class="module-card__name">{{ mod.name }}</p>
                     <p class="module-card__desc">{{ mod.description }}</p>
@@ -132,8 +131,7 @@ import { ModuleRegistryService } from '../../core/modules/module-registry.servic
                   <div
                     class="module-card__icon"
                     aria-hidden="true"
-                    [innerHTML]="trustIcon(mod.icon)"
-                  ></div>
+                  ><pivot-ds-icon [name]="mod.icon" [size]="24" /></div>
                   <div class="module-card__body">
                     <p class="module-card__name">{{ mod.name }}</p>
                     <p class="module-card__desc">{{ mod.description }}</p>
@@ -153,7 +151,6 @@ import { ModuleRegistryService } from '../../core/modules/module-registry.servic
 export class HomeComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly moduleRegistry = inject(ModuleRegistryService);
-  private readonly sanitizer = inject(DomSanitizer);
 
   readonly user = this.auth.currentUser;
   readonly activeModules = this.moduleRegistry.activeModules;
@@ -174,16 +171,5 @@ export class HomeComponent implements OnInit {
     const g = Number.parseInt(hex.slice(3, 5), 16);
     const b = Number.parseInt(hex.slice(5, 7), 16);
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  }
-
-  /**
-   * Marks a module's icon markup as trusted so Angular's default HTML sanitizer stops
-   * stripping the inline `<svg>` before binding it via `[innerHTML]` (SVG isn't in Angular's
-   * safe-HTML allowlist, so without this every module card rendered an empty icon slot).
-   * Safe here: `mod.icon` only ever comes from this app's own static `MODULE_METADATA`/
-   * `defaultMeta()` (see module-metadata.ts) — never from user input or the backend DTO.
-   */
-  trustIcon(icon: string): SafeHtml {
-    return this.sanitizer.bypassSecurityTrustHtml(icon);
   }
 }
