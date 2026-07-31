@@ -23,3 +23,13 @@ export { sessionRoutes as SESSION_ROUTES } from './lib/session/session.routes';
 // ROLE_GUEST participant (US19.2.1, no PIVOT account, no bearer token) can actually reach it. See
 // `sessionPublicRoutes`'s own TSDoc in session.routes.ts for the full rationale.
 export { sessionPublicRoutes as SESSION_PUBLIC_ROUTES } from './lib/session/session.routes';
+
+// Bingo des réunions (US47.1.1, E47/F47.1) — mounted by the shell alongside the other
+// collaboratif sub-features, same `provideCollaboratifUi`/`COLLABORATIF_API_URL` config entry
+// point (same backend module, `fr.pivot.collaboratif.bingo`).
+export { bingoRoutes as BINGO_ROUTES } from './lib/bingo/bingo.routes';
+
+// Participant-facing subset of BINGO_ROUTES (join, :roomId), unguarded — mounted a second time
+// at the shell's public route fallback level so an anonymous participant (AC-47.1.1-03, no PIVOT
+// account, no bearer token) can actually reach it. See `bingoPublicRoutes`'s own TSDoc.
+export { bingoPublicRoutes as BINGO_PUBLIC_ROUTES } from './lib/bingo/bingo.routes';

@@ -945,5 +945,45 @@
       "myScore": "Your score:",
       "points": "pts"
     }
+  },
+  "bingo": {
+    "create": {
+      "title": "Create a Bingo des réunions game",
+      "nameLabel": "Game name",
+      "nameRequired": "A name is required.",
+      "submit": "Create",
+      "errors": {
+        "generic": "Something went wrong."
+      }
+    },
+    "join": {
+      "title": "Join a Bingo des réunions game",
+      "codeLabel": "Game code",
+      "codeRequired": "The code must be 6 characters.",
+      "displayNameLabel": "Your nickname",
+      "displayNameRequired": "A 2-30 character nickname is required.",
+      "submit": "Join",
+      "errors": {
+        "notFound": "Invalid or expired code.",
+        "invalidDisplayName": "Invalid nickname.",
+        "invalidCode": "Invalid code.",
+        "invalidRequest": "Invalid request.",
+        "generic": "Something went wrong."
+      }
+    },
+    "board": {
+      "gridLabel": "Bingo grid",
+      "progressTitle": "Progress",
+      "markedCount": "{{count}} cell(s) marked",
+      "bingoAnnouncement": "Bingo! {{name}} won.",
+      "finished": "The game is over.",
+      "spectatorNotice": "Game full — spectator mode. You follow the progress and victory announcement, without a grid.",
+      "errors": {
+        "SPECTATOR_CANNOT_MARK": "Spectators cannot mark cells.",
+        "INVALID_CELL": "Invalid cell.",
+        "ROOM_FINISHED": "The game is already over.",
+        "generic": "Something went wrong."
+      }
+    }
   }
 }

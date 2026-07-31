@@ -8,6 +8,7 @@ import { moduleGuard } from './core/modules/module.guard';
 import { loadWhiteboardModule } from './core/modules/whiteboard-module-loader';
 import { loadAgiliteModule } from './core/modules/agilite-module-loader';
 import { loadSessionModule, loadSessionPublicModule } from './core/modules/session-module-loader';
+import { loadBingoModule, loadBingoPublicModule } from './core/modules/bingo-module-loader';
 
 /**
  * Cible de redirection pour toute route inexistante (US01.1.4) :
@@ -101,6 +102,35 @@ const SESSION_PUBLIC_ROUTE: Routes = [
   {
     path: 'session',
     loadChildren: loadSessionPublicModule,
+  },
+];
+
+/**
+ * `/bingo` — US47.1.1 (E47/F47.1, module `collaboratif`). Real module
+ * (`@pivot-platform/collaboratif-ui`'s `BINGO_ROUTES`), same pattern as `session`. Deliberately
+ * **not** gated by `moduleGuard` — Bingo is a sub-feature of the already-activated `collaboratif`
+ * domain (whiteboard/session live under it too), not its own toggleable module; no backend
+ * `PivotModule` registry entry exists for it, and none is required by this US's ACs.
+ */
+const BINGO_ROUTE: Routes = [
+  {
+    path: 'bingo',
+    loadChildren: loadBingoModule,
+  },
+];
+
+/**
+ * `/bingo/{join,:roomId}` — AC-47.1.1-03. Public, unguarded duplicate of the participant-facing
+ * subset of `BINGO_ROUTE` above, registered as a top-level sibling in the "Public fallback
+ * routes" section below (same pattern as `SESSION_PUBLIC_ROUTE`). An anonymous participant (no
+ * PIVOT account, no bearer token) has no other way to reach `bingo/join` — `BINGO_ROUTE` sits
+ * inside the authenticated shell, which an anonymous caller cannot pass. See `collaboratif-ui`'s
+ * `bingoPublicRoutes` TSDoc for the full rationale.
+ */
+const BINGO_PUBLIC_ROUTE: Routes = [
+  {
+    path: 'bingo',
+    loadChildren: loadBingoPublicModule,
   },
 ];
 
@@ -259,6 +289,7 @@ export const routes: Routes = [
       ...WHITEBOARD_ROUTE,
       ...AGILITE_ROUTE,
       ...SESSION_ROUTE,
+      ...BINGO_ROUTE,
       ...MODULE_CHILDREN,
       { path: 'legal', children: LEGAL_CHILDREN },
       {
@@ -302,5 +333,7 @@ export const routes: Routes = [
   },
   // US19.2.1 — anonymous ROLE_GUEST session participation, same public-fallback pattern as above.
   ...SESSION_PUBLIC_ROUTE,
+  // AC-47.1.1-03 — anonymous Bingo participation, same public-fallback pattern as above.
+  ...BINGO_PUBLIC_ROUTE,
   { path: '**', redirectTo: notFoundRedirect },
 ];
