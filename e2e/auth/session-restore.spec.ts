@@ -24,7 +24,7 @@ import { test, expect, type Page } from '@playwright/test';
 
 const API = 'http://localhost:8080/api';
 const LOGIN_URL = '/auth/login';
-const DASHBOARD_URL = '/dashboard';
+const HOME_URL = '/home';
 
 /** Minimal valid AuthResponse. */
 const AUTH_RESPONSE = {
@@ -76,23 +76,23 @@ test.describe('US-AUTH-002 — Session restore', () => {
   // -------------------------------------------------------------------------
   // 1. Session restore — l'utilisateur reste connecté après un reload
   // -------------------------------------------------------------------------
-  test('session restore — authenticated user stays on /dashboard after page reload', async ({
+  test('session restore — authenticated user stays on /home after page reload', async ({
     page,
   }) => {
     // First load: /auth/refresh returns OK → user is authenticated
     await stubRefreshOk(page);
-    await page.goto(DASHBOARD_URL);
+    await page.goto(HOME_URL);
 
     // The auth guard lets the user through because APP_INITIALIZER set the token
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 10_000 });
+    await expect(page).toHaveURL(/\/home/, { timeout: 10_000 });
     await expect(page.locator('h1')).toContainText('Bob');
 
     // Reload the page — /auth/refresh is called again by APP_INITIALIZER
     // Keep the same stub active (route is still in place)
     await page.reload();
 
-    // User must remain on /dashboard, not be kicked to /auth/login
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 10_000 });
+    // User must remain on /home, not be kicked to /auth/login
+    await expect(page).toHaveURL(/\/home/, { timeout: 10_000 });
     await expect(page.locator('h1')).toContainText('Bob');
   });
 
@@ -106,7 +106,7 @@ test.describe('US-AUTH-002 — Session restore', () => {
     await stubRefreshUnauthorized(page);
 
     // Try to access a protected route directly
-    await page.goto(DASHBOARD_URL);
+    await page.goto(HOME_URL);
 
     // The AuthService clears in-memory token, AuthGuard redirects to login
     await expect(page).toHaveURL(new RegExp(LOGIN_URL), { timeout: 10_000 });
@@ -120,8 +120,8 @@ test.describe('US-AUTH-002 — Session restore', () => {
   test('mid-session expiry — reload with expired cookie redirects to login', async ({ page }) => {
     // First load: session is valid
     await stubRefreshOk(page);
-    await page.goto(DASHBOARD_URL);
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 10_000 });
+    await page.goto(HOME_URL);
+    await expect(page).toHaveURL(/\/home/, { timeout: 10_000 });
 
     // Simulate cookie expiry: replace the /auth/refresh stub before reload
     await page.unroute(`${API}/auth/refresh`);
@@ -136,16 +136,16 @@ test.describe('US-AUTH-002 — Session restore', () => {
   });
 
   // -------------------------------------------------------------------------
-  // 4. Session restore — navigation directe vers /auth/login redirige vers dashboard
+  // 4. Session restore — navigation directe vers /auth/login redirige vers /home
   // -------------------------------------------------------------------------
-  test('authenticated user visiting /auth/login is redirected to /dashboard', async ({ page }) => {
+  test('authenticated user visiting /auth/login is redirected to /home', async ({ page }) => {
     // Valid session in place
     await stubRefreshOk(page);
 
     // Navigate to login while already authenticated
     await page.goto(LOGIN_URL);
 
-    // guestGuard redirects authenticated users to /dashboard
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 10_000 });
+    // guestGuard redirects authenticated users to /home (DEFAULT_POST_LOGIN_URL)
+    await expect(page).toHaveURL(/\/home/, { timeout: 10_000 });
   });
 });

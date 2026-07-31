@@ -3,6 +3,7 @@
   "version": "0.30.0",
   "scripts": {
     "ng": "ng",
+    "prestart": "node scripts/merge-module-i18n.mjs --target=public/assets/i18n",
     "start": "ng serve",
     "build": "ng build",
     "postbuild": "node scripts/merge-module-i18n.mjs",

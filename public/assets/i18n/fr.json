@@ -19,7 +19,6 @@
     "help": "Aide",
     "bug_report": "Remonter un bug",
     "home": "Accueil",
-    "modules": "Modules",
     "teams": "Mes équipes",
     "theme_to_dark": "Passer en mode sombre",
     "theme_to_light": "Passer en mode clair",
@@ -44,12 +43,6 @@
     "superadmin_tenants": "Tenants",
     "expand": "Développer",
     "collapse": "Réduire"
-  },
-  "dashboard": {
-    "greeting": "Bonjour, {{ name }} !",
-    "subtitle": "Bienvenue sur votre tableau de bord PIVOT.",
-    "card_role": "Rôle",
-    "card_org": "Organisation"
   },
   "footer": {
     "copy": "Réalisé par l'équipe PIVOT",

@@ -16,6 +16,7 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { IconComponent } from '@pivot-platform/design-system';
 import { AuthService } from '../../core/auth/service/auth.service';
 import { ModuleRegistryService } from '../../core/modules/module-registry.service';
 
@@ -23,7 +24,7 @@ import { ModuleRegistryService } from '../../core/modules/module-registry.servic
   selector: 'piv-home',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslocoPipe],
+  imports: [RouterLink, TranslocoPipe, IconComponent],
   template: `
     <main class="home" [attr.aria-label]="'home.aria_label' | transloco">
 
@@ -76,9 +77,8 @@ import { ModuleRegistryService } from '../../core/modules/module-registry.servic
                     class="module-card__icon"
                     [style.background]="hexToRgba(mod.color, 0.1)"
                     [style.color]="mod.color"
-                    [innerHTML]="mod.icon"
                     aria-hidden="true"
-                  ></div>
+                  ><pivot-ds-icon [name]="mod.icon" [size]="24" /></div>
                   <div class="module-card__body">
                     <p class="module-card__name">{{ mod.name }}</p>
                     <p class="module-card__desc">{{ mod.description }}</p>
@@ -131,8 +131,7 @@ import { ModuleRegistryService } from '../../core/modules/module-registry.servic
                   <div
                     class="module-card__icon"
                     aria-hidden="true"
-                    [innerHTML]="mod.icon"
-                  ></div>
+                  ><pivot-ds-icon [name]="mod.icon" [size]="24" /></div>
                   <div class="module-card__body">
                     <p class="module-card__name">{{ mod.name }}</p>
                     <p class="module-card__desc">{{ mod.description }}</p>
@@ -173,5 +172,4 @@ export class HomeComponent implements OnInit {
     const b = Number.parseInt(hex.slice(5, 7), 16);
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
-
 }

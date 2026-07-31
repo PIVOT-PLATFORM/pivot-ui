@@ -8,11 +8,13 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideTransloco } from '@jsverse/transloco';
 import { provideCollaboratifUi, COLLABORATIF_BEARER_TOKEN, COLLABORATIF_CURRENT_USER, type CollaboratifCurrentUser } from '@pivot-platform/collaboratif-ui';
 import { provideAgiliteUi } from '@pivot-platform/agilite-ui';
+import { IconRegistry } from '@pivot-platform/design-system';
 import { routes } from './app.routes';
 import { tokenInterceptor } from './core/auth/interceptor/token.interceptor';
 import { AuthService } from './core/auth/service/auth.service';
 import { TranslocoHttpLoader } from './core/i18n/transloco.loader';
 import { LanguageSyncService } from './core/i18n/language-sync.service';
+import { MODULE_ICONS } from './core/modules/module-icons';
 import { environment } from '../environments/environment';
 import { catchError, of } from 'rxjs';
 
@@ -26,10 +28,21 @@ function detectInitialLang(): string {
 
 function initSession(auth: AuthService) {
   // Tente la restauration de session sur TOUTES les routes (y compris /auth/*) : un utilisateur
-  // déjà authentifié qui ouvre /auth/login doit être redirigé vers /dashboard par guestGuard,
+  // déjà authentifié qui ouvre /auth/login doit être redirigé vers /home par guestGuard,
   // ce qui exige que le token soit restauré avant l'activation du routeur. Le 401 attendu pour
   // un visiteur non authentifié est absorbé par catchError (pas d'impact fonctionnel).
   return auth.initSession().pipe(catchError(() => of(null)));
+}
+
+/**
+ * Registers the shell's module icons into the design system's `IconRegistry` at bootstrap.
+ * Routes module-card icons through `<pivot-ds-icon>` instead of a component-level
+ * `DomSanitizer.bypassSecurityTrustHtml` call — the latter is flagged as a security
+ * vulnerability by Semgrep/SonarCloud even when the source string is fully static
+ * (see `module-icons.ts`), while `IconComponent`'s own registry-keyed lookup is not.
+ */
+function registerModuleIcons(): void {
+  inject(IconRegistry).registerMany(MODULE_ICONS);
 }
 
 /**
@@ -82,6 +95,7 @@ export const appConfig: ApplicationConfig = {
     }),
     provideAppInitializer(() => {
       initLanguageSync();
+      registerModuleIcons();
       return initSession(inject(AuthService));
     }),
   ]

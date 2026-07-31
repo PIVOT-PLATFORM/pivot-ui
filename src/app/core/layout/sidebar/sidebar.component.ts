@@ -115,7 +115,7 @@ export class SidebarComponent {
   private readonly auth = inject(AuthService);
 
   private readonly allItems: NavItem[] = [
-    { labelKey: 'sidebar.dashboard', icon: '▦', route: '/dashboard' },
+    { labelKey: 'sidebar.dashboard', icon: '▦', route: '/home' },
     { labelKey: 'sidebar.admin', icon: '⚙', route: '/admin', roles: ['ROLE_ADMIN', 'ROLE_SUPER_ADMIN'] },
     {
       labelKey: 'sidebar.superadmin_tenants',

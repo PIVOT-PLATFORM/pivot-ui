@@ -151,10 +151,10 @@ describe('guestGuard', () => {
     expect(result).toBe(true);
   });
 
-  it('redirects to /dashboard when already authenticated', () => {
+  it('redirects to /home when already authenticated', () => {
     authService.updateToken('tok', Date.now() + 3600_000);
     const result = TestBed.runInInjectionContext(() => guestGuard({} as never, {} as never));
     expect(result).toBeInstanceOf(UrlTree);
-    expect(router.serializeUrl(result as UrlTree)).toBe('/dashboard');
+    expect(router.serializeUrl(result as UrlTree)).toBe('/home');
   });
 });

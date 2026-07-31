@@ -72,7 +72,7 @@ function makeModule(partial: Partial<PivotModuleUi> = {}): PivotModuleUi {
     version: '1.0.0',
     enabled: true,
     status: 'online',
-    icon: '<svg></svg>',
+    icon: 'module-whiteboard',
     description: 'Tableau blanc',
     route: '/whiteboard',
     comingSoon: false,
