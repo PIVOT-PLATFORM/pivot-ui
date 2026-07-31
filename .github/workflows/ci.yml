@@ -188,7 +188,7 @@ jobs:
         # Java 17 — sans cette étape le scan échoue avant même d'analyser quoi que ce soit
         # (« The version of Java (17) used to run this analysis is deprecated »), sur toutes les PR.
         # Ce JDK ne sert qu'au scanner : le projet reste un projet Node, rien n'est compilé en Java.
-        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5.6.0
         with:
           distribution: temurin
           java-version: '21'
