@@ -57,7 +57,6 @@ export function avatarColor(name: string): string {
         </a>
         <nav class="navbar__nav" aria-label="Navigation principale">
           <a routerLink="/home" routerLinkActive="navbar__nav-link--active" class="navbar__nav-link">{{ 'nav.home' | transloco }}</a>
-          <a routerLink="/dashboard" routerLinkActive="navbar__nav-link--active" class="navbar__nav-link">{{ 'nav.modules' | transloco }}</a>
           <a routerLink="/teams" routerLinkActive="navbar__nav-link--active" class="navbar__nav-link">{{ 'nav.teams' | transloco }}</a>
         </nav>
       </div>
