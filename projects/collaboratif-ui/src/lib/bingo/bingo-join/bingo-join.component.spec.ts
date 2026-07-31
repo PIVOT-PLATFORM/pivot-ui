@@ -104,6 +104,8 @@ describe('BingoJoinComponent', () => {
       const fixture = TestBed.createComponent(BingoJoinComponent);
       fixture.detectChanges();
       expect(fixture.componentInstance['isAnonymous']).toBe(false);
+      const router = TestBed.inject(Router);
+      const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
 
       fixture.componentInstance['form'].controls.code.setValue('ABCDEF');
       expect(fixture.componentInstance['form'].valid).toBe(true);
@@ -123,6 +125,11 @@ describe('BingoJoinComponent', () => {
         role: 'PLAYER',
         grid: { cells: [] },
       });
+
+      expect(navigateSpy).toHaveBeenCalledWith(
+        ['/bingo', 'r-2'],
+        expect.objectContaining({ state: expect.objectContaining({ roomId: 'r-2', isAnonymous: false }) }),
+      );
     });
   });
 });
