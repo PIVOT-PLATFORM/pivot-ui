@@ -1,0 +1,76 @@
+<div class="session-activity-postit-rush">
+  <span class="session-activity-postit-rush__sr-only" aria-live="assertive">
+    @if (assertiveMessageKey(); as key) {
+      {{ key | transloco }}
+    }
+  </span>
+
+  @if (!roundActive() && finalStandings() === null) {
+    <p class="session-activity-postit-rush__waiting" role="status">
+      {{ 'session.postitRush.waiting' | transloco }}
+    </p>
+  }
+
+  @if (roundActive()) {
+    <p class="session-activity-postit-rush__timer" aria-hidden="true">
+      {{ 'session.postitRush.timeLeft' | transloco }} {{ remainingSeconds() }}
+    </p>
+
+    <div class="session-activity-postit-rush__board" role="group" [attr.aria-label]="'session.postitRush.boardLabel' | transloco">
+      @for (postit of livePostits(); track postit.postitId) {
+        <button
+          type="button"
+          class="session-activity-postit-rush__postit"
+          [class]="'session-activity-postit-rush__postit--' + postit.colorKey"
+          [style.left.%]="postit.x"
+          [style.top.%]="postit.y"
+          [disabled]="disabled()"
+          [attr.aria-label]="'session.postitRush.postitLabel' | transloco: { color: postit.colorKey }"
+          (click)="click(postit.postitId)"
+        >
+          <span aria-hidden="true">{{ shapeFor(postit.colorKey) }}</span>
+        </button>
+      }
+    </div>
+
+    @if (feedbackKey(); as key) {
+      <p class="session-activity-postit-rush__feedback" role="status">{{ key | transloco }}</p>
+    }
+    @if (errorMessageKey(); as key) {
+      <p class="session-activity-postit-rush__error" role="alert">{{ key | transloco }}</p>
+    }
+
+    <dl class="session-activity-postit-rush__stats">
+      <dt>{{ 'session.postitRush.myScore' | transloco }}</dt>
+      <dd>{{ myScore() }}</dd>
+      <dt>{{ 'session.postitRush.myCombo' | transloco }}</dt>
+      <dd>×{{ myMultiplier() }}</dd>
+    </dl>
+
+    <section class="session-activity-postit-rush__leaderboard" aria-live="polite">
+      <h3>{{ 'session.postitRush.leaderboardTitle' | transloco }}</h3>
+      <ol>
+        @for (entry of leaderboard(); track entry.participantId) {
+          <li [class.session-activity-postit-rush__me]="isOwnRow(entry)">
+            {{ entry.rank }}. {{ entry.displayName }} — {{ entry.score }} {{ 'session.postitRush.points' | transloco }}
+          </li>
+        }
+      </ol>
+    </section>
+  }
+
+  @if (finalStandings(); as standings) {
+    <section class="session-activity-postit-rush__results" aria-live="polite">
+      <h3>{{ 'session.postitRush.resultsTitle' | transloco }}</h3>
+      <ol>
+        @for (entry of standings; track entry.participantId) {
+          <li [class.session-activity-postit-rush__me]="isOwnRow(entry)">
+            {{ entry.rank }}. {{ entry.displayName }} — {{ entry.score }} {{ 'session.postitRush.points' | transloco }}
+            ({{ 'session.postitRush.hits' | transloco }}: {{ entry.hits }},
+            {{ 'session.postitRush.bestCombo' | transloco }}: ×{{ entry.bestCombo }})
+          </li>
+        }
+      </ol>
+    </section>
+  }
+</div>

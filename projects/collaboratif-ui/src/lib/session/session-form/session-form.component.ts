@@ -4,8 +4,16 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { SessionType } from '../models/session.model';
 import { SessionApiService } from '../services/session-api.service';
 
-/** The six selectable activity types, in display order (US19.1.1). */
-const SESSION_TYPES: SessionType[] = ['QUIZ', 'POLL', 'WORDCLOUD', 'BRAINSTORM', 'QA', 'VOTE'];
+/** The selectable activity types, in display order (US19.1.1, +POSTIT_RUSH per US47.2.1). */
+const SESSION_TYPES: SessionType[] = [
+  'QUIZ',
+  'POLL',
+  'WORDCLOUD',
+  'BRAINSTORM',
+  'QA',
+  'VOTE',
+  'POSTIT_RUSH',
+];
 
 const MAX_TITLE_LENGTH = 120;
 

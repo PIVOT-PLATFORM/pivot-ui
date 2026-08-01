@@ -13,8 +13,11 @@
  * omits `joinCode`/`teamId`/`createdAt` — see that interface's own TSDoc.
  */
 
-/** The six interactive activity types a session can run (US19.1.1). */
-export type SessionType = 'QUIZ' | 'POLL' | 'WORDCLOUD' | 'BRAINSTORM' | 'QA' | 'VOTE';
+/**
+ * The interactive activity types a session can run (US19.1.1). `POSTIT_RUSH` (US47.2.1, E47/F47.2)
+ * reuses this exact shared session/join/participant socle.
+ */
+export type SessionType = 'QUIZ' | 'POLL' | 'WORDCLOUD' | 'BRAINSTORM' | 'QA' | 'VOTE' | 'POSTIT_RUSH';
 
 /** Session lifecycle status (US19.1.2) — strict state machine, see {@link SessionService}. */
 export type SessionStatus = 'DRAFT' | 'LIVE' | 'PAUSED' | 'COMPLETED';
@@ -74,6 +77,12 @@ export interface CreateSessionRequest {
 export interface JoinSessionRequest {
   readonly code: string;
   readonly displayName: string;
+  /**
+   * US47.2.1 `POSTIT_RUSH` only: pass `true` to explicitly accept the spectator fallback offered
+   * on a prior `409 ROOM_FULL` response (the room is at hard capacity). Omit/`false` for a normal
+   * join attempt — ignored by every other session type.
+   */
+  readonly spectator?: boolean;
 }
 
 /**
@@ -134,7 +143,13 @@ export type SessionEventType =
   | 'VOTE_CLOSED'
   | 'QUESTION_STARTED'
   | 'QUESTION_ENDED'
-  | 'QUIZ_ANSWERED';
+  | 'QUIZ_ANSWERED'
+  | 'ROUND_STARTED'
+  | 'POSTIT_SPAWNED'
+  | 'POSTIT_EXPIRED'
+  | 'POSTIT_CLAIMED'
+  | 'LEADERBOARD_UPDATED'
+  | 'ROUND_ENDED';
 
 /** `SESSION_STARTED` carries the full, started session (`SessionStartedEvent.java`). */
 export interface SessionStartedEvent {
@@ -490,6 +505,117 @@ export interface QuizAnsweredEvent {
   readonly answerCount: number;
 }
 
+// ---------------------------------------------------------------------------------------------
+// POSTIT_RUSH activity (US47.2.1, E47/F47.2)
+// ---------------------------------------------------------------------------------------------
+
+/** Type-dependent POSTIT_RUSH setup (`config`) — `durationSeconds` defaults to 90 server-side. */
+export interface PostitRushConfig extends SessionConfig {
+  readonly durationSeconds?: number;
+}
+
+/** Request body for `POST .../postit-rush/click` (US47.2.1) — never a score, only the target id. */
+export interface ClickPostitRequest {
+  readonly postitId: string;
+}
+
+/** Response of a successful click — the clicker's own updated state (`ClickPostitResponse.java`). */
+export interface ClickPostitResponse {
+  readonly pointsAwarded: number;
+  readonly multiplier: number;
+  readonly score: number;
+  readonly currentCombo: number;
+  readonly hits: number;
+}
+
+/** One ranked leaderboard row (`PostitRushLeaderboardEntry.java`). */
+export interface PostitRushLeaderboardEntry {
+  readonly participantId: string;
+  readonly displayName: string;
+  readonly score: number;
+  readonly rank: number;
+}
+
+/** A currently-live post-it, as returned by the reconnect state read (`LivePostitDto.java`). */
+export interface LivePostit {
+  readonly postitId: string;
+  readonly x: number;
+  readonly y: number;
+  readonly colorKey: string;
+  readonly remainingMs: number;
+}
+
+/** A reconnecting player's snapshot (`PostitRushStateDto.java`). */
+export interface PostitRushState {
+  readonly roundActive: boolean;
+  readonly roundId: string | null;
+  readonly remainingSeconds: number | null;
+  readonly livePostits: LivePostit[];
+  readonly myScore: number;
+  readonly myCurrentCombo: number;
+  readonly myBestCombo: number;
+  readonly myHits: number;
+}
+
+/** One final standings row (`PostitRushStandingEntry.java`). */
+export interface PostitRushStandingEntry {
+  readonly rank: number;
+  readonly participantId: string;
+  readonly displayName: string;
+  readonly score: number;
+  readonly hits: number;
+  readonly bestCombo: number;
+}
+
+/** Final POSTIT_RUSH results (`PostitRushResultsDto.java`). */
+export interface PostitRushResults {
+  readonly standings: PostitRushStandingEntry[];
+}
+
+/** `ROUND_STARTED` opens a round (`RoundStartedEvent.java`) — server-authoritative clock. */
+export interface RoundStartedEvent {
+  readonly type: 'ROUND_STARTED';
+  readonly roundId: string;
+  readonly durationSeconds: number;
+  readonly startedAt: string;
+}
+
+/** `POSTIT_SPAWNED` — server-generated position/color/timing (`PostitSpawnedEvent.java`). */
+export interface PostitSpawnedEvent {
+  readonly type: 'POSTIT_SPAWNED';
+  readonly postitId: string;
+  readonly x: number;
+  readonly y: number;
+  readonly colorKey: string;
+  readonly spawnedAt: string;
+  readonly lifespanMs: number;
+}
+
+/** `POSTIT_EXPIRED` — a live post-it's lifespan elapsed unclaimed (`PostitExpiredEvent.java`). */
+export interface PostitExpiredEvent {
+  readonly type: 'POSTIT_EXPIRED';
+  readonly postitId: string;
+}
+
+/** `POSTIT_CLAIMED` — disappears for every client, claimant or not (`PostitClaimedEvent.java`). */
+export interface PostitClaimedEvent {
+  readonly type: 'POSTIT_CLAIMED';
+  readonly postitId: string;
+  readonly participantId: string;
+}
+
+/** `LEADERBOARD_UPDATED` — throttled to at most every 500ms (`LeaderboardUpdatedEvent.java`). */
+export interface PostitRushLeaderboardUpdatedEvent {
+  readonly type: 'LEADERBOARD_UPDATED';
+  readonly entries: PostitRushLeaderboardEntry[];
+}
+
+/** `ROUND_ENDED` — the server-authoritative timer hit zero (`RoundEndedEvent.java`). */
+export interface RoundEndedEvent {
+  readonly type: 'ROUND_ENDED';
+  readonly roundId: string;
+}
+
 /** Union of every event shape that can arrive on a session's STOMP topic. */
 export type SessionTopicEvent =
   | SessionStartedEvent
@@ -508,4 +634,10 @@ export type SessionTopicEvent =
   | VoteClosedEvent
   | QuestionStartedEvent
   | QuestionEndedEvent
-  | QuizAnsweredEvent;
+  | QuizAnsweredEvent
+  | RoundStartedEvent
+  | PostitSpawnedEvent
+  | PostitExpiredEvent
+  | PostitClaimedEvent
+  | PostitRushLeaderboardUpdatedEvent
+  | RoundEndedEvent;

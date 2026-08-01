@@ -778,7 +778,8 @@
       "WORDCLOUD": "Word cloud",
       "BRAINSTORM": "Brainstorm",
       "QA": "Q&A",
-      "VOTE": "Vote"
+      "VOTE": "Vote",
+      "POSTIT_RUSH": "Post-it Rush"
     },
     "form": {
       "title": "Create a live session",
@@ -944,6 +945,33 @@
       "leaderboardTitle": "Leaderboard",
       "myScore": "Your score:",
       "points": "pts"
+    },
+    "postitRush": {
+      "waiting": "Waiting for the round to start…",
+      "timeLeft": "Time left:",
+      "boardLabel": "Post-it Rush board",
+      "postitLabel": "{{color}} post-it, click to claim it",
+      "myScore": "Your score:",
+      "myCombo": "Combo:",
+      "leaderboardTitle": "Leaderboard",
+      "resultsTitle": "Final results",
+      "points": "pts",
+      "hits": "hits",
+      "bestCombo": "best combo",
+      "feedback": {
+        "hit": "Nice hit!",
+        "miss": "Missed — combo reset."
+      },
+      "errors": {
+        "unavailable": "That post-it is no longer available.",
+        "roundNotActive": "No round is currently active.",
+        "rateLimited": "Slow down a little — too many clicks.",
+        "generic": "Click not recorded."
+      },
+      "announcements": {
+        "roundStarted": "Round started.",
+        "timeUp": "Time's up."
+      }
     }
   },
   "meeting": {
